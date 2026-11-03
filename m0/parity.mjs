@@ -1,5 +1,6 @@
 // Module 0, step 3: wobble stats, parity report, >=95% label gate. No network.
-//   node m0/parity.mjs   -> data/m0/parity-report.json + printed summary
+//   node m0/parity.mjs   -> data/m0/parity-report.json + printed summary (v1 hand labels)
+//   node m0/parity.mjs --truth v3 -> data/m0/parity-report-v3.json (BRIEF-v3 truth from rwxmap)
 // Reads data/m0/mechanical.jsonl.gz, jev-pass1.jsonl, jev-pass2.jsonl and
 // rwxmap's hand labels / calibration labels (read in place, never written).
 // The exam (rwxmap data/exam-2026-09-22) is never read here.
@@ -132,31 +133,77 @@ const centrality = (rows) => ({ n: rows.length, meanAbsFromCut: Math.round(1e3 *
 parity.noDescription = { without: centrality(nd), with: centrality(wd), allRowsWithoutDescriptionInCorpus: mech.filter((r) => r.noDesc).length };
 
 // ---- 3. gate
-const hand = new Map(readCsv(D('corpus', 'labelled.csv')).map((r) => [`${first(r.repo)}|${opKey(r.method, r.path, r.operationId)}`, r.gt_class]));
-const calibTruth = {};
-for (const c of ['A', 'B', 'C']) {
-  const blind = readCsv(D('calibration-2026-09-14', `calib${c}-blind.csv`));
-  const lab = new Map(readCsv(D('calibration-2026-09-14', `calib${c}-labels.csv`)).map((r) => [r.row_id, r.truth_class]));
-  for (const b of blind) calibTruth[`${b.provider}|${opKey(b.method, b.path, b.operationId)}`] = lab.get(b.row_id);
-}
+// --truth v1 (default): hand labels / calibration labels made under BRIEF v1 (step 3 as run 2026-11-03).
+// --truth v3: BRIEF-v3 (D87, amended D98) truth held by rwxmap, tuning data only (see findings 3b).
+const TRUTH = (process.argv.includes('--truth') ? process.argv[process.argv.indexOf('--truth') + 1] : 'v1');
+if (!['v1', 'v3'].includes(TRUTH)) throw new Error('--truth v1|v3');
+const EXAM_AND_LOCKED = ['cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot', 'zendesk', 'miro', 'dropbox', 'shopify', 'linear'];
 const gateAll = [];
 const drops = { exam_vendor: 0, exam_opkey_overlap: 0, bad_label: 0 };
-for (const r of mech) {
-  if (!r.hand_set && !r.calib_set) continue;
-  if (r.exam) { drops.exam_vendor++; continue; }
-  if (r.exam_opkey_overlap) { drops.exam_opkey_overlap++; continue; }
-  const h = r.hand_set ? hand.get(`${r.vendor}|${opKey(r.method, r.path, r.operationId)}`) : undefined;
-  const c = r.calib_set ? calibTruth[`${r.provider}|${opKey(r.method, r.path, r.operationId)}`] : undefined;
-  const truth = h ?? c;
-  if (!(truth in ORDER)) { drops.bad_label++; continue; }
-  gateAll.push({ ...r, truth, src: h ? 'hand_set' : 'calib_set', both: !!(h && c) });
+let gateSets; let v3join = null;
+if (TRUTH === 'v1') {
+  const hand = new Map(readCsv(D('corpus', 'labelled.csv')).map((r) => [`${first(r.repo)}|${opKey(r.method, r.path, r.operationId)}`, r.gt_class]));
+  const calibTruth = {};
+  for (const c of ['A', 'B', 'C']) {
+    const blind = readCsv(D('calibration-2026-09-14', `calib${c}-blind.csv`));
+    const lab = new Map(readCsv(D('calibration-2026-09-14', `calib${c}-labels.csv`)).map((r) => [r.row_id, r.truth_class]));
+    for (const b of blind) calibTruth[`${b.provider}|${opKey(b.method, b.path, b.operationId)}`] = lab.get(b.row_id);
+  }
+  for (const r of mech) {
+    if (!r.hand_set && !r.calib_set) continue;
+    if (r.exam) { drops.exam_vendor++; continue; }
+    if (r.exam_opkey_overlap) { drops.exam_opkey_overlap++; continue; }
+    const h = r.hand_set ? hand.get(`${r.vendor}|${opKey(r.method, r.path, r.operationId)}`) : undefined;
+    const c = r.calib_set ? calibTruth[`${r.provider}|${opKey(r.method, r.path, r.operationId)}`] : undefined;
+    const truth = h ?? c;
+    if (!(truth in ORDER)) { drops.bad_label++; continue; }
+    gateAll.push({ ...r, truth, src: h ? 'hand_set' : 'calib_set', both: !!(h && c) });
+  }
+  gateSets = {
+    hand_set: gateAll.filter((r) => r.hand_set && hand.has(`${r.vendor}|${opKey(r.method, r.path, r.operationId)}`)),
+    calib_set: gateAll.filter((r) => r.calib_set),
+    combined: gateAll,
+  };
+} else {
+  // v3 truth, reusing rwxmap's own builders' outputs (read in place):
+  //  - data/combined-2026-09-21/labelled.csv (tools/make-combined-labelled.js): 6,557 rows, 23 providers;
+  //    v1 r stands, every non-r row takes its BRIEF-v3 label from relabel-2026-09-22/label/labels-*.csv,
+  //    rulings.csv overrides. pc- = tuning corpus, x17-/x20- = burned exams.
+  //  - data/relabel-buildset-2026-09-23/labelled.csv (tools/make-buildset-v3-labelled.js): 1,819 rows, 13
+  //    apis-guru vendors, all relabelled under BRIEF-v3 with the D98 comment/reaction correction applied.
+  // Provider names differ (bare vendor vs apis.guru domain), so the combined set joins via an explicit map.
+  const PMAP = { stripe: 'stripe.com', openai: 'openai.com', square: 'squareup.com', zoom: 'zoom.us', 'meta-whatsapp': 'whatsapp.local', spotify: 'spotify.com', digitalocean: 'digitalocean.com', jira: 'jira.local', asana: 'asana.com', okta: 'okta.local', docusign: 'docusign.net', xero: 'xero.com' };
+  const truthRows = [];
+  for (const t of readCsv(D('combined-2026-09-21', 'labelled.csv'))) truthRows.push({ ...t, set: 'combined', mp: PMAP[t.provider] || null });
+  for (const t of readCsv(D('relabel-buildset-2026-09-23', 'labelled.csv'))) truthRows.push({ ...t, set: 'buildset', mp: `${t.provider}.*` });
+  const tdup = new Set(); const tkeys = new Map();
+  for (const t of truthRows) { const k = `${t.set}|${t.provider}|${opKey(t.method, t.path, t.operationId)}`; if (tdup.has(k)) throw new Error('dup truth key ' + k); tdup.add(k); }
+  const byOp = new Map();
+  for (const r of mech) { const k = opKey(r.method, r.path, r.operationId); (byOp.get(k) ?? byOp.set(k, []).get(k)).push(r); }
+  const provMatch = (t, r) => (t.set === 'buildset' ? r.vendor === t.provider : r.provider === t.mp);
+  v3join = { truthRows: truthRows.length, bySet: {}, byProvider: {}, mechRowsWithMultiTruth: 0, mechDupKeysJoined: 0, notJoined: {} };
+  const seen = new Map();
+  for (const t of truthRows) {
+    const bs = (v3join.bySet[t.set] ??= { truth: 0, joined: 0 }); bs.truth++;
+    const bp = (v3join.byProvider[`${t.set}/${t.provider}`] ??= { truth: 0, joined: 0, mappedTo: t.set === 'combined' ? (t.mp || '(not in apis.guru corpus)') : t.provider + '.*' }); bp.truth++;
+    const hits = t.mp ? (byOp.get(opKey(t.method, t.path, t.operationId)) || []).filter((r) => provMatch(t, r)) : [];
+    if (!hits.length) { const why = !t.mp ? 'vendor not in APIs.guru corpus' : 'vendor present, operation absent (path/operationId differs between official spec and APIs.guru snapshot)'; v3join.notJoined[why] = (v3join.notJoined[why] || 0) + 1; continue; }
+    bs.joined++; bp.joined++;
+    if (hits.length > 1) v3join.mechDupKeysJoined++;
+    for (const r of hits) {
+      if (seen.has(r.id)) { v3join.mechRowsWithMultiTruth++; continue; }
+      seen.set(r.id, 1);
+      if (r.exam || EXAM_AND_LOCKED.includes(r.vendor)) { drops.exam_vendor++; continue; }
+      if (r.exam_opkey_overlap) { drops.exam_opkey_overlap++; continue; }
+      if (!(t.truth_class in ORDER)) { drops.bad_label++; continue; }
+      gateAll.push({ ...r, truth: t.truth_class, src: t.set, tsrc: t.source_set, tid: t.row_id, lowconf: t.confidence === 'low', v1overlap: !!(r.hand_set || r.calib_set) });
+    }
+  }
+  const mechVendors = new Set(mech.map((r) => r.vendor));
+  v3join.lockedOrExamVendorsInMechanical = EXAM_AND_LOCKED.filter((v) => mechVendors.has(v));
+  gateSets = { all: gateAll, buildset: gateAll.filter((r) => r.src === 'buildset'), combined_pc: gateAll.filter((r) => r.tsrc === 'provider-corpus-2026-09-16'), combined_x17_x20_burned: gateAll.filter((r) => r.tsrc && r.tsrc.startsWith('exam-')), also_in_v1_gate: gateAll.filter((r) => r.v1overlap), high_confidence_only: gateAll.filter((r) => !r.lowconf) };
 }
-if (gateAll.some((r) => r.exam || ['cloudflare', 'pagerduty', 'sentry'].includes(r.vendor))) throw new Error('exam vendor in gate set');
-const gateSets = {
-  hand_set: gateAll.filter((r) => r.hand_set && hand.has(`${r.vendor}|${opKey(r.method, r.path, r.operationId)}`)),
-  calib_set: gateAll.filter((r) => r.calib_set),
-  combined: gateAll,
-};
+if (gateAll.some((r) => r.exam || EXAM_AND_LOCKED.includes(r.vendor))) throw new Error('exam/locked vendor in gate set');
 
 function labelOf(r, th) {
   const t = pileOf(r);
@@ -204,17 +251,28 @@ function tune(rows, t, mode) {
   }
   return best?.v ?? (t === 'lower' ? 0 : 1.01);
 }
-const OFF = { lower: 0, 'raise-wx': 1.01, 'raise-get': 1.01 };
-for (const mode of ['lexi', 'budget']) {
-  const th = {}; for (const t of Object.keys(GRID)) th[t] = tune(gateAll, t, mode);
+// global budget (v3 only): max exact over the 3-cut grid s.t. TOTAL too-loose no worse than mechanical's total.
+// The per-tier budget degenerates when a tier's mechanical too-loose is 0 (lower tier under v3), so this variant is reported beside it.
+function tuneGlobal(rows) {
+  const base = score(rows, (r) => r.class); let best = null;
+  for (const a of GRID.lower) for (const b of GRID['raise-wx']) for (const c of GRID['raise-get']) {
+    const th = { ...RW, lower: a, 'raise-wx': b, 'raise-get': c }; const s = score(rows, (r) => labelOf(r, th));
+    if (s.loose > base.loose) continue;
+    if (!best || s.exact > best.s.exact) best = { th, s };
+  }
+  return best.th;
+}
+const tuneAll = (rows, mode) => (mode === 'budgetGlobal' ? tuneGlobal(rows) : Object.fromEntries(Object.keys(GRID).map((t) => [t, tune(rows, t, mode)])));
+for (const mode of (TRUTH === 'v3' ? ['lexi', 'budget', 'budgetGlobal'] : ['lexi', 'budget'])) {
+  const th = tuneAll(gateAll, mode);
   gate.tuned[mode] = { thresholds: th, score: score(gateAll, (r) => labelOf(r, th)) };
   // leave-one-vendor-out over vendors that have gate rows
   const vendors = [...new Set(gateAll.map((r) => r.vendor))];
   const chosen = {}; const agg = { n: 0, exact: 0, loose: 0, tight: 0 };
   for (const v of vendors) {
     const train = gateAll.filter((r) => r.vendor !== v), test = gateAll.filter((r) => r.vendor === v);
-    const lt = {}; for (const t of Object.keys(GRID)) lt[t] = tune(train, t, mode);
-    for (const t of Object.keys(lt)) (chosen[t] ??= []).push(lt[t]);
+    const lt = tuneAll(train, mode);
+    for (const t of Object.keys(GRID)) (chosen[t] ??= []).push(lt[t]);
     const s = score(test, (r) => labelOf(r, lt));
     for (const k of ['n', 'exact', 'loose', 'tight']) agg[k] += s[k];
   }
@@ -238,9 +296,9 @@ for (const [name, f] of [['GET changes (r vs w+; truth x counts as not-r)', (r) 
 {
   const subs = { all: gateAll, nonDelete: gateAll.filter((r) => r.method.toUpperCase() !== 'DELETE'), pilesOnly: gateAll.filter((r) => pileOf(r)) };
   gate.subsets = {};
-  for (const [k, v] of Object.entries(subs)) gate.subsets[k] = { mechanical: score(v, (r) => r.class), rwxmap: score(v, (r) => labelOf(r, RW)), tunedLexi: score(v, (r) => labelOf(r, gate.tuned.lexi.thresholds)), tunedBudget: score(v, (r) => labelOf(r, gate.tuned.budget.thresholds)) };
+  for (const [k, v] of Object.entries(subs)) gate.subsets[k] = { mechanical: score(v, (r) => r.class), rwxmap: score(v, (r) => labelOf(r, RW)), tunedLexi: score(v, (r) => labelOf(r, gate.tuned.lexi.thresholds)), tunedBudget: score(v, (r) => labelOf(r, gate.tuned.budget.thresholds)), ...(gate.tuned.budgetGlobal ? { tunedBudgetGlobal: score(v, (r) => labelOf(r, gate.tuned.budgetGlobal.thresholds)) } : {}) };
   gate.deleteTruth = {};
-  for (const src of ['hand_set', 'calib_set']) { const d = gateAll.filter((r) => r.method.toUpperCase() === 'DELETE' && r.src === src); gate.deleteTruth[src] = { n: d.length, r: d.filter((r) => r.truth === 'r').length, w: d.filter((r) => r.truth === 'w').length, x: d.filter((r) => r.truth === 'x').length }; }
+  for (const src of (TRUTH === 'v1' ? ['hand_set', 'calib_set'] : ['combined', 'buildset'])) { const d = gateAll.filter((r) => r.method.toUpperCase() === 'DELETE' && r.src === src); gate.deleteTruth[src] = { n: d.length, r: d.filter((r) => r.truth === 'r').length, w: d.filter((r) => r.truth === 'w').length, x: d.filter((r) => r.truth === 'x').length }; }
   gate.methodMix = Object.fromEntries([...group(gateAll, (r) => r.method.toUpperCase())].map(([k, v]) => [k, v.length]));
 }
 
@@ -267,8 +325,37 @@ wob.flipDropCandidates = {
   note: 'pile rows only; a flip = the two asks fall on different sides of the tier cut',
 };
 
-const report = { generated: new Date().toISOString().slice(0, 10), checks, counts: { mechanicalRows: mech.length, asked: asked.length, reasked: reRows.length }, wobble: wob, parity, gate };
-fs.writeFileSync(path.join(DATA, 'parity-report.json'), JSON.stringify(report, null, 1));
+// v3 extras: DELETE vs non-DELETE per tier, lower-tier misses with summaries, mode (b) per question
+if (TRUTH === 'v3') {
+  const ex = {};
+  const cfgs = { mechanical: null, rwxmap: RW, tunedBudget: gate.tuned.budget.thresholds, tunedBudgetGlobal: gate.tuned.budgetGlobal.thresholds, tunedLexi: gate.tuned.lexi.thresholds };
+  ex.tierByDelete = {};
+  for (const [cn, th] of Object.entries(cfgs)) {
+    const f = th ? (r) => labelOf(r, th) : (r) => r.class;
+    ex.tierByDelete[cn] = {};
+    for (const [grp, sel] of Object.entries({ DELETE: (r) => r.method.toUpperCase() === 'DELETE', nonDELETE: (r) => r.method.toUpperCase() !== 'DELETE' })) {
+      ex.tierByDelete[cn][grp] = { all: score(gateAll.filter(sel), f) };
+      for (const t of ['lower', 'raise-wx', 'raise-get', 'none']) ex.tierByDelete[cn][grp][t] = score(gateAll.filter((r) => sel(r) && (pileOf(r) || 'none') === t), f);
+    }
+    ex.tierByDelete[cn].byMethod = Object.fromEntries([...group(gateAll, (r) => r.method.toUpperCase())].map(([k, v]) => [k, score(v, f)]));
+  }
+  ex.truthMix = Object.fromEntries([...group(gateAll, (r) => `${r.method.toUpperCase()}${pileOf(r) ? ' [' + pileOf(r) + ']' : ''}`)].map(([k, v]) => [k, { n: v.length, r: v.filter((x) => x.truth === 'r').length, w: v.filter((x) => x.truth === 'w').length, x: v.filter((x) => x.truth === 'x').length }]));
+  // lower tier: Jev "not x" (p<0.5) vs truth, and the misses at the budget cuts
+  const low = gateAll.filter((r) => pileOf(r) === 'lower' && r.p !== null);
+  ex.lowerTier = { n: low.length, truthX: low.filter((r) => r.truth === 'x').length, jevSaysNotX_at_0_5: low.filter((r) => r.p < 0.5).length, jevNotX_whenTruthX: low.filter((r) => r.p < 0.5 && r.truth === 'x').length, jevNotX_whenTruthW: low.filter((r) => r.p < 0.5 && r.truth === 'w').length, jevX_whenTruthW: low.filter((r) => r.p >= 0.5 && r.truth === 'w').length, jevX_whenTruthX: low.filter((r) => r.p >= 0.5 && r.truth === 'x').length };
+  const pick = (rows) => rows.sort((a, b) => (a.id < b.id ? -1 : 1)).filter((_, i) => i % Math.max(1, Math.floor(rows.length / 10)) === 0).slice(0, 10).map((r) => ({ id: r.id, vendor: r.provider, method: r.method, path: r.path, op: r.operationId, summary: String(r.summary || '').slice(0, 140), mech: `${r.class}/${r.rule}`, p: Math.round(r.p * 1000) / 1000, truth: r.truth }));
+  for (const [cn, th] of [['rwxmap', RW], ['tunedBudget', gate.tuned.budget.thresholds], ['tunedBudgetGlobal', gate.tuned.budgetGlobal.thresholds]]) {
+    const miss = low.filter((r) => labelOf(r, th) !== r.truth);
+    ex.lowerTier[`missCount_${cn}`] = miss.length;
+    ex.lowerTier[`missesLowered_truthX_${cn}`] = miss.filter((r) => labelOf(r, th) === 'w').length;
+    ex.lowerTier[`examples_${cn}`] = pick([...miss]);
+  }
+  ex.lowerTier.examples_truthX_loweredByJevAtRwxmap = pick(low.filter((r) => r.truth === 'x' && r.p < RW.lower));
+  ex.v3join = v3join;
+  gate.v3 = ex;
+}
+const report = { truth: TRUTH, generated: new Date().toISOString().slice(0, 10), checks, counts: { mechanicalRows: mech.length, asked: asked.length, reasked: reRows.length }, wobble: wob, parity, gate };
+fs.writeFileSync(path.join(DATA, TRUTH === 'v3' ? 'parity-report-v3.json' : 'parity-report.json'), JSON.stringify(report, null, 1));
 
 // ---- print
 const J = (o) => console.log(JSON.stringify(o));
@@ -280,6 +367,7 @@ console.log('BYRULE'); for (const [k, v] of Object.entries(parity.byRule)) conso
 console.log('VENDOR top count'); for (const v of parity.byVendor.topByCount.slice(0, 25)) console.log(' ', v.vendor, v.n, v.disagree, v.rate + '%');
 console.log('VENDOR top rate'); for (const v of parity.byVendor.topByRate.slice(0, 25)) console.log(' ', v.vendor, v.n, v.disagree, v.rate + '%');
 console.log('NODESC'); J(parity.noDescription);
+if (TRUTH === 'v3') { console.log('V3 EXTRAS'); J(gate.v3.v3join); J(gate.v3.lowerTier); console.log(JSON.stringify(gate.v3.tierByDelete, null, 0)); J(gate.v3.truthMix); }
 console.log('GATE rows'); J(gate.rows); J(gate.drops);
 console.log('mechanical'); J(gate.mechanical);
 console.log('rwxmap thresholds'); J(gate.rwxmapThresholds);
