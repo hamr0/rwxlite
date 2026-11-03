@@ -413,3 +413,24 @@ Per tier, exact / loose / tight (calibrated):
 ### Verdicts (indicators only; the exam decides)
 - By the PRD rule (exact >= 91 and too-loose no worse than mechanical) on these tuning rows: baseline (a) calibrated passes (91.0, 74 vs 77 rows); MiniLM (a) fails on loose (108 vs 77); MiniLM (b) fails on exact (88.6). Edge cases: the baseline's pass is 0.0 above the exact line, and MiniLM (a) would pass if the budget were judged in-sample (92.4 / 77) rather than LOVO.
 - Caveats: one split of 23 vendors, rows within a vendor are correlated; the cut grid was extended for MiniLM only; v3 truth is Jev-derived labels, so every figure is against labels, not ground truth; the MiniLM is one seed, one epoch; loose differences of 30 rows are a few vendors' worth.
+
+## 2026-11-03: rwxmap take-backs and gate-3 (rwxmap F2 exam)
+
+### rwxmap decisions that touch rwxlite
+- D128 (rwxmap): rwxlite's trained model is scored ONCE on rwxmap exam-2026-09-22 as the M0 go/no-go, and only after a fresh label gate passes.
+- D129 (rwxmap) = our F1 two-step POST lower, built into rwxmap src and scored once on gate-2 by rwxmap's real CLI (jev-1.14.0, 654 requests, 0 failed; rwxmap T_r = 0.50, chosen on its tuning set). All 600 shipped rows: 91.7 / 3 / 47 (exact% / too-loose rows / too-tight rows) -> with F1 94.5 / 3 / 30. Vendor-clean 483: 90.5 -> 93.6. It moved 17 rows, all right. It is stricter than ours: it moves rows only after isX lowers, ours moved 20.
+- rwxmap F2 tuning finding: a broad credential-noun rule on PUT/PATCH fails (6 right vs 17 wrong on rwxmap combined). Most credential-naming rows are config edits, which are w. Only replacing the credential itself is x.
+
+### Gate-3 (data/gate-2026-11-06/; commits b3d8e0e, ec76d1b, 7323817, 0f61b68)
+- Drawn for rwxmap's F2 exam. It is NOT an rwxlite exam: the rwxlite MiniLM was trained on these rows.
+- 800 rows: credential stratum 200 (POST 100 / PUT 68 / PATCH 32; regex password|passcode|\bpin\b|secret|credential|key|token|certificate|session on path + operationId + summary, POST/PUT/PATCH) plus 600 general.
+- hubapi.com (HubSpot, burned x20) dropped by name after rwxmap's lock check; 2 credential POST rows redrawn.
+- Labellers agreed on 785 of 800 (98.1%); the user ruled the other 15.
+- Truth: credential stratum r 19 / w 149 / x 32; general r 365 / w 203 / x 32.
+- D131 (rwxmap) = F2 narrow credential rule: PUT/PATCH whose last path segment is password|passcode|pin, or whose lead verb is change|regenerate|regen naming one; singular only. Scored once on gate-3: fired 4, 3 right (signl4 changePassword, sendgrid /user/password, jira changeMyPassword), 1 wrong (whapi plusCard pin, truth w). Credential part 56.5 / 16 / 71 -> 57.5 / 13 / 72; general unchanged 77.5 / 10 / 125; vendor-clean too-loose 21 -> 19.
+- Gate-3 is burned for both projects.
+
+### Process notes
+- Shared scratchpad: the two gate-3 labellers shared a scratch folder and one helper script was overwritten. It only printed blind rows (never labels), so the labels stayed independent. Lesson: give each labeller its own scratch dir.
+- Workflow lesson: background workers left orphan sleep/watch loops. Now each worker must leave none, and the main session stops finished workers.
+- Repo: public at https://github.com/hamr0/rwxlite (branches main = PRD 0d270c9, m0 = work), Apache-2.0 (7951645), README in bareagent shape (b2aae56) with honest "planned" markers.
