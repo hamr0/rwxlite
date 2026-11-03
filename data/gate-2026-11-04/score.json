@@ -1,0 +1,1868 @@
+{
+ "generated": "2026-11-03",
+ "gate": "2026-11-04",
+ "usedOnce": true,
+ "labelAgreement": {
+  "agree": 590,
+  "total": 600,
+  "pct": 98.3
+ },
+ "recipe": {
+  "round6": {
+   "lower": 0.2,
+   "raise-wx": 0.6,
+   "raise-get": 0.2,
+   "rcut": 0.2
+  },
+  "round5": {
+   "lower": 0.2,
+   "raise-wx": 0.6,
+   "raise-get": 0.2
+  },
+  "rwxmapShipped": {
+   "lower": 0.1,
+   "raise-wx": 0.8,
+   "raise-get": 0.5
+  },
+  "credentialRule": "narrow (parity.mjs ROUND6)",
+  "vendorCleanExcludedNames": [
+   "adyen",
+   "appcenter",
+   "atlassian",
+   "azure",
+   "box",
+   "clearblade",
+   "dracoon",
+   "gitea",
+   "github",
+   "gitlab",
+   "jira",
+   "keycloak",
+   "linode",
+   "microsoft",
+   "netbox",
+   "notion",
+   "openai",
+   "slack",
+   "trello",
+   "twilio",
+   "vercel",
+   "whatsapp",
+   "xero",
+   "zoom"
+  ]
+ },
+ "join": {
+  "asked": 600,
+  "tierWithoutP": 0,
+  "pWithoutTier": 33,
+  "lowerTierRows": 142,
+  "lowerTierMethods": {
+   "POST": 142
+  },
+  "lowerTierWithoutPC": 0,
+  "postWithPC": 175
+ },
+ "truthMix": {
+  "r": 353,
+  "w": 204,
+  "x": 43
+ },
+ "lines": {
+  "all600": {
+   "n": 600,
+   "overall": {
+    "i_mechanical": {
+     "n": 600,
+     "exact": 476,
+     "tooLoose": 7,
+     "tooTight": 117,
+     "exactPct": 79.3,
+     "tooLoosePct": 1.2,
+     "tooTightPct": 19.5
+    },
+    "ii_round6_GATE": {
+     "n": 600,
+     "exact": 579,
+     "tooLoose": 4,
+     "tooTight": 17,
+     "exactPct": 96.5,
+     "tooLoosePct": 0.7,
+     "tooTightPct": 2.8
+    },
+    "iii_round5_cuts": {
+     "n": 600,
+     "exact": 559,
+     "tooLoose": 4,
+     "tooTight": 37,
+     "exactPct": 93.2,
+     "tooLoosePct": 0.7,
+     "tooTightPct": 6.2
+    },
+    "iv_rwxmap_shipped": {
+     "n": 600,
+     "exact": 549,
+     "tooLoose": 3,
+     "tooTight": 48,
+     "exactPct": 91.5,
+     "tooLoosePct": 0.5,
+     "tooTightPct": 8
+    },
+    "v_modeB_p05": {
+     "n": 600,
+     "exact": 552,
+     "tooLoose": 11,
+     "tooTight": 37,
+     "exactPct": 92,
+     "tooLoosePct": 1.8,
+     "tooTightPct": 6.2
+    }
+   },
+   "byMethod": {
+    "GET": {
+     "i_mechanical": {
+      "n": 325,
+      "exact": 319,
+      "tooLoose": 6,
+      "tooTight": 0,
+      "exactPct": 98.2,
+      "tooLoosePct": 1.8,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 325,
+      "exact": 320,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.5,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0.9
+     },
+     "iii_round5_cuts": {
+      "n": 325,
+      "exact": 320,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.5,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0.9
+     },
+     "iv_rwxmap_shipped": {
+      "n": 325,
+      "exact": 323,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.4,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 325,
+      "exact": 323,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.4,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0
+     }
+    },
+    "PATCH": {
+     "i_mechanical": {
+      "n": 50,
+      "exact": 49,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98,
+      "tooLoosePct": 2,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 50,
+      "exact": 49,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98,
+      "tooLoosePct": 2,
+      "tooTightPct": 0
+     },
+     "iii_round5_cuts": {
+      "n": 50,
+      "exact": 49,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98,
+      "tooLoosePct": 2,
+      "tooTightPct": 0
+     },
+     "iv_rwxmap_shipped": {
+      "n": 50,
+      "exact": 49,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98,
+      "tooLoosePct": 2,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 50,
+      "exact": 49,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98,
+      "tooLoosePct": 2,
+      "tooTightPct": 0
+     }
+    },
+    "POST": {
+     "i_mechanical": {
+      "n": 175,
+      "exact": 58,
+      "tooLoose": 0,
+      "tooTight": 117,
+      "exactPct": 33.1,
+      "tooLoosePct": 0,
+      "tooTightPct": 66.9
+     },
+     "ii_round6_GATE": {
+      "n": 175,
+      "exact": 160,
+      "tooLoose": 1,
+      "tooTight": 14,
+      "exactPct": 91.4,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 8
+     },
+     "iii_round5_cuts": {
+      "n": 175,
+      "exact": 140,
+      "tooLoose": 1,
+      "tooTight": 34,
+      "exactPct": 80,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 19.4
+     },
+     "iv_rwxmap_shipped": {
+      "n": 175,
+      "exact": 127,
+      "tooLoose": 0,
+      "tooTight": 48,
+      "exactPct": 72.6,
+      "tooLoosePct": 0,
+      "tooTightPct": 27.4
+     },
+     "v_modeB_p05": {
+      "n": 175,
+      "exact": 131,
+      "tooLoose": 8,
+      "tooTight": 36,
+      "exactPct": 74.9,
+      "tooLoosePct": 4.6,
+      "tooTightPct": 20.6
+     }
+    },
+    "PUT": {
+     "i_mechanical": {
+      "n": 50,
+      "exact": 50,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 50,
+      "exact": 50,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iii_round5_cuts": {
+      "n": 50,
+      "exact": 50,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iv_rwxmap_shipped": {
+      "n": 50,
+      "exact": 50,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 50,
+      "exact": 49,
+      "tooLoose": 0,
+      "tooTight": 1,
+      "exactPct": 98,
+      "tooLoosePct": 0,
+      "tooTightPct": 2
+     }
+    }
+   },
+   "byTier": {
+    "raise-get": {
+     "i_mechanical": {
+      "n": 325,
+      "exact": 319,
+      "tooLoose": 6,
+      "tooTight": 0,
+      "exactPct": 98.2,
+      "tooLoosePct": 1.8,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 325,
+      "exact": 320,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.5,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0.9
+     },
+     "iii_round5_cuts": {
+      "n": 325,
+      "exact": 320,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.5,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0.9
+     },
+     "iv_rwxmap_shipped": {
+      "n": 325,
+      "exact": 323,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.4,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 325,
+      "exact": 323,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.4,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0
+     }
+    },
+    "raise-wx": {
+     "i_mechanical": {
+      "n": 100,
+      "exact": 99,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 99,
+      "tooLoosePct": 1,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 100,
+      "exact": 99,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 99,
+      "tooLoosePct": 1,
+      "tooTightPct": 0
+     },
+     "iii_round5_cuts": {
+      "n": 100,
+      "exact": 99,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 99,
+      "tooLoosePct": 1,
+      "tooTightPct": 0
+     },
+     "iv_rwxmap_shipped": {
+      "n": 100,
+      "exact": 99,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 99,
+      "tooLoosePct": 1,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 100,
+      "exact": 98,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 98,
+      "tooLoosePct": 1,
+      "tooTightPct": 1
+     }
+    },
+    "lower": {
+     "i_mechanical": {
+      "n": 142,
+      "exact": 30,
+      "tooLoose": 0,
+      "tooTight": 112,
+      "exactPct": 21.1,
+      "tooLoosePct": 0,
+      "tooTightPct": 78.9
+     },
+     "ii_round6_GATE": {
+      "n": 142,
+      "exact": 132,
+      "tooLoose": 1,
+      "tooTight": 9,
+      "exactPct": 93,
+      "tooLoosePct": 0.7,
+      "tooTightPct": 6.3
+     },
+     "iii_round5_cuts": {
+      "n": 142,
+      "exact": 112,
+      "tooLoose": 1,
+      "tooTight": 29,
+      "exactPct": 78.9,
+      "tooLoosePct": 0.7,
+      "tooTightPct": 20.4
+     },
+     "iv_rwxmap_shipped": {
+      "n": 142,
+      "exact": 99,
+      "tooLoose": 0,
+      "tooTight": 43,
+      "exactPct": 69.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 30.3
+     },
+     "v_modeB_p05": {
+      "n": 142,
+      "exact": 109,
+      "tooLoose": 7,
+      "tooTight": 26,
+      "exactPct": 76.8,
+      "tooLoosePct": 4.9,
+      "tooTightPct": 18.3
+     }
+    },
+    "none": {
+     "i_mechanical": {
+      "n": 33,
+      "exact": 28,
+      "tooLoose": 0,
+      "tooTight": 5,
+      "exactPct": 84.8,
+      "tooLoosePct": 0,
+      "tooTightPct": 15.2
+     },
+     "ii_round6_GATE": {
+      "n": 33,
+      "exact": 28,
+      "tooLoose": 0,
+      "tooTight": 5,
+      "exactPct": 84.8,
+      "tooLoosePct": 0,
+      "tooTightPct": 15.2
+     },
+     "iii_round5_cuts": {
+      "n": 33,
+      "exact": 28,
+      "tooLoose": 0,
+      "tooTight": 5,
+      "exactPct": 84.8,
+      "tooLoosePct": 0,
+      "tooTightPct": 15.2
+     },
+     "iv_rwxmap_shipped": {
+      "n": 33,
+      "exact": 28,
+      "tooLoose": 0,
+      "tooTight": 5,
+      "exactPct": 84.8,
+      "tooLoosePct": 0,
+      "tooTightPct": 15.2
+     },
+     "v_modeB_p05": {
+      "n": 33,
+      "exact": 22,
+      "tooLoose": 1,
+      "tooTight": 10,
+      "exactPct": 66.7,
+      "tooLoosePct": 3,
+      "tooTightPct": 30.3
+     }
+    }
+   },
+   "byMechLetter": {
+    "r": {
+     "i_mechanical": {
+      "n": 334,
+      "exact": 328,
+      "tooLoose": 6,
+      "tooTight": 0,
+      "exactPct": 98.2,
+      "tooLoosePct": 1.8,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 334,
+      "exact": 329,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.5,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0.9
+     },
+     "iii_round5_cuts": {
+      "n": 334,
+      "exact": 329,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.5,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0.9
+     },
+     "iv_rwxmap_shipped": {
+      "n": 334,
+      "exact": 332,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.4,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 334,
+      "exact": 323,
+      "tooLoose": 2,
+      "tooTight": 9,
+      "exactPct": 96.7,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 2.7
+     }
+    },
+    "w": {
+     "i_mechanical": {
+      "n": 110,
+      "exact": 108,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 98.2,
+      "tooLoosePct": 0.9,
+      "tooTightPct": 0.9
+     },
+     "ii_round6_GATE": {
+      "n": 110,
+      "exact": 108,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 98.2,
+      "tooLoosePct": 0.9,
+      "tooTightPct": 0.9
+     },
+     "iii_round5_cuts": {
+      "n": 110,
+      "exact": 108,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 98.2,
+      "tooLoosePct": 0.9,
+      "tooTightPct": 0.9
+     },
+     "iv_rwxmap_shipped": {
+      "n": 110,
+      "exact": 108,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 98.2,
+      "tooLoosePct": 0.9,
+      "tooTightPct": 0.9
+     },
+     "v_modeB_p05": {
+      "n": 110,
+      "exact": 107,
+      "tooLoose": 1,
+      "tooTight": 2,
+      "exactPct": 97.3,
+      "tooLoosePct": 0.9,
+      "tooTightPct": 1.8
+     }
+    },
+    "x": {
+     "i_mechanical": {
+      "n": 156,
+      "exact": 40,
+      "tooLoose": 0,
+      "tooTight": 116,
+      "exactPct": 25.6,
+      "tooLoosePct": 0,
+      "tooTightPct": 74.4
+     },
+     "ii_round6_GATE": {
+      "n": 156,
+      "exact": 142,
+      "tooLoose": 1,
+      "tooTight": 13,
+      "exactPct": 91,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 8.3
+     },
+     "iii_round5_cuts": {
+      "n": 156,
+      "exact": 122,
+      "tooLoose": 1,
+      "tooTight": 33,
+      "exactPct": 78.2,
+      "tooLoosePct": 0.6,
+      "tooTightPct": 21.2
+     },
+     "iv_rwxmap_shipped": {
+      "n": 156,
+      "exact": 109,
+      "tooLoose": 0,
+      "tooTight": 47,
+      "exactPct": 69.9,
+      "tooLoosePct": 0,
+      "tooTightPct": 30.1
+     },
+     "v_modeB_p05": {
+      "n": 156,
+      "exact": 122,
+      "tooLoose": 8,
+      "tooTight": 26,
+      "exactPct": 78.2,
+      "tooLoosePct": 5.1,
+      "tooTightPct": 16.7
+     }
+    }
+   },
+   "modeB_askedOnly": {
+    "n": 600,
+    "exact": 552,
+    "tooLoose": 11,
+    "tooTight": 37,
+    "exactPct": 92,
+    "tooLoosePct": 1.8,
+    "tooTightPct": 6.2
+   }
+  },
+  "vendorClean": {
+   "n": 483,
+   "overall": {
+    "i_mechanical": {
+     "n": 483,
+     "exact": 376,
+     "tooLoose": 7,
+     "tooTight": 100,
+     "exactPct": 77.8,
+     "tooLoosePct": 1.4,
+     "tooTightPct": 20.7
+    },
+    "ii_round6_GATE": {
+     "n": 483,
+     "exact": 463,
+     "tooLoose": 4,
+     "tooTight": 16,
+     "exactPct": 95.9,
+     "tooLoosePct": 0.8,
+     "tooTightPct": 3.3
+    },
+    "iii_round5_cuts": {
+     "n": 483,
+     "exact": 446,
+     "tooLoose": 4,
+     "tooTight": 33,
+     "exactPct": 92.3,
+     "tooLoosePct": 0.8,
+     "tooTightPct": 6.8
+    },
+    "iv_rwxmap_shipped": {
+     "n": 483,
+     "exact": 436,
+     "tooLoose": 3,
+     "tooTight": 44,
+     "exactPct": 90.3,
+     "tooLoosePct": 0.6,
+     "tooTightPct": 9.1
+    },
+    "v_modeB_p05": {
+     "n": 483,
+     "exact": 442,
+     "tooLoose": 9,
+     "tooTight": 32,
+     "exactPct": 91.5,
+     "tooLoosePct": 1.9,
+     "tooTightPct": 6.6
+    }
+   },
+   "byMethod": {
+    "GET": {
+     "i_mechanical": {
+      "n": 259,
+      "exact": 253,
+      "tooLoose": 6,
+      "tooTight": 0,
+      "exactPct": 97.7,
+      "tooLoosePct": 2.3,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 259,
+      "exact": 254,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 1.2
+     },
+     "iii_round5_cuts": {
+      "n": 259,
+      "exact": 254,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 1.2
+     },
+     "iv_rwxmap_shipped": {
+      "n": 259,
+      "exact": 257,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.2,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 259,
+      "exact": 257,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.2,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 0
+     }
+    },
+    "POST": {
+     "i_mechanical": {
+      "n": 146,
+      "exact": 46,
+      "tooLoose": 0,
+      "tooTight": 100,
+      "exactPct": 31.5,
+      "tooLoosePct": 0,
+      "tooTightPct": 68.5
+     },
+     "ii_round6_GATE": {
+      "n": 146,
+      "exact": 132,
+      "tooLoose": 1,
+      "tooTight": 13,
+      "exactPct": 90.4,
+      "tooLoosePct": 0.7,
+      "tooTightPct": 8.9
+     },
+     "iii_round5_cuts": {
+      "n": 146,
+      "exact": 115,
+      "tooLoose": 1,
+      "tooTight": 30,
+      "exactPct": 78.8,
+      "tooLoosePct": 0.7,
+      "tooTightPct": 20.5
+     },
+     "iv_rwxmap_shipped": {
+      "n": 146,
+      "exact": 102,
+      "tooLoose": 0,
+      "tooTight": 44,
+      "exactPct": 69.9,
+      "tooLoosePct": 0,
+      "tooTightPct": 30.1
+     },
+     "v_modeB_p05": {
+      "n": 146,
+      "exact": 109,
+      "tooLoose": 6,
+      "tooTight": 31,
+      "exactPct": 74.7,
+      "tooLoosePct": 4.1,
+      "tooTightPct": 21.2
+     }
+    },
+    "PUT": {
+     "i_mechanical": {
+      "n": 41,
+      "exact": 41,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 41,
+      "exact": 41,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iii_round5_cuts": {
+      "n": 41,
+      "exact": 41,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iv_rwxmap_shipped": {
+      "n": 41,
+      "exact": 41,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 41,
+      "exact": 40,
+      "tooLoose": 0,
+      "tooTight": 1,
+      "exactPct": 97.6,
+      "tooLoosePct": 0,
+      "tooTightPct": 2.4
+     }
+    },
+    "PATCH": {
+     "i_mechanical": {
+      "n": 37,
+      "exact": 36,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 97.3,
+      "tooLoosePct": 2.7,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 37,
+      "exact": 36,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 97.3,
+      "tooLoosePct": 2.7,
+      "tooTightPct": 0
+     },
+     "iii_round5_cuts": {
+      "n": 37,
+      "exact": 36,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 97.3,
+      "tooLoosePct": 2.7,
+      "tooTightPct": 0
+     },
+     "iv_rwxmap_shipped": {
+      "n": 37,
+      "exact": 36,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 97.3,
+      "tooLoosePct": 2.7,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 37,
+      "exact": 36,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 97.3,
+      "tooLoosePct": 2.7,
+      "tooTightPct": 0
+     }
+    }
+   },
+   "byTier": {
+    "raise-get": {
+     "i_mechanical": {
+      "n": 259,
+      "exact": 253,
+      "tooLoose": 6,
+      "tooTight": 0,
+      "exactPct": 97.7,
+      "tooLoosePct": 2.3,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 259,
+      "exact": 254,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 1.2
+     },
+     "iii_round5_cuts": {
+      "n": 259,
+      "exact": 254,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 1.2
+     },
+     "iv_rwxmap_shipped": {
+      "n": 259,
+      "exact": 257,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.2,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 259,
+      "exact": 257,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.2,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 0
+     }
+    },
+    "lower": {
+     "i_mechanical": {
+      "n": 118,
+      "exact": 22,
+      "tooLoose": 0,
+      "tooTight": 96,
+      "exactPct": 18.6,
+      "tooLoosePct": 0,
+      "tooTightPct": 81.4
+     },
+     "ii_round6_GATE": {
+      "n": 118,
+      "exact": 108,
+      "tooLoose": 1,
+      "tooTight": 9,
+      "exactPct": 91.5,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 7.6
+     },
+     "iii_round5_cuts": {
+      "n": 118,
+      "exact": 91,
+      "tooLoose": 1,
+      "tooTight": 26,
+      "exactPct": 77.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 22
+     },
+     "iv_rwxmap_shipped": {
+      "n": 118,
+      "exact": 78,
+      "tooLoose": 0,
+      "tooTight": 40,
+      "exactPct": 66.1,
+      "tooLoosePct": 0,
+      "tooTightPct": 33.9
+     },
+     "v_modeB_p05": {
+      "n": 118,
+      "exact": 90,
+      "tooLoose": 5,
+      "tooTight": 23,
+      "exactPct": 76.3,
+      "tooLoosePct": 4.2,
+      "tooTightPct": 19.5
+     }
+    },
+    "none": {
+     "i_mechanical": {
+      "n": 28,
+      "exact": 24,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 85.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 14.3
+     },
+     "ii_round6_GATE": {
+      "n": 28,
+      "exact": 24,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 85.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 14.3
+     },
+     "iii_round5_cuts": {
+      "n": 28,
+      "exact": 24,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 85.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 14.3
+     },
+     "iv_rwxmap_shipped": {
+      "n": 28,
+      "exact": 24,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 85.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 14.3
+     },
+     "v_modeB_p05": {
+      "n": 28,
+      "exact": 19,
+      "tooLoose": 1,
+      "tooTight": 8,
+      "exactPct": 67.9,
+      "tooLoosePct": 3.6,
+      "tooTightPct": 28.6
+     }
+    },
+    "raise-wx": {
+     "i_mechanical": {
+      "n": 78,
+      "exact": 77,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98.7,
+      "tooLoosePct": 1.3,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 78,
+      "exact": 77,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98.7,
+      "tooLoosePct": 1.3,
+      "tooTightPct": 0
+     },
+     "iii_round5_cuts": {
+      "n": 78,
+      "exact": 77,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98.7,
+      "tooLoosePct": 1.3,
+      "tooTightPct": 0
+     },
+     "iv_rwxmap_shipped": {
+      "n": 78,
+      "exact": 77,
+      "tooLoose": 1,
+      "tooTight": 0,
+      "exactPct": 98.7,
+      "tooLoosePct": 1.3,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 78,
+      "exact": 76,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 97.4,
+      "tooLoosePct": 1.3,
+      "tooTightPct": 1.3
+     }
+    }
+   },
+   "byMechLetter": {
+    "r": {
+     "i_mechanical": {
+      "n": 266,
+      "exact": 260,
+      "tooLoose": 6,
+      "tooTight": 0,
+      "exactPct": 97.7,
+      "tooLoosePct": 2.3,
+      "tooTightPct": 0
+     },
+     "ii_round6_GATE": {
+      "n": 266,
+      "exact": 261,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 1.1
+     },
+     "iii_round5_cuts": {
+      "n": 266,
+      "exact": 261,
+      "tooLoose": 2,
+      "tooTight": 3,
+      "exactPct": 98.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 1.1
+     },
+     "iv_rwxmap_shipped": {
+      "n": 266,
+      "exact": 264,
+      "tooLoose": 2,
+      "tooTight": 0,
+      "exactPct": 99.2,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 0
+     },
+     "v_modeB_p05": {
+      "n": 266,
+      "exact": 257,
+      "tooLoose": 2,
+      "tooTight": 7,
+      "exactPct": 96.6,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 2.6
+     }
+    },
+    "x": {
+     "i_mechanical": {
+      "n": 131,
+      "exact": 32,
+      "tooLoose": 0,
+      "tooTight": 99,
+      "exactPct": 24.4,
+      "tooLoosePct": 0,
+      "tooTightPct": 75.6
+     },
+     "ii_round6_GATE": {
+      "n": 131,
+      "exact": 118,
+      "tooLoose": 1,
+      "tooTight": 12,
+      "exactPct": 90.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 9.2
+     },
+     "iii_round5_cuts": {
+      "n": 131,
+      "exact": 101,
+      "tooLoose": 1,
+      "tooTight": 29,
+      "exactPct": 77.1,
+      "tooLoosePct": 0.8,
+      "tooTightPct": 22.1
+     },
+     "iv_rwxmap_shipped": {
+      "n": 131,
+      "exact": 88,
+      "tooLoose": 0,
+      "tooTight": 43,
+      "exactPct": 67.2,
+      "tooLoosePct": 0,
+      "tooTightPct": 32.8
+     },
+     "v_modeB_p05": {
+      "n": 131,
+      "exact": 102,
+      "tooLoose": 6,
+      "tooTight": 23,
+      "exactPct": 77.9,
+      "tooLoosePct": 4.6,
+      "tooTightPct": 17.6
+     }
+    },
+    "w": {
+     "i_mechanical": {
+      "n": 86,
+      "exact": 84,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 97.7,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 1.2
+     },
+     "ii_round6_GATE": {
+      "n": 86,
+      "exact": 84,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 97.7,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 1.2
+     },
+     "iii_round5_cuts": {
+      "n": 86,
+      "exact": 84,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 97.7,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 1.2
+     },
+     "iv_rwxmap_shipped": {
+      "n": 86,
+      "exact": 84,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 97.7,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 1.2
+     },
+     "v_modeB_p05": {
+      "n": 86,
+      "exact": 83,
+      "tooLoose": 1,
+      "tooTight": 2,
+      "exactPct": 96.5,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 2.3
+     }
+    }
+   },
+   "modeB_askedOnly": {
+    "n": 483,
+    "exact": 442,
+    "tooLoose": 9,
+    "tooTight": 32,
+    "exactPct": 91.5,
+    "tooLoosePct": 1.9,
+    "tooTightPct": 6.6
+   }
+  }
+ },
+ "twoStep": {
+  "hits": 20,
+  "truthMix": {
+   "r": 20
+  },
+  "exactGained": 20,
+  "exactLost": 0,
+  "tooLooseBefore": 0,
+  "tooLooseAfter": 0,
+  "ids": [
+   "gate2-0004",
+   "gate2-0087",
+   "gate2-0099",
+   "gate2-0116",
+   "gate2-0133",
+   "gate2-0165",
+   "gate2-0216",
+   "gate2-0260",
+   "gate2-0267",
+   "gate2-0272",
+   "gate2-0286",
+   "gate2-0319",
+   "gate2-0431",
+   "gate2-0432",
+   "gate2-0479",
+   "gate2-0514",
+   "gate2-0534",
+   "gate2-0542",
+   "gate2-0548",
+   "gate2-0557"
+  ]
+ },
+ "credentialRule": {
+  "hits": 0,
+  "truthMix": {},
+  "exactGained": 0,
+  "exactLost": 0,
+  "tooLooseBefore": 0,
+  "tooLooseAfter": 0,
+  "ids": [],
+  "methods": {}
+ },
+ "missesRound6": [
+  {
+   "id": "gate2-0023",
+   "provider": "zuora.com",
+   "method": "POST",
+   "path": "/v1/billing-preview-runs",
+   "summary": "Create a billing preview run",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.7,
+   "pC": 0.9,
+   "truth": "r",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0039",
+   "provider": "amazonaws.com",
+   "method": "GET",
+   "path": "/#Action=DeleteNotificationConfiguration",
+   "summary": "",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "p": 0.97,
+   "pC": null,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate2-0046",
+   "provider": "visualstudio.com",
+   "method": "POST",
+   "path": "/api/v1/Tokens/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{providerNamespace}/plans/{resourceName}/writeCodespaces",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.5,
+   "pC": 0.845,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0074",
+   "provider": "configcat.com",
+   "method": "POST",
+   "path": "/v1/code-references",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.305,
+   "pC": 0.64,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0082",
+   "provider": "pdfblocks.com",
+   "method": "POST",
+   "path": "/v1/remove_restrictions",
+   "summary": "Remove the restrictions from a PDF",
+   "mech": "w/modify-verb",
+   "tier": "none",
+   "p": 0.65,
+   "pC": 0.93,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0086",
+   "provider": "c19qrserver.local",
+   "method": "POST",
+   "path": "/requestPasswordReset",
+   "summary": "Used for requesting a password reset code",
+   "mech": "x/cant-undo-verb",
+   "tier": "none",
+   "p": 0.395,
+   "pC": 0.84,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0098",
+   "provider": "smart-me.com",
+   "method": "GET",
+   "path": "/api/FastSendDeviceValues/{id}",
+   "summary": "Force a device to send the data every second (if supported). This for about 30s.             Don't u",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "p": 0.94,
+   "pC": null,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate2-0196",
+   "provider": "hetzner.cloud",
+   "method": "POST",
+   "path": "/certificates",
+   "summary": "Create a Certificate",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.235,
+   "pC": 0.99,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0257",
+   "provider": "azure.com",
+   "method": "POST",
+   "path": "/Faults/Nodes/{nodeName}/$/StartTransition/",
+   "summary": "Starts or stops a cluster node.",
+   "mech": "x/cant-undo-verb",
+   "tier": "none",
+   "p": 0.05,
+   "pC": 0.98,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0258",
+   "provider": "quickchart.io",
+   "method": "POST",
+   "path": "/qr",
+   "summary": "Generate a QR code (POST)",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.29000000000000004,
+   "pC": 0.09,
+   "truth": "r",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0322",
+   "provider": "plaid.com",
+   "method": "POST",
+   "path": "/credit/payroll_income/precheck",
+   "summary": "Check income verification eligibility and optimize conversion",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.195,
+   "pC": 0.825,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0326",
+   "provider": "taggun.io",
+   "method": "POST",
+   "path": "/api/validation/v1/campaign/file",
+   "summary": "validate and match a receipt against a campaign validation settings by uploading an image file",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.14500000000000002,
+   "pC": 0.315,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0377",
+   "provider": "tokenjay.app",
+   "method": "GET",
+   "path": "/mosaik/tokenburn",
+   "summary": "",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "p": 0.29,
+   "pC": null,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0421",
+   "provider": "watchful.li",
+   "method": "GET",
+   "path": "/sites/{id}/validate",
+   "summary": "validate the site, return the new logs",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "p": 0.425,
+   "pC": null,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0449",
+   "provider": "mist.com",
+   "method": "POST",
+   "path": "/api/v1/sites/{site_id}/devices/{device_id}/locate",
+   "summary": "startSiteLocateDevice",
+   "mech": "x/cant-undo-verb",
+   "tier": "none",
+   "p": 0.04,
+   "pC": 0.98,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0455",
+   "provider": "mandrillapp.com",
+   "method": "POST",
+   "path": "/ips/cancel-warmup.json",
+   "summary": "",
+   "mech": "x/cant-undo-verb",
+   "tier": "none",
+   "p": 0.32,
+   "pC": 0.9,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0487",
+   "provider": "zoomconnect.com",
+   "method": "GET",
+   "path": "/api/rest/v1/sms/send",
+   "summary": "send",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "p": 0.395,
+   "pC": null,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0527",
+   "provider": "magento.com",
+   "method": "POST",
+   "path": "/V1/companyCredits/{creditId}/increaseBalance",
+   "summary": "companyCredits/{creditId}/increaseBalance",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.6,
+   "pC": 0.96,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0546",
+   "provider": "contract-p.fit",
+   "method": "POST",
+   "path": "/auth",
+   "summary": "Login and retrieve a JWT Token",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.24,
+   "pC": 0.265,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate2-0553",
+   "provider": "orthanc-server.com",
+   "method": "POST",
+   "path": "/tools/shutdown",
+   "summary": "Shutdown Orthanc",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.16,
+   "pC": 0.93,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate2-0578",
+   "provider": "kumpeapps.com",
+   "method": "PATCH",
+   "path": "/appkey",
+   "summary": "Compromise app key",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "p": 0.295,
+   "pC": null,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  }
+ ],
+ "missPatterns": {
+  "POST tier=lower mech=x truth=w pred=x (too-tight)": 5,
+  "POST tier=none mech=x truth=w pred=x (too-tight)": 4,
+  "GET tier=raise-get mech=r truth=r pred=w (too-tight)": 3,
+  "POST tier=lower mech=x truth=r pred=x (too-tight)": 2,
+  "GET tier=raise-get mech=r truth=x pred=w (too-loose)": 2,
+  "POST tier=lower mech=x truth=r pred=w (too-tight)": 2,
+  "POST tier=none mech=w truth=r pred=w (too-tight)": 1,
+  "POST tier=lower mech=x truth=x pred=w (too-loose)": 1,
+  "PATCH tier=raise-wx mech=w truth=x pred=w (too-loose)": 1
+ },
+ "verdict": {
+  "gateExactPct": 96.5,
+  "bar": 95,
+  "exactRows": 579,
+  "tooLoose": 4,
+  "mechanicalTooLoose": 7,
+  "tooLooseNoWorseThanMechanical": true,
+  "result": "PASS"
+ },
+ "posthocSweepNotForTuning": {
+  "note": "POST-HOC, NOT FOR TUNING: sample is burned; reported only to explain the gate number",
+  "perTier": {
+   "lower": [
+    {
+     "cut": 0,
+     "n": 142,
+     "exact": 30,
+     "tooLoose": 0,
+     "tooTight": 112,
+     "exactPct": 21.1,
+     "tooLoosePct": 0,
+     "tooTightPct": 78.9
+    },
+    {
+     "cut": 0.05,
+     "n": 142,
+     "exact": 46,
+     "tooLoose": 0,
+     "tooTight": 96,
+     "exactPct": 32.4,
+     "tooLoosePct": 0,
+     "tooTightPct": 67.6
+    },
+    {
+     "cut": 0.1,
+     "n": 142,
+     "exact": 117,
+     "tooLoose": 0,
+     "tooTight": 25,
+     "exactPct": 82.4,
+     "tooLoosePct": 0,
+     "tooTightPct": 17.6
+    },
+    {
+     "cut": 0.15,
+     "n": 142,
+     "exact": 127,
+     "tooLoose": 0,
+     "tooTight": 15,
+     "exactPct": 89.4,
+     "tooLoosePct": 0,
+     "tooTightPct": 10.6
+    },
+    {
+     "cut": 0.2,
+     "n": 142,
+     "exact": 132,
+     "tooLoose": 1,
+     "tooTight": 9,
+     "exactPct": 93,
+     "tooLoosePct": 0.7,
+     "tooTightPct": 6.3
+    },
+    {
+     "cut": 0.3,
+     "n": 142,
+     "exact": 133,
+     "tooLoose": 3,
+     "tooTight": 6,
+     "exactPct": 93.7,
+     "tooLoosePct": 2.1,
+     "tooTightPct": 4.2
+    },
+    {
+     "cut": 0.4,
+     "n": 142,
+     "exact": 133,
+     "tooLoose": 4,
+     "tooTight": 5,
+     "exactPct": 93.7,
+     "tooLoosePct": 2.8,
+     "tooTightPct": 3.5
+    },
+    {
+     "cut": 0.5,
+     "n": 142,
+     "exact": 130,
+     "tooLoose": 7,
+     "tooTight": 5,
+     "exactPct": 91.5,
+     "tooLoosePct": 4.9,
+     "tooTightPct": 3.5
+    }
+   ],
+   "raise-wx": [
+    {
+     "cut": 0.5,
+     "n": 100,
+     "exact": 98,
+     "tooLoose": 1,
+     "tooTight": 1,
+     "exactPct": 98,
+     "tooLoosePct": 1,
+     "tooTightPct": 1
+    },
+    {
+     "cut": 0.6,
+     "n": 100,
+     "exact": 99,
+     "tooLoose": 1,
+     "tooTight": 0,
+     "exactPct": 99,
+     "tooLoosePct": 1,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.7,
+     "n": 100,
+     "exact": 99,
+     "tooLoose": 1,
+     "tooTight": 0,
+     "exactPct": 99,
+     "tooLoosePct": 1,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.8,
+     "n": 100,
+     "exact": 99,
+     "tooLoose": 1,
+     "tooTight": 0,
+     "exactPct": 99,
+     "tooLoosePct": 1,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.9,
+     "n": 100,
+     "exact": 99,
+     "tooLoose": 1,
+     "tooTight": 0,
+     "exactPct": 99,
+     "tooLoosePct": 1,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 1.01,
+     "n": 100,
+     "exact": 99,
+     "tooLoose": 1,
+     "tooTight": 0,
+     "exactPct": 99,
+     "tooLoosePct": 1,
+     "tooTightPct": 0
+    }
+   ],
+   "raise-get": [
+    {
+     "cut": 0.2,
+     "n": 325,
+     "exact": 320,
+     "tooLoose": 2,
+     "tooTight": 3,
+     "exactPct": 98.5,
+     "tooLoosePct": 0.6,
+     "tooTightPct": 0.9
+    },
+    {
+     "cut": 0.3,
+     "n": 325,
+     "exact": 321,
+     "tooLoose": 2,
+     "tooTight": 2,
+     "exactPct": 98.8,
+     "tooLoosePct": 0.6,
+     "tooTightPct": 0.6
+    },
+    {
+     "cut": 0.5,
+     "n": 325,
+     "exact": 323,
+     "tooLoose": 2,
+     "tooTight": 0,
+     "exactPct": 99.4,
+     "tooLoosePct": 0.6,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.8,
+     "n": 325,
+     "exact": 323,
+     "tooLoose": 2,
+     "tooTight": 0,
+     "exactPct": 99.4,
+     "tooLoosePct": 0.6,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 1.01,
+     "n": 325,
+     "exact": 319,
+     "tooLoose": 6,
+     "tooTight": 0,
+     "exactPct": 98.2,
+     "tooLoosePct": 1.8,
+     "tooTightPct": 0
+    }
+   ]
+  },
+  "rcut": [
+   {
+    "cut": 0,
+    "n": 142,
+    "exact": 112,
+    "tooLoose": 1,
+    "tooTight": 29,
+    "exactPct": 78.9,
+    "tooLoosePct": 0.7,
+    "tooTightPct": 20.4
+   },
+   {
+    "cut": 0.05,
+    "n": 142,
+    "exact": 130,
+    "tooLoose": 1,
+    "tooTight": 11,
+    "exactPct": 91.5,
+    "tooLoosePct": 0.7,
+    "tooTightPct": 7.7
+   },
+   {
+    "cut": 0.1,
+    "n": 142,
+    "exact": 132,
+    "tooLoose": 1,
+    "tooTight": 9,
+    "exactPct": 93,
+    "tooLoosePct": 0.7,
+    "tooTightPct": 6.3
+   },
+   {
+    "cut": 0.2,
+    "n": 142,
+    "exact": 132,
+    "tooLoose": 1,
+    "tooTight": 9,
+    "exactPct": 93,
+    "tooLoosePct": 0.7,
+    "tooTightPct": 6.3
+   },
+   {
+    "cut": 0.3,
+    "n": 142,
+    "exact": 132,
+    "tooLoose": 1,
+    "tooTight": 9,
+    "exactPct": 93,
+    "tooLoosePct": 0.7,
+    "tooTightPct": 6.3
+   },
+   {
+    "cut": 0.5,
+    "n": 142,
+    "exact": 133,
+    "tooLoose": 1,
+    "tooTight": 8,
+    "exactPct": 93.7,
+    "tooLoosePct": 0.7,
+    "tooTightPct": 5.6
+   },
+   {
+    "cut": 1.01,
+    "n": 142,
+    "exact": 51,
+    "tooLoose": 84,
+    "tooTight": 7,
+    "exactPct": 35.9,
+    "tooLoosePct": 59.2,
+    "tooTightPct": 4.9
+   }
+  ]
+ }
+}
