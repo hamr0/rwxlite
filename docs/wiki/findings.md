@@ -640,3 +640,38 @@ Reading. MECH alone is not a fix: below the bar the mechanical letter is wrong i
 MECH-THEN-ASK keeps that lower-tier gain and asks only on the raise-wx rows where mechanical is looser than the model, so it asks far less than ASK. Mode (a): 0.9 gives 39 loose with 2.8% asked (ASK 0.9: 38 loose, 11.3% asked); 0.95 gives 27 loose (0.49% of answered) with 3.4% asked, 91.5% right, 8.1% tight. ASK 0.95 gives 24 loose (0.51%) but asks 17.1% (over the 15% limit), 98.7% right, 0.82% tight. Mode (b) is the same story (MECH-THEN-ASK 0.95: 27 loose, 3.3% asked).
 Which gives the fewest loose rows at an ask rate of about 15% or less: in a strict sense MECH-THEN-ASK at 0.99 (16 loose, 3.5% asked) but it is nearly the mechanical letter everywhere (76.6% right, 23% too tight), so it is not useful. Among usable settings, MECH-THEN-ASK at 0.95 (27 loose, 3.4% asked) beats ASK at 0.9 (38 loose, 11.3% asked) on both loose and ask rate, and is within 3 loose rows of ASK 0.95 at a fifth of the asks. The price is too-tight: 8% of answered rows versus under 1% for ASK 0.95, because the mechanical fallback is blunt (it holds the mechanical letter everywhere the model is unsure, 445 tight rows). So the choice is loose vs tight: ASK 0.95 buys very high exactness with 17% asks; MECH-THEN-ASK 0.95 buys the same loose count with 3% asks and a lot of tight rows. Whether tight rows cost less than asks is a product call, not measured here.
 Caveat: practice rows, not an exam; the One-time exam showed the model is confidently wrong on its loose rows more than LOVO suggested (median max p 0.94), so the loose avoidance here may not transfer.
+
+## 2026-11-03: Round 9c: flag the lowerings (user flow)
+
+Practice (LOVO) rows, not an exam: v3 tuning truth only (n=5,716), r8soft mode (a), same honest per-fold cuts and calibrated p (T 0.844) as 9b; `train/lowerflag.py` reuses `lovo_preds` and `fallback.cell`. Exam, gate truth and the fresh exam untouched. Results `data/train/lowerflag-r8soft.json`. Four piles asserted to sum to 5,716 per rule. Order r<w<x; lowering = model < mechanical, raise = model > mechanical, keep = equal. Percentages are of answered rows; asked % of all rows.
+
+What the model does (mode a, no bar):
+| move | rows | right | too loose | too tight |
+|---|---|---|---|---|
+| lowering | 1,135 | 1,070 | 57 | 8 |
+| raise | 200 | 61 | 0 | 139 |
+| keep | 4,381 | 4,172 | 16 | 193 |
+
+Rules (asked column: asks that would have been right / loose / tight):
+| rule | right | too loose | too tight | asked (R/L/T) |
+|---|---|---|---|---|
+| 1 BASE (model letter) | 5303 (92.77%) | 73 (1.28%) | 340 (5.95%) | 0 |
+| 2 MECH-THEN-ASK@0.95 | 5050 (91.45%) | 27 (0.49%) | 445 (8.06%) | 194 (3.39%; 58/0/136) |
+| 3 FLAG-ALL-LOWER | 4233 (92.4%) | 16 (0.35%) | 332 (7.25%) | 1135 (19.86%; 1070/57/8) |
+| 4 LOWER-BAR-KEEP@0.8 | 5269 (92.18%) | 54 (0.94%) | 393 (6.88%) | 0 |
+| 4 KEEP@0.9 | 5225 (91.41%) | 39 (0.68%) | 452 (7.91%) | 0 |
+| 4 KEEP@0.95 | 5108 (89.36%) | 27 (0.47%) | 581 (10.16%) | 0 |
+| 4 KEEP@0.97 | 4859 (85.01%) | 21 (0.37%) | 836 (14.63%) | 0 |
+| 4 KEEP@0.99 | 4287 (75.0%) | 16 (0.28%) | 1413 (24.72%) | 0 |
+| 5 LOWER-BAR-ASK@0.8 | 5254 (93.06%) | 54 (0.96%) | 338 (5.99%) | 70 (1.22%; 49/19/2) |
+| 5 ASK@0.9 | 5195 (93.27%) | 39 (0.7%) | 336 (6.03%) | 146 (2.55%; 108/34/4) |
+| 5 ASK@0.95 | 5066 (93.33%) | 27 (0.5%) | 335 (6.17%) | 288 (5.04%; 237/46/5) |
+| 5 ASK@0.97 | 4811 (93.15%) | 21 (0.41%) | 333 (6.45%) | 551 (9.64%; 492/52/7) |
+| 5 ASK@0.99 | 4234 (92.41%) | 16 (0.35%) | 332 (7.25%) | 1134 (19.84%; 1069/57/8) |
+| 6 ASK@0.95 + MTA@0.95 | 5008 (95.68%) | 27 (0.52%) | 199 (3.8%) | 482 (8.43%; 295/46/141) |
+| 6 ASK@0.99 + MTA@0.95 | 4176 (95.17%) | 16 (0.36%) | 196 (4.47%) | 1328 (23.23%; 1127/57/144) |
+
+Remaining too-loose rows by type: BASE 57 lowered wrongly + 16 mechanical too loose and not raised + 0 other. Every lowering rule leaves the same 16 (mechanical-letter keeps the model never raises); lowered-wrongly falls 38 / 23 / 11 / 5 / 0 at bars 0.8 / 0.9 / 0.95 / 0.97 / 0.99. MECH-THEN-ASK@0.95 is 11 + 16.
+
+Reading. Nearly all the model's looseness is in its lowerings (57 of 73); the 16 others are keeps where mechanical is already too loose and the model does not raise, and no rule here touches them (floor 16). Raises never go loose but are mostly tight (139 of 200), so trusting them is cheap in looseness and costly in tightness. Under about 15% asks, the fewest too-loose rows is rule 5 (or 3-style flagging) at bar 0.97: 21 loose with 9.6% asked, 93.2% right, 6.5% tight; the 0.99 bar reaches the floor of 16 but asks 19.8%, over the limit. Against MECH-THEN-ASK@0.95 (27 loose, 3.4% asked, 91.5% right, 8.1% tight): LOWER-BAR-ASK@0.95 ties it on loose (27) with 5.0% asks, and is better on right (93.3%) and tight (6.2%); it asks more rows, though. Rule 6 at 0.95 (27 loose, 8.4% asked, 95.7% right, 3.8% tight) is the best overall exactness at the same loose count. Bar-then-keep (rule 4) cuts loose the same way but pays in tight rows (10% at 0.95), so asking beats silently keeping the mechanical letter. Whether 5 extra asks per 100 rows are worth ~6 fewer loose than the 0.9 bar is a product call.
+Caveat: practice rows, not an exam; the exam showed the model is confidently wrong on its loose rows more than LOVO suggests, so high-bar loose reductions may not transfer.
