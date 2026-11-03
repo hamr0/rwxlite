@@ -3,6 +3,9 @@
 //   node m0/jev-label.mjs --smoke    30 rows (10 per method group) -> data/m0/jev-smoke.jsonl
 //   node m0/jev-label.mjs            pass 1  -> data/m0/jev-pass1.jsonl
 //   node m0/jev-label.mjs --reask    pass 2  -> data/m0/jev-pass2.jsonl (rows with 0.1 <= p <= 0.9)
+//   node m0/jev-label.mjs --question changes --methods POST [--smoke|--reask]
+//       round 6: the "changes" question on every non-DELETE POST row
+//       -> data/m0/jev-post-changes.jsonl (smoke: jev-post-changes-smoke.jsonl; --reask: jev-post-changes-2.jsonl)
 //
 // Resumable: ids already answered (p present) in the output file are skipped.
 // Output lines: { id, question, p, model, error, in, out, cost }. Gitignored (data/).
@@ -35,7 +38,7 @@ const PRICE_IN = 42 / 1e9; // $ per input token (jev-learnings.md)
 const PRICE_OUT = 0; // output tokens not billed per the learnings; tracked anyway
 const FALLBACK_COST = 0.000085; // $ per answer when tokens are not returned
 const RESERVE = 4 * 0.0003; // headroom for in-flight calls
-const CONCURRENCY = 4;
+const CONCURRENCY = Number(process.env.JEV_CONCURRENCY) || 4;
 const TIMEOUT_MS = 30_000;
 const MAX_RETRIES = 5;
 
@@ -106,7 +109,12 @@ async function loadRows() {
 async function main() {
   const smoke = process.argv.includes('--smoke');
   const reask = process.argv.includes('--reask');
-  const outName = smoke ? 'jev-smoke.jsonl' : reask ? 'jev-pass2.jsonl' : 'jev-pass1.jsonl';
+  const argv = process.argv;
+  const qArg = argv.includes('--question') ? argv[argv.indexOf('--question') + 1] : null;
+  const mArg = argv.includes('--methods') ? argv[argv.indexOf('--methods') + 1] : null;
+  const postChanges = qArg === 'changes' && mArg === 'POST';
+  if (qArg || mArg) { if (!postChanges) throw new Error('only --question changes --methods POST is supported'); GROUPS.POST = { key: 'changes', q: qChanges, name: 'post-changes' }; }
+  const outName = postChanges ? (smoke ? 'jev-post-changes-smoke.jsonl' : reask ? 'jev-post-changes-2.jsonl' : 'jev-post-changes.jsonl') : smoke ? 'jev-smoke.jsonl' : reask ? 'jev-pass2.jsonl' : 'jev-pass1.jsonl';
   const OUT = path.join(DATA, outName);
 
   const all = await loadRows();
@@ -117,6 +125,7 @@ async function main() {
     if (r.exam_opkey_overlap) { skipped.exam_opkey_overlap++; continue; }
     const m = r.method.toUpperCase();
     if (m === 'DELETE') { skipped.delete++; continue; }
+    if (postChanges && m !== 'POST') { continue; }
     if (!GROUPS[m]) { skipped.other_method[m] = (skipped.other_method[m] || 0) + 1; continue; }
     rows.push(r);
   }
@@ -125,7 +134,7 @@ async function main() {
   console.log('skipped (no Jev call):', JSON.stringify(skipped), '| to ask:', rows.length);
 
   if (reask) {
-    const p1 = new Map(readJsonl(path.join(DATA, 'jev-pass1.jsonl')).filter((x) => typeof x.p === 'number').map((x) => [x.id, x.p]));
+    const p1 = new Map(readJsonl(path.join(DATA, postChanges ? 'jev-post-changes.jsonl' : 'jev-pass1.jsonl')).filter((x) => typeof x.p === 'number').map((x) => [x.id, x.p]));
     rows = rows.filter((r) => { const p = p1.get(r.id); return p !== undefined && p >= 0.1 && p <= 0.9; });
     console.log('re-ask rows (0.1 <= p <= 0.9):', rows.length);
   }
@@ -134,7 +143,7 @@ async function main() {
     rows = rows.filter((r) => {
       const g = GROUPS[r.method.toUpperCase()].name;
       per[g] = per[g] || 0;
-      if (r.id.slice(-1) !== '7' || per[g] >= 10) return false;
+      if (r.id.slice(-1) !== '7' || per[g] >= (postChanges ? 20 : 10)) return false;
       per[g]++;
       return true;
     });
@@ -143,7 +152,7 @@ async function main() {
   const done = new Set(readJsonl(OUT).filter((x) => typeof x.p === 'number').map((x) => x.id));
   const todo = rows.filter((r) => !done.has(r.id));
   let spent = 0;
-  for (const f of ['jev-smoke.jsonl', 'jev-pass1.jsonl', 'jev-pass2.jsonl']) for (const x of readJsonl(path.join(DATA, f))) spent += x.cost || 0;
+  for (const f of ['jev-smoke.jsonl', 'jev-pass1.jsonl', 'jev-pass2.jsonl', 'jev-post-changes-smoke.jsonl', 'jev-post-changes.jsonl', 'jev-post-changes-2.jsonl']) for (const x of readJsonl(path.join(DATA, f))) spent += x.cost || 0;
   console.log(`${outName}: ${rows.length} rows, ${done.size} done, ${todo.length} todo; spend so far $${spent.toFixed(4)} (cap $${CAP_USD})`);
 
   const key = getKey();
