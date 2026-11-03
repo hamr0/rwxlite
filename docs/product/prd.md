@@ -248,12 +248,40 @@ Reading:
 - ASK at 0.95 gives the highest accuracy on what it answers but asks on 1 in 6 operations.
 - Caveat: on the exam the model's dangerous mistakes were confident (median top p 0.94), so the practice-row gain may not fully transfer. That is what the fresh exam tests.
 
-**Go/no-go for the fresh exam (signed off by the user 2026-11-03, frozen).** The full pre-registration (checkpoint hash, cuts, vendors) is committed before scoring, once the exam vendors are agreed with rwxmap. The rule itself does not change:
-- Rule: mode (a), MECH-THEN-ASK at 0.95.
+**Go/no-go for the fresh exam.** First signed off as MECH-THEN-ASK at 0.95; **replaced by the user on 2026-11-03, before any prediction on the fresh exam, by the lowering-flag rule below** (round 9c, measured on practice rows only). The full pre-registration (checkpoint hash, cuts) is committed before scoring.
+- Rule: mode (a), LOWER-BAR-ASK at 0.97: when rwxlite lowers the mechanical letter (x to w or r, w to r) it is accepted only if its top p is at least 0.97, otherwise the row is "ask". Raises and keeps are trusted.
 - Pass: too loose at most 0.5% of answered rows AND exact at least 91% of answered rows AND asked at most 15% of rows.
-- Reported only: mode (b), ASK at 0.7 / 0.9 / 0.95, MECH-THEN-ASK at 0.7 / 0.9, no bar.
+- Reported only: no bar; MECH-THEN-ASK at 0.95 (the earlier rule); ask on every lowering; LOWER-BAR-ASK at 0.95 plus MECH-THEN-ASK on non-lowerings; mode (b) no bar; mechanical alone.
 - The bar is a user setting in the product; the exam fixes one value so the test is fair.
 - Fresh exam: vendors never used in training or tuning, agreed with rwxmap; labelled blind under BRIEF-v3 by two labellers, disagreements ruled by the user; scored once.
+
+
+## The flow (user, 2026-11-03)
+
+**rwxmap is the adapter; rwxlite is only a classifier.** rwxmap imports specs, shapes each operation into Jev's request, calls an engine, applies the rules below, and emits every verdict and flag. rwxlite never sees URLs or specs and never decides to ask. Engines under rwxmap:
+
+| engine | what runs | cost |
+|---|---|---|
+| mechanical, then rwxlite (default) | mechanical leans first; rwxlite settles the contested rows (Jev's job today) | free, local |
+| rwxlite alone | rwxlite labels every operation (mode b) | free, local |
+| mechanical, then Jev | today's setup, the paid option if you trust neither | paid per call |
+
+**Two answers in one call.** rwxmap asks rwxlite both Jev questions in one request: isX ("can't be taken back?") and changes ("changes anything?"). From those two: x = isX, w = changes - isX, r = 1 - changes. Same request and answer shape as Jev, so engines stay swappable.
+
+**Lowerings are flagged, not trusted blindly.** Measured on practice rows (round 9c): of r8soft's 73 too-loose rows, 57 are lowerings (x to w or r, w to r); raises were never too loose (61 right, 139 too tight of 200); 16 are keeps where the mechanical letter is itself too loose and rwxlite agreed. So rwxmap highlights every lowering; a lowering is accepted only when rwxlite is at least 97% sure; the rest go to the user, alongside rows rwxmap already marks too tight. Practice-row result: 93.2% right, 21 too loose (0.41% of answered), 6.5% too tight, 9.6% asked (asking on every lowering: 16 too loose but 19.9% asked).
+
+| rule (practice rows, 5,716) | right | too loose | too tight | asked |
+|---|---|---|---|---|
+| trust rwxlite blindly | 92.8% | 73 | 6.0% | 0% |
+| MECH-THEN-ASK at 0.95 (earlier rule) | 91.5% | 27 | 8.1% | 3.4% |
+| ask on every lowering | 92.4% | 16 | 7.3% | 19.9% |
+| **ask on lowerings under 0.97** | **93.2%** | **21** | 6.5% | **9.6%** |
+| lowering under 0.95 asks + MECH-THEN-ASK on the rest | 95.7% | 27 | 3.8% | 8.4% |
+| lowering under 0.95 keeps mechanical (no ask) | 89.4% | 27 | 10.2% | 0% |
+
+Silently keeping the mechanical letter instead of asking costs too-tight rows (10% to 25%); asking is better.
+
+**Known limit: confident mistakes are not flagged.** A wrong answer rwxlite is sure about is not marked. The 16 rows where mechanical is too loose and rwxlite agrees are not lowerings, so no lowering rule catches them (the same as Jev today); rwxmap's own "loose" review markers may cover some (to check with rwxmap). Mitigations later: user answers to asks become hand labels for the next manual training round; bareguard policy (later, after the flow is settled).
 
 ## Out of scope (whole build)
 
@@ -283,7 +311,7 @@ Only module 0 is sharp. The rest are sketches.
 - Accept `{state, model, questions}`, return `{p, model}`.
 - Measure size and latency in Node.
 
-**M2 — Wire into rwxmap.**
+**M2 — Wire into rwxmap** (see "The flow": engines, two-question call, lowering flag; rwxmap owns the ask marker).
 - Add a local Jev option (for example `--jev local`).
 - Re-run rwxmap's numbers with it.
 
