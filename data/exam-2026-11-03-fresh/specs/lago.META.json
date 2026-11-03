@@ -1,0 +1,21 @@
+{
+ "vendor": "lago",
+ "source_url": "https://raw.githubusercontent.com/getlago/lago-openapi/main/openapi.yaml",
+ "ref": "git main 1f1f510e; spec 1.56.0",
+ "retrieved": "2026-11-03",
+ "sha256_of_raw_download": "5d26657495a3a47ef65ec5e77f2e9f90d4d4580b77aad52f72bf3f53c2a2876a",
+ "file": "lago.yaml",
+ "openapi": "3.1.0",
+ "title": "Lago API documentation",
+ "ops": 217,
+ "by_method": {
+  "GET": 95,
+  "POST": 52,
+  "PUT": 28,
+  "DELETE": 36,
+  "PATCH": 6
+ },
+ "non_delete": 181,
+ "pct_summary_or_description": 100,
+ "pct_operationId": 100
+}
