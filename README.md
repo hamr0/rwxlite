@@ -55,9 +55,9 @@ This is a research repo for now. There is nothing to install.
 |---|---|---|
 | Label recipe | built, measured | rwxmap mechanical + Jev, per-method questions, two-step POST lower, credential rule |
 | Baseline | trained | TF-IDF + logistic regression, 24 MB, about 1.5 ms/op |
-| Fine-tuned MiniLM | trained, still tuning | 22.7M params, 90.9 MB fp32, about 22-28 ms/op in fp32 PyTorch |
+| Fine-tuned MiniLM | trained, exam failed (too loose) | 22.7M params, 90.9 MB fp32, about 22-28 ms/op in fp32 PyTorch; 95.9% exact, 0.84% too loose on the exam |
 | int8 ONNX export + Node answerer | *planned (M1)* | the in-process answerer that speaks Jev's JSON |
-| Abstain threshold | *planned* | "no answer when not confident" |
+| Abstain threshold | measured, not built | "no answer when not confident"; 0.95 gives 90% answered at 98.7% exact on the exam |
 | rwxmap integration | *planned (M2)* | mechanical leans first, model moves contested rows |
 
 Input is OpenAPI operations only: method, path template, operationId, summary, description.
@@ -67,8 +67,9 @@ Input is OpenAPI operations only: method, path template, operationId, summary, d
 As of 2026-11-03, rwxlite is in module 0 and not released.
 
 - **Labels are measured.** The label recipe passed a fresh blind gate at 96.5% exact and 0.7% too loose, against 79.3% and 1.2% for mechanical alone. Two findings went back into rwxmap (D129 two-step POST, D131 credential rule).
-- **Models are trained, not yet judged.** On tuning rows (leave-one-vendor-out) the baseline scores 91.0% exact, with too-loose equal to mechanical. MiniLM scores 92.0% exact, but its too-loose rate is above mechanical. Work continues. Neither has been scored on the go/no-go exam.
-- **"No answer if not confident" is not built.** The model returns probabilities today. The abstain threshold is planned.
+- **The model failed its go/no-go exam, on one line.** The fine-tuned MiniLM was scored once on 4,279 operations from vendors it never saw (cloudflare, pagerduty, sentry). It answered 95.9% exact, ahead of mechanical + Jev (93.0%) and mechanical alone (82.3%). But 0.84% of its answers were too loose (36 rows), over the 0.5% line set by Jev. Most of those are Cloudflare "create" calls that move money or start jobs, which it confidently called editable. Next step is open.
+- **Asking helps, but wasn't the pass/fail check.** When the model answers only at 95% confidence or above and asks on the rest, it answers 90.2% of rows at 98.7% exact and 0.47% too loose. That was reported, not pre-registered, so it doesn't count as a pass. Full table in the [PRD](docs/product/prd.md#m0-exam-result-2026-11-03-no-go).
+- **"No answer if not confident" is measured, not built.** The model returns probabilities today. The "ask" rule exists only in the scoring scripts.
 - **"About 24 MB int8" is an estimate** for the neural model. The baseline is already about 24 MB. The int8 export is not built.
 - **Limits.** OpenAPI operations only. No request bodies, no query values, no hosts without a spec.
 

@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: contract, round 6 signed off. Date: 2026-11-03.
+Status: contract, round 6 signed off; M0 exam NO-GO (too loose), next step open. Date: 2026-11-03.
 
 ## Problem & goal
 
@@ -154,6 +154,31 @@ On the 4279-operation exam, with exam providers held out:
 - **Mode (b).** Reported, no bar.
 - **Fail** means back to the PRD as a spec change. Never loosen the bar, narrow the input, or shrink scope to pass.
 
+### M0 exam result (2026-11-03): NO-GO
+
+Scored once, pre-registered (f05ec42), scored in 51d8fb4. Model: MiniLM r8soft (soft targets), calibrated, cuts tuned on v3 tuning truth only. 4279 exam rows (cloudflare, pagerduty, sentry); none were seen in training or tuning.
+
+Mode (a), no ask, was the go/no-go: **exact 95.91% passes, too loose 0.84% (36 rows) fails the 0.5% line.** Every other row is reported only.
+
+"Ask at p" = the model answers only when its top probability is at least p; the rest become "ask" (bareguard asks the user). Exact / too loose / too tight are counted on the rows it answers.
+
+| setup | answers itself | asks | exact | too loose | too tight | asks that would have been too loose |
+|---|---|---|---|---|---|---|
+| mechanical alone (base) | 4279 (100%) | 0 | 3520 (82.26%) | 34 (0.79%) | 725 (16.94%) | — |
+| mechanical + Jev (rwxmap) | 4279 (100%) | 0 | 93.0% | 0.5% | 6.5% | — |
+| **(a) no ask — go/no-go** | 4279 (100%) | 0 | 4104 (95.91%) | **36 (0.84%)** | 139 (3.25%) | — |
+| (a) ask at 0.7 | 4169 (97.4%) | 110 (2.6%) | 4064 (97.48%) | 36 (0.86%) | 69 (1.66%) | 0 |
+| (a) ask at 0.9 | 4019 (93.9%) | 260 (6.1%) | 3961 (98.56%) | 21 (0.52%) | 37 (0.92%) | 15 |
+| (a) ask at 0.95 | 3861 (90.2%) | 418 (9.8%) | 3812 (98.73%) | 18 (0.47%) | 31 (0.80%) | 18 |
+| (b) no ask | 4279 (100%) | 0 | 4088 (95.54%) | 32 (0.75%) | 159 (3.72%) | — |
+| (b) ask at 0.7 | 4169 (97.4%) | 110 (2.6%) | 4060 (97.39%) | 32 (0.77%) | 77 (1.85%) | 0 |
+| (b) ask at 0.9 | 4019 (93.9%) | 260 (6.1%) | 3965 (98.66%) | 21 (0.52%) | 33 (0.82%) | 11 |
+| (b) ask at 0.95 | 3861 (90.2%) | 418 (9.8%) | 3812 (98.73%) | 18 (0.47%) | 31 (0.80%) | 14 |
+
+Where the 36 too-loose rows of (a) no ask are: 30 cloudflare, 4 pagerduty, 2 sentry. 22 are POST creates the mechanical rules called x and the model lowered (top-up, zone subscription, restore database, deletion job); 9 are PUT/PATCH credential updates whose p(x) (0.01 to 0.11) sat under the 0.15 raise cut; 5 others. The model is confident on them (median top p 0.94), so asking at 0.7 catches none and asking at 0.9 to 0.95 catches about half.
+
+Reading: rwxlite beats mechanical + Jev on exact by about 3 points but is looser than Jev, and as loose as mechanical alone. Asking at 0.95 would clear the 0.5% line, but it was not the pre-registered go/no-go, so it does not count as a pass. The exam is now burned for rwxlite. Next step (spec change) is open; see Open questions.
+
 ## Out of scope (whole build)
 
 - Fine-tuning a generative or chat LLM.
@@ -199,6 +224,8 @@ Only module 0 is sharp. The rest are sketches.
 - Licence: Apache-2.0, matching rwxmap (user, 2026-11-03).
 
 ## Open questions
+
+- **After the M0 NO-GO (2026-11-03).** Options: (1) round 9, a targeted retrain on the two failure shapes (POST creates that move money, start jobs or restore data; credential PUT/PATCH), then a fresh exam; (2) make "ask at p" part of the product and pre-register it as the go/no-go on a fresh exam; (3) accept and move to M1. Any fresh exam needs vendors never used in training; the exam vendors are burned and the remaining locked vendors belong to rwxmap's pre-registered split, so the vendors are agreed with rwxmap first.
 
 - **Which small encoder.** all-MiniLM-L6-v2 first, bge-small-en-v1.5 second, TF-IDF + LR as baseline; the bars decide.
 - **Model string.** What exact string rwxlite returns in `{p, model}`, and how it is versioned. rwxmap records the model string on every moved verdict (D88), so it must change whenever the weights change.
