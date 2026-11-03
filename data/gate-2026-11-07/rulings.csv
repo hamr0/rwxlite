@@ -1,0 +1,10 @@
+id,A,B,ruling,reason
+gate4-0086,x,w,x,"batch task runs commands; a run cannot be undone, clause b"
+gate4-0206,x,w,x,"broadcast campaign may send SMS; tighter on doubt, clause c"
+gate4-0280,x,w,w,tags are re-addable labels; restore is exact
+gate4-0357,w,r,w,"issues a sign-in token, same as gate-3 login ruling"
+gate4-0579,w,x,w,re-registering restores the account link
+gate4-0672,x,w,x,"batch tasks run commands; a run cannot be undone, clause b"
+gate4-0686,w,x,x,tax return status change can submit to tax office; tighter on doubt
+gate4-0735,x,w,x,"node group version upgrade replaces nodes, no downgrade"
+gate4-0798,w,r,w,"authenticate issues a token, same as gate-3 login ruling"
