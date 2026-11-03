@@ -69,3 +69,21 @@ Replaced ids: gate3-0127, gate3-0207.
 ## Vendor-clean line for scoring
 
 Exclude providers whose whole domain label is in: adyen appcenter atlassian azure box clearblade dracoon gitea github gitlab jira keycloak linode microsoft netbox notion openai slack trello twilio vercel whatsapp xero zoom.
+
+## Labelling
+
+Two independent labellers (A, B) labelled all 800 rows blind (r/w/x, with confidence high/low and a short note): `labels-A.csv`, `labels-B.csv`. They agreed on 785/800 (98.1%). The 15 disagreements were ruled by the user on 2026-11-03: 9 in the cred part, 6 in the general part. Each is in `rulings.csv` (id,A,B,ruling,reason). `truth.csv` (id,label) is the agreed label, or the ruling where A and B disagreed; 800 rows, no "?".
+
+Confidence (high/low): A high 731 / low 69; B high 713 / low 87; both high 702, both low 58.
+
+Truth mix (r/w/x), from part.csv:
+
+| part | r | w | x | n |
+|---|---|---|---|---|
+| cred | 19 | 149 | 32 | 200 |
+| general | 365 | 203 | 32 | 600 |
+| overall | 384 | 352 | 64 | 800 |
+
+## Status
+
+FROZEN. rwxmap scores F2 on this set once. It is NOT an rwxlite exam: rwxlite's MiniLM was trained on these rows, so scoring it here is contaminated. rwxlite will not tune on it.

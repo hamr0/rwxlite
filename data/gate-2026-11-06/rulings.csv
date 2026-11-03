@@ -1,0 +1,16 @@
+id,A,B,ruling,reason
+gate3-0010,r,w,w,recalculate updates stored workbook values
+gate3-0035,w,r,w,"login issues a new token, clause ii"
+gate3-0043,w,x,x,"GenerateCredentialReport runs a job, clause e"
+gate3-0075,w,x,x,"resolve-all-incidents is a state change that cannot step back, clause f"
+gate3-0103,w,r,w,establish connection = login issues session
+gate3-0258,r,w,w,issues a token
+gate3-0392,x,w,x,"easy-password change is a credential change, clause b"
+gate3-0447,x,w,x,"relay token shares report with outside partner, clause c"
+gate3-0454,w,r,w,authenticate issues token
+gate3-0490,w,x,x,"approving a CSR lets the cert be issued, cannot take back"
+gate3-0603,w,x,x,accepting an end-user agreement commits to an outside party
+gate3-0617,r,w,w,exchange attestation issues a token
+gate3-0649,w,x,w,start of something that can be stopped
+gate3-0673,w,x,w,"call only issues a token, deletes nothing"
+gate3-0773,r,x,w,PUT is w unless text names an x thing
