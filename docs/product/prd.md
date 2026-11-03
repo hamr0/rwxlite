@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: contract, round 4 signed off. Date: 2026-11-03.
+Status: contract, round 5 signed off. Date: 2026-11-03.
 
 ## Problem & goal
 
@@ -43,10 +43,12 @@ Jev is a hosted model (`api.typesafe.ai/v1/systemone`, model `jev-latest`). rwxm
 - Mode (a) first: mechanical in charge, rwxlite as the Jev stand-in.
 - Mode (b), standalone, is reported in module 0 but has no bar. The user would use it alone later only if it proves good enough. For now they trust mechanical more.
 - One model, 3-way output, one training run.
-- Quantization: int8 ONNX. This is the "Cactus idea". Cactus itself (a phone LLM runtime) is not used.
-- Runtime: inside rwxmap's Node process, via ONNX.
-- Training: Python on CPU. Machine has 8 cores, 31 GB RAM, no NVIDIA GPU.
-- Base model: a small text encoder (MiniLM-class). The exact choice is a module-0 run, not a decision.
+- Quantization: post-training dynamic int8 on the ONNX export. This is the "Cactus idea". Cactus itself (a phone LLM runtime) is not used.
+- Runtime: inside rwxmap's Node process, via onnxruntime-node.
+- Training: HF transformers + PyTorch on the laptop CPU. Machine has 8 cores, 31 GB RAM, no NVIDIA GPU. No GPU, no cloud.
+- Format: ONNX. GGUF / llama.cpp is not used: it targets decoder LLMs, and this is a small encoder classifier.
+- Base model candidates, tried in this order: (1) sentence-transformers/all-MiniLM-L6-v2 (22M params), (2) BAAI/bge-small-en-v1.5 (33M). Baseline for comparison: TF-IDF + logistic regression. The pick is a module-0 result against the bars below.
+- Size/speed bar unchanged: int8 model at most 100 MB on disk, at most 20 ms per operation on this laptop CPU.
 - rwxmap stays untouched. rwxlite reads its data in place and keeps its own copy of the Jev client.
 
 ## Labelling (first step inside module 0)
@@ -101,7 +103,23 @@ rwxlite has its own small Jev client, copied from rwxmap's `src/jev-client.js` (
 
 ### Step 4. Label quality gate
 
-Jev-derived labels must be at least 95% correct against the non-exam hand labels (`hand_set` and `calib_set` joins). Hand labels outside the exam vendors also enter training, with extra weight. If the gate fails, the cause goes back to the PRD; the bar is not loosened.
+**Label standard.** BRIEF-v3 (D87 + D98) is the ONLY label standard, for the gate and for tuning. v1 labels (rwxmap `data/corpus/labelled.csv`, `data/calibration-2026-09-14`) are not used for either.
+
+**DELETE.** Stays mechanical x, no Jev call (99.3% exact under v3). Unchanged from Step 2.
+
+**Bar.** Jev-derived labels must be at least 95% exact against BRIEF-v3 truth. The 95% bar is kept. If the gate fails, the cause goes back to the PRD; the bar is not loosened.
+
+**Fresh-sample procedure.** The bar is measured on a fresh sample, not on the older v3 sets (those are tuning data):
+1. About 600 non-DELETE rows drawn from our 123k by `m0/gate-sample.mjs` (seeded, deterministic, seed recorded). Frozen in `data/gate-2026-11-03/` and committed.
+2. Excluded: the exam vendors (cloudflare, pagerduty, sentry); the 10 locked vendors (rwxmap `docs/logs/pre-registered-split-2026-09-18.md`); the 19 `exam_opkey_overlap` rows; every op already in any v3 truth set (combined-2026-09-21, relabel-buildset-2026-09-23); HEAD, OPTIONS, TRACE and other methods.
+3. Stratified: roughly proportional by method across GET/POST/PUT/PATCH, with at least 100 GET and 100 PUT/PATCH; no vendor above 5% of the sample; one row per op key (provider+method+path+operationId).
+4. Two blind Claude workers label `blind.csv` under BRIEF-v3 (`data/gate-2026-11-03/BRIEF-v3.md`). They see no mechanical letter, no Jev p. The user rules disputes.
+5. The sample is used ONCE, as the label gate. It is never used for tuning, model selection or any repeat scoring.
+6. Every APIs.guru snapshot of a sampled op key is excluded from training and tuning (`data/gate-2026-11-03/ids.txt`).
+
+Hand labels outside the exam vendors may also enter training, with extra weight, only if labelled under BRIEF-v3.
+
+**Training before the gate.** Training setup (tooling, features, baselines) proceeds in parallel with labelling. Nothing is scored on the exam until the label gate passes.
 
 ### Exam isolation
 
@@ -109,7 +127,11 @@ Exam providers (cloudflare, pagerduty, sentry) are excluded from all training an
 
 ### Thresholds
 
-rwxlite tunes its own thresholds per tier, by leave-one-vendor-out on non-exam data. The exam is never used for tuning.
+rwxlite tunes its own thresholds per tier, on BRIEF-v3 truth only, by leave-one-vendor-out on non-exam data. The exam is never used for tuning.
+
+**Rule: global budget.** Maximise exact subject to TOTAL too-loose across all tiers being no worse than mechanical alone. The budget is shared across tiers, not per tier. Judged leave-one-vendor-out.
+
+**Starting cuts** (a starting point for the sweep, not final): lower 0.20, raise-wx 0.60, raise-get 0.20.
 
 ## Go / no-go (module 0)
 
@@ -162,11 +184,12 @@ Only module 0 is sharp. The rest are sketches.
 
 - Easy-case bias: train on Jev's p for all rows; agreement is a report, not a filter.
 - $50 Jev cap: confirmed.
-- Thresholds: rwxlite tunes its own.
+- Thresholds: rwxlite tunes its own, under the global-budget rule (round 5).
+- Round 5: BRIEF-v3 only; DELETE mechanical; fresh-sample gate used once; model/format decisions recorded above.
 
 ## Open questions
 
-- **Which small encoder.** The first run decides.
+- **Which small encoder.** all-MiniLM-L6-v2 first, bge-small-en-v1.5 second, TF-IDF + LR as baseline; the bars decide.
 - **Model string.** What exact string rwxlite returns in `{p, model}`, and how it is versioned. rwxmap records the model string on every moved verdict (D88), so it must change whenever the weights change.
 - **Licence.** Match rwxmap (Apache 2.0)? Not decided.
 - **Distribution form.** npm package with the ONNX file, or a separate download. Decided in M1.
