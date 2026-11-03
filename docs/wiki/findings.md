@@ -140,3 +140,81 @@ On the gate rows that Jev was asked about, p alone at a 0.5 cut, as a yes/no: GE
 2. Gate wording: "at least 95% correct against the hand labels" cannot be met at all by mechanical (84.8% on pile rows) or by Jev moves (87.6%). The contract needs either a different measure (for example, "labels no worse than mechanical on too-loose, and better on exact, per tier") or a decision to fix the lower tier first.
 3. Lower tier: Jev's isX under 0.10 on POST is wrong more often than right on the hand labels at rwxmap's cut. Propose the first model does not train the lower move from Jev p alone (keep mechanical x unless p under 0.03), or the lower tier gets a re-check on the full hand-labelled POST rows.
 4. The PRD's tuning rule "leave-one-vendor-out, minimise too-loose first" collapses to "never move"; proposed wording: "maximise exact subject to too-loose no worse than mechanical".
+
+## 2026-11-03: M0 step 3b, gate re-scored on BRIEF-v3 labels
+
+Source: `node m0/parity.mjs --truth v3` (no network, no paid calls), output `data/m0/parity-report-v3.json` (gitignored). The v1 run (`node m0/parity.mjs`) is unchanged and byte-identical to before. Exam `data/exam-2026-09-22` never read.
+
+### What the v1 mismatch was
+
+Step 3 scored against `data/corpus/labelled.csv` (2026-09-16) and the calibration-2026-09-14 labels, both made under rwxmap's BRIEF v1. The exam and Jev's questions follow BRIEF-v3 (D87, adopted 2026-09-22; amended by D98), where DELETE is x (except trash/recoverable wording) and plain POST creates are w. v3 is bidirectional against v1: rwxmap moved 777 of 803 DELETE rows w to x and 930 POST rows x to w on the combined set, and 943 of 1,819 buildset rows (51.8%). So step 3's 70%-w DELETE "failure" and its "Jev lowers the wrong POST rows" were a standard mismatch, not a classifier fault.
+
+### v3 truth source (reused, not rebuilt)
+
+rwxmap already assembled it. Two flat files, both TUNING DATA (D24):
+- `data/combined-2026-09-21/labelled.csv` (`tools/make-combined-labelled.js`): 6,557 rows, 23 providers. v1 r labels stand; each non-r row takes its BRIEF-v3 label from nine blind labellers (`data/relabel-2026-09-22/label/labels-*.csv`), with `rulings.csv` (4 abstentions ruled x) overriding. Practice/holdback calibration rows are inside it. Sources: `pc-` tuning corpus, `x17-`/`x20-` burned exams. Per rwxmap's README no number over these rows is a generalization claim.
+- `data/relabel-buildset-2026-09-23/labelled.csv` (`tools/make-buildset-v3-labelled.js`): 1,819 rows, 13 APIs.guru vendors (github, microsoft, gitea, appcenter, netbox, clearblade, keycloak, atlassian, dracoon, trello, box, gitlab, launchdarkly), relabelled under v3 (D97), D98 comment/reaction correction already applied (w 1,130 / x 646 / r 43). Also tuning data: step 2's word lists were mined on it.
+- No other v3-standard non-exam labels exist in rwxmap (the exam-2026-09-22 labels are the burned exam; not read). Both files are single-labeller-per-row; there is no second labeller outside the 200-row calibration draws, so label noise is unmeasured here (391 combined and the buildset's low-confidence rows are flagged; dropping them is the `high_confidence_only` set in the JSON).
+
+### Join
+
+Key: provider + method + path + operationId against `mechanical.jsonl.gz`. The combined set uses bare vendor names, so an explicit map was used (stripe.com, squareup.com, zoom.us, jira.local, ...); buildset vendors match by bare name.
+- 8,376 truth rows, 3,724 joined (44.5%): buildset 1,819 of 1,819, combined 1,905 of 6,557.
+- Unjoined combined rows: 1,995 are vendors not in the APIs.guru corpus at all (paypal, mailchimp, datadog, intercom, canva, figma, auth0, hubspot, klaviyo, miro, zendesk); 2,657 are vendors present where the operation is absent (official spec vs APIs.guru snapshot differ in path/operationId; jira 0 of 610, okta 2 of 734, openai 17 of 346, stripe 441 of 594, ...).
+- 3,724 truth rows map to 5,716 mechanical rows because APIs.guru holds several snapshots/versions of the same operation (316 keys joined to 2+ rows, e.g. github). All 5,716 are scored. No mechanical row matched two truth rows.
+- Asserted: zero rows from cloudflare, pagerduty, sentry, nor the other 7 locked vendors (auth0, hubspot, zendesk, miro, dropbox, shopify, linear); none of them exist in the mechanical file. `exam` flag false on all; 1 row dropped for `exam_opkey_overlap`. Docusign/okta/xero (burned exam x17) and asana..zoom (tuning corpus) are included as tuning data, as the relabel README allows.
+- Gate composition: 5,716 rows = buildset 3,726 + combined 1,990 (pc- 1,380, burned x17/x20 610); 375 of them were also in the v1 gate. Tiers: lower 1,641, raise-wx 1,486, raise-get 959, no pile 1,630 (of which DELETE 1,364). It is write-heavy and github/microsoft-heavy, not a random sample of the corpus.
+
+### Sanity check
+
+Mechanical alone: 76.3% exact / 1.3% too loose / 22.3% too tight (v1 labels: 55.5%). Closer to the exam's 82.3 / 0.8 / 16.9 but not equal, for identifiable reasons: DELETE is now 99.3% exact (v1: 24.7%); by source mechanical is buildset 72.7%, pc- 80.9%, burned x17/x20 88.2%. The buildset (65% of rows) is where step 2's lists were mined against v1 labels that v3 then changed on 51.8% of rows, and POST floor-post is x in mechanical but w in 71% of v3 truth (24.3% exact). Nothing indicates a join or scoring bug.
+
+### Verdict: the 95% gate still FAILS on honest numbers, but narrowly, and the cause is now tuning, not labels
+
+| Labels | Rows | Exact | Too loose | Too tight |
+|---|---|---|---|---|
+| mechanical alone | 5,716 | 76.3% | 1.3% | 22.3% |
+| mechanical + Jev, rwxmap cuts (0.10 / 0.80 / 0.50) | 5,716 | 92.6% | 1.3% | 6.1% |
+| tuned, per-tier budget rule (0.03 / 0.60 / 0.20) | 5,716 | 77.2% | 0.4% | 22.4% |
+| tuned, rwxmap's min-too-loose rule (0.03 / 0.50 / 0.20) | 5,716 | 76.6% | 0.3% | 23.1% |
+| tuned, global budget (0.20 / 0.60 / 0.20), in sample | 5,716 | 95.5% | 1.2% | 3.3% |
+| same, leave-one-vendor-out (23 vendors) | 5,716 | 94.0% | 0.9% | 5.0% |
+
+- Per-tier budget rule degenerates: mechanical's lower tier has 0 too-loose rows under v3, so "no worse than mechanical" forces lower to 0.03 (switched off). A budget on total too-loose across the three cuts (max exact s.t. total too-loose at most mechanical's 77) gives lower 0.20. Both are reported; the global one is the sensible reading but is a new rule (see proposals). Chosen cuts under LOVO were stable: lower 0.1 to 0.3, raise-wx 0.6, raise-get 0.2.
+- Per tier at rwxmap cuts (exact / loose / tight): lower 80.3 / 0.5 / 19.2 (n 1,641; mechanical 24.3 / 0 / 75.7); raise-wx 95.9 / 4.0 / 0.1 (n 1,486; mechanical 95.2 / 4.8 / 0.1); raise-get 100 / 0 / 0 (n 959); no pile 97.7 / 0.4 / 2.0 (n 1,630). At the global-budget cuts: lower 88.0 / 2.7 / 9.3, raise-wx 98.4 / 1.2 / 0.4.
+- DELETE vs non-DELETE (rwxmap cuts): DELETE 99.3% exact (1,364 rows, all kept mechanical x; 9 of them truth w). Non-DELETE 90.5 / 1.7 / 7.8 (mechanical alone 69.1). Pile-only rows (4,086): mechanical 67.8, rwxmap 90.6 / 1.6 / 7.8, global-budget 94.6 / 1.5 / 3.9. DELETE no longer needs Jev.
+- Mode (b), p alone at 0.5, reported only: GET changes 100% (959); PUT/PATCH isX 95.8% (1,503; mechanical letter 94.5%); POST isX 91.9% (1,890; mechanical letter 33.3%). Under v1 labels this was 46.9% for POST.
+- Sweeps: lower tier exact peaks at cut about 0.30 (1,467 of 1,641 exact, 58 loose); 0.10 gives 1,318 / 8 loose. raise-get cuts change nothing (all 959 are r). raise-wx best at 0.60 (1,462 exact, 18 loose, 6 tight).
+
+### Is the lower tier weak? No, the v1 labels made it look weak
+
+Jev says not-x (p under 0.5) on 1,360 of 1,641 POST floor-post rows (83%); v3 truth is x on only 399 (24%), w 1,165, r 77. So Jev's not-x is right: it agrees with v3 on 1,231 of the 1,242 non-x rows. It misses 129 of 399 true-x rows (32%). At rwxmap's 0.10 cut it lowers 31 true-x rows wrongly and leaves 315 w/r rows at x (p between 0.10 and 0.5), the 19.2% too tight. The fix is a higher lower cut (0.2 to 0.3), at the price of more too-loose (rwxmap's own range).
+
+Lower-tier misses, 10 examples at global-budget cuts (lower 0.20), mechanical x/floor-post:
+- appcenter POST `.../analytics/audiences/definition/test`, no summary, p 0.09 (lowered to w), truth r
+- asana POST `/webhooks` "Establish a webhook", p 0.23 (kept x), truth w
+- digitalocean POST `/v2/apps/{app_id}/rollback/revert` "Revert App Rollback", p 0.145 (lowered), truth x
+- dracoon POST `/v4/nodes/rooms/{room_id}/keypairs` "Create key pair and preserve copy of old private key", p 0.23, truth w
+- github POST `/repos/{owner}/{repo}/transfer` "Transfer a repository", p 0.18 (lowered), truth x (two snapshots)
+- github POST `/applications/{client_id}/token` "Check a token", p 0.125 (lowered to w), truth r
+- microsoft POST `/devices/{device-id}/microsoft.graph.getMemberObjects` "Invoke action getMemberObjects", p 0.05, truth r
+- microsoft POST `.../calendarView/{event-id}/instances/.../tentativelyAccept` "Invoke action tentativelyAccept", p 0.14 (lowered), truth x
+- spotify POST `/me/player/next` "Skip To Next", p 0.345 (kept x), truth w
+- Also from the rwxmap-cut list: asana POST `/tasks/{task_gid}/stories` "Create a story on a task" p 0.04, squareup `/v2/cards/{card_id}/disable` p 0.08, stripe POST `/v1/payment_intents` (no summary) p 0.09, all truth x, all lowered wrongly.
+The true-x misses are sends/transfers/state actions with ordinary-sounding create/invoke summaries; the r and w misses are check/read-by-POST and plain creates. This is the lowering error band, not a systematic failure.
+
+### Caveats
+
+- Everything here is tuning data (including burned exams x17-/x20-); no number is a generalization claim. In particular the cuts are tuned and scored on the same 5,716 rows; LOVO is the honest estimate (94.0 / 0.9).
+- Rows are write-heavy: the buildset has no GETs, and 24% of the gate is DELETE at 99% exact, which lifts every overall number. Pile-only and non-DELETE rows are the harder measure (90.6 and 90.5 at rwxmap cuts, 94.6 and 94.3 at the global-budget cuts).
+- Single labeller per row; v3 truth has its own noise (391 low-confidence combined rows, an unknown count in the buildset). The 316 duplicate APIs.guru snapshots weight github-type operations more than once.
+- Whole-corpus parity numbers (58.7% of lower-tier rows at p under 0.10) from step 3 stand; they are label-independent. What changes is their reading: Jev disagrees with mechanical x there because v3 truth is mostly w.
+
+### Proposed PRD contract changes (PRD not edited)
+
+1. Label standard: state that gate/tuning labels are BRIEF-v3 (D87 + D98) and name the source files above. v1 labels must not be used for the gate.
+2. DELETE: keep "skip Jev, keep mechanical x". Under v3 it is 99.3% exact on 1,364 rows. Drop the step-3 option of asking Jev about DELETE.
+3. Gate wording: measure on non-DELETE (or pile-only) rows and report overall too; require 95% exact with total too-loose no worse than mechanical's, judged on leave-one-vendor-out, not in-sample. Current best LOVO is 94.0%, so either more tuning/labels or a 94% bar is needed, a user call.
+4. Tuning rule: replace "leave-one-vendor-out, minimise too-loose first" (collapses to never move) and the per-tier budget (collapses to lower 0.03 when a tier's mechanical too-loose is 0) with "max exact subject to total too-loose across all tiers no worse than mechanical alone". Starting cuts: lower 0.20, raise-wx 0.60, raise-get 0.20 (or keep raise-get off; it changes nothing on this set).
+5. Lower tier: keep it, with its cut near 0.20 (not 0.10); do not drop it. The v1-based proposal to keep mechanical x unless p under 0.03 should be withdrawn.
+6. Add a note that the gate set is tuning data with 65% buildset rows and duplicate snapshots; a fresh v3-labelled sample drawn from the full APIs.guru corpus (non-DELETE, stratified by tier) would give an honest gate.
