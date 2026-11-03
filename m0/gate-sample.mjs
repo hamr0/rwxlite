@@ -1,6 +1,7 @@
 // Draws the fresh BRIEF-v3 label-gate sample (blind). Deterministic: same seed + same inputs -> same files.
 //   node m0/gate-sample.mjs           -> data/gate-2026-11-03/{blind.csv,ids.txt,README.md}   (gate-1, seed 20261103)
 //   node m0/gate-sample.mjs --gate 3  -> data/gate-2026-11-06/ (gate-3 for rwxmap F2: credential stratum 200 + general 600, seed 20261106; see block below)
+//   node m0/gate-sample.mjs --gate 4  -> data/gate-2026-11-07/ (gate-4 for rwxmap: write stratum 200 pure seeded random + general 600, seed 20261107)
 //   node m0/gate-sample.mjs --gate 2  -> data/gate-2026-11-04/{blind.csv,ids.txt,README.md,providers.txt}   (gate-2, seed 20261104)
 // Gate-2 additionally excludes every op key in gate-1's ids.txt (all snapshots).
 // No network. Reads data/m0/mechanical.jsonl.gz and rwxmap truth sets in place (never written).
@@ -14,11 +15,12 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const GATEARG = process.argv.includes('--gate') ? process.argv[process.argv.indexOf('--gate') + 1] : '1';
 const GATE2 = GATEARG === '2';
 const GATE3 = GATEARG === '3';
-const DIR = GATE3 ? 'gate-2026-11-06' : GATE2 ? 'gate-2026-11-04' : 'gate-2026-11-03';
+const GATE4 = GATEARG === '4';
+const DIR = GATE4 ? 'gate-2026-11-07' : GATE3 ? 'gate-2026-11-06' : GATE2 ? 'gate-2026-11-04' : 'gate-2026-11-03';
 const OUT = path.join(HERE, '..', 'data', DIR);
 const RWXMAP = process.env.RWXMAP_DIR || path.resolve(HERE, '..', '..', 'rwxmap');
 const D = (...p) => path.join(RWXMAP, 'data', ...p);
-const SEED = GATE3 ? 20261106 : GATE2 ? 20261104 : 20261103;
+const SEED = GATE4 ? 20261107 : GATE3 ? 20261106 : GATE2 ? 20261104 : 20261103;
 const GATE1_IDS = GATE2 ? new Set(fs.readFileSync(path.join(HERE, '..', 'data', 'gate-2026-11-03', 'ids.txt'), 'utf8').split('\n').filter(Boolean)) : new Set();
 const N = 600, MIN_GET = 100, MIN_PUTPATCH = 100, VENDOR_CAP = Math.floor(N * 0.05);
 const EXAM_AND_LOCKED = ['cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot', 'zendesk', 'miro', 'dropbox', 'shopify', 'linear'];
@@ -203,6 +205,129 @@ Replaced ids: ${swaps.map((w) => w.id).join(', ')}.
 Exclude providers whose whole domain label is in: adyen appcenter atlassian azure box clearblade dracoon gitea github gitlab jira keycloak linode microsoft netbox notion openai slack trello twilio vercel whatsapp xero zoom.
 `);
   console.log(JSON.stringify({ x3, eligible: el.length, credAvail, genAvail, ppN, cm_cred: cm('cred'), cm_gen: cm('general'), topCred: cv('cred').slice(0, 6), topGen: cv('general').slice(0, 6), ids: ids3.length, providers: new Set(rows3.map(({ e }) => e.row.provider)).size }));
+  process.exit(0);
+}
+
+if (GATE4) {
+  const readIds = (d) => new Set(fs.readFileSync(path.join(HERE, '..', 'data', d, 'ids.txt'), 'utf8').split('\n').filter(Boolean));
+  const PRIOR = new Set([...readIds('gate-2026-11-03'), ...readIds('gate-2026-11-04'), ...readIds('gate-2026-11-06')]);
+  const x4 = { op_keys_total: groups.size, by_name: 0, exam_opkey_overlap: 0, prior_gates: 0, in_v3_truth: 0, delete: 0, head_options_trace_other: 0 };
+  const droppedLabel = {}; // brand label -> op keys dropped by name
+  const el = [];
+  for (const [k, rs] of groups) {
+    const r = rs[0]; const m = r.method.toUpperCase(); const ok = opKey(r.method, r.path, r.operationId);
+    if (byName(r.provider)) { x4.by_name++; const l = String(r.provider).toLowerCase().split(/[.:]/).find((q) => BURNED_NAMES.includes(q)); droppedLabel[`${r.provider} [${l}]`] = (droppedLabel[`${r.provider} [${l}]`] || 0) + 1; continue; }
+    if (rs.some((x) => x.exam_opkey_overlap || x.exam)) { x4.exam_opkey_overlap++; continue; }
+    if (rs.some((x) => PRIOR.has(x.id))) { x4.prior_gates++; continue; }
+    if (truthKeys.has(`${r.provider}|${ok}`) || truthKeys.has(`vendor:${r.vendor}|${ok}`)) { x4.in_v3_truth++; continue; }
+    if (m === 'DELETE') { x4.delete++; continue; }
+    if (!SAMPLED.includes(m)) { x4.head_options_trace_other++; continue; }
+    el.push({ key: k, rows: rs, row: r, method: m, vendor: r.vendor });
+  }
+  el.sort((a, b) => (a.key < b.key ? -1 : 1));
+  const rnd = mulberry32(SEED);
+  // Part 1, write stratum: pure seeded random over POST/PUT/PATCH, no word/regex filter. Vendor cap 10.
+  const wPool = shuffle(el.filter((e) => ['POST', 'PUT', 'PATCH'].includes(e.method)), rnd);
+  const wAvail = Object.fromEntries(['POST', 'PUT', 'PATCH'].map((m) => [m, wPool.filter((e) => e.method === m).length]));
+  const WQ = { POST: 100, PUT: 50, PATCH: 50 };
+  const wr = []; const wV = {}; const wM = {};
+  for (const e of wPool) { if ((wM[e.method] || 0) >= WQ[e.method] || (wV[e.vendor] || 0) >= 10) continue; wr.push(e); wM[e.method] = (wM[e.method] || 0) + 1; wV[e.vendor] = (wV[e.vendor] || 0) + 1; }
+  const wrKeys = new Set(wr.map((e) => e.key));
+  const genPool = shuffle(el.filter((e) => !wrKeys.has(e.key)), rnd);
+  const genAvail = Object.fromEntries(SAMPLED.map((m) => [m, genPool.filter((e) => e.method === m).length]));
+  const GQ = { GET: 325, POST: 175, PUT: 50, PATCH: 50 };
+  const gen = []; const gV = {}; const gM = {};
+  for (const e of genPool) { if ((gM[e.method] || 0) >= GQ[e.method] || (gV[e.vendor] || 0) >= 30) continue; gen.push(e); gM[e.method] = (gM[e.method] || 0) + 1; gV[e.vendor] = (gV[e.vendor] || 0) + 1; }
+  for (const m of SAMPLED) if (gM[m] !== GQ[m]) throw new Error('general quota short ' + m);
+  for (const m of Object.keys(WQ)) if (wM[m] !== WQ[m]) throw new Error('write quota short ' + m);
+  const all = shuffle([...wr.map((e) => ({ e, part: 'write' })), ...gen.map((e) => ({ e, part: 'general' }))], rnd);
+  const rows4 = all.map((x, i) => ({ id: `gate4-${String(i + 1).padStart(4, '0')}`, ...x }));
+  // ---- assertions ----
+  const keys4 = rows4.map((x) => x.e.key);
+  const a = { rows: rows4.length, unique_op_keys: new Set(keys4).size, burned_name_rows: 0, prior_gate_rows: 0, truth_rows: 0, exam_rows: 0, delete_or_other: 0, write_in_general_overlap: 0 };
+  for (const { e } of rows4) {
+    if (byName(e.row.provider)) a.burned_name_rows++;
+    if (e.rows.some((x) => PRIOR.has(x.id))) a.prior_gate_rows++;
+    if (truthKeys.has(`${e.row.provider}|${opKey(e.row.method, e.row.path, e.row.operationId)}`) || truthKeys.has(`vendor:${e.vendor}|${opKey(e.row.method, e.row.path, e.row.operationId)}`)) a.truth_rows++;
+    if (e.rows.some((x) => x.exam || x.exam_opkey_overlap)) a.exam_rows++;
+    if (!SAMPLED.includes(e.method)) a.delete_or_other++;
+  }
+  a.write_in_general_overlap = gen.filter((e) => wrKeys.has(e.key)).length;
+  if (a.rows !== 800 || a.unique_op_keys !== 800 || a.burned_name_rows || a.prior_gate_rows || a.truth_rows || a.exam_rows || a.delete_or_other || a.write_in_general_overlap) throw new Error('assertion failed ' + JSON.stringify(a));
+  fs.mkdirSync(OUT, { recursive: true });
+  const H4 = ['id', 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
+  fs.writeFileSync(path.join(OUT, 'blind.csv'), [H4.join(','), ...rows4.map(({ id, e }) => [id, e.row.provider, e.row.method, e.row.path, e.row.operationId, e.row.summary, e.row.description].map(csvCell).join(','))].join('\n') + '\n');
+  fs.writeFileSync(path.join(OUT, 'part.csv'), ['id,part', ...rows4.map(({ id, part }) => `${id},${part}`)].join('\n') + '\n');
+  const ids4 = rows4.flatMap(({ e }) => e.rows.map((r) => r.id)).sort();
+  fs.writeFileSync(path.join(OUT, 'ids.txt'), ids4.join('\n') + '\n');
+  const provCount = {}; for (const { e } of rows4) provCount[e.row.provider] = (provCount[e.row.provider] || 0) + 1;
+  fs.writeFileSync(path.join(OUT, 'providers.txt'), Object.keys(provCount).sort().join('\n') + '\n');
+  fs.copyFileSync(path.join(HERE, '..', 'data', 'gate-2026-11-06', 'BRIEF-v3.md'), path.join(OUT, 'BRIEF-v3.md'));
+  const cm = (part) => { const m = {}; for (const x of rows4) if (x.part === part) m[x.e.method] = (m[x.e.method] || 0) + 1; return m; };
+  const cv = (part) => { const m = {}; for (const x of rows4) if (x.part === part) m[x.e.vendor] = (m[x.e.vendor] || 0) + 1; return Object.entries(m).sort((p, q) => q[1] - p[1] || (p[0] < q[0] ? -1 : 1)); };
+  const tbl = (o) => Object.entries(o).map(([k, v]) => `| ${k} | ${v} |`).join('\n');
+  fs.writeFileSync(path.join(OUT, 'README.md'), `# data/${DIR} — gate-4 sample for rwxmap (general + write stratum), blind
+
+## Purpose
+
+800 operations drawn from the 123k APIs.guru ops (\`data/m0/mechanical.jsonl.gz\`) as an rwxmap exam set: 600 general rows plus a 200-row write stratum. This is an rwxmap exam, NOT an rwxlite exam: rwxlite's MiniLM was trained on these rows, so scoring rwxlite on them would be contaminated.
+
+**Used ONCE.** Never used for tuning, threshold sweeps, model selection or repeated scoring.
+
+## Files
+
+- \`blind.csv\`: ${H4.join(', ')}. 800 rows, ids gate4-0001..0800 assigned after one seeded shuffle of all 800, so write-stratum rows are indistinguishable from general rows.
+- \`part.csv\`: id,part (write|general). This is the KEY saying which part a row is in. **Labellers must never see part.csv.**
+- \`ids.txt\`: ${ids4.length} \`ag-\` row ids = the 800 sampled rows PLUS every APIs.guru snapshot sharing their op key (provider+method+path+operationId). Training exclusion list.
+- \`providers.txt\`: sorted provider list (${Object.keys(provCount).length}).
+- \`BRIEF-v3.md\`: byte copy of gate-3's (unchanged).
+
+## Draw
+
+**Seed ${SEED}** (mulberry32), one rng stream: shuffle of the write pool, shuffle of the general pool, then the final shuffle of all 800. Reproduce: \`node m0/gate-sample.mjs --gate 4\`.
+Unit = op key (provider+method+path+operationId); one row per op key (first snapshot's text).
+
+Eligibility (both parts): exclude op keys in data/gate-2026-11-03, -04 and -06 ids.txt (gates 1-3, any snapshot); ops in rwxmap combined-2026-09-21 and relabel-buildset-2026-09-23; exam / exam_opkey_overlap rows; HEAD/OPTIONS/TRACE; DELETE; and by whole domain label (split on "." and ":") ${BURNED_NAMES.join(' ')}.
+
+Part 1, write stratum (200): POST 100 / PUT 50 / PATCH 50, pure seeded random draw over eligible POST/PUT/PATCH ops. NO word or regex filter of any kind. Vendor cap 10 per vendor across the stratum.
+
+Part 2, general (600), drawn after and never sharing an op key with Part 1: GET 325 / POST 175 / PUT 50 / PATCH 50, vendor cap 30. Vendor = first dotted token of provider.
+
+## Exclusion counts (op keys)
+
+Total ${x4.op_keys_total}. by-name ${x4.by_name}; exam/exam_opkey_overlap ${x4.exam_opkey_overlap}; prior gates ${x4.prior_gates}; v3 truth ${x4.in_v3_truth}; DELETE ${x4.delete}; HEAD/OPTIONS/TRACE/other ${x4.head_options_trace_other}. Eligible ${el.length}. (Counts are sequential, in that order.)
+
+Assertions run in code on the final 800 (all passed): ${JSON.stringify(a)}.
+
+By-name drops (provider [matched label]: op keys): ${Object.entries(droppedLabel).map(([k, v]) => `${k}: ${v}`).join('; ')}. hubapi.com is HubSpot. No other alias domain of a locked or exam vendor exists in the provider list (checked for the 10 locked names, okta/docusign/xero/klaviyo, hubapi, zdassets, zopim, and substring matches).
+
+## Pool sizes
+
+Write-eligible: ${Object.entries(wAvail).map(([k, v]) => `${k} ${v}`).join(', ')}. General pool (eligible minus stratum draw): ${Object.entries(genAvail).map(([k, v]) => `${k} ${v}`).join(', ')}.
+
+## Counts
+
+Write part:
+
+| method | n |
+|---|---|
+${tbl(cm('write'))}
+
+General part:
+
+| method | n |
+|---|---|
+${tbl(cm('general'))}
+
+Top vendors, write: ${cv('write').slice(0, 8).map(([k, v]) => `${k} ${v}`).join(', ')}.
+Top vendors, general: ${cv('general').slice(0, 8).map(([k, v]) => `${k} ${v}`).join(', ')}.
+
+## Status
+
+Unlabelled. Labelling is a separate step.
+`);
+  console.log(JSON.stringify({ x4, eligible: el.length, droppedLabel, assertions: a, wAvail, genAvail, cm_write: cm('write'), cm_gen: cm('general'), ids: ids4.length }));
+  console.log('PROVIDERS\n' + Object.entries(provCount).sort((p, q) => q[1] - p[1] || (p[0] < q[0] ? -1 : 1)).map(([k, v]) => `${k} ${v}`).join('\n'));
   process.exit(0);
 }
 
