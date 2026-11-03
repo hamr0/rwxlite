@@ -39,6 +39,7 @@ resend), each in spec document order, then shuffled once with Python
 `random.Random(20261110).shuffle`; ids fx-0001..fx-0949 follow the shuffled order. Text is
 taken from the operation object only (no refs resolved), newlines collapsed to spaces.
 No op key (provider+method+path) occurs in data/m0/mechanical.jsonl.gz (0 overlap).
+On a fresh clone the script rebuilds from the committed pinned copies in `specs/` (each file's sha256 is checked against its `<vendor>.META.json`, exit 1 on mismatch) and writes a byte-identical ops.csv; the overlap check above runs only where the gitignored data/m0/mechanical.jsonl.gz exists, otherwise it prints a skip line.
 
 ## Labelling (frozen 2026-11-03)
 
