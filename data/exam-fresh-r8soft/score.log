@@ -1,0 +1,37 @@
+GONOGO_lba097      right 810 (92.57% ans, 85.35% all)  loose 5 (0.57%)  tight 60 (6.86%)  asked 74 (7.8%; held R/L/T 60/13/1)
+a_none             right 870 (91.68% ans, 91.68% all)  loose 18 (1.9%)  tight 61 (6.43%)  asked 0 (0.0%; held R/L/T 0/0/0)
+a_mta095           right 840 (89.27% ans, 88.51% all)  loose 6 (0.64%)  tight 95 (10.1%)  asked 8 (0.84%; held R/L/T 1/1/6)
+a_askalllower      right 718 (91.7% ans, 75.66% all)  loose 5 (0.64%)  tight 60 (7.66%)  asked 166 (17.49%; held R/L/T 152/13/1)
+a_lba095_mta095    right 829 (93.25% ans, 87.36% all)  loose 6 (0.67%)  tight 54 (6.07%)  asked 60 (6.32%; held R/L/T 41/12/7)
+a_lba095           right 830 (92.53% ans, 87.46% all)  loose 7 (0.78%)  tight 60 (6.69%)  asked 52 (5.48%; held R/L/T 40/11/1)
+a_lba099           right 718 (91.7% ans, 75.66% all)  loose 5 (0.64%)  tight 60 (7.66%)  asked 166 (17.49%; held R/L/T 152/13/1)
+b_none             right 867 (91.36% ans, 91.36% all)  loose 17 (1.79%)  tight 65 (6.85%)  asked 0 (0.0%; held R/L/T 0/0/0)
+mechanical         right 736 (77.56% ans, 77.56% all)  loose 6 (0.63%)  tight 207 (21.81%)  asked 0 (0.0%; held R/L/T 0/0/0)
+moves {'lowering': {'n': 166, 'right': 152, 'loose': 13, 'tight': 1}, 'raise': {'n': 9, 'right': 1, 'loose': 2, 'tight': 6}, 'keep': {'n': 774, 'right': 717, 'loose': 3, 'tight': 54}}
+loose types {'loweredWrongly': 0, 'keepMechLoose': 3, 'raiseStillLoose': 2}
+--- GONOGO by_vendor
+  coolify.io   right 279 (95.88% ans, 86.92% all)  loose 1 (0.34%)  tight 11 (3.78%)  asked 30 (9.35%; held R/L/T 25/5/0)
+  getlago.com  right 183 (91.5% ans, 84.33% all)  loose 0 (0.0%)  tight 17 (8.5%)  asked 17 (7.83%; held R/L/T 12/5/0)
+  resend.com   right 130 (97.01% ans, 91.55% all)  loose 0 (0.0%)  tight 4 (2.99%)  asked 8 (5.63%; held R/L/T 7/1/0)
+  workos.com   right 218 (87.2% ans, 81.04% all)  loose 4 (1.6%)  tight 28 (11.2%)  asked 19 (7.06%; held R/L/T 16/2/1)
+--- GONOGO by_method
+  DELETE       right 135 (99.26% ans, 99.26% all)  loose 0 (0.0%)  tight 1 (0.74%)  asked 0 (0.0%; held R/L/T 0/0/0)
+  GET          right 378 (98.69% ans, 98.69% all)  loose 2 (0.52%)  tight 3 (0.78%)  asked 0 (0.0%; held R/L/T 0/0/0)
+  PATCH        right 79 (92.94% ans, 92.94% all)  loose 1 (1.18%)  tight 5 (5.88%)  asked 0 (0.0%; held R/L/T 0/0/0)
+  POST         right 167 (77.31% ans, 57.59% all)  loose 0 (0.0%)  tight 49 (22.69%)  asked 74 (25.52%; held R/L/T 60/13/1)
+  PUT          right 51 (92.73% ans, 92.73% all)  loose 2 (3.64%)  tight 2 (3.64%)  asked 0 (0.0%; held R/L/T 0/0/0)
+--- GONOGO by_tier
+  lower        right 138 (75.41% ans, 53.7% all)  loose 0 (0.0%)  tight 45 (24.59%)  asked 74 (28.79%; held R/L/T 60/13/1)
+  none         right 165 (94.83% ans, 94.83% all)  loose 0 (0.0%)  tight 9 (5.17%)  asked 0 (0.0%; held R/L/T 0/0/0)
+  raise-get    right 378 (98.69% ans, 98.69% all)  loose 2 (0.52%)  tight 3 (0.78%)  asked 0 (0.0%; held R/L/T 0/0/0)
+  raise-wx     right 129 (95.56% ans, 95.56% all)  loose 3 (2.22%)  tight 3 (2.22%)  asked 0 (0.0%; held R/L/T 0/0/0)
+--- GONOGO by_move
+  keep         right 717 (92.64% ans, 92.64% all)  loose 3 (0.39%)  tight 54 (6.98%)  asked 0 (0.0%; held R/L/T 0/0/0)
+  lowering     right 92 (100.0% ans, 55.42% all)  loose 0 (0.0%)  tight 0 (0.0%)  asked 74 (44.58%; held R/L/T 60/13/1)
+  raise        right 1 (11.11% ans, 11.11% all)  loose 2 (22.22%)  tight 6 (66.67%)  asked 0 (0.0%; held R/L/T 0/0/0)
+LOOSE {"id": "fx-0249", "type": "raiseStillLoose", "vendor": "workos.com", "method": "GET", "path": "/sso/logout", "operationId": "SsoController_logout", "summary": "Logout Redirect", "mech": "r", "mech_rule": "r/method", "model": "w", "max_p": 0.965808, "p": [0.033787, 0.965808, 0.000405], "truth": "x"}
+LOOSE {"id": "fx-0354", "type": "keepMechLoose", "vendor": "workos.com", "method": "PUT", "path": "/data-integrations/{slug}/client-credentials", "operationId": "DataIntegrationsController_upsertClientCredentials", "summary": "Upsert client credentials for a connected account", "mech": "w", "mech_rule": "w/method-floor", "model": "w", "max_p": 0.976722, "p": [0.00029, 0.976722, 0.022988], "truth": "x"}
+LOOSE {"id": "fx-0503", "type": "keepMechLoose", "vendor": "workos.com", "method": "PUT", "path": "/data-integrations/{slug}/api-key", "operationId": "DataIntegrationsController_upsertApiKey", "summary": "Upsert an API key for a connected account", "mech": "w", "mech_rule": "w/method-floor", "model": "w", "max_p": 0.984996, "p": [0.000335, 0.984996, 0.014668], "truth": "x"}
+LOOSE {"id": "fx-0543", "type": "keepMechLoose", "vendor": "coolify.io", "method": "PATCH", "path": "/security/integration-tokens/{uuid}", "operationId": "update-integration-token-by-uuid", "summary": "Update Integration Token", "mech": "w", "mech_rule": "w/method-floor", "model": "w", "max_p": 0.97894, "p": [0.000424, 0.97894, 0.020637], "truth": "x"}
+LOOSE {"id": "fx-0837", "type": "raiseStillLoose", "vendor": "workos.com", "method": "GET", "path": "/user_management/sessions/logout", "operationId": "UserlandSessionsController_logout", "summary": "Logout", "mech": "r", "mech_rule": "r/method", "model": "w", "max_p": 0.935006, "p": [0.064698, 0.935006, 0.000296], "truth": "x"}
+GO/NO-GO {"loose_le_0.5pct": false, "exact_ge_91pct": true, "asked_le_15pct": true, "verdict": "NO-GO", "right_pct": 92.57, "loose_pct": 0.57, "loose_rows": 5, "asked_pct": 7.8}
