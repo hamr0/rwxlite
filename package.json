@@ -1,0 +1,10 @@
+{
+  "name": "rwxlite",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "rwxlite: small local r/w/x classifier (module 0 labelling scripts)",
+  "dependencies": {
+    "rwxmap": "file:../rwxmap"
+  }
+}
