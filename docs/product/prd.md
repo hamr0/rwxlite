@@ -85,6 +85,7 @@ rwxlite has its own small Jev client, copied from rwxmap's `src/jev-client.js` (
 
 - Questions are never taken from rwxmap `src/jev.js` at v0.8.0 or earlier (the shipped raise-wx and raise-get questions were wrong; fixed in a7bc855).
 - State sent to Jev is exactly method, path, operationId, summary, description. The mechanical verdict is never sent.
+- The API key is read from the `RWXMAP_JEV_KEY` environment variable, else from `../rwxmap/.env` (gitignored); it is never printed or logged.
 - Jev's answer is read from `answers.<key>.noul`. The response model string is recorded on every answer.
 
 **Wobble.** Jev gives different answers on repeat calls.
@@ -132,6 +133,8 @@ rwxlite tunes its own thresholds per tier, on BRIEF-v3 truth only, by leave-one-
 **Rule: global budget.** Maximise exact subject to TOTAL too-loose across all tiers being no worse than mechanical alone. The budget is shared across tiers, not per tier. Judged leave-one-vendor-out.
 
 **Starting cuts** (a starting point for the sweep, not final): lower 0.20, raise-wx 0.60, raise-get 0.20.
+
+**Final cuts used on both exams** (r8soft, calibrated with T = 0.844, chosen on all non-exam data): lower 0.30, r cut 0.40, raise-wx 0.15, raise-get 0.05; mode (b) margin 0.6 (findings, "Round 8").
 
 ## Round 6 (signed off 2026-11-03)
 
@@ -319,12 +322,12 @@ Silently keeping the mechanical letter instead of asking costs too-tight rows (1
 
 Only module 0 is sharp. The rest are sketches.
 
-**M0 — Labels + train + score.** This is the go/no-go.
+**M0 — Labels + train + score.** This is the go/no-go. Status 2026-11-03: built and scored, NO-GO twice (exam 1: 36 too loose; fresh exam: 5 too loose, one over the line); next step open. The int8 export was not built, so the scoring below ran in fp32 only.
 - Mechanical pass.
 - Jev pass.
 - Parity, label gate, parity report.
 - Train the small encoder.
-- Score modes (a) and (b), in fp32 and int8, on the exam.
+- Score modes (a) and (b), in fp32 and int8, on the exam (done in fp32 only, on the exam and on the fresh exam; int8 waits for M1).
 
 **M1 — Jev-compatible local answerer.**
 - Export int8 ONNX.
@@ -350,7 +353,7 @@ Only module 0 is sharp. The rest are sketches.
 
 ## Open questions
 
-- **After the M0 NO-GO (2026-11-03).** Options: (1) round 9, a targeted retrain on the two failure shapes (POST creates that move money, start jobs or restore data; credential PUT/PATCH), then a fresh exam; (2) make "ask at p" part of the product and pre-register it as the go/no-go on a fresh exam; (3) accept and move to M1. Any fresh exam needs vendors never used in training; the exam vendors are burned and the remaining locked vendors belong to rwxmap's pre-registered split, so the vendors are agreed with rwxmap first. **Chosen: option 2** (see "Option 2"); the round-9 retrain is skipped. Open: the fresh-exam vendors (asked of rwxmap), and whether bareguard prompts on x (decides what too-tight costs).
+- **After the M0 NO-GO (2026-11-03).** Options: (1) round 9, a targeted retrain on the two failure shapes (POST creates that move money, start jobs or restore data; credential PUT/PATCH), then a fresh exam; (2) make "ask at p" part of the product and pre-register it as the go/no-go on a fresh exam; (3) accept and move to M1. Any fresh exam needs vendors never used in training; the exam vendors are burned and the remaining locked vendors belong to rwxmap's pre-registered split, so the vendors are agreed with rwxmap first. **Chosen: option 2** (see "Option 2"); the round-9 retrain is skipped. The fresh exam has since been run (coolify, workos, lago, resend; NO-GO by one row, see "Fresh exam result"). Still open: what to do about the confident non-lowering mistakes (credential upserts, logouts), which needs a new fresh exam with new vendors, and whether bareguard prompts on x (decides what too-tight costs).
 
 - **Which small encoder.** all-MiniLM-L6-v2 first, bge-small-en-v1.5 second, TF-IDF + LR as baseline; the bars decide.
 - **Model string.** What exact string rwxlite returns in `{p, model}`, and how it is versioned. rwxmap records the model string on every moved verdict (D88), so it must change whenever the weights change.
