@@ -48,6 +48,8 @@ This is a research repo for now. There is nothing to install.
 - Mechanical labels: `node m0/mechanical.mjs`
 - Training: `python3 train/build_dataset.py`, `train/baseline.py`, `train/finetune.py`, `train/tune_cuts.py`
 - Gate scripts for the label exam live in `m0/`.
+- Exams: `node m0/exam-inputs.mjs [fresh]` builds the model inputs, then `python3 train/exam_score.py predict|score` (first exam) or `python3 train/exam_fresh.py predict|score` (fresh exam). The ask-rule measurements are `train/abstain.py`, `train/fallback.py` and `train/lowerflag.py`.
+- These scripts need a sibling checkout of [rwxmap](https://github.com/hamr0/rwxmap) and the trained weights, which are local and not in the repo (`data/train/`); the committed exam inputs, predictions and results are under `data/`.
 
 ## What's inside
 

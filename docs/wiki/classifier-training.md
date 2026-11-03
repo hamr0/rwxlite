@@ -1,6 +1,6 @@
 # How rwxlite's classifier is trained and how it answers
 
-Plain-English notes, written 2026-11-03. Some parts describe the plan rather than what's built: the JSON wrapper is M1 work, and the call shape is a proposal agreed in principle with rwxmap. The contract is in docs/product/prd.md, and measured results are in findings.md.
+Plain-English notes, written 2026-11-03. Some parts describe the plan rather than what's built: the int8 export and the JSON wrapper are M1 work, and the call shape is a proposal agreed in principle with rwxmap. What exists today is the fp32 model (MiniLM r8soft, trained with soft targets), scored on two exams; both missed the go/no-go. The contract is in docs/product/prd.md, and measured results are in findings.md.
 
 ## Part 1: How training works
 
@@ -23,6 +23,8 @@ The model reads it and makes a guess, for example r 10%, w 60%, x 30%.
 ### 3. How it "knows what is right"
 It doesn't know. We tell it. Every row carries the answer from the round-6 recipe, meaning the mechanical rules plus Jev's moves. That answer is the **label**. The model can only become as good as the labels it copies, which is why the labels were first checked against human-labelled fresh samples. Gate-2 passed at 96.5% exact.
 
+From round 8 the target is soft rather than a single letter. Where Jev gave a probability (for example "70% chance this is x"), the row's target is that spread over r, w and x, built from the stored Jev answers (`soft_targets()` in `train/common.py`). Rows with no Jev answer (DELETE, credential rule, rows outside the Jev piles) keep a one-hot target. The loss mixes both: 0.7 x soft cross-entropy + 0.3 x hard cross-entropy against the round-6 letter. Hard labels had pushed p(x) on PUT/PATCH rows to about 0, so no threshold could ever raise the true-x ones; soft targets fixed most of that (too-loose rows 108 to 73 on the practice rows).
+
 ### 4. Measure how wrong the guess was
 A formula called the **loss** (cross-entropy) compares the guess with the label:
 - If the label is x and the model gave x only 30%, the loss is large.
@@ -38,17 +40,17 @@ Each single step is tiny on purpose, so one example can't wreck what the model a
 ### 6. Repeat
 - **A batch:** the model sees about 32 rows at once, averages their losses, and does one weight update. That's one **step**.
 - **An epoch:** one pass over all the training rows (87,657 rows is about 2,740 steps).
-- **Our plan:** 1–2 epochs. More passes risk memorizing the rows instead of learning the pattern.
+- **What we ran:** 1 epoch (2,740 steps, about 50 minutes on the home server). More passes risk memorizing the rows instead of learning the pattern.
 
 ### 7. Check on rows it has never seen
 About 10% of vendors are held out of training. After training, we score the model on them:
 - **If it does well,** it has learned the pattern.
 - **If it does well on training rows but badly on held-out vendors,** it has memorized, which is called **overfitting**.
 
-The final test is a single, one-time score on rwxmap's 2026-09-22 exam (ruling D128).
+The final test is a single, one-time score on rwxmap's 2026-09-22 exam (ruling D128). It was run on 2026-11-03 and was a NO-GO: 95.9% exact, but 0.84% too loose against a 0.5% line. A second, fresh exam (949 operations from coolify, workos, lago and resend, scored once with the ask rule below) was also a NO-GO, by one row: 5 too-loose answers (0.57%) against a line of 4. See findings.md.
 
 ### 8. Shrink it
-After training, each weight is stored as an 8-bit number instead of a 32-bit one. That's **post-training dynamic int8 quantization**, the Cactus-like part:
+*Planned (M1), not built yet: every number above and in findings.md is the fp32 model (90.9 MB, about 22-28 ms per operation).* After training, each weight is stored as an 8-bit number instead of a 32-bit one. That's **post-training dynamic int8 quantization**, the Cactus-like part:
 - **Size:** about 90 MB down to about 23 MB.
 - **Speed:** faster on a CPU.
 - **Accuracy:** usually drops only slightly, and we measure that.
@@ -86,6 +88,15 @@ The model doesn't need a separate brain for each shape. It always produces three
 
 So one model, one file, and one pass answers every shape.
 
+### Turning probabilities into answers, and when to ask
+The model only reports three probabilities. Three steps sit between those and a verdict, all measured but not yet built into a product (they live in `train/tune_cuts.py`, `train/exam_score.py`, `train/lowerflag.py` and `train/fallback.py`):
+
+- **Calibration.** The raw probabilities are over-confident, so they are divided by a temperature (T = 0.844 for r8soft, fitted on held-out vendors) before use.
+- **Cuts (mode a).** Mechanical stays in charge and the model only makes Jev's one-step moves on the contested rows, at cuts tuned on practice rows only: lower 0.30, POST lowered rows go to r when p(w) + p(x) is under 0.40 (else w), raise-wx 0.15, raise-get 0.05. A narrow credential rule forces x.
+- **Lowering flag (the ask rule).** When the model moves a letter down (x to w or r, w to r) it is trusted only if its top probability is at least 0.97; otherwise the row is "ask". Raises and keeps are trusted. On the practice rows 57 of the 73 too-loose answers were lowerings, which is why the flag targets them. Earlier ask rules (ask under a confidence bar, fall back to the mechanical letter, a mix) were measured and are in findings.md.
+
+rwxlite itself never decides to ask. It returns probabilities, and rwxmap applies the rule and emits the flag (PRD, "The flow"). Confident mistakes that are not lowerings, for example credential updates the mechanical rules already call too safe, are not caught by any of this; that is what failed the fresh exam.
+
 ### JSON only
 The model itself outputs just three numbers. A small Node wrapper (M1) turns those into Jev's exact JSON format, so rwxmap sees no difference:
 
@@ -112,7 +123,7 @@ Two differences from Jev:
 ```json
 { "letter": "r", "p": { "r": 0.91, "w": 0.07, "x": 0.02 }, "model": "rwxlite-0.1.0+<hash>" }
 ```
-That's the form API providers or guardrails like bareguard would use. A low top probability becomes the "ask a human" signal, and the threshold for that is the caller's choice. Exact field names are settled in M1 with rwxmap.
+That's the form API providers or guardrails like bareguard would use. A low top probability becomes the "ask a human" signal, and the threshold for that is the caller's choice. For lowerings the measured threshold is 0.97 (see above); a plain confidence bar alone only caught about half the dangerous mistakes on the first exam. Exact field names are settled in M1 with rwxmap.
 
 ## Training on the home server
 
