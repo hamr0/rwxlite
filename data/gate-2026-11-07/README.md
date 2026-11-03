@@ -62,3 +62,17 @@ Top vendors, general: amazonaws 30, autotask 30, azure 30, googleapis 30, micros
 ## Status
 
 Unlabelled. Labelling is a separate step.
+
+## Vendor-clean line for scoring
+
+Same 24-name list as gate-3 (rwxmap lock check 2026-11-03): exclude providers whose whole domain label is in: adyen appcenter atlassian azure box clearblade dracoon gitea github gitlab jira keycloak linode microsoft netbox notion openai slack trello twilio vercel whatsapp xero zoom. rwxmap's lock check on gate-4 found 0 locked, 0 burned-exam vendors and no brand aliases left; vendor caps kept at rwxmap's request.
+
+## Labelling
+
+Two independent labellers (A, B) labelled all 800 rows blind against BRIEF-v3 (r/w/x, confidence high/low, short note), each with its own scratch dir, never seeing part.csv or the other's file: `labels-A.csv`, `labels-B.csv`. They agreed on 791/800 (98.9%). The main session spot-checked 20 random agreed rows (seed 7) against the brief: no corrections. The 9 disagreements were ruled by the user on 2026-11-03 (accepting the main session's suggestions): 4 in the write part, 5 in the general part, in `rulings.csv` (id,A,B,ruling,reason). `truth.csv` (id,label) is the agreed label or the ruling; 800 rows, no "?". Frozen.
+
+Confidence: A high 736 / low 64; B high 733 / low 67; both high 724, both low 55.
+
+Truth mix (r/w/x): all 399 / 347 / 54; write part 27 / 153 / 20; general part 372 / 194 / 34.
+
+rwxlite's MiniLM (r6/r8) was trained on the 123k corpus, which includes these rows: gate-4 is an rwxmap exam only, never an rwxlite score. Used ONCE.

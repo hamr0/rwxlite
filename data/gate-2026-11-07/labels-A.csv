@@ -1,0 +1,801 @@
+id,label,confidence,note
+gate4-0001,r,high,list read
+gate4-0002,w,high,reaction create
+gate4-0003,w,high,edit payment method
+gate4-0004,x,low,cancel job on device
+gate4-0005,r,high,show attrs
+gate4-0006,w,high,plain create
+gate4-0007,r,high,list
+gate4-0008,w,high,put edit
+gate4-0009,r,high,list key ids
+gate4-0010,r,high,list
+gate4-0011,w,high,update filter
+gate4-0012,r,high,describe history
+gate4-0013,w,high,create template
+gate4-0014,w,high,create limit
+gate4-0015,w,high,add trap dest
+gate4-0016,w,high,update config
+gate4-0017,w,high,update allergy
+gate4-0018,r,high,watch read
+gate4-0019,r,high,get run
+gate4-0020,r,high,retrieve
+gate4-0021,r,high,query
+gate4-0022,r,high,get package
+gate4-0023,r,high,get status
+gate4-0024,x,high,delete user pool
+gate4-0025,r,high,retrieve
+gate4-0026,r,high,list
+gate4-0027,r,high,count query
+gate4-0028,x,low,accept change request not reversible
+gate4-0029,w,high,update
+gate4-0030,r,high,field info
+gate4-0031,w,high,patch webhook
+gate4-0032,r,high,browse
+gate4-0033,w,high,register user create
+gate4-0034,r,high,show config
+gate4-0035,r,high,list
+gate4-0036,w,high,update preference
+gate4-0037,r,high,get
+gate4-0038,w,high,create stock
+gate4-0039,r,high,get pages
+gate4-0040,r,high,get
+gate4-0041,x,high,expires tokens
+gate4-0042,r,high,load
+gate4-0043,r,high,get
+gate4-0044,r,high,analyze
+gate4-0045,r,high,list
+gate4-0046,w,high,create endpoint
+gate4-0047,x,high,refund
+gate4-0048,r,high,info lookup
+gate4-0049,r,high,list
+gate4-0050,r,high,count query
+gate4-0051,r,high,list
+gate4-0052,r,high,field info
+gate4-0053,r,high,retrieve path
+gate4-0054,w,high,edit xml
+gate4-0055,r,high,match search
+gate4-0056,r,high,list
+gate4-0057,r,high,calculation
+gate4-0058,r,high,filtered listing
+gate4-0059,w,high,snooze reminder edit
+gate4-0060,w,high,plain create
+gate4-0061,r,high,check
+gate4-0062,w,high,create channel
+gate4-0063,r,high,list
+gate4-0064,w,high,create
+gate4-0065,w,high,update details
+gate4-0066,r,high,get op
+gate4-0067,w,low,login issues session token
+gate4-0068,r,high,decode
+gate4-0069,w,high,update rule
+gate4-0070,r,high,get
+gate4-0071,r,high,name check
+gate4-0072,w,high,create log messages
+gate4-0073,w,high,update flag
+gate4-0074,r,high,batch fetch
+gate4-0075,r,high,search
+gate4-0076,r,high,get tags
+gate4-0077,w,high,update holder
+gate4-0078,w,high,update
+gate4-0079,w,low,creates hosted connection
+gate4-0080,r,high,list
+gate4-0081,w,high,update profile
+gate4-0082,w,high,create or reactivate
+gate4-0083,x,high,cancel marketplace order
+gate4-0084,r,high,get
+gate4-0085,w,high,set location
+gate4-0086,x,low,adds task that runs
+gate4-0087,w,high,edit env var
+gate4-0088,r,high,get filter
+gate4-0089,r,high,get list
+gate4-0090,r,high,list
+gate4-0091,r,high,list
+gate4-0092,w,high,patch
+gate4-0093,r,high,get
+gate4-0094,w,high,create spec
+gate4-0095,r,high,search
+gate4-0096,r,high,list
+gate4-0097,x,high,triggers test run
+gate4-0098,w,high,update trigger dates
+gate4-0099,r,high,get claims
+gate4-0100,w,high,update payment
+gate4-0101,r,high,get
+gate4-0102,w,high,create report
+gate4-0103,r,high,get
+gate4-0104,r,high,list
+gate4-0105,r,high,info
+gate4-0106,r,high,retrieve
+gate4-0107,w,high,update comment
+gate4-0108,w,high,add worklog
+gate4-0109,r,high,get svg
+gate4-0110,r,high,status
+gate4-0111,r,high,get
+gate4-0112,w,high,enroll user no notify
+gate4-0113,w,high,create user
+gate4-0114,r,low,generates report
+gate4-0115,w,high,create model
+gate4-0116,w,high,create trigger
+gate4-0117,x,high,bulk delete ads
+gate4-0118,w,high,update
+gate4-0119,w,high,update team
+gate4-0120,r,high,get
+gate4-0121,w,low,import file to own site
+gate4-0122,r,high,query
+gate4-0123,r,high,list
+gate4-0124,w,high,update
+gate4-0125,r,high,field info
+gate4-0126,r,high,get
+gate4-0127,r,high,get
+gate4-0128,x,high,confirms offset purchase
+gate4-0129,w,high,create asset
+gate4-0130,w,high,update category
+gate4-0131,r,high,list
+gate4-0132,r,high,get
+gate4-0133,r,high,get resources
+gate4-0134,r,high,get
+gate4-0135,w,high,update
+gate4-0136,r,high,query
+gate4-0137,r,high,list
+gate4-0138,r,high,retrieve
+gate4-0139,w,high,register device
+gate4-0140,w,high,update feature
+gate4-0141,w,high,add post
+gate4-0142,r,high,calculates
+gate4-0143,r,high,download
+gate4-0144,r,high,count query
+gate4-0145,w,high,set backend
+gate4-0146,r,high,get
+gate4-0147,w,high,update dates
+gate4-0148,r,high,get
+gate4-0149,w,high,update rules
+gate4-0150,w,high,create location
+gate4-0151,r,high,get info
+gate4-0152,w,low,posts leave records
+gate4-0153,x,low,sends doc to human review
+gate4-0154,w,high,update branding
+gate4-0155,w,low,unclear env write
+gate4-0156,w,high,patch
+gate4-0157,w,high,upsert user
+gate4-0158,r,high,list
+gate4-0159,w,high,update
+gate4-0160,w,high,create
+gate4-0161,r,high,get
+gate4-0162,r,high,list
+gate4-0163,w,high,add link
+gate4-0164,r,high,query
+gate4-0165,r,high,list
+gate4-0166,w,high,toggle autoapprove
+gate4-0167,r,high,get
+gate4-0168,w,high,create
+gate4-0169,w,high,update
+gate4-0170,w,high,add video to channel
+gate4-0171,r,high,get
+gate4-0172,w,high,update
+gate4-0173,r,high,get
+gate4-0174,r,high,get
+gate4-0175,w,high,update bucket
+gate4-0176,w,high,create data source
+gate4-0177,w,low,authenticate issues token
+gate4-0178,r,high,list
+gate4-0179,r,high,list
+gate4-0180,w,high,assign
+gate4-0181,w,high,update
+gate4-0182,r,high,get
+gate4-0183,w,high,update config
+gate4-0184,w,high,toggle signing
+gate4-0185,r,high,timeline
+gate4-0186,r,high,report
+gate4-0187,x,high,merge pr
+gate4-0188,r,high,check
+gate4-0189,w,high,update
+gate4-0190,r,high,info
+gate4-0191,r,high,get
+gate4-0192,r,high,export
+gate4-0193,r,high,verify
+gate4-0194,w,high,update settings
+gate4-0195,w,high,attach
+gate4-0196,w,low,unsubscribe webhook resubscribable
+gate4-0197,r,high,get
+gate4-0198,w,low,callback put
+gate4-0199,w,high,update
+gate4-0200,w,high,upsert commissions
+gate4-0201,r,high,get rule
+gate4-0202,w,low,callback ack
+gate4-0203,w,high,update
+gate4-0204,w,high,snooze
+gate4-0205,x,low,password reset
+gate4-0206,x,low,text broadcast sends
+gate4-0207,r,high,verify
+gate4-0208,r,high,get
+gate4-0209,r,high,list
+gate4-0210,w,high,update
+gate4-0211,w,high,update keyword
+gate4-0212,w,high,set attr
+gate4-0213,r,high,get
+gate4-0214,w,high,update template
+gate4-0215,w,high,patch
+gate4-0216,r,high,list
+gate4-0217,w,high,set template
+gate4-0218,r,high,get
+gate4-0219,w,high,patch
+gate4-0220,x,high,triggers test
+gate4-0221,r,high,read
+gate4-0222,r,high,retrieve
+gate4-0223,r,high,meta
+gate4-0224,w,high,unhide has hide
+gate4-0225,x,low,no text unsure
+gate4-0226,r,high,audit log
+gate4-0227,w,high,create bundle
+gate4-0228,r,high,query
+gate4-0229,r,high,list
+gate4-0230,r,high,list
+gate4-0231,r,high,get
+gate4-0232,r,high,list
+gate4-0233,r,high,list
+gate4-0234,r,high,list
+gate4-0235,w,high,update user
+gate4-0236,r,low,resize returned
+gate4-0237,r,high,get
+gate4-0238,r,high,list
+gate4-0239,w,high,persist order
+gate4-0240,x,high,revoke credential deletes
+gate4-0241,r,high,list
+gate4-0242,r,high,statuses
+gate4-0243,r,high,query
+gate4-0244,r,high,list
+gate4-0245,w,high,associate
+gate4-0246,w,low,create webchat
+gate4-0247,w,high,replace
+gate4-0248,r,high,list
+gate4-0249,r,high,search
+gate4-0250,r,high,get
+gate4-0251,r,high,delta
+gate4-0252,r,high,infer
+gate4-0253,r,high,plot
+gate4-0254,x,high,capture payment
+gate4-0255,r,high,list
+gate4-0256,r,high,list
+gate4-0257,w,high,monitor dep graph
+gate4-0258,w,high,patch
+gate4-0259,w,high,create or update
+gate4-0260,r,high,counts
+gate4-0261,r,high,show
+gate4-0262,w,high,update instance
+gate4-0263,r,high,config
+gate4-0264,w,high,update email
+gate4-0265,r,high,get
+gate4-0266,w,high,update class
+gate4-0267,w,high,edit contact
+gate4-0268,x,high,payment run
+gate4-0269,w,high,update
+gate4-0270,w,high,edit album
+gate4-0271,r,high,status
+gate4-0272,r,high,list
+gate4-0273,w,high,create config
+gate4-0274,r,high,get
+gate4-0275,w,high,update
+gate4-0276,x,low,health data request
+gate4-0277,r,high,list
+gate4-0278,w,high,update lead
+gate4-0279,r,high,list
+gate4-0280,x,high,deletes tags
+gate4-0281,r,high,info
+gate4-0282,w,high,update notification
+gate4-0283,w,high,add type
+gate4-0284,r,high,query
+gate4-0285,w,high,update gist
+gate4-0286,r,high,get
+gate4-0287,w,high,snooze
+gate4-0288,w,high,create assignment
+gate4-0289,w,high,create policy
+gate4-0290,r,high,list
+gate4-0291,r,high,stats
+gate4-0292,w,high,create
+gate4-0293,r,high,get
+gate4-0294,w,high,patch user
+gate4-0295,w,high,clone version
+gate4-0296,x,low,decline notifies organizer
+gate4-0297,r,high,list
+gate4-0298,x,high,imports from remote
+gate4-0299,w,low,verify email change
+gate4-0300,r,high,generate returned
+gate4-0301,w,high,patch
+gate4-0302,w,high,update mapping
+gate4-0303,w,low,generates secret create
+gate4-0304,r,high,list
+gate4-0305,r,high,get
+gate4-0306,w,high,upload thumbnail
+gate4-0307,w,high,patch
+gate4-0308,w,high,edit
+gate4-0309,w,high,patch
+gate4-0310,x,high,capture
+gate4-0311,r,high,get
+gate4-0312,w,low,modify person delete mentioned
+gate4-0313,r,high,query
+gate4-0314,w,high,update group
+gate4-0315,r,high,list
+gate4-0316,w,high,create prefix
+gate4-0317,r,high,info
+gate4-0318,r,high,aggregate
+gate4-0319,r,high,get
+gate4-0320,r,high,get
+gate4-0321,r,high,read
+gate4-0322,r,low,genome lookup post
+gate4-0323,r,high,get
+gate4-0324,w,high,patch user
+gate4-0325,r,high,fetch
+gate4-0326,w,high,update action
+gate4-0327,r,high,retrieve
+gate4-0328,w,high,set tracing
+gate4-0329,x,high,new sale charge
+gate4-0330,r,high,list
+gate4-0331,r,high,validate
+gate4-0332,w,high,patch
+gate4-0333,r,high,get data
+gate4-0334,w,high,update person
+gate4-0335,r,high,list
+gate4-0336,r,high,count
+gate4-0337,r,high,list
+gate4-0338,r,high,validate
+gate4-0339,r,high,get
+gate4-0340,w,high,create feature
+gate4-0341,r,high,calculate
+gate4-0342,r,high,list
+gate4-0343,r,high,list
+gate4-0344,w,high,add video
+gate4-0345,r,high,get
+gate4-0346,w,high,create group
+gate4-0347,x,high,sends email invites
+gate4-0348,r,high,list
+gate4-0349,w,high,update
+gate4-0350,r,high,describe
+gate4-0351,w,high,add tag
+gate4-0352,r,high,list
+gate4-0353,r,high,list
+gate4-0354,r,high,get
+gate4-0355,w,high,update description
+gate4-0356,w,low,ACL change
+gate4-0357,w,low,generates sso token url
+gate4-0358,x,low,merges networks irreversible
+gate4-0359,w,high,create payment method
+gate4-0360,r,low,GET read despite text
+gate4-0361,r,high,get
+gate4-0362,w,high,patch
+gate4-0363,w,high,enable dnssec
+gate4-0364,r,low,incremental read
+gate4-0365,r,high,list
+gate4-0366,w,high,update policy
+gate4-0367,w,high,set favourite
+gate4-0368,w,high,update
+gate4-0369,r,high,get
+gate4-0370,r,high,list
+gate4-0371,x,low,cancel repair task
+gate4-0372,w,high,update
+gate4-0373,r,high,list
+gate4-0374,w,high,create container
+gate4-0375,w,high,assign address
+gate4-0376,r,high,count
+gate4-0377,r,high,hash
+gate4-0378,r,high,get
+gate4-0379,w,high,update product
+gate4-0380,w,high,create app
+gate4-0381,w,high,enable has disable
+gate4-0382,r,high,count
+gate4-0383,r,high,get
+gate4-0384,r,high,search
+gate4-0385,w,high,upsert holiday
+gate4-0386,r,high,list
+gate4-0387,r,high,describe
+gate4-0388,x,high,cancel order rollback payments
+gate4-0389,r,high,retrieve
+gate4-0390,w,high,patch
+gate4-0391,w,high,associate
+gate4-0392,w,high,create user
+gate4-0393,r,high,list
+gate4-0394,x,low,test event sent to sink
+gate4-0395,r,high,get
+gate4-0396,r,high,query
+gate4-0397,r,high,infer
+gate4-0398,w,high,enable
+gate4-0399,r,high,list
+gate4-0400,w,high,add comment
+gate4-0401,w,high,patch
+gate4-0402,w,high,patch
+gate4-0403,r,high,list
+gate4-0404,r,high,list
+gate4-0405,r,high,describe
+gate4-0406,r,high,list
+gate4-0407,w,high,create webhook
+gate4-0408,w,high,update video
+gate4-0409,w,high,create relation
+gate4-0410,w,high,update
+gate4-0411,r,high,get
+gate4-0412,r,high,view
+gate4-0413,w,low,creates quote
+gate4-0414,r,high,get
+gate4-0415,w,high,add poster
+gate4-0416,r,high,get
+gate4-0417,r,high,get
+gate4-0418,w,high,patch
+gate4-0419,r,high,get
+gate4-0420,r,high,get
+gate4-0421,r,high,get
+gate4-0422,w,low,stop watch re-watchable
+gate4-0423,r,high,get
+gate4-0424,r,high,get
+gate4-0425,r,high,get
+gate4-0426,w,high,replace
+gate4-0427,w,high,patch
+gate4-0428,x,high,upgrade job irreversible
+gate4-0429,w,high,create allocation
+gate4-0430,r,high,list
+gate4-0431,w,high,patch
+gate4-0432,x,low,answer call state step
+gate4-0433,r,high,get
+gate4-0434,r,high,find
+gate4-0435,r,high,list
+gate4-0436,w,high,create location
+gate4-0437,x,high,donation charge
+gate4-0438,r,high,get
+gate4-0439,r,high,list
+gate4-0440,w,high,update
+gate4-0441,w,high,add actors
+gate4-0442,r,low,report fetch
+gate4-0443,r,high,balance
+gate4-0444,w,high,update contact
+gate4-0445,r,high,get
+gate4-0446,r,high,list
+gate4-0447,w,high,update card
+gate4-0448,r,high,list
+gate4-0449,w,high,register script tag
+gate4-0450,r,high,balance
+gate4-0451,w,high,update
+gate4-0452,r,high,list
+gate4-0453,r,high,count
+gate4-0454,x,high,performs maintenance
+gate4-0455,w,high,create or update
+gate4-0456,w,high,create schedule
+gate4-0457,r,high,list
+gate4-0458,r,high,count
+gate4-0459,r,high,get
+gate4-0460,w,high,update user
+gate4-0461,w,high,create env
+gate4-0462,w,high,update
+gate4-0463,r,high,state
+gate4-0464,w,high,create service
+gate4-0465,w,high,create bucket
+gate4-0466,r,high,info
+gate4-0467,r,high,credit
+gate4-0468,r,high,list
+gate4-0469,w,high,bookmark private
+gate4-0470,w,high,patch user
+gate4-0471,r,high,list
+gate4-0472,r,high,info
+gate4-0473,w,high,update bin
+gate4-0474,w,high,edit
+gate4-0475,r,high,compute
+gate4-0476,w,high,create sku file
+gate4-0477,r,high,list
+gate4-0478,w,high,add items to list
+gate4-0479,w,high,add ssh key
+gate4-0480,r,high,view
+gate4-0481,r,high,list
+gate4-0482,w,high,set columns
+gate4-0483,r,high,get
+gate4-0484,w,low,create account
+gate4-0485,r,high,get
+gate4-0486,r,low,echo patch
+gate4-0487,w,high,create model
+gate4-0488,w,high,patch
+gate4-0489,w,high,create field
+gate4-0490,w,high,update
+gate4-0491,r,high,lookup
+gate4-0492,w,high,pause recording
+gate4-0493,r,high,get
+gate4-0494,w,high,update config
+gate4-0495,w,high,patch
+gate4-0496,w,low,records cash payment
+gate4-0497,w,high,create folder
+gate4-0498,x,high,restarts role
+gate4-0499,r,high,get
+gate4-0500,r,high,list
+gate4-0501,w,high,update step
+gate4-0502,w,high,subscribe user
+gate4-0503,r,high,summary
+gate4-0504,r,high,convert
+gate4-0505,w,high,put
+gate4-0506,w,high,patch
+gate4-0507,w,high,patch
+gate4-0508,r,high,list
+gate4-0509,w,high,patch
+gate4-0510,r,high,transcribe
+gate4-0511,w,high,import map file own
+gate4-0512,r,high,list
+gate4-0513,w,high,update
+gate4-0514,r,high,query
+gate4-0515,x,low,invites users
+gate4-0516,r,high,status
+gate4-0517,r,high,get
+gate4-0518,w,high,upsert tax entry
+gate4-0519,w,high,patch
+gate4-0520,w,high,update media
+gate4-0521,r,high,get
+gate4-0522,w,high,add group
+gate4-0523,r,high,directions
+gate4-0524,r,high,stats
+gate4-0525,r,high,search
+gate4-0526,r,high,compute
+gate4-0527,r,high,list
+gate4-0528,w,high,upload evidence
+gate4-0529,r,high,list
+gate4-0530,w,high,update
+gate4-0531,r,high,list
+gate4-0532,r,high,get
+gate4-0533,r,high,list
+gate4-0534,r,high,list
+gate4-0535,r,high,progress
+gate4-0536,w,high,update spec
+gate4-0537,r,high,describe
+gate4-0538,r,high,get
+gate4-0539,r,high,list
+gate4-0540,w,high,patch
+gate4-0541,r,high,infer
+gate4-0542,x,high,queues training job
+gate4-0543,w,high,assign category
+gate4-0544,w,high,update task
+gate4-0545,w,low,callback ack
+gate4-0546,w,low,proxy put unclear
+gate4-0547,r,high,search
+gate4-0548,r,high,get
+gate4-0549,r,high,list
+gate4-0550,r,high,details
+gate4-0551,w,high,associate CA
+gate4-0552,r,high,list
+gate4-0553,r,high,list
+gate4-0554,r,high,field info
+gate4-0555,r,high,aggregated
+gate4-0556,r,high,list
+gate4-0557,r,high,count
+gate4-0558,w,high,upload artifact
+gate4-0559,r,high,usages
+gate4-0560,w,high,update authorization
+gate4-0561,w,high,patch
+gate4-0562,w,high,put
+gate4-0563,w,high,put
+gate4-0564,r,high,details
+gate4-0565,r,high,list
+gate4-0566,w,high,update
+gate4-0567,w,high,patch
+gate4-0568,r,low,read codespaces
+gate4-0569,r,high,list
+gate4-0570,w,high,create user
+gate4-0571,w,high,patch
+gate4-0572,x,high,export job runs
+gate4-0573,r,high,count
+gate4-0574,r,high,get
+gate4-0575,r,high,list
+gate4-0576,r,high,image
+gate4-0577,r,high,list
+gate4-0578,w,high,patch
+gate4-0579,w,low,unregister has register
+gate4-0580,w,high,patch
+gate4-0581,w,high,update image
+gate4-0582,r,high,get
+gate4-0583,w,high,create domain
+gate4-0584,w,high,rename
+gate4-0585,w,high,put
+gate4-0586,w,high,create template
+gate4-0587,w,high,set runners
+gate4-0588,w,high,store address
+gate4-0589,r,high,count
+gate4-0590,r,high,compute
+gate4-0591,r,high,watch
+gate4-0592,r,high,describe
+gate4-0593,w,low,applies optimisations
+gate4-0594,w,high,configure filters
+gate4-0595,w,high,assign points
+gate4-0596,w,high,upload artifact
+gate4-0597,w,high,link departments
+gate4-0598,w,high,create consent
+gate4-0599,w,high,patch
+gate4-0600,r,high,list
+gate4-0601,r,high,list
+gate4-0602,r,high,list
+gate4-0603,w,high,create api key
+gate4-0604,r,high,list results
+gate4-0605,r,high,list
+gate4-0606,w,high,clone team create
+gate4-0607,w,high,update settings
+gate4-0608,r,high,get
+gate4-0609,w,high,update user
+gate4-0610,r,high,diagnostics
+gate4-0611,r,low,exchange token validate
+gate4-0612,r,high,search
+gate4-0613,r,high,receipt
+gate4-0614,w,high,create association
+gate4-0615,w,low,create listing maybe public
+gate4-0616,w,low,plugin upgrade
+gate4-0617,x,high,remote start command
+gate4-0618,r,low,GET generates id
+gate4-0619,r,high,status
+gate4-0620,w,high,write element
+gate4-0621,w,high,update status
+gate4-0622,r,high,count
+gate4-0623,r,high,get
+gate4-0624,w,high,update sample
+gate4-0625,w,high,remove item from collection
+gate4-0626,w,high,create account
+gate4-0627,w,high,update ordering
+gate4-0628,w,high,update device
+gate4-0629,r,high,get
+gate4-0630,w,high,update
+gate4-0631,r,high,field info
+gate4-0632,w,high,update
+gate4-0633,r,high,get
+gate4-0634,w,high,update config
+gate4-0635,w,high,upload track
+gate4-0636,r,high,list
+gate4-0637,r,high,count
+gate4-0638,r,high,get
+gate4-0639,r,high,check
+gate4-0640,w,high,create definition
+gate4-0641,w,high,attach
+gate4-0642,w,high,update template
+gate4-0643,r,high,list
+gate4-0644,r,high,get
+gate4-0645,r,high,get
+gate4-0646,w,high,save rule
+gate4-0647,r,high,name check
+gate4-0648,r,high,count
+gate4-0649,r,high,list
+gate4-0650,r,high,query
+gate4-0651,w,high,update
+gate4-0652,w,low,create deposit switch
+gate4-0653,r,high,get
+gate4-0654,r,high,list
+gate4-0655,r,high,get
+gate4-0656,r,high,search
+gate4-0657,w,high,replace
+gate4-0658,r,high,get
+gate4-0659,w,high,update
+gate4-0660,r,high,list
+gate4-0661,w,low,app upgrade
+gate4-0662,r,high,get
+gate4-0663,w,high,create credentials
+gate4-0664,w,high,update
+gate4-0665,w,high,follow
+gate4-0666,r,high,search
+gate4-0667,x,high,creates chat message sent
+gate4-0668,x,high,sends test text
+gate4-0669,x,high,upgrade devices job
+gate4-0670,r,high,calculate
+gate4-0671,r,high,count
+gate4-0672,x,low,adds tasks that run
+gate4-0673,x,high,close account no reopen
+gate4-0674,r,high,get
+gate4-0675,r,high,get
+gate4-0676,r,high,list
+gate4-0677,r,high,list
+gate4-0678,r,high,convert
+gate4-0679,w,low,issues oauth token
+gate4-0680,r,high,status
+gate4-0681,r,high,list
+gate4-0682,r,high,get
+gate4-0683,r,high,list
+gate4-0684,w,high,update scheme
+gate4-0685,r,high,list
+gate4-0686,w,low,changes tax return status
+gate4-0687,r,low,suggestions lookup
+gate4-0688,w,high,replace rules
+gate4-0689,r,high,search
+gate4-0690,w,high,create or update
+gate4-0691,r,high,get
+gate4-0692,w,low,registers publisher
+gate4-0693,w,high,update webhook
+gate4-0694,r,high,get
+gate4-0695,r,high,list
+gate4-0696,r,high,query
+gate4-0697,r,high,get
+gate4-0698,x,high,confirm transaction
+gate4-0699,w,high,update
+gate4-0700,r,high,count
+gate4-0701,w,high,create transactions
+gate4-0702,r,high,fetch url
+gate4-0703,w,high,put tag
+gate4-0704,w,high,update
+gate4-0705,r,high,get
+gate4-0706,w,high,update rule
+gate4-0707,w,high,update subscription
+gate4-0708,r,high,list
+gate4-0709,w,high,update repo
+gate4-0710,w,high,update settings
+gate4-0711,r,high,get
+gate4-0712,w,high,update
+gate4-0713,w,high,create template
+gate4-0714,w,high,update brand
+gate4-0715,w,high,patch
+gate4-0716,r,high,get
+gate4-0717,r,high,list
+gate4-0718,r,high,report
+gate4-0719,w,high,put
+gate4-0720,w,high,create progress
+gate4-0721,w,high,write event
+gate4-0722,w,high,update role
+gate4-0723,r,high,search
+gate4-0724,r,high,get
+gate4-0725,r,high,get groups
+gate4-0726,w,high,update rule
+gate4-0727,r,high,get
+gate4-0728,w,high,replace
+gate4-0729,w,high,update
+gate4-0730,w,low,removes list rule has authorize
+gate4-0731,r,high,get
+gate4-0732,r,high,get
+gate4-0733,r,high,get
+gate4-0734,w,high,patch status
+gate4-0735,x,low,version update rollout
+gate4-0736,w,high,extend trial
+gate4-0737,w,high,put
+gate4-0738,r,high,get zip
+gate4-0739,r,high,count
+gate4-0740,w,high,create community
+gate4-0741,w,high,update psk
+gate4-0742,x,high,starts execution
+gate4-0743,r,high,get
+gate4-0744,r,high,list
+gate4-0745,w,high,update refund record
+gate4-0746,r,high,get
+gate4-0747,w,high,recover has delete
+gate4-0748,w,high,update settings
+gate4-0749,r,high,geocode
+gate4-0750,w,high,patch
+gate4-0751,x,high,deletes channel
+gate4-0752,r,high,list
+gate4-0753,w,high,create child
+gate4-0754,r,high,stats
+gate4-0755,w,high,set tracing
+gate4-0756,w,high,update link
+gate4-0757,r,high,get
+gate4-0758,r,high,aggregate
+gate4-0759,r,high,list
+gate4-0760,w,low,sends cart tracking
+gate4-0761,w,high,create collection
+gate4-0762,r,high,show
+gate4-0763,r,high,list
+gate4-0764,w,low,telemetry post
+gate4-0765,x,high,purge tasks
+gate4-0766,x,high,rescan job
+gate4-0767,w,high,create part
+gate4-0768,w,high,create test item
+gate4-0769,r,high,list
+gate4-0770,x,high,triggers check run
+gate4-0771,w,high,subscribe category
+gate4-0772,r,high,get
+gate4-0773,r,high,list
+gate4-0774,w,low,generates pdf file
+gate4-0775,r,high,get
+gate4-0776,w,high,disable has enable
+gate4-0777,r,high,count
+gate4-0778,x,high,cancels run
+gate4-0779,r,high,list
+gate4-0780,x,high,deletes graph
+gate4-0781,r,high,calculate
+gate4-0782,w,high,patch
+gate4-0783,r,high,get data
+gate4-0784,w,high,update user
+gate4-0785,r,high,get
+gate4-0786,w,high,edit
+gate4-0787,w,high,set discoverability
+gate4-0788,w,high,add source
+gate4-0789,r,high,get
+gate4-0790,x,high,reboots device
+gate4-0791,r,high,range
+gate4-0792,w,low,generates skin upload
+gate4-0793,w,high,update
+gate4-0794,w,high,put attributes
+gate4-0795,r,high,list
+gate4-0796,r,high,get
+gate4-0797,w,high,insert tag
+gate4-0798,w,low,authenticate token
+gate4-0799,w,high,set noshow
+gate4-0800,w,low,marks message fixed
