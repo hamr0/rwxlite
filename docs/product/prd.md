@@ -248,7 +248,7 @@ Reading:
 - ASK at 0.95 gives the highest accuracy on what it answers but asks on 1 in 6 operations.
 - Caveat: on the exam the model's dangerous mistakes were confident (median top p 0.94), so the practice-row gain may not fully transfer. That is what the fresh exam tests.
 
-**Proposed go/no-go for the fresh exam** (to be pre-registered, frozen in a commit before scoring, once the exam vendors are agreed with rwxmap):
+**Go/no-go for the fresh exam (signed off by the user 2026-11-03, frozen).** The full pre-registration (checkpoint hash, cuts, vendors) is committed before scoring, once the exam vendors are agreed with rwxmap. The rule itself does not change:
 - Rule: mode (a), MECH-THEN-ASK at 0.95.
 - Pass: too loose at most 0.5% of answered rows AND exact at least 91% of answered rows AND asked at most 15% of rows.
 - Reported only: mode (b), ASK at 0.7 / 0.9 / 0.95, MECH-THEN-ASK at 0.7 / 0.9, no bar.
