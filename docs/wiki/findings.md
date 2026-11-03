@@ -594,7 +594,7 @@ Practice (LOVO) rows, not an exam: v3 tuning truth only (n=5,716), honest per-fo
 
 Rules for rows below the bar. ASK: ask. MECH: use the mechanical letter, no asks. MECH-THEN-ASK: mechanical letter if it is at least as strict as the model's (r < w < x), else ask. Percentages are of answered rows; asked % is of all rows. 'none' = no bar (identical for all rules).
 
-Reference lines: mechanical alone 76.4 right / 76 too loose (1.33%) / 22.3 too tight (the old 76.3 / 77 is the same row count class; this run counts 76 at the LOVO fold level); r8soft mode (a) no bar 5303 right (92.8%) / 73 loose (1.28%) / 340 tight (5.95%); mode (b) no bar 5253 (91.9%) / 55 (0.96%) / 408 (7.14%). MECH at 0.99 is almost mechanical alone (76.4 / 76 loose).
+Reference lines: mechanical alone 76.3 right / 77 too loose / 22.3 too tight (earlier count); this run's MECH at 0.99, which is almost mechanical alone, gives 76.4 right / 76 too loose (1.33%), one row apart from the earlier count. r8soft mode (a) no bar 5303 right (92.8%) / 73 loose (1.28%) / 340 tight (5.95%); mode (b) no bar 5253 (91.9%) / 55 (0.96%) / 408 (7.14%).
 
 ### Mode (a) mechanical + cuts
 | rule | bar | right | too loose | too tight | asked (would be right / loose / tight) |
