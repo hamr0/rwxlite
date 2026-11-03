@@ -434,3 +434,90 @@ Per tier, exact / loose / tight (calibrated):
 - Shared scratchpad: the two gate-3 labellers shared a scratch folder and one helper script was overwritten. It only printed blind rows (never labels), so the labels stayed independent. Lesson: give each labeller its own scratch dir.
 - Workflow lesson: background workers left orphan sleep/watch loops. Now each worker must leave none, and the main session stops finished workers.
 - Repo: public at https://github.com/hamr0/rwxlite (branches main = PRD 0d270c9, m0 = work), Apache-2.0 (7951645), README in bareagent shape (b2aae56) with honest "planned" markers.
+
+## 2026-11-03: Round 8: soft targets + abstain table
+
+User sign-off: "we need less loose". r6 (hard targets) left 108 too-loose rows at LOVO own cuts, 47 of them raise-wx (PUT/PATCH): hard labels pushed p(x) on PUT/PATCH to about 0, so no cut could raise the true-x rows.
+
+Change (`train/finetune.py --soft`, `soft_targets()` in `train/common.py`; data unchanged, columns jev_p/jev_pC already in `train.parquet`): 3-way target per row from the stored Jev probabilities. lower/raise-wx tier rows: p(x)=isX; POST rows p(r)=(1-isX)(1-changes), p(w)=(1-isX)changes (changes = jev_pC; missing -> all non-x mass to w); PUT/PATCH p(w)=1-isX; GET (raise-get) p(r)=1-changes, p(w)=changes; DELETE, credential rows, tier-none rows and rows without Jev p are one-hot of the round-6 label. Loss = alpha x soft CE + (1-alpha) x hard CE, alpha 0.7 (default `--alpha`; chosen a priori, not tuned: soft term carries the uncertainty, the hard term keeps the argmax anchored to the r6 label). `--x_weight` (class weight on x) added, default 1.0, not needed. Run: server, 1 epoch, 87,657 rows, 2740 steps, 48.5 min, val acc (vs hard r6 labels) 96.89% (r6: 97.27). Eval by `python3 train/tune_cuts.py --tag r8soft` (T=0.844 on val; r6full T=1.322), unchanged procedure; abstain tables by new `train/abstain.py` (results `data/train/abstain-<tag>.json`). Because r8soft passes the rule the r8softx follow-up was not run.
+
+### LOVO, exact / too loose / too tight (v3 tuning truth, n=5,716; too-loose rows in brackets; calibrated p)
+| | overall | non-DELETE | lower (1,641) | raise-wx (1,486) |
+|---|---|---|---|---|
+| mechanical | 76.3 / 1.3 / 22.3 (77) | | | |
+| baseline (a) | 91.0 / 1.3 / 7.8 (74) | 88.3 | 79.3 / 3.5 / 17.2 | 90.6 / 0.7 / 8.7 |
+| r6full (a) own cuts | 92.0 / 1.9 / 6.1 (108) | 89.7 | 82.6 / 3.4 / 14.0 (55) | 90.8 / 3.2 / 6.0 (47) |
+| **r8soft (a) own cuts** | **92.8 / 1.3 / 5.9 (73)** | 90.7 / 1.7 / 7.6 | 86.3 / 3.5 / 10.2 (57) | 90.0 / 0.7 / 9.3 (10) |
+| r6full (b) guarded | 88.6 / 1.3 / 10.1 (76) | 85.2 | 71.4 / 1.3 / 27.4 (21) | 90.4 / 3.3 / 6.3 (49) |
+| **r8soft (b) guarded** | **91.9 / 1.0 / 7.1 (55)** | 89.6 / 1.3 / 9.2 | 82.7 / 2.4 / 14.9 (39) | 90.5 / 0.7 / 8.8 (10) |
+
+raise-get 99.8 to 100 and DELETE 99.3 / 0 / 0.7 for all rows. Cuts r8soft mode (a), calibrated, chosen on all data: lower 0.30 (LOVO 0.10 to 0.50), r cut 0.40 (0.15 to 0.60), raise-wx 0.15 (0.05 to 0.15), raise-get 0.05 (0.02 to 0.05); mode (b) margin 0.6 to 0.9. Raw p (no calibration): (a) 93.4 / 1.3 / 5.3 (75), (b) 92.3 / 0.9 / 6.8 (51). Plain argmax r8soft 95.7 / 2.5 / 1.8 (142 loose), so cuts and guard still do the work of keeping loose down.
+
+Result: raise-wx too-loose fell from 47 to 10 (baseline 11), the whole 108 -> 73 gain. Lower tier is unchanged in too-loose (57 vs 55) but its tight fell 14.0 -> 10.2. Both modes now clear "exact >= 91 and too-loose <= 77" under honest LOVO. The lower tier (57 of 73 loose rows in mode a) is now the remaining loose source.
+
+### Abstain / ask table (honest LOVO cuts/margins, calibrated p; confidence = max p; abstained rows become "ask")
+Cell = answered rows' exact % / too-loose rows / too-tight rows; abstained count with, in brackets, how many of those the unguarded answer would have got too-loose.
+
+r8soft mode (b) guarded standalone
+| thr | answered % | exact % | too-loose | too-tight | abstained (loose avoided) |
+|---|---|---|---|---|---|
+| none | 100.0 | 91.9 | 55 | 408 | 0 |
+| 0.5 | 99.5 | 92.2 | 55 | 388 | 26 (0) |
+| 0.6 | 97.5 | 93.5 | 55 | 309 | 143 (0) |
+| 0.7 | 95.2 | 94.6 | 55 | 239 | 273 (0) |
+| 0.8 | 92.9 | 95.5 | 54 | 185 | 407 (1) |
+| 0.85 | 90.8 | 96.5 | 45 | 139 | 526 (10) |
+| 0.9 | 88.7 | 97.3 | 38 | 99 | 646 (17) |
+| 0.95 | 82.9 | 98.7 | 24 | 37 | 978 (31) |
+| 0.99 | 54.3 | 98.7 | 6 | 33 | 2612 (49) |
+
+r8soft mode (a) own cuts
+| thr | answered % | exact % | too-loose | too-tight | abstained (loose avoided) |
+|---|---|---|---|---|---|
+| none | 100.0 | 92.8 | 73 | 340 | 0 |
+| 0.5 | 99.5 | 93.1 | 70 | 324 | 26 (3) |
+| 0.6 | 97.5 | 94.3 | 68 | 247 | 143 (5) |
+| 0.7 | 95.2 | 95.3 | 65 | 192 | 273 (8) |
+| 0.8 | 92.9 | 95.8 | 54 | 168 | 407 (19) |
+| 0.85 | 90.8 | 96.9 | 45 | 118 | 526 (28) |
+| 0.9 | 88.7 | 97.7 | 38 | 78 | 646 (35) |
+| 0.95 | 82.9 | 98.7 | 24 | 39 | 978 (49) |
+| 0.99 | 54.3 | 98.7 | 6 | 33 | 2612 (67) |
+
+r6full mode (b) guarded standalone
+| thr | answered % | exact % | too-loose | too-tight | abstained (loose avoided) |
+|---|---|---|---|---|---|
+| none | 100.0 | 88.6 | 76 | 578 | 0 |
+| 0.5 | 99.8 | 88.7 | 76 | 569 | 9 (0) |
+| 0.6 | 98.6 | 89.6 | 76 | 511 | 78 (0) |
+| 0.7 | 97.6 | 90.3 | 76 | 464 | 140 (0) |
+| 0.8 | 96.2 | 91.1 | 76 | 412 | 219 (0) |
+| 0.85 | 94.6 | 92.2 | 76 | 347 | 306 (0) |
+| 0.9 | 92.8 | 93.2 | 76 | 283 | 413 (0) |
+| 0.95 | 89.8 | 95.0 | 76 | 183 | 585 (0) |
+| 0.99 | 47.3 | 98.9 | 3 | 28 | 3010 (73) |
+
+r6full mode (a) own cuts
+| thr | answered % | exact % | too-loose | too-tight | abstained (loose avoided) |
+|---|---|---|---|---|---|
+| none | 100.0 | 92.0 | 108 | 351 | 0 |
+| 0.5 | 99.8 | 92.1 | 107 | 343 | 9 (1) |
+| 0.6 | 98.6 | 93.0 | 105 | 289 | 78 (3) |
+| 0.7 | 97.6 | 93.8 | 103 | 245 | 140 (5) |
+| 0.8 | 96.2 | 94.6 | 96 | 202 | 219 (12) |
+| 0.85 | 94.6 | 95.5 | 90 | 156 | 306 (18) |
+| 0.9 | 92.8 | 96.2 | 85 | 117 | 413 (23) |
+| 0.95 | 89.8 | 96.8 | 75 | 89 | 585 (33) |
+| 0.99 | 47.3 | 98.9 | 3 | 28 | 3010 (105) |
+
+Band abstain, mode (a) (abstain when the tier-relevant p is within +-0.1 of its cut):
+| model | rule | answered % | exact % | too-loose | too-tight | abstained (loose avoided) |
+|---|---|---|---|---|---|---|
+| r6full | moved rows only (spec) | 91.4 | 92.4 | 96 | 299 | 494 (12) |
+| r6full | any in-tier row | 60.2 | 90.9 | 89 | 223 | 2277 (19) |
+| r8soft | moved rows only (spec) | 91.1 | 93.6 | 66 | 266 | 506 (7) |
+| r8soft | any in-tier row | 63.4 | 93.1 | 63 | 186 | 2092 (10) |
+
+Reading: r8soft is also better calibrated for abstaining. At 0.9 it answers 88.7% at 97.7% exact with 38 too-loose rows (mode a), abstaining on 646 rows of which 35 would have been too-loose; r6full at 0.9 answers 92.8% at 96.2% exact with 85 loose. The confidence of the r6 model carries almost no loose signal in mode (b) (its 76 loose rows are all answered with confidence >= 0.95), whereas r8soft's loose rows are concentrated at low confidence. Band abstain is a weak ask rule: it catches only 7 to 12 loose rows for about 500 asks; the max-p threshold is the better signal. About 98.7% exact is reached at p >= 0.95 (83% coverage) and 0.99 (54%).
+
+Caveats: one seed, one epoch, one 23-vendor split; thresholds are not tuned on v3 (grid reported as is); truth is Jev-derived labels; LOVO cuts differ per fold. Latency/size unchanged from r6 (same architecture).

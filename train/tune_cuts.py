@@ -181,16 +181,19 @@ def lighter(tr, va, ev, tu_base):
         print(name, json.dumps(res[name]), flush=True)
     return res
 
+def extend_grids():
+    """a fine-tuned model's p is far more peaked than TF-IDF's: add fine steps near 0 and 1 to every grid (baseline grids unchanged)"""
+    A_GRID[:] = sorted(set(A_GRID + [0.001, 0.005, 0.01])); RC_GRID[:] = sorted(set(RC_GRID + [0.001, 0.005, 0.01]))
+    B_GRID[:] = sorted(set(B_GRID + [0.001, 0.005, 0.01, 0.99, 0.995, 0.999])); C_GRID[:] = sorted(set(C_GRID + [0.001, 0.005, 0.01, 0.99, 0.995, 0.999]))
+    M_GRID[:] = sorted(set(M_GRID + [0.95, 0.98, 0.99, 0.995, 0.999]))
+
 if __name__ == '__main__':
     tag = sys.argv[sys.argv.index('--tag') + 1] if '--tag' in sys.argv else None
     tr, va, ev = (load_split('train') if '--lighter' in sys.argv else None), load_split('val'), load_split('v3eval')
     if tag == 'baseline':   # re-score the cached TF-IDF probs with exact row counts (original grids); writes tune-cuts-baseline-results.json
         z = np.load(os.path.join(OUT, 'baseline-probs.npz')); Pva, Pev = z['va'], z['ev']
     elif tag:
-        # a fine-tuned model's p is far more peaked than TF-IDF's: add fine steps near 0 and 1 to every grid (baseline grids unchanged)
-        A_GRID[:] = sorted(set(A_GRID + [0.001, 0.005, 0.01])); RC_GRID[:] = sorted(set(RC_GRID + [0.001, 0.005, 0.01]))
-        B_GRID[:] = sorted(set(B_GRID + [0.001, 0.005, 0.01, 0.99, 0.995, 0.999])); C_GRID[:] = sorted(set(C_GRID + [0.001, 0.005, 0.01, 0.99, 0.995, 0.999]))
-        M_GRID[:] = sorted(set(M_GRID + [0.95, 0.98, 0.99, 0.995, 0.999]))
+        extend_grids()
         Pva, Pev = np.load(os.path.join(OUT, f'probs-{tag}-val.npy')).astype(float), np.load(os.path.join(OUT, f'probs-{tag}-v3eval.npy')).astype(float)
         assert len(Pva) == len(va) and len(Pev) == len(ev)
     else:

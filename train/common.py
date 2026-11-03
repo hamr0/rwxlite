@@ -98,3 +98,24 @@ def print_report(rep):
     for name, d in rep.items():
         print(f'--- {name}')
         for k, v in d.items(): print(f'  {k:16s} n={v["n"]:5d} exact {v.get("exact")}  loose {v.get("loose")}  tight {v.get("tight")}')
+
+def soft_targets(df):
+    """Round 8: 3-way (r,w,x) target distribution per row from stored Jev probabilities. (n,3) float32.
+    lower/raise-wx tiers (isX asked): p(x)=isX. POST rows with POST-changes p c: p(r)=(1-isX)(1-c), p(w)=(1-isX)c (c missing -> all non-x mass to w).
+    PUT/PATCH: p(w)=1-isX. raise-get (GET, changes asked): p(r)=1-ch, p(w)=ch (hard label x -> p(x)=ch, p(r)=1-ch).
+    DELETE, credential rows, tier none and rows without Jev p: one-hot of the round-6 label."""
+    T = np.zeros((len(df), 3), dtype=np.float32)
+    cols = {c: df[c].values for c in ['y', 'status', 'tier', 'method', 'jev_p', 'jev_pC']}
+    for i in range(len(df)):
+        y, st, t, m, p, c = (cols[k][i] for k in ['y', 'status', 'tier', 'method', 'jev_p', 'jev_pC'])
+        if st in ('delete', 'credential') or t == 'none' or p is None or p != p:
+            T[i, y] = 1; continue
+        p = float(p)
+        if t in ('lower', 'raise-wx'):
+            T[i, 2] = p; rest = 1 - p
+            if m == 'POST' and c is not None and c == c: T[i, 0] = rest * (1 - c); T[i, 1] = rest * c
+            else: T[i, 1] = rest
+        elif t == 'raise-get':
+            T[i, 0] = 1 - p; T[i, 2 if y == 2 else 1] = p
+        else: T[i, y] = 1
+    return T
