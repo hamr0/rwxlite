@@ -66,7 +66,6 @@ def score():
         col = [P[i][c] for i in ids]; asked[c] = np.array([v == 'ask' for v in col]); fin = np.array([0 if v == 'ask' else ORDER[v] for v in col])
         pref = np.array([ORDER[P[i]['b_letter']] for i in ids]) if c.startswith('b_') else pa
         res['configs'][c] = piles(fin, asked[c], pref, y)
-        res['configs'][c]['final'] = fin.tolist() if False else None
     # moves (mode a, no bar)
     res['moves'] = {}
     for nm in ('lowering', 'raise', 'keep'):
@@ -76,7 +75,7 @@ def score():
     for key, arr in (('by_vendor', np.array([inp[i]['provider'] for i in ids])), ('by_method', np.array([inp[i]['method'] for i in ids])), ('by_tier', np.array([P[i]['tier'] for i in ids])), ('by_move', np.array([P[i]['move'] for i in ids]))):
         res['GONOGO_' + key] = {v: piles(g, ga, pa, y, arr == v) for v in sorted(set(arr))}
     for c in ('a_none', 'mechanical'):
-        fin = np.array([ORDER[P[i][c]] for i in ids]); 
+        fin = np.array([ORDER[P[i][c]] for i in ids])
         for key, arr in (('by_vendor', np.array([inp[i]['provider'] for i in ids])), ('by_method', np.array([inp[i]['method'] for i in ids]))):
             res[c + '_' + key] = {v: piles(fin, np.zeros(N, bool), pa, y, arr == v) for v in sorted(set(arr))}
     L = np.where(~ga & (g < y))[0]; lt = {'loweredWrongly': 0, 'keepMechLoose': 0, 'raiseStillLoose': 0}; rows = []

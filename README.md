@@ -57,7 +57,7 @@ This is a research repo for now. There is nothing to install.
 | Baseline | trained | TF-IDF + logistic regression, 24 MB, about 1.5 ms/op |
 | Fine-tuned MiniLM | trained, exam failed (too loose) | 22.7M params, 90.9 MB fp32, about 22-28 ms/op in fp32 PyTorch; 95.9% exact, 0.84% too loose on the exam |
 | int8 ONNX export + Node answerer | *planned (M1)* | the in-process answerer that speaks Jev's JSON |
-| Abstain threshold | measured, not built | "no answer when not confident"; 0.95 gives 90% answered at 98.7% exact on the exam |
+| Abstain threshold | measured, not built | "no answer when not confident"; the contract rule asks on lowerings under 0.97 and trusts raises and keeps: fresh exam 92.6% right, 5 too loose, 7.8% asked |
 | rwxmap integration | *planned (M2)* | mechanical leans first, model moves contested rows |
 
 Input is OpenAPI operations only: method, path template, operationId, summary, description.
