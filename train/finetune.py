@@ -11,6 +11,9 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--n', type=int, default=0); ap.add_argument('--epochs', type=float, default=1)
 ap.add_argument('--bs', type=int, default=32); ap.add_argument('--lr', type=float, default=5e-5)
 ap.add_argument('--max_len', type=int, default=128); ap.add_argument('--tag', default='run'); ap.add_argument('--ckpt', type=int, default=500); ap.add_argument('--threads', type=int, default=8)
+ap.add_argument('--soft', action='store_true', help='round 8: soft targets from Jev p (see common.soft_targets)')
+ap.add_argument('--alpha', type=float, default=0.7, help='weight of soft CE; loss = alpha*soft + (1-alpha)*hard')
+ap.add_argument('--x_weight', type=float, default=1.0, help='class weight on x in both CE terms')
 a = ap.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(1); random.seed(1)
 BASE = 'sentence-transformers/all-MiniLM-L6-v2'
@@ -19,6 +22,8 @@ model = AutoModelForSequenceClassification.from_pretrained(BASE, num_labels=3)
 tr, va, ev = load_split('train'), load_split('val'), load_split('v3eval')
 if a.n: tr = tr.sample(a.n, random_state=1)
 texts, ys = list(tr.text), tr.y.values
+soft = torch.tensor(soft_targets(tr)) if a.soft else None
+cw = torch.tensor([1.0, 1.0, a.x_weight])
 enc = tok(texts, truncation=True, max_length=a.max_len)['input_ids']
 def batches(order):
     # bucket: sort within chunks of 50 batches by length so padding is small, then shuffle batch order
@@ -62,7 +67,12 @@ while not done:
     bl = batches(order); skip = step % steps_per_epoch if ep == step // steps_per_epoch else 0
     for b in bl[skip:]:
         x, m = collate(b, enc); y = torch.tensor(ys[b])
-        loss = torch.nn.functional.cross_entropy(model(input_ids=x, attention_mask=m).logits, y)
+        logits = model(input_ids=x, attention_mask=m).logits
+        hard = torch.nn.functional.cross_entropy(logits, y, weight=cw)
+        if soft is not None:
+            sce = -(soft[b] * cw * torch.log_softmax(logits, -1)).sum(1).mean()
+            loss = a.alpha * sce + (1 - a.alpha) * hard
+        else: loss = hard
         loss.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step(); sch.step(); opt.zero_grad(); step += 1
         ema = loss.item() if ema is None else 0.98 * ema + 0.02 * loss.item()
         if step % 25 == 0:
