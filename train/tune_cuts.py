@@ -3,7 +3,9 @@ on the v3 tuning truth under the PRD global-budget rule (max exact s.t. TOTAL to
 Honest LOVO: for each held-out vendor the cuts are picked on the other vendors only.
 Calibration (temperature) is fit on the val split (round-6 targets), never on v3.
 Run: python3 train/tune_cuts.py            (cuts + calibration + latency breakdown; writes data/train/tune-cuts-results.json)
-     python3 train/tune_cuts.py --lighter  (also fit lighter vectoriser variants; slow, n_jobs=2)"""
+     python3 train/tune_cuts.py --lighter  (also fit lighter vectoriser variants; slow, n_jobs=2)
+     python3 train/tune_cuts.py --tag r6full  (same procedure on a fine-tuned model's saved probs: data/train/probs-<tag>-{val,v3eval}.npy;
+                                               writes tune-cuts-<tag>-results.json; no latency/baseline pickle)"""
 import sys, os, json, time, pickle
 import numpy as np, scipy.sparse as sp
 from scipy.optimize import minimize_scalar
@@ -110,7 +112,7 @@ class Tuner:
         return tot, dl, tt, chosen, pre, tabs
 
 def fin(a):
-    n, e, l = (float(x) for x in a); return {'n': int(n), 'exact': round(100*e/n, 1), 'loose': round(100*l/n, 1), 'tight': round(100*(n-e-l)/n, 1)} if n else {'n': 0}
+    n, e, l = (float(x) for x in a); return {'n': int(n), 'exact': round(100*e/n, 1), 'loose': round(100*l/n, 1), 'looseRows': int(round(l)), 'tight': round(100*(n-e-l)/n, 1)} if n else {'n': 0}
 
 def report(name, tu):
     parts, chosen = tu.lovo_a()
@@ -128,7 +130,7 @@ def report(name, tu):
 
 def show(name, r):
     a, b = r['mode_a'], r['mode_b_guarded']
-    f = lambda d: f"{d['exact']} / {d['loose']} / {d['tight']} (loose rows {round(d['loose']*d['n']/100)})"
+    f = lambda d: f"{d['exact']} / {d['loose']} / {d['tight']} (loose rows {d['looseRows']})"
     print(f'=== {name}')
     print(f" mode (a) LOVO  all {f(a['overall'])}  nonDEL {f(a['nonDELETE'])}  DEL {f(a['DELETE'])}")
     for k, v in a['tiers'].items(): print(f"   {k:12s} n={v['n']:5d} {f(v)}")
@@ -180,13 +182,24 @@ def lighter(tr, va, ev, tu_base):
     return res
 
 if __name__ == '__main__':
-    tr, va, ev = load_split('train'), load_split('val'), load_split('v3eval')
-    wv, cv, clf = pickle.load(open(os.path.join(OUT, 'baseline.pkl'), 'rb'))
-    feat = lambda s: sp.hstack([wv.transform(s), cv.transform(s)]).tocsr()
-    cache = os.path.join(OUT, 'baseline-probs.npz')
-    if os.path.exists(cache): z = np.load(cache); Pva, Pev = z['va'], z['ev']
+    tag = sys.argv[sys.argv.index('--tag') + 1] if '--tag' in sys.argv else None
+    tr, va, ev = (load_split('train') if '--lighter' in sys.argv else None), load_split('val'), load_split('v3eval')
+    if tag == 'baseline':   # re-score the cached TF-IDF probs with exact row counts (original grids); writes tune-cuts-baseline-results.json
+        z = np.load(os.path.join(OUT, 'baseline-probs.npz')); Pva, Pev = z['va'], z['ev']
+    elif tag:
+        # a fine-tuned model's p is far more peaked than TF-IDF's: add fine steps near 0 and 1 to every grid (baseline grids unchanged)
+        A_GRID[:] = sorted(set(A_GRID + [0.001, 0.005, 0.01])); RC_GRID[:] = sorted(set(RC_GRID + [0.001, 0.005, 0.01]))
+        B_GRID[:] = sorted(set(B_GRID + [0.001, 0.005, 0.01, 0.99, 0.995, 0.999])); C_GRID[:] = sorted(set(C_GRID + [0.001, 0.005, 0.01, 0.99, 0.995, 0.999]))
+        M_GRID[:] = sorted(set(M_GRID + [0.95, 0.98, 0.99, 0.995, 0.999]))
+        Pva, Pev = np.load(os.path.join(OUT, f'probs-{tag}-val.npy')).astype(float), np.load(os.path.join(OUT, f'probs-{tag}-v3eval.npy')).astype(float)
+        assert len(Pva) == len(va) and len(Pev) == len(ev)
     else:
-        Pva, Pev = clf.predict_proba(feat(va.text)), clf.predict_proba(feat(ev.text)); np.savez(cache, va=Pva, ev=Pev)
+        wv, cv, clf = pickle.load(open(os.path.join(OUT, 'baseline.pkl'), 'rb'))
+        feat = lambda s: sp.hstack([wv.transform(s), cv.transform(s)]).tocsr()
+        cache = os.path.join(OUT, 'baseline-probs.npz')
+        if os.path.exists(cache): z = np.load(cache); Pva, Pev = z['va'], z['ev']
+        else:
+            Pva, Pev = clf.predict_proba(feat(va.text)), clf.predict_proba(feat(ev.text)); np.savez(cache, va=Pva, ev=Pev)
     T = temp_fit(Pva, va.y.values)
     print(f'val acc {(Pva.argmax(1)==va.y.values).mean()*100:.2f}  temperature (fit on val) T={T:.3f}')
     results = {'temperature': round(T, 3)}
@@ -195,6 +208,7 @@ if __name__ == '__main__':
     print('mechanical', results['mechanical'])
     results['raw'] = report('raw p', tu); show('raw p', results['raw'])
     tuc = Tuner(ev, temp_apply(Pev, T)); results['calibrated'] = report('temperature-calibrated p', tuc); show('temperature-calibrated p', results['calibrated'])
-    results['latency'] = latency(wv, cv, clf, list(ev.text.values[:300])); print(results['latency'])
-    if '--lighter' in sys.argv: results['lighter'] = lighter(tr, va, ev, tu)
-    json.dump(results, open(os.path.join(OUT, 'tune-cuts-results.json'), 'w'), indent=1)
+    if not tag:
+        results['latency'] = latency(wv, cv, clf, list(ev.text.values[:300])); print(results['latency'])
+        if '--lighter' in sys.argv: results['lighter'] = lighter(tr, va, ev, tu)
+    json.dump(results, open(os.path.join(OUT, f'tune-cuts-{tag}-results.json' if tag else 'tune-cuts-results.json'), 'w'), indent=1)

@@ -86,4 +86,6 @@ Truth mix (r/w/x), from part.csv:
 
 ## Status
 
+BURNED for rwxmap too: F2 (D131) scored once on 2026-11-03.
+
 FROZEN. rwxmap scores F2 on this set once. It is NOT an rwxlite exam: rwxlite's MiniLM was trained on these rows, so scoring it here is contaminated. rwxlite will not tune on it.
