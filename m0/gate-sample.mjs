@@ -19,6 +19,12 @@ const SEED = GATE2 ? 20261104 : 20261103;
 const GATE1_IDS = GATE2 ? new Set(fs.readFileSync(path.join(HERE, '..', 'data', 'gate-2026-11-03', 'ids.txt'), 'utf8').split('\n').filter(Boolean)) : new Set();
 const N = 600, MIN_GET = 100, MIN_PUTPATCH = 100, VENDOR_CAP = Math.floor(N * 0.05);
 const EXAM_AND_LOCKED = ['cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot', 'zendesk', 'miro', 'dropbox', 'shopify', 'linear'];
+// Gate-2 amendment (rwxmap lock check): burned-exam and locked vendors are excluded BY NAME (whole domain labels of
+// provider, split on '.' and ':'), not only by row. Burned exam vendors: okta, docusign, xero (exam-2026-09-17);
+// klaviyo (exam-2026-09-20, plus auth0/hubspot/miro/zendesk); cloudflare, pagerduty, sentry (exam-2026-09-22).
+// Locked: auth0, hubspot, zendesk, miro, dropbox, shopify, linear.
+const BURNED_NAMES = ['okta', 'docusign', 'xero', 'klaviyo', 'cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot', 'zendesk', 'miro', 'dropbox', 'shopify', 'linear'];
+const byName = (provider) => String(provider || '').toLowerCase().split(/[.:]/).some((l) => BURNED_NAMES.includes(l));
 const SAMPLED = ['GET', 'POST', 'PUT', 'PATCH'];
 const first = (s) => String(s || '').toLowerCase().split(/[.:]/)[0];
 const opKey = (m, p, o) => `${String(m).toUpperCase()}|${p}|${o}`;
@@ -92,6 +98,27 @@ const short = SAMPLED.filter((m) => (nM[m] || 0) < quota[m]);
 if (short.length) console.warn('quota short for', short, nM, quota);
 
 // blind order: pool is already seeded-shuffled; picked keeps that order. Ids gate-0001..
+// Gate-2 minimal fix: keep every retained row (and its id/position); redraw only slots whose vendor is excluded by name,
+// from a second seeded shuffle (SEED+1) of the by-name-eligible pool, same method stratum, same vendor cap.
+let redraw = null;
+if (GATE2) {
+  const keep = (e) => !byName(e.row.provider);
+  const slotsOut = picked.map((e, i) => (keep(e) ? -1 : i)).filter((i) => i >= 0);
+  const kept = picked.filter(keep);
+  const used = new Set(picked.map((e) => e.key));
+  const need = {}; for (const i of slotsOut) need[picked[i].method] = (need[picked[i].method] || 0) + 1;
+  const vN = {}; for (const e of kept) vN[e.vendor] = (vN[e.vendor] || 0) + 1;
+  const pool2 = shuffle(eligible.filter((e) => keep(e) && !used.has(e.key)).sort((a, b) => (a.key < b.key ? -1 : 1)), mulberry32(SEED + 1));
+  const got = {};
+  for (const e of pool2) {
+    if ((got[e.method] || []).length >= (need[e.method] || 0) || (vN[e.vendor] || 0) >= VENDOR_CAP) continue;
+    (got[e.method] ??= []).push(e); vN[e.vendor] = (vN[e.vendor] || 0) + 1;
+  }
+  redraw = { slotsOut, need, replaced: [] };
+  for (const i of slotsOut) { const m = picked[i].method; const n = got[m]?.shift(); if (!n) throw new Error('redraw short ' + m); redraw.replaced.push({ slot: i, old: picked[i], now: n }); picked[i] = n; }
+  ex.byname_replaced = slotsOut.length;
+  ex.byname_eligible = eligible.filter(keep).length;
+}
 const rows = picked.map((e, i) => ({ id: `${GATE2 ? 'gate2' : 'gate'}-${String(i + 1).padStart(4, '0')}`, e }));
 fs.mkdirSync(OUT, { recursive: true });
 const H = ['id', 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
@@ -134,7 +161,22 @@ selection or any repeated scoring. After the gate it is burned. Nothing is score
 Total op keys: ${ex.op_keys_total} (from ${ex.total} rows). Excluded, in order: exam vendors (cloudflare, pagerduty, sentry) ${ex.exam_vendor};
 the other 7 locked vendors (auth0, hubspot, zendesk, dropbox, shopify, linear, miro) ${ex.locked_vendor}; exam_opkey_overlap ${ex.exam_opkey_overlap};
 already in a v3 truth set (combined-2026-09-21, relabel-buildset-2026-09-23) ${ex.in_v3_truth};${GATE2 ? ` already in gate-1 (any snapshot of an op key in data/gate-2026-11-03/ids.txt) ${ex.gate1};` : ''} DELETE ${ex.delete}; HEAD/OPTIONS/TRACE/other ${ex.head_options_trace_other}.
-Eligible: ${ex.op_keys_eligible}.
+Eligible: ${ex.op_keys_eligible}.${GATE2 ? `
+
+## Amendment: burned-exam vendors excluded by name (rwxmap lock check)
+
+rwxmap's lock check on this gate found xero.com in the draw: xero was an exam vendor in rwxmap \`data/exam-2026-09-17\`
+(with okta and docusign). rwxmap's rule is that a draw excludes prior exam vendors BY NAME, not only by row. The first
+draw only excluded exam rows/op keys and cloudflare/pagerduty/sentry by first token, so xero.com (1 row) slipped in.
+
+Fix (minimal): the original seeded draw above is unchanged; every row whose provider has a whole domain label (split on
+\`.\` and \`:\`) in the burned/locked name list is dropped, and only those slots are redrawn: ${redraw.replaced.length} rows. Each new row takes
+the freed id/position, comes from a second seeded shuffle (seed ${SEED + 1}, mulberry32, sorted op keys) of the by-name-eligible pool, same
+method stratum (${Object.entries(redraw.need).map(([m, n]) => `${m} ${n}`).join(', ')}), same ${VENDOR_CAP}-row vendor cap, same exclusions as above
+(including gate-1). All other ${N - redraw.replaced.length} rows and ids are unchanged. ids.txt and providers.txt are rewritten.
+Names excluded: ${BURNED_NAMES.join(', ')}. Burned exam vendors: okta, docusign, xero (exam-2026-09-17); auth0, hubspot, klaviyo, miro, zendesk
+(exam-2026-09-20); cloudflare, pagerduty, sentry (exam-2026-09-22). Locked only: dropbox, shopify, linear.
+Replaced ids: ${redraw.replaced.map((r) => `gate2-${String(r.slot + 1).padStart(4, '0')}`).join(', ')} (all were xero.com, replaced in place).` : ''}
 
 ## Counts
 
@@ -149,4 +191,5 @@ ${fmt(byVendor.slice(0, 15))}
 (${byVendor.length} vendors in all.)
 `);
 if (GATE2) fs.writeFileSync(path.join(OUT, 'providers.txt'), [...new Set(rows.map(({ e }) => e.row.provider))].sort().join('\n') + '\n');
+if (redraw) console.log('replaced', redraw.replaced.map((r) => `${r.slot + 1}:${r.old.method}:${r.old.row.provider}->${r.now.row.provider}`).join(' '));
 console.log(JSON.stringify({ ex, avail, quota, nM, sample: rows.length, ids: ids.length, vendors: byVendor.length, top: byVendor.slice(0, 8) }));
