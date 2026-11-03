@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: contract, round 5 signed off. Date: 2026-11-03.
+Status: contract, round 6 signed off. Date: 2026-11-03.
 
 ## Problem & goal
 
@@ -30,7 +30,7 @@ Jev is a hosted model (`api.typesafe.ai/v1/systemone`, model `jev-latest`). rwxm
 
 - Mechanical rules run first and stay in charge.
 - rwxlite then answers the same three questions Jev answers, on the same piles. It may make only Jev's one-step moves:
-  - jev-lower: x to w, on `floor-post` rows (question isX).
+  - jev-lower: x to w, on `floor-post` rows (question isX). Round 6: a two-step lower, x can drop to w OR r (see Round 6).
   - jev-raise-wx: w to x, on `method-floor` rows (question isX).
   - jev-raise-get: r to w, on `method` rows with class r (question changes).
 - rwxlite tunes its own thresholds (see Thresholds). It does not reuse rwxmap's, because a threshold is valid only for the exact client and model it was swept on.
@@ -133,6 +133,15 @@ rwxlite tunes its own thresholds per tier, on BRIEF-v3 truth only, by leave-one-
 
 **Starting cuts** (a starting point for the sweep, not final): lower 0.20, raise-wx 0.60, raise-get 0.20.
 
+## Round 6 (signed off 2026-11-03)
+
+1. **Two-step lower on POST.** On `floor-post` x rows, x can drop to w OR r. POST rows are also asked the "changes" question (`m0/questions/criteria-changes.mjs`, byte-identical to rwxmap a7bc855; its r letter covers POST). Label rule for a POST x row: if isX p < lower cut, then if changes p < r cut the label is r, else w. The r cut is tuned with the global-budget rule (max exact subject to total too-loose no worse than mechanical), leave-one-vendor-out, on the v3 TUNING truth (the 5,716 joined rows from `m0/parity.mjs --truth v3`). Never on either gate sample or the exam.
+2. **Second fresh gate sample (gate-2).** The first sample failed at 90.8% (all too-tight, mostly read-by-POST). After the rule changes, the label gate is measured on a SECOND fresh 600-row sample, same rules as gate-1 (seed 20261104, `data/gate-2026-11-04/`), also excluding every op key in `data/gate-2026-11-03/ids.txt` and all gate-1 rows. Used once.
+3. **Credential rule.** A narrow text rule gives x when the operation changes, resets or rotates a credential (password, PIN, passcode, auth key, API key or secret, passphrase), per BRIEF-v3 clause (b). Narrow: creating a token or session for login is NOT covered unless the brief says so. Its effect is measured on the v3 tuning truth (hits, exact gained and lost) and it is applied only if it adds no too-loose and gains net.
+4. **Bar stays 95%.** Not loosened.
+5. **Exam as go/no-go.** The trained model is scored ONCE on rwxmap's 2026-09-22 exam as the M0 go/no-go. rwxmap already scored it with mechanical and with Jev; rwxlite never trained or tuned on it. This happens only after the label gate passes.
+6. **Stance.** rwxlite and rwxmap learn from each other, no upper hand. rwxlite may build its own dataset to complement rwxmap's.
+
 ## Go / no-go (module 0)
 
 On the 4279-operation exam, with exam providers held out:
@@ -185,6 +194,7 @@ Only module 0 is sharp. The rest are sketches.
 - Easy-case bias: train on Jev's p for all rows; agreement is a report, not a filter.
 - $50 Jev cap: confirmed.
 - Thresholds: rwxlite tunes its own, under the global-budget rule (round 5).
+- Round 6: items 1-6 above (two-step POST lower, gate-2, credential rule, bar 95%, exam once, mutual-learning stance).
 - Round 5: BRIEF-v3 only; DELETE mechanical; fresh-sample gate used once; model/format decisions recorded above.
 
 ## Open questions
