@@ -1,0 +1,950 @@
+id,label,confidence,note
+fx-0001,r,high,GET read
+fx-0002,x,low,e runs migration stops service
+fx-0003,w,high,edit
+fx-0004,r,high,GET read
+fx-0005,r,high,GET read
+fx-0006,r,high,GET read
+fx-0007,r,high,GET read
+fx-0008,r,high,GET read
+fx-0009,x,high,a DELETE discards draft
+fx-0010,w,high,edit webhook
+fx-0011,r,high,GET read
+fx-0012,r,high,GET read
+fx-0013,x,high,DELETE method wins
+fx-0014,r,high,GET read
+fx-0015,r,high,GET read
+fx-0016,w,high,ii creates unsent draft
+fx-0017,w,high,edit wallet
+fx-0018,w,high,edit
+fx-0019,x,high,e dispatches cleanup job
+fx-0020,w,high,set setting
+fx-0021,r,high,GET read
+fx-0022,w,high,ii plain create
+fx-0023,r,high,GET read
+fx-0024,r,high,GET read
+fx-0025,r,high,GET read
+fx-0026,r,high,GET read
+fx-0027,w,high,ii create api key
+fx-0028,r,high,GET read
+fx-0029,r,high,GET read
+fx-0030,x,high,a DELETE template
+fx-0031,r,high,GET read
+fx-0032,x,high,a DELETE preview
+fx-0033,x,high,a DELETE tax
+fx-0034,w,high,edit event
+fx-0035,r,high,i evaluates expression only
+fx-0036,r,high,GET read
+fx-0037,x,high,a DELETE backup schedule
+fx-0038,w,low,start has stop opposite
+fx-0039,x,low,f finalize cannot step back
+fx-0040,r,high,GET read
+fx-0041,r,high,GET read
+fx-0042,x,high,b revokes links ends sessions
+fx-0043,r,high,GET read
+fx-0044,x,high,a DELETE alerts
+fx-0045,w,high,iii applies coupon
+fx-0046,w,high,edit wallet
+fx-0047,r,high,GET read
+fx-0048,r,high,GET read
+fx-0049,w,low,ii records usage event
+fx-0050,r,high,GET read
+fx-0051,r,high,GET read
+fx-0052,w,high,edit org
+fx-0053,r,high,GET read
+fx-0054,w,high,edit permission
+fx-0055,w,high,ii plain create
+fx-0056,w,high,ii create or update customer
+fx-0057,r,low,check only
+fx-0058,r,high,GET read
+fx-0059,x,high,a DELETE env
+fx-0060,x,high,a DELETE suppression
+fx-0061,w,low,refresh draft invoice recompute
+fx-0062,r,high,GET read
+fx-0063,w,high,ii adds reference
+fx-0064,w,high,ii adds tag
+fx-0065,x,high,e starts transfer sends secrets
+fx-0066,x,high,DELETE terminate wallet
+fx-0067,w,high,edit automation
+fx-0068,x,high,DELETE method wins
+fx-0069,x,high,d voids credit
+fx-0070,r,high,GET read
+fx-0071,r,high,GET read
+fx-0072,r,high,GET read
+fx-0073,x,high,a DELETE app
+fx-0074,w,low,ii creates event
+fx-0075,x,high,c resends invitation email
+fx-0076,r,high,GET read
+fx-0077,w,high,ii create api key
+fx-0078,r,high,GET read
+fx-0079,w,high,ii plain create
+fx-0080,w,high,ii create domain
+fx-0081,r,high,GET read
+fx-0082,r,high,GET read
+fx-0083,x,high,a DELETE fee
+fx-0084,w,low,generates checkout link
+fx-0085,x,high,e runs backup
+fx-0086,w,low,PUT replace assignments
+fx-0087,w,high,ii create secret
+fx-0088,r,high,GET read
+fx-0089,w,high,ii plain create
+fx-0090,x,low,voids existing draft
+fx-0091,r,high,GET read
+fx-0092,r,high,GET read
+fx-0093,w,high,iii confirms email change
+fx-0094,w,high,ii create webhook
+fx-0095,r,high,GET read
+fx-0096,x,high,a DELETE metadata
+fx-0097,r,high,GET read
+fx-0098,w,high,ii plain create
+fx-0099,w,high,ii plain create
+fx-0100,w,high,ii create schema
+fx-0101,r,high,GET read
+fx-0102,x,high,DELETE removes and revokes links
+fx-0103,w,high,edit template
+fx-0104,w,high,edit topics
+fx-0105,x,low,e runs migration stops app
+fx-0106,x,high,c admin invitation sent
+fx-0107,r,high,GET read
+fx-0108,r,high,GET read
+fx-0109,w,high,ii plain create
+fx-0110,w,high,attach
+fx-0111,x,high,a DELETE metadata
+fx-0112,w,high,edit
+fx-0113,x,low,d top-up may charge
+fx-0114,x,high,f cancel mid-send not restartable
+fx-0115,r,high,GET read
+fx-0116,w,high,edit fee status
+fx-0117,w,high,adds permission to role
+fx-0118,r,high,GET read
+fx-0119,w,high,edit resource
+fx-0120,x,low,d provisions paid droplet at provider
+fx-0121,x,high,b revokes invitation
+fx-0122,r,high,GET read
+fx-0123,r,high,GET read
+fx-0124,r,high,GET read
+fx-0125,x,high,a DELETE payment method
+fx-0126,r,high,GET read
+fx-0127,r,high,GET read
+fx-0128,w,high,ii create task
+fx-0129,r,high,GET read
+fx-0130,r,high,GET read
+fx-0131,w,high,edit
+fx-0132,x,high,a DELETE event
+fx-0133,r,high,GET read
+fx-0134,w,high,ii create api key
+fx-0135,w,high,edit
+fx-0136,w,high,edit plan
+fx-0137,r,high,GET read
+fx-0138,w,high,edit env
+fx-0139,x,high,a DELETE segment
+fx-0140,w,low,edit settings may restart sentinel
+fx-0141,w,low,replace metadata is set
+fx-0142,r,high,GET read
+fx-0143,w,high,edit env
+fx-0144,r,high,GET read
+fx-0145,x,high,a DELETE schedule and archives
+fx-0146,w,high,ii create env
+fx-0147,r,high,GET read
+fx-0148,r,high,GET read
+fx-0149,w,high,ii create filter
+fx-0150,r,high,GET read
+fx-0151,x,high,e executes task
+fx-0152,r,high,GET read
+fx-0153,r,high,GET read
+fx-0154,r,high,GET read
+fx-0155,w,high,edit entitlements
+fx-0156,w,low,marks transferred disables automations
+fx-0157,x,high,void definitive
+fx-0158,w,high,edit role
+fx-0159,r,high,GET read
+fx-0160,w,high,ii create indicator
+fx-0161,r,high,GET read
+fx-0162,r,high,GET read
+fx-0163,w,high,toggle deactivate has activate
+fx-0164,r,high,GET read
+fx-0165,w,high,edit integration
+fx-0166,r,high,GET read
+fx-0167,w,low,assigns plan creates subscription
+fx-0168,w,high,ii duplicate creates
+fx-0169,w,low,creates reset token no send named
+fx-0170,x,low,e syncs from outside source
+fx-0171,r,high,GET read
+fx-0172,w,high,ii create resource
+fx-0173,x,low,e restarts service
+fx-0174,x,high,a DELETE role
+fx-0175,w,high,edit key
+fx-0176,r,high,GET read
+fx-0177,w,high,ii create env
+fx-0178,w,high,ii create webhook
+fx-0179,w,high,edit email
+fx-0180,x,high,a deletes DNS record at Cloudflare
+fx-0181,x,high,a DELETE automation
+fx-0182,w,low,repoints DNS record
+fx-0183,x,high,a DELETE permanent
+fx-0184,r,high,GET read
+fx-0185,r,high,GET read
+fx-0186,r,high,GET read
+fx-0187,x,high,b revokes registration permanent
+fx-0188,w,high,assign role
+fx-0189,w,low,creates challenge no send named
+fx-0190,w,high,edit webhook
+fx-0191,w,high,merge metadata
+fx-0192,r,high,GET read
+fx-0193,r,high,GET read
+fx-0194,w,high,moves service
+fx-0195,w,low,replaces entitlements is set
+fx-0196,x,high,c sends emails
+fx-0197,r,high,GET read
+fx-0198,r,high,GET read
+fx-0199,r,high,GET read
+fx-0200,r,high,GET read
+fx-0201,r,high,GET read
+fx-0202,w,high,ii plain create
+fx-0203,x,low,c shareable link exposes email
+fx-0204,w,high,edit env
+fx-0205,x,high,a DELETE permission
+fx-0206,x,high,e runs backup
+fx-0207,w,high,edit account
+fx-0208,w,high,ii create property
+fx-0209,r,high,GET read
+fx-0210,r,high,GET read
+fx-0211,w,high,ii adds suppressions
+fx-0212,w,high,ii create charge
+fx-0213,r,high,GET read
+fx-0214,w,low,replace metadata is set
+fx-0215,w,high,edit charge
+fx-0216,w,high,ii create filter
+fx-0217,x,high,a permanently deletes draft invoice
+fx-0218,w,high,edit topic
+fx-0219,r,high,GET read
+fx-0220,w,high,ii create topic
+fx-0221,w,high,edit settings
+fx-0222,w,high,edit feature
+fx-0223,w,high,ii generate cert
+fx-0224,w,high,toggle enable has disable
+fx-0225,x,high,a permanent delete
+fx-0226,x,high,a DELETE filter
+fx-0227,r,high,GET read
+fx-0228,w,high,ii create feature
+fx-0229,r,high,GET read
+fx-0230,r,high,GET read
+fx-0231,w,high,edit membership both settable
+fx-0232,r,high,GET read
+fx-0233,x,high,a DELETE env
+fx-0234,x,high,a DELETE config and executions
+fx-0235,r,high,GET read
+fx-0236,w,high,edit app
+fx-0237,x,high,b expires key
+fx-0238,x,high,a DELETE token
+fx-0239,x,high,c replay delivers event
+fx-0240,w,high,stop can be started again
+fx-0241,x,high,a DELETE resource cascade
+fx-0242,w,low,confirms email verification
+fx-0243,r,high,GET read
+fx-0244,w,high,ii plain create
+fx-0245,w,high,ii create env
+fx-0246,x,high,c sends email
+fx-0247,r,high,GET read
+fx-0248,r,high,i validates token
+fx-0249,x,low,b triggers IdP sign out
+fx-0250,x,high,a DELETE logout removes login
+fx-0251,w,high,ii create connected account
+fx-0252,w,high,ii create env
+fx-0253,w,low,docker login replaces saved login
+fx-0254,r,high,GET read
+fx-0255,r,high,GET read
+fx-0256,r,high,GET read
+fx-0257,r,high,GET read
+fx-0258,r,high,GET read
+fx-0259,r,high,GET read
+fx-0260,x,low,d issues one-off invoice
+fx-0261,x,high,a DELETE metric
+fx-0262,r,high,GET read
+fx-0263,r,high,GET read
+fx-0264,w,high,ii generate token
+fx-0265,r,high,GET read
+fx-0266,r,high,GET read
+fx-0267,r,high,GET read
+fx-0268,x,low,c sends event may trigger automations
+fx-0269,w,high,edit assignments
+fx-0270,w,high,edit settings
+fx-0271,x,high,c forwards email
+fx-0272,r,high,GET read
+fx-0273,w,high,edit connection
+fx-0274,w,high,organizational move
+fx-0275,w,high,toggle enable has disable
+fx-0276,w,high,ii generate token
+fx-0277,w,high,edit group
+fx-0278,r,high,GET read
+fx-0279,w,high,iii accept activates membership
+fx-0280,r,low,i verify check
+fx-0281,r,high,GET read
+fx-0282,r,high,GET read
+fx-0283,r,high,GET read
+fx-0284,x,low,e re-runs generation
+fx-0285,r,high,GET read
+fx-0286,x,high,a DELETE entitlement
+fx-0287,r,high,GET read
+fx-0288,x,high,a DELETE entry
+fx-0289,w,high,ii create domain
+fx-0290,r,high,GET read
+fx-0291,w,high,toggle disable has enable
+fx-0292,x,high,a DELETE object
+fx-0293,r,high,GET read
+fx-0294,r,high,i validate connection
+fx-0295,x,high,a DELETE applied coupon
+fx-0296,r,high,GET read
+fx-0297,r,high,GET read
+fx-0298,x,high,f cancel deployment
+fx-0299,r,high,GET read
+fx-0300,x,high,a DELETE token
+fx-0301,w,low,ii generates key
+fx-0302,r,high,GET read
+fx-0303,w,high,ii create label
+fx-0304,w,high,edit settings
+fx-0305,r,high,GET read
+fx-0306,r,high,GET read
+fx-0307,r,high,GET read
+fx-0308,r,high,GET read
+fx-0309,w,high,edit name
+fx-0310,r,high,GET read
+fx-0311,w,high,PUT set permissions
+fx-0312,r,high,GET read
+fx-0313,x,high,b revokes invitation
+fx-0314,r,high,GET read
+fx-0315,r,high,GET read
+fx-0316,r,high,GET read
+fx-0317,r,high,GET read
+fx-0318,x,high,a DELETE webhook
+fx-0319,r,high,GET read
+fx-0320,r,high,GET read
+fx-0321,r,high,GET read
+fx-0322,w,high,edit tag
+fx-0323,w,high,edit env
+fx-0324,r,high,GET read
+fx-0325,w,high,ii enroll factor
+fx-0326,r,high,GET read
+fx-0327,w,low,ii upload
+fx-0328,x,high,a DELETE alert
+fx-0329,w,high,edit override
+fx-0330,r,high,GET read
+fx-0331,w,high,edit config
+fx-0332,w,high,edit storage
+fx-0333,r,high,GET read
+fx-0334,x,high,a DELETE schedule and archives
+fx-0335,w,high,ii adds tag
+fx-0336,r,high,GET read
+fx-0337,w,high,ii duplicate creates
+fx-0338,r,high,GET read
+fx-0339,r,high,GET read
+fx-0340,r,high,GET read
+fx-0341,r,high,GET read
+fx-0342,w,low,repoints DNS record
+fx-0343,x,high,a DELETE storage
+fx-0344,w,low,ii creates DNS record
+fx-0345,r,low,i assess risk verdict
+fx-0346,r,high,GET read
+fx-0347,r,high,GET read
+fx-0348,x,high,a permanent delete
+fx-0349,x,high,a DELETE key
+fx-0350,x,high,a DELETE entitlement
+fx-0351,r,high,GET read
+fx-0352,x,high,b revokes secret
+fx-0353,x,high,c sends email
+fx-0354,x,low,b rotates credentials
+fx-0355,x,low,d provisions paid instance at provider
+fx-0356,w,high,ii plain create
+fx-0357,w,high,ii creates membership
+fx-0358,w,high,set schedule
+fx-0359,w,low,triggers domain verification
+fx-0360,w,high,edit account
+fx-0361,r,high,GET read
+fx-0362,w,high,edit settings
+fx-0363,w,high,ii create coupon
+fx-0364,r,high,GET read
+fx-0365,x,high,c generates order form to send to customer
+fx-0366,x,high,a DELETE tag
+fx-0367,w,high,ii create role
+fx-0368,r,high,GET read
+fx-0369,r,high,GET read
+fx-0370,r,high,GET read
+fx-0371,w,high,edit membership
+fx-0372,r,high,GET read
+fx-0373,r,high,GET read
+fx-0374,x,high,a permanent delete
+fx-0375,r,high,GET read
+fx-0376,r,high,GET read
+fx-0377,x,high,a DELETE metadata
+fx-0378,x,high,c sends broadcast
+fx-0379,x,high,a DELETE privilege
+fx-0380,x,high,a DELETE cert
+fx-0381,x,high,c emails setup link
+fx-0382,r,high,GET read
+fx-0383,r,high,GET read
+fx-0384,x,high,a DELETE storage
+fx-0385,x,low,b resets password
+fx-0386,x,high,a DELETE cascade
+fx-0387,r,high,GET read
+fx-0388,w,high,ii create script
+fx-0389,r,high,GET read
+fx-0390,r,high,GET read
+fx-0391,r,high,GET read
+fx-0392,w,high,ii plain create
+fx-0393,w,low,replace metadata is set
+fx-0394,x,high,DELETE method wins
+fx-0395,w,high,ii clone creates
+fx-0396,w,high,edit storage
+fx-0397,r,high,GET read
+fx-0398,x,low,e runs migration stops database
+fx-0399,w,high,edit filter
+fx-0400,r,high,GET read
+fx-0401,w,high,stop can be started again
+fx-0402,w,low,toggle disable has enable
+fx-0403,r,high,GET read
+fx-0404,x,high,a DELETE audience
+fx-0405,r,high,GET read
+fx-0406,r,high,GET read
+fx-0407,r,high,GET read
+fx-0408,r,high,GET read
+fx-0409,x,high,a DELETE feature
+fx-0410,x,high,c sends draft
+fx-0411,x,low,a removes suppressions
+fx-0412,r,high,GET read
+fx-0413,r,high,GET read
+fx-0414,r,high,GET read
+fx-0415,w,high,ii create broadcast unsent
+fx-0416,w,high,edit tax
+fx-0417,w,high,merge metadata
+fx-0418,r,high,GET read
+fx-0419,w,high,set schedule
+fx-0420,r,high,GET read
+fx-0421,w,high,edit object
+fx-0422,r,high,GET read
+fx-0423,r,high,GET read
+fx-0424,r,high,GET read
+fx-0425,x,high,a DELETE script
+fx-0426,r,high,GET read
+fx-0427,r,high,GET read
+fx-0428,r,high,GET read
+fx-0429,x,high,a DELETE alerts
+fx-0430,r,high,GET read
+fx-0431,r,high,GET read
+fx-0432,w,high,ii import into own store
+fx-0433,r,high,GET read
+fx-0434,r,high,GET read
+fx-0435,r,high,GET read
+fx-0436,r,high,GET read
+fx-0437,x,high,DELETE method wins
+fx-0438,w,high,ii adds certificate
+fx-0439,r,high,GET read
+fx-0440,w,high,edit credit note
+fx-0441,w,high,ii create contact
+fx-0442,r,high,GET read
+fx-0443,r,high,GET read
+fx-0444,w,high,edit fixed charge
+fx-0445,x,low,c publishes template
+fx-0446,w,high,edit alert
+fx-0447,w,high,ii plain create
+fx-0448,r,low,fetches token read
+fx-0449,x,high,DELETE method wins
+fx-0450,r,high,GET read
+fx-0451,r,high,GET read
+fx-0452,w,high,edit entitlements
+fx-0453,w,high,edit add-on
+fx-0454,r,high,GET read
+fx-0455,r,high,GET read
+fx-0456,w,high,edit blueprint
+fx-0457,r,high,GET read
+fx-0458,x,high,a DELETE project
+fx-0459,w,high,ii create segment
+fx-0460,r,high,GET read
+fx-0461,x,low,e restarts container
+fx-0462,w,high,adds permission to role
+fx-0463,w,high,edit label
+fx-0464,w,low,ii creates device code
+fx-0465,w,high,ii plain create
+fx-0466,r,high,POST only reads logs
+fx-0467,r,high,GET read
+fx-0468,w,high,edit integration
+fx-0469,r,high,GET read
+fx-0470,x,high,a DELETE task
+fx-0471,x,high,DELETE method wins
+fx-0472,x,high,a DELETE env
+fx-0473,r,high,GET read
+fx-0474,r,high,GET read
+fx-0475,r,high,i estimate
+fx-0476,x,high,a permanent delete
+fx-0477,w,high,ii plain create
+fx-0478,r,high,GET read
+fx-0479,w,high,edit user
+fx-0480,r,high,GET read
+fx-0481,r,high,GET read
+fx-0482,r,high,GET read
+fx-0483,x,high,e runs compose up rebuild
+fx-0484,r,high,GET read
+fx-0485,w,high,edit config
+fx-0486,w,high,edit broadcast
+fx-0487,r,high,GET read
+fx-0488,r,high,GET read
+fx-0489,w,high,ii create blueprint
+fx-0490,x,high,a DELETE filter
+fx-0491,r,high,GET read
+fx-0492,r,high,GET read
+fx-0493,r,high,GET read
+fx-0494,r,high,GET read
+fx-0495,r,high,GET read
+fx-0496,r,high,GET read
+fx-0497,w,high,edit override
+fx-0498,x,high,a DELETE webhook
+fx-0499,r,high,GET read
+fx-0500,x,low,e restarts database
+fx-0501,r,high,GET read
+fx-0502,w,low,ii creates audit event
+fx-0503,x,low,b rotates stored API key
+fx-0504,r,high,GET read
+fx-0505,w,high,ii create template
+fx-0506,r,high,GET read
+fx-0507,x,high,a DELETE property
+fx-0508,x,high,a DELETE label
+fx-0509,x,high,a DELETE topic
+fx-0510,w,high,ii create inbox
+fx-0511,r,high,GET read
+fx-0512,x,high,a deletes DNS record at Cloudflare
+fx-0513,x,high,a DELETE group
+fx-0514,x,high,a DELETE server
+fx-0515,w,high,edit service
+fx-0516,x,low,e triggers verification and ownership transfer
+fx-0517,r,high,GET read
+fx-0518,w,high,merge metadata
+fx-0519,x,high,a DELETE alert
+fx-0520,r,low,calculates auth URL
+fx-0521,r,high,GET read
+fx-0522,x,high,a DELETE blueprint cascade
+fx-0523,w,high,ii create billing entity
+fx-0524,r,high,GET read
+fx-0525,w,high,edit domain
+fx-0526,r,high,GET read
+fx-0527,w,high,ii create destination
+fx-0528,w,high,ii create metric
+fx-0529,w,high,edit name
+fx-0530,x,high,DELETE terminate subscription
+fx-0531,r,high,GET read
+fx-0532,w,high,soft delete to trash restorable
+fx-0533,w,high,edit settings
+fx-0534,w,high,toggle enable has disable
+fx-0535,x,low,d records payment
+fx-0536,r,high,GET read
+fx-0537,w,high,ii duplicate draft
+fx-0538,r,high,GET read
+fx-0539,w,high,edit subscription
+fx-0540,x,high,DELETE method wins
+fx-0541,w,high,ii plain create
+fx-0542,r,high,i estimate
+fx-0543,x,low,b rotates secret
+fx-0544,w,high,ii create tax
+fx-0545,r,high,GET read
+fx-0546,x,high,DELETE terminate wallet
+fx-0547,w,low,ii records usage events
+fx-0548,r,low,download pdf
+fx-0549,r,high,GET builds URL
+fx-0550,w,high,ii create alerts
+fx-0551,r,high,GET read
+fx-0552,w,high,PUT set labels
+fx-0553,x,high,a DELETE webhook
+fx-0554,w,high,edit filter
+fx-0555,w,low,authenticate issues session
+fx-0556,w,high,ii create token
+fx-0557,x,high,b revokes grant
+fx-0558,r,high,GET read
+fx-0559,r,high,GET read
+fx-0560,r,high,GET read
+fx-0561,r,high,i validate
+fx-0562,x,high,DELETE method wins
+fx-0563,r,high,GET read
+fx-0564,r,high,GET read
+fx-0565,w,high,ii enroll factor
+fx-0566,w,high,edit envs
+fx-0567,r,high,GET read
+fx-0568,x,low,d provisions paid server at provider
+fx-0569,w,high,edit env
+fx-0570,r,high,GET read
+fx-0571,r,high,GET read
+fx-0572,w,high,ii generate cert
+fx-0573,r,high,GET read
+fx-0574,w,high,ii create webhook
+fx-0575,x,high,a DELETE coupon
+fx-0576,r,high,GET read
+fx-0577,x,high,a DELETE key
+fx-0578,r,high,GET read
+fx-0579,r,high,GET read
+fx-0580,r,high,GET read
+fx-0581,w,high,ii create alerts
+fx-0582,w,high,edit billing entity
+fx-0583,r,high,GET read
+fx-0584,r,high,GET read
+fx-0585,r,high,GET read
+fx-0586,w,low,ii upload
+fx-0587,x,high,a DELETE storage
+fx-0588,r,high,GET read
+fx-0589,w,low,regenerates checkout URL
+fx-0590,r,high,GET read
+fx-0591,r,high,GET read
+fx-0592,r,high,GET read
+fx-0593,r,high,GET read
+fx-0594,r,high,GET read
+fx-0595,w,high,edit team
+fx-0596,x,high,a DELETE app
+fx-0597,w,high,edit property
+fx-0598,r,high,GET read
+fx-0599,r,high,GET read
+fx-0600,r,high,GET read
+fx-0601,x,low,f records signature creates order
+fx-0602,w,high,edit default
+fx-0603,r,high,GET read
+fx-0604,r,high,GET read
+fx-0605,w,high,ii plain create
+fx-0606,r,high,GET read
+fx-0607,r,low,exchanges code for token
+fx-0608,r,high,GET read
+fx-0609,r,high,GET read
+fx-0610,r,high,GET read
+fx-0611,r,high,GET read
+fx-0612,r,high,i decrypt returns only
+fx-0613,w,high,edit project
+fx-0614,w,low,ii creates DNS record
+fx-0615,r,high,GET read
+fx-0616,w,high,deny reversible by approve
+fx-0617,x,high,DELETE method wins
+fx-0618,x,high,e runs directory sync
+fx-0619,r,high,GET read
+fx-0620,r,high,GET read
+fx-0621,w,high,edit settings
+fx-0622,r,high,GET read
+fx-0623,r,high,GET read
+fx-0624,w,low,ii create export
+fx-0625,r,high,GET read
+fx-0626,r,high,GET read
+fx-0627,w,low,completes auth flow
+fx-0628,r,high,GET read
+fx-0629,w,high,ii plain create
+fx-0630,r,high,GET read
+fx-0631,w,low,ii starts domain claim
+fx-0632,r,high,GET read
+fx-0633,r,high,GET read
+fx-0634,w,high,adds labels
+fx-0635,x,high,a DELETE contact
+fx-0636,r,high,GET read
+fx-0637,w,high,edit metric
+fx-0638,w,high,edit
+fx-0639,r,high,GET read
+fx-0640,x,high,a DELETE instance and sessions
+fx-0641,x,high,e executes task
+fx-0642,x,high,c sends invitation email
+fx-0643,w,high,toggle reactivate has deactivate
+fx-0644,r,high,GET read
+fx-0645,x,high,c sends reply
+fx-0646,w,low,links claim attempt
+fx-0647,r,high,GET read
+fx-0648,x,high,a permanent delete
+fx-0649,r,high,GET read
+fx-0650,x,high,a DELETE integration
+fx-0651,r,high,GET read
+fx-0652,r,high,GET read
+fx-0653,r,high,GET read
+fx-0654,w,high,edit contact
+fx-0655,r,high,GET read
+fx-0656,w,high,ii clone creates
+fx-0657,r,high,GET read
+fx-0658,w,high,ii create redirect URI
+fx-0659,x,high,DELETE method wins
+fx-0660,r,high,GET read
+fx-0661,w,high,ii create key
+fx-0662,x,high,a DELETE app
+fx-0663,r,high,i preview
+fx-0664,x,high,a DELETE env
+fx-0665,r,high,GET read
+fx-0666,x,high,a DELETE entry
+fx-0667,x,high,a DELETE key
+fx-0668,w,high,ii plain create
+fx-0669,w,high,ii create tag
+fx-0670,w,high,edit alert
+fx-0671,x,high,b revokes session
+fx-0672,r,high,GET read
+fx-0673,w,high,ii create env
+fx-0674,w,high,ii create connection
+fx-0675,x,high,a DELETE key
+fx-0676,w,high,ii create app
+fx-0677,r,high,GET read
+fx-0678,r,high,GET read
+fx-0679,r,high,GET read
+fx-0680,r,high,GET read
+fx-0681,x,high,a permanent delete
+fx-0682,x,high,a DELETE privilege
+fx-0683,w,high,ii create add-on
+fx-0684,x,high,a DELETE app
+fx-0685,w,high,toggle disable has enable
+fx-0686,r,high,GET read
+fx-0687,r,high,GET read
+fx-0688,r,high,GET read
+fx-0689,x,high,a DELETE service
+fx-0690,x,high,a DELETE plan
+fx-0691,x,high,c sends email
+fx-0692,r,high,GET read
+fx-0693,x,high,a DELETE integration
+fx-0694,w,low,generates checkout link
+fx-0695,x,low,e imports from outside source
+fx-0696,x,low,e imports bundle adopts server
+fx-0697,w,high,toggle disable has enable
+fx-0698,x,low,b re-encrypts under new key
+fx-0699,w,high,edit coupon
+fx-0700,r,high,GET read
+fx-0701,w,high,edit settings
+fx-0702,r,high,GET read
+fx-0703,w,high,ii saves connection
+fx-0704,w,high,edit database
+fx-0705,x,high,d void invoice
+fx-0706,r,high,GET read
+fx-0707,r,high,GET read
+fx-0708,r,high,GET read
+fx-0709,w,low,ii generates logout token
+fx-0710,x,high,e queues deployment
+fx-0711,x,low,e restarts app
+fx-0712,x,high,a DELETE execution
+fx-0713,w,high,ii create wallet
+fx-0714,w,high,set config
+fx-0715,r,high,GET read
+fx-0716,w,high,edit webhook
+fx-0717,r,high,GET read
+fx-0718,x,low,d issues credit note
+fx-0719,r,high,GET read
+fx-0720,r,high,GET read
+fx-0721,w,high,edit attempt
+fx-0722,r,high,GET read
+fx-0723,w,low,ii creates code no send named
+fx-0724,r,high,GET read
+fx-0725,r,high,GET read
+fx-0726,x,low,e restarts container
+fx-0727,r,high,GET read
+fx-0728,w,high,assign role
+fx-0729,w,high,ii create env
+fx-0730,r,high,GET read
+fx-0731,x,high,c sends SMS
+fx-0732,r,high,GET read
+fx-0733,r,high,GET read
+fx-0734,r,high,GET read
+fx-0735,r,high,GET read
+fx-0736,r,high,GET read
+fx-0737,x,high,DELETE method wins
+fx-0738,w,high,stop can be started again
+fx-0739,x,high,a DELETE key
+fx-0740,x,high,a DELETE removes tokens
+fx-0741,x,high,a DELETE key
+fx-0742,x,high,a DELETE removes tokens
+fx-0743,x,high,a DELETE metadata
+fx-0744,r,high,GET read
+fx-0745,x,high,e runs deploy
+fx-0746,r,high,GET read
+fx-0747,w,high,ii create service
+fx-0748,r,high,GET read
+fx-0749,r,high,GET read
+fx-0750,r,high,GET read
+fx-0751,w,high,ii create account
+fx-0752,r,high,GET read
+fx-0753,r,high,GET read
+fx-0754,x,high,e executes order
+fx-0755,w,high,ii adds entry
+fx-0756,r,high,GET read
+fx-0757,w,high,edit segment
+fx-0758,w,high,stop can be started again
+fx-0759,w,high,PUT set permissions
+fx-0760,x,high,a permanent delete
+fx-0761,x,high,e runs rollback deployment
+fx-0762,r,high,GET read
+fx-0763,w,low,start has stop opposite
+fx-0764,w,high,ii create origin
+fx-0765,w,high,ii create wallet
+fx-0766,r,high,GET read
+fx-0767,w,high,edit backup config
+fx-0768,r,high,GET read
+fx-0769,w,high,ii create task
+fx-0770,r,high,GET read
+fx-0771,r,high,GET read
+fx-0772,r,high,GET read
+fx-0773,r,high,GET read
+fx-0774,w,low,stop automation can restart
+fx-0775,x,high,a DELETE privilege
+fx-0776,w,high,ii create list
+fx-0777,w,high,edit usage
+fx-0778,r,high,GET read
+fx-0779,r,high,GET read
+fx-0780,r,high,GET read
+fx-0781,r,high,GET read
+fx-0782,r,high,GET read
+fx-0783,r,low,returns credentials
+fx-0784,w,high,edit link
+fx-0785,w,high,ii create suppression
+fx-0786,r,high,GET read
+fx-0787,w,high,edit resource
+fx-0788,w,high,ii create env
+fx-0789,r,high,GET read
+fx-0790,w,high,edit template
+fx-0791,x,high,a DELETE customer
+fx-0792,x,high,e restores backup into database
+fx-0793,r,high,GET read
+fx-0794,r,high,GET read
+fx-0795,w,high,edit invoice
+fx-0796,r,high,GET read
+fx-0797,x,high,d retries payment
+fx-0798,r,high,GET read
+fx-0799,x,high,c sends invitation email
+fx-0800,x,high,a DELETE destination
+fx-0801,w,high,ii clone creates
+fx-0802,w,high,edit envs
+fx-0803,w,low,initiates domain verification
+fx-0804,x,high,b rotates signing secret
+fx-0805,r,high,GET read
+fx-0806,x,high,a DELETE charge
+fx-0807,x,high,b revokes session
+fx-0808,r,high,GET read
+fx-0809,w,high,adds contact to segment
+fx-0810,r,low,i validate check
+fx-0811,r,high,GET read
+fx-0812,r,high,GET read
+fx-0813,r,high,GET read
+fx-0814,r,high,GET read
+fx-0815,r,high,GET read
+fx-0816,x,high,a DELETE inbox
+fx-0817,x,high,a DELETE cert
+fx-0818,r,high,GET read
+fx-0819,w,high,edit settings
+fx-0820,r,high,GET read
+fx-0821,r,high,GET read
+fx-0822,w,high,edit app
+fx-0823,w,high,edit envs
+fx-0824,r,high,i estimate
+fx-0825,w,high,ii plain create
+fx-0826,w,high,ii create integration
+fx-0827,x,high,a DELETE storage
+fx-0828,w,high,edit settings
+fx-0829,w,high,ii create schedule
+fx-0830,x,low,f marks dispute lost
+fx-0831,r,high,GET read
+fx-0832,w,high,ii plain create
+fx-0833,w,high,edit script
+fx-0834,x,high,a DELETE database
+fx-0835,x,high,DELETE method wins
+fx-0836,w,low,replace metadata is set
+fx-0837,x,low,b ends session
+fx-0838,w,high,ii create automation
+fx-0839,r,high,GET read
+fx-0840,r,high,i validate read-only
+fx-0841,w,high,edit env
+fx-0842,r,high,GET read
+fx-0843,w,high,edit domains
+fx-0844,w,high,edit env
+fx-0845,w,high,edit org
+fx-0846,r,high,GET read
+fx-0847,w,high,adds target
+fx-0848,x,high,a DELETE source
+fx-0849,w,high,adds member
+fx-0850,x,high,d collects payment of invoices
+fx-0851,x,low,f cancels scheduled email
+fx-0852,x,high,a DELETE environment
+fx-0853,w,high,ii create role
+fx-0854,w,high,ii create group
+fx-0855,r,low,builds portal URL
+fx-0856,r,high,GET read
+fx-0857,x,high,e runs compose up
+fx-0858,r,high,GET read
+fx-0859,r,high,GET read
+fx-0860,r,high,GET read
+fx-0861,w,high,edit storage
+fx-0862,r,high,GET read
+fx-0863,w,high,merge metadata
+fx-0864,w,low,ii creates contact import
+fx-0865,x,high,a DELETE env
+fx-0866,w,high,edit inbox
+fx-0867,x,high,a DELETE env
+fx-0868,x,high,a DELETE add-on cascade
+fx-0869,r,high,i validate token
+fx-0870,r,high,GET read
+fx-0871,r,high,GET read
+fx-0872,x,high,d purchases VPS
+fx-0873,w,high,set schedule
+fx-0874,r,high,GET read
+fx-0875,r,high,i search
+fx-0876,r,high,GET read
+fx-0877,x,low,e restarts proxy
+fx-0878,r,high,GET read
+fx-0879,r,high,GET read
+fx-0880,w,high,adds tag
+fx-0881,r,high,GET read
+fx-0882,r,high,GET read
+fx-0883,r,high,GET read
+fx-0884,r,high,GET read
+fx-0885,r,high,GET read
+fx-0886,r,low,download pdf
+fx-0887,w,high,ii plain create
+fx-0888,r,high,GET read
+fx-0889,x,high,DELETE method wins
+fx-0890,x,high,a DELETE app authorization
+fx-0891,w,high,edit settings
+fx-0892,x,high,DELETE method wins
+fx-0893,x,high,a DELETE task
+fx-0894,w,low,ii create contact no invite sent
+fx-0895,w,high,stop can be started again
+fx-0896,r,high,GET read
+fx-0897,w,high,edit role
+fx-0898,r,high,GET read
+fx-0899,r,high,GET read
+fx-0900,w,high,edit task
+fx-0901,x,high,a DELETE env
+fx-0902,x,high,e restores backup into database
+fx-0903,w,high,ii generate link
+fx-0904,x,high,e runs backup
+fx-0905,w,high,organizational move
+fx-0906,w,high,ii plain create
+fx-0907,r,high,GET read
+fx-0908,w,low,start has stop opposite
+fx-0909,w,high,edit settings
+fx-0910,w,high,ii create project
+fx-0911,w,high,edit settings
+fx-0912,r,high,GET read
+fx-0913,r,high,GET read
+fx-0914,x,high,a DELETE indicator removes consents
+fx-0915,x,high,a voids order form cascade
+fx-0916,w,high,ii create object
+fx-0917,w,high,edit draft
+fx-0918,r,high,i check only
+fx-0919,r,high,GET read
+fx-0920,w,high,edit key
+fx-0921,r,high,GET read
+fx-0922,r,high,GET read
+fx-0923,w,high,ii create org
+fx-0924,r,high,GET read
+fx-0925,w,high,ii create plan
+fx-0926,r,high,i check
+fx-0927,w,low,ii creates token
+fx-0928,r,high,GET read
+fx-0929,x,low,a DELETE cert
+fx-0930,r,high,GET read
+fx-0931,w,high,ii create user
+fx-0932,w,high,edit thread
+fx-0933,x,high,a DELETE domain
+fx-0934,w,high,edit server
+fx-0935,r,high,GET read
+fx-0936,x,low,c confirmation email implied
+fx-0937,w,high,edit task
+fx-0938,w,high,ii mint token
+fx-0939,w,high,ii create permission
+fx-0940,r,high,i estimate
+fx-0941,x,high,a DELETE fixed charge
+fx-0942,w,high,ii import connected account
+fx-0943,w,high,ii create fixed charge
+fx-0944,r,high,GET read
+fx-0945,x,high,a DELETE broadcast
+fx-0946,r,high,GET read
+fx-0947,r,high,GET read
+fx-0948,r,high,GET read
+fx-0949,r,high,GET read
