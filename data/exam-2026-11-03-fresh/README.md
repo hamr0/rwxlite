@@ -39,3 +39,11 @@ resend), each in spec document order, then shuffled once with Python
 `random.Random(20261110).shuffle`; ids fx-0001..fx-0949 follow the shuffled order. Text is
 taken from the operation object only (no refs resolved), newlines collapsed to spaces.
 No op key (provider+method+path) occurs in data/m0/mechanical.jsonl.gz (0 overlap).
+
+## Labelling (frozen 2026-11-03)
+
+Two independent labellers (A, B) labelled all 949 rows blind against BRIEF-v3 (`data/gate-2026-11-07/BRIEF-v3.md`), each with its own scratch dir, reading only the brief and ops.csv (no specs, no web docs, no model output): `labels-A.csv`, `labels-B.csv`. They agreed on 934/949 (98.4%). The 15 disagreements were ruled by the user on 2026-11-03 (accepting the main session's suggestions), in `rulings.csv`: six coolify restarts -> w (restart = stop + start; the agreed start/stop rows are w); three paid servers at DigitalOcean/Vultr/Hetzner -> x (charges at an outside provider); resend suppression batch remove -> w; workos device code -> w; resend domain claim -> x; coolify secret-manager import -> x (imports from an outside source); workos vault rekey -> r (returned, not stored); lago credit note -> x. `truth.csv` (id,label) = agreed label or ruling; 949 rows, no "?". Consistency check after rulings: start / stop / restart rows are all w; deploy / redeploy / create-preview-deployment rows are x (a run).
+
+Truth mix r / w / x: all 406 / 328 / 215. GET 381 / 0 / 2; POST 25 / 192 / 73; PUT 0 / 51 / 4; PATCH 0 / 84 / 1; DELETE 0 / 1 / 135. Per vendor: coolify 124 / 130 / 67; workos 117 / 91 / 61; lago 103 / 61 / 53; resend 62 / 46 / 34.
+
+No model or mechanical prediction has been computed on these rows at the time of freezing.

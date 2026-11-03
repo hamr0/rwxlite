@@ -1,0 +1,16 @@
+id,A,B,ruling,reason
+fx-0120,x,w,x,"creates a paid server at an outside provider; charges, clause iv/d"
+fx-0173,x,w,w,"restart = stop + start; agreed start/stop are w, end state as before"
+fx-0355,x,w,x,"creates a paid server at an outside provider; charges, clause iv/d"
+fx-0411,x,w,w,removing items from a list on POST; adding back is one call
+fx-0461,x,w,w,"restart = stop + start; agreed start/stop are w, end state as before"
+fx-0464,w,r,w,"creates a device code/token, clause ii (gate-3 token ruling)"
+fx-0500,x,w,w,"restart = stop + start; agreed start/stop are w, end state as before"
+fx-0568,x,w,x,"creates a paid server at an outside provider; charges, clause iv/d"
+fx-0631,w,x,x,"takes a verified domain from another account; its DKIM keys stop working, clause b"
+fx-0695,x,w,x,"imports from an outside source, clause e"
+fx-0698,x,r,r,"re-encrypted key returned, nothing stored, clause i"
+fx-0711,x,w,w,"restart = stop + start; agreed start/stop are w, end state as before"
+fx-0718,x,w,x,"issues a credit note to a customer; money document, may refund, clause d; tighter on doubt"
+fx-0726,x,w,w,"restart = stop + start; agreed start/stop are w, end state as before"
+fx-0877,x,w,w,"restart = stop + start; agreed start/stop are w, end state as before"
