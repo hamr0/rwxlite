@@ -74,7 +74,7 @@ Exclude providers whose whole domain label is in: adyen appcenter atlassian azur
 
 Two independent labellers (A, B) labelled all 800 rows blind (r/w/x, with confidence high/low and a short note): `labels-A.csv`, `labels-B.csv`. They agreed on 785/800 (98.1%). The 15 disagreements were ruled by the user on 2026-11-03: 9 in the cred part, 6 in the general part. Each is in `rulings.csv` (id,A,B,ruling,reason). `truth.csv` (id,label) is the agreed label, or the ruling where A and B disagreed; 800 rows, no "?".
 
-Confidence (high/low): A high 731 / low 69; B high 713 / low 87; both high 702, both low 58.
+Confidence (high/low): A high 713 / low 87; B high 731 / low 69; both high 702, both low 58.
 
 Truth mix (r/w/x), from part.csv:
 
