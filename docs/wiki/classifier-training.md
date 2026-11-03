@@ -113,3 +113,14 @@ Two differences from Jev:
 { "letter": "r", "p": { "r": 0.91, "w": 0.07, "x": 0.02 }, "model": "rwxlite-0.1.0+<hash>" }
 ```
 That's the form API providers or guardrails like bareguard would use. A low top probability becomes the "ask a human" signal, and the threshold for that is the caller's choice. Exact field names are settled in M1 with rwxmap.
+
+## Training on the home server
+
+Sandbox: `ahassan@192.168.178.180:~/rwxlite-train/` (Fedora, 4-core i3-8100T, CPU only, venv at `.venv`, torch CPU, transformers 5.0.0). Nothing outside that dir is touched. Only `train/*.py` and `data/train/{train,val,v3eval}.parquet` are copied there (no exam, gate labels, keys or .env).
+
+- Check: `ssh ahassan@192.168.178.180 'tail -3 ~/rwxlite-train/data/train/finetune-r6full.log'`
+- Resume (re-run, it loads `ckpt-r6full/last.pt`): `ssh ahassan@192.168.178.180 'cd ~/rwxlite-train && HF_HOME=~/rwxlite-train/hf-cache setsid nohup .venv/bin/python train/finetune.py --epochs 1 --tag r6full --threads 4 --ckpt 250 > data/train/finetune-r6full.log 2>&1 < /dev/null &'`
+- Stop: `ssh ahassan@192.168.178.180 'kill $(cat ~/rwxlite-train/r6full.pid)'`
+- Pull results: `rsync -a 'ahassan@192.168.178.180:rwxlite-train/data/train/{finetune-r6full*,probs-r6full*,ckpt-r6full}' data/train/`
+
+Speed: about 1 step/s on the server (2740 steps, ETA about 45 min).
