@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: draft, WIP. Date: 2026-11-03.
+Status: contract, round 4 signed off. Date: 2026-11-03.
 
 ## Problem & goal
 
@@ -33,7 +33,7 @@ Jev is a hosted model (`api.typesafe.ai/v1/systemone`, model `jev-latest`). rwxm
   - jev-lower: x to w, on `floor-post` rows (question isX).
   - jev-raise-wx: w to x, on `method-floor` rows (question isX).
   - jev-raise-get: r to w, on `method` rows with class r (question changes).
-- The thresholds are rwxmap's existing ones. rwxlite does not set its own.
+- rwxlite tunes its own thresholds (see Thresholds). It does not reuse rwxmap's, because a threshold is valid only for the exact client and model it was swept on.
 - The model sees method, path, operationId, summary and description, plus the mechanical letter and rule name (the "leaning"). That is two passes in one model, from one training run. No separate pre-train and fine-tune stages.
 - Output is 3-way r/w/x with probabilities. isX = p(x). changes = p(w) + p(x).
 - The same output gives a standalone classifier (mode b) for free.
@@ -58,19 +58,58 @@ Data is read in place from rwxmap's `data/`, not copied:
 - Calibration data (`data/calibration-2026-09-14`).
 - The exam (`data/exam-2026-09-22/labelled.csv`).
 
-Steps:
+### Step 1. Mechanical pass (done)
 
-1. **Mechanical pass.** rwxmap `classifyRow` over all 123k. Free.
-2. **Jev pass.** Jev over all 123k, both questions (isX, changes) on every row, not only its usual piles. This gives Jev's own independent r/w/x plus p. rwxlite gets its own small Jev client, copied from rwxmap's `src/jev-client.js` (rwxmap does not export it). Jev bills only output tokens.
-3. **Parity check.**
-   - Rows where mechanical and Jev agree and Jev is confident become the training set.
-   - Disagreements go into a separate pile.
-   - A report shows where mechanical does not hold across 123k, by rule and by vendor. This report is a deliverable in its own right.
-4. **Label quality gate.** Agreed labels must be at least 95% correct against the hand labels outside the exam (the 1.2k corpus plus calibration). If not, raise the confidence cut until they are. Hand labels also enter training, with extra weight.
+rwxmap `classifyRow` over all rows. Free. Output `data/m0/mechanical.jsonl.gz`.
 
-Exam providers (cloudflare, pagerduty, sentry) are excluded from all training and filter tuning.
+### Step 2. Jev pass
 
-**Jev spend cap in module 0: $50.** Proposed. Confirm before the first paid call.
+rwxlite has its own small Jev client, copied from rwxmap's `src/jev-client.js` (rwxmap does not export it).
+
+**Rows excluded before any paid call (asserted in code):**
+- The exam vendors: cloudflare, pagerduty, sentry.
+- The 10 locked vendors: auth0, cloudflare, hubspot, zendesk, pagerduty, dropbox, shopify, linear, miro, sentry.
+- The 19 rows flagged `exam_opkey_overlap`.
+
+**Per-method question, one question per row:**
+
+| Method | Question | Source file (rwxmap commit a7bc855, copied byte for byte) |
+|---|---|---|
+| POST | isX | `poc/jev-tiers/criteria-x.mjs` |
+| PUT, PATCH | isX | `poc/jev-tiers/criteria-x-raise.mjs` |
+| GET | changes | `poc/jev-tiers/criteria-changes.mjs` |
+| DELETE | none: skip Jev, keep mechanical x | |
+| HEAD, OPTIONS, TRACE, other | none: skip Jev, counts reported | |
+
+- Questions are never taken from rwxmap `src/jev.js` at v0.8.0 or earlier (the shipped raise-wx and raise-get questions were wrong; fixed in a7bc855).
+- State sent to Jev is exactly method, path, operationId, summary, description. The mechanical verdict is never sent.
+- Jev's answer is read from `answers.<key>.noul`. The response model string is recorded on every answer.
+
+**Wobble.** Jev gives different answers on repeat calls.
+- Every row is asked once.
+- Only rows with 0.1 <= p <= 0.9 are asked a second time.
+- A row whose answer crosses a cut between the two asks is flagged and dropped from training.
+
+**Spend cap: $50 (confirmed by the user).** The pass and the re-ask together stay under it. The labelling script enforces a hard stop below the cap in code (pass 1 + re-ask under $45 in the script's own accounting; price $42 per billion input tokens).
+
+### Step 3. Training set and parity report
+
+- Train on Jev's p for ALL rows that were asked. The mechanical letter and rule name are model input.
+- Mechanical/Jev agreement is a REPORT, by rule and by vendor, not a filter. This report is a deliverable in its own right.
+- DELETE rows keep the mechanical x as their label.
+- Wobble-flagged rows are dropped.
+
+### Step 4. Label quality gate
+
+Jev-derived labels must be at least 95% correct against the non-exam hand labels (`hand_set` and `calib_set` joins). Hand labels outside the exam vendors also enter training, with extra weight. If the gate fails, the cause goes back to the PRD; the bar is not loosened.
+
+### Exam isolation
+
+Exam providers (cloudflare, pagerduty, sentry) are excluded from all training and from threshold tuning. The exam is scored once at the end.
+
+### Thresholds
+
+rwxlite tunes its own thresholds per tier, by leave-one-vendor-out on non-exam data. The exam is never used for tuning.
 
 ## Go / no-go (module 0)
 
@@ -119,10 +158,14 @@ Only module 0 is sharp. The rest are sketches.
 **M3 (maybe) — Standalone mode (b) as a product.**
 - Only if its M0 and M2 numbers earn it.
 
+## Resolved (2026-11-03)
+
+- Easy-case bias: train on Jev's p for all rows; agreement is a report, not a filter.
+- $50 Jev cap: confirmed.
+- Thresholds: rwxlite tunes its own.
+
 ## Open questions
 
-- **Easy-case bias.** Training only on agreed rows may teach the easy cases and leave the hard (disagreement) cases weak. The first exam score will show it. Possible fix: use rwxmap + Jev's tiered verdict on disagreement rows, only if it also clears 95% against hand labels.
-- **$50 Jev cap.** Confirm before the first paid call.
 - **Which small encoder.** The first run decides.
 - **Model string.** What exact string rwxlite returns in `{p, model}`, and how it is versioned. rwxmap records the model string on every moved verdict (D88), so it must change whenever the weights change.
 - **Licence.** Match rwxmap (Apache 2.0)? Not decided.
