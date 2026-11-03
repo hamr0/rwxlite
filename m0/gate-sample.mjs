@@ -1,5 +1,6 @@
 // Draws the fresh BRIEF-v3 label-gate sample (blind). Deterministic: same seed + same inputs -> same files.
 //   node m0/gate-sample.mjs           -> data/gate-2026-11-03/{blind.csv,ids.txt,README.md}   (gate-1, seed 20261103)
+//   node m0/gate-sample.mjs --gate 3  -> data/gate-2026-11-06/ (gate-3 for rwxmap F2: credential stratum 200 + general 600, seed 20261106; see block below)
 //   node m0/gate-sample.mjs --gate 2  -> data/gate-2026-11-04/{blind.csv,ids.txt,README.md,providers.txt}   (gate-2, seed 20261104)
 // Gate-2 additionally excludes every op key in gate-1's ids.txt (all snapshots).
 // No network. Reads data/m0/mechanical.jsonl.gz and rwxmap truth sets in place (never written).
@@ -10,12 +11,14 @@ import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const GATE2 = process.argv.includes('--gate') && process.argv[process.argv.indexOf('--gate') + 1] === '2';
-const DIR = GATE2 ? 'gate-2026-11-04' : 'gate-2026-11-03';
+const GATEARG = process.argv.includes('--gate') ? process.argv[process.argv.indexOf('--gate') + 1] : '1';
+const GATE2 = GATEARG === '2';
+const GATE3 = GATEARG === '3';
+const DIR = GATE3 ? 'gate-2026-11-06' : GATE2 ? 'gate-2026-11-04' : 'gate-2026-11-03';
 const OUT = path.join(HERE, '..', 'data', DIR);
 const RWXMAP = process.env.RWXMAP_DIR || path.resolve(HERE, '..', '..', 'rwxmap');
 const D = (...p) => path.join(RWXMAP, 'data', ...p);
-const SEED = GATE2 ? 20261104 : 20261103;
+const SEED = GATE3 ? 20261106 : GATE2 ? 20261104 : 20261103;
 const GATE1_IDS = GATE2 ? new Set(fs.readFileSync(path.join(HERE, '..', 'data', 'gate-2026-11-03', 'ids.txt'), 'utf8').split('\n').filter(Boolean)) : new Set();
 const N = 600, MIN_GET = 100, MIN_PUTPATCH = 100, VENDOR_CAP = Math.floor(N * 0.05);
 const EXAM_AND_LOCKED = ['cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot', 'zendesk', 'miro', 'dropbox', 'shopify', 'linear'];
@@ -59,6 +62,113 @@ for (const t of parseCsv(fs.readFileSync(D('relabel-buildset-2026-09-23', 'label
 const groups = new Map(); // op key (provider+method+path+operationId) -> all snapshot rows
 for (const r of mech) r.vendor = first(r.provider);
 for (const r of mech) { const k = `${r.provider}|${opKey(r.method, r.path, r.operationId)}`; (groups.get(k) ?? groups.set(k, []).get(k)).push(r); }
+
+if (GATE3) {
+  const readIds = (d) => new Set(fs.readFileSync(path.join(HERE, '..', 'data', d, 'ids.txt'), 'utf8').split('\n').filter(Boolean));
+  const PRIOR = new Set([...readIds('gate-2026-11-03'), ...readIds('gate-2026-11-04')]);
+  const CRED = /password|passcode|\bpin\b|secret|credential|key|token|certificate|session/i;
+  const x3 = { op_keys_total: groups.size, by_name: 0, exam_opkey_overlap: 0, prior_gates: 0, in_v3_truth: 0, delete: 0, head_options_trace_other: 0 };
+  const el = [];
+  for (const [k, rs] of groups) {
+    const r = rs[0]; const m = r.method.toUpperCase(); const ok = opKey(r.method, r.path, r.operationId);
+    if (byName(r.provider)) { x3.by_name++; continue; }
+    if (rs.some((x) => x.exam_opkey_overlap || x.exam)) { x3.exam_opkey_overlap++; continue; }
+    if (rs.some((x) => PRIOR.has(x.id))) { x3.prior_gates++; continue; }
+    if (truthKeys.has(`${r.provider}|${ok}`) || truthKeys.has(`vendor:${r.vendor}|${ok}`)) { x3.in_v3_truth++; continue; }
+    if (m === 'DELETE') { x3.delete++; continue; }
+    if (!SAMPLED.includes(m)) { x3.head_options_trace_other++; continue; }
+    el.push({ key: k, rows: rs, row: r, method: m, vendor: r.vendor });
+  }
+  el.sort((a, b) => (a.key < b.key ? -1 : 1));
+  const rnd3 = mulberry32(SEED);
+  const credPool = shuffle(el.filter((e) => ['POST', 'PUT', 'PATCH'].includes(e.method) && CRED.test(`${e.row.path} ${e.row.operationId} ${e.row.summary}`)), rnd3);
+  const credAvail = Object.fromEntries(['POST', 'PUT', 'PATCH'].map((m) => [m, credPool.filter((e) => e.method === m).length]));
+  const take = (pool, need, cap, vN, out) => { for (const e of pool) { if (out.length >= need) break; if ((vN[e.vendor] || 0) >= cap) continue; out.push(e); vN[e.vendor] = (vN[e.vendor] || 0) + 1; } };
+  const cred = []; const cV = {};
+  take(credPool.filter((e) => e.method !== 'POST'), 100, 10, cV, cred);
+  const ppN = cred.length;
+  take(credPool.filter((e) => e.method === 'POST'), 200, 10, cV, cred);
+  const credKeys = new Set(cred.map((e) => e.key));
+  const genPool = shuffle(el.filter((e) => !credKeys.has(e.key)), rnd3);
+  const genAvail = Object.fromEntries(SAMPLED.map((m) => [m, genPool.filter((e) => e.method === m).length]));
+  const GQ = { GET: 325, POST: 175, PUT: 50, PATCH: 50 };
+  const gen = []; const gV = {}; const gM = {};
+  for (const e of genPool) { if ((gM[e.method] || 0) >= GQ[e.method] || (gV[e.vendor] || 0) >= 30) continue; gen.push(e); gM[e.method] = (gM[e.method] || 0) + 1; gV[e.vendor] = (gV[e.vendor] || 0) + 1; }
+  for (const m of SAMPLED) if (gM[m] !== GQ[m]) console.warn('general quota short', m, gM[m]);
+  const all = shuffle([...cred.map((e) => ({ e, part: 'cred' })), ...gen.map((e) => ({ e, part: 'general' }))], rnd3);
+  const rows3 = all.map((x, i) => ({ id: `gate3-${String(i + 1).padStart(4, '0')}`, ...x }));
+  fs.mkdirSync(OUT, { recursive: true });
+  const H3 = ['id', 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
+  fs.writeFileSync(path.join(OUT, 'blind.csv'), [H3.join(','), ...rows3.map(({ id, e }) => [id, e.row.provider, e.row.method, e.row.path, e.row.operationId, e.row.summary, e.row.description].map(csvCell).join(','))].join('\n') + '\n');
+  fs.writeFileSync(path.join(OUT, 'part.csv'), ['id,part', ...rows3.map(({ id, part }) => `${id},${part}`)].join('\n') + '\n');
+  const ids3 = rows3.flatMap(({ e }) => e.rows.map((r) => r.id)).sort();
+  fs.writeFileSync(path.join(OUT, 'ids.txt'), ids3.join('\n') + '\n');
+  fs.writeFileSync(path.join(OUT, 'providers.txt'), [...new Set(rows3.map(({ e }) => e.row.provider))].sort().join('\n') + '\n');
+  const cm = (part) => { const m = {}; for (const x of rows3) if (x.part === part) m[x.e.method] = (m[x.e.method] || 0) + 1; return m; };
+  const cv = (part) => { const m = {}; for (const x of rows3) if (x.part === part) m[x.e.vendor] = (m[x.e.vendor] || 0) + 1; return Object.entries(m).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)); };
+  const tbl = (o) => Object.entries(o).map(([k, v]) => `| ${k} | ${v} |`).join('\n');
+  const tv = (a) => a.slice(0, 10).map(([k, v]) => `| ${k} | ${v} |`).join('\n');
+  fs.writeFileSync(path.join(OUT, 'README.md'), `# data/${DIR} — gate-3 sample for rwxmap F2 (credential-change words exam), blind
+
+## Purpose
+
+800 operations drawn from the 123k APIs.guru ops (\`data/m0/mechanical.jsonl.gz\`) as the exam set for rwxmap's F2
+(credential-change words). This is an rwxmap exam, NOT an rwxlite exam: rwxlite's MiniLM was trained on these rows, so
+scoring rwxlite on them would be contaminated.
+
+**Used ONCE.** Never used for tuning, threshold sweeps, model selection or repeated scoring.
+
+## Files
+
+- \`blind.csv\`: ${H3.join(', ')}. 800 rows, ids gate3-0001..0800 assigned after one seeded shuffle of all 800, so credential-stratum rows are indistinguishable from general rows.
+- \`part.csv\`: id,part (cred|general). This is the KEY saying which part a row is in. **Labellers must never see part.csv.**
+- \`ids.txt\`: ${ids3.length} \`ag-\` row ids = the 800 sampled rows PLUS every APIs.guru snapshot sharing their op key (provider+method+path+operationId). Training exclusion list.
+- \`providers.txt\`: sorted provider list (${new Set(rows3.map(({ e }) => e.row.provider)).size}).
+- \`BRIEF-v3.md\`: byte copy of gate-2's.
+
+## Draw
+
+Seed ${SEED} (mulberry32), one rng stream: shuffle of the credential pool, shuffle of the general pool, then the final shuffle of all 800. Reproduce: \`node m0/gate-sample.mjs --gate 3\`.
+Unit = op key (provider+method+path+operationId); one row per op key (first snapshot's text).
+
+Eligibility (both parts): exclude op keys in data/gate-2026-11-03/ids.txt and data/gate-2026-11-04/ids.txt (any snapshot); ops in rwxmap combined-2026-09-21 and relabel-buildset-2026-09-23; exam / exam_opkey_overlap rows; HEAD/OPTIONS/TRACE; DELETE; and by whole domain label (split on "." and ":") ${BURNED_NAMES.join(' ')}.
+
+Part 1, credential stratum (200): method in POST/PUT/PATCH AND the string (path + " " + operationId + " " + summary; description NOT used) matches, case-insensitive:
+
+    ${CRED.toString()}
+
+PUT+PATCH drawn first, up to 100 (got ${ppN}), then POST to fill to 200. Vendor cap 10 per vendor across the stratum.
+
+Part 2, general (600), drawn after and never sharing an op key with Part 1: GET 325 / POST 175 / PUT 50 / PATCH 50, vendor cap 30. Vendor = first dotted token of provider.
+
+## Exclusion counts (op keys)
+
+Total ${x3.op_keys_total}. by-name ${x3.by_name}; exam/exam_opkey_overlap ${x3.exam_opkey_overlap}; prior gates ${x3.prior_gates}; v3 truth ${x3.in_v3_truth}; DELETE ${x3.delete}; HEAD/OPTIONS/TRACE/other ${x3.head_options_trace_other}. Eligible ${el.length}.
+
+## Pool sizes
+
+Credential-eligible: ${Object.entries(credAvail).map(([k, v]) => `${k} ${v}`).join(', ')}. General pool (eligible minus stratum draw): ${Object.entries(genAvail).map(([k, v]) => `${k} ${v}`).join(', ')}.
+
+## Counts
+
+Credential part:
+
+| method | n |
+|---|---|
+${tbl(cm('cred'))}
+
+General part:
+
+| method | n |
+|---|---|
+${tbl(cm('general'))}
+
+Top vendors, credential: ${cv('cred').slice(0, 8).map(([k, v]) => `${k} ${v}`).join(', ')}.
+Top vendors, general: ${cv('general').slice(0, 8).map(([k, v]) => `${k} ${v}`).join(', ')}.
+`);
+  console.log(JSON.stringify({ x3, eligible: el.length, credAvail, genAvail, ppN, cm_cred: cm('cred'), cm_gen: cm('general'), topCred: cv('cred').slice(0, 6), topGen: cv('general').slice(0, 6), ids: ids3.length, providers: new Set(rows3.map(({ e }) => e.row.provider)).size }));
+  process.exit(0);
+}
 
 const eligible = [];
 for (const [k, rows] of groups) {

@@ -6,4 +6,5 @@ __pycache__
 data/*
 !data/gate-2026-11-03/
 !data/gate-2026-11-04/
+!data/gate-2026-11-06/
 runs/
