@@ -306,3 +306,26 @@ Vendor-clean excludes the 24 rwxmap-tuning names (adyen ... zoom), 483 rows here
 Post-hoc, NOT for tuning (sample is burned): in the lower tier raising the isX cut from 0.20 to 0.30 would add 1 exact and 2 too-loose; the r cut is flat from 0.05 to 0.30 (132/142); raise-get at 0.30 to 0.50 would add 1 to 3 exact with no new too-loose. None of this selects cuts.
 
 Also corrected: gate-1's vendor-clean line is 472 rows (see the gate-1 entry above), not 523.
+
+## 2026-11-03: M0 step 4, training pipeline, TF-IDF baseline, MiniLM first run
+
+Code: `train/common.py`, `train/build_dataset.py`, `train/baseline.py`, `train/finetune.py`. Outputs in `data/train/` (gitignored). Rebuilt on the ROUND-6 recipe (cuts 0.20 / 0.60 / 0.20; POST x rows lowered by isX get r if the averaged POST-changes p is under 0.20, else w; narrow credential rule gives x; DELETE x) after the label gate passed. Excluded from train and val: exam vendors and locked vendors, the 19 exam_opkey_overlap rows, every id in gate-1 and gate-2 `ids.txt` (1,481), and all 5,716 rows joined to v3 truth. No gate labels, exam data or v1 labels read.
+
+### Dataset
+- Input string: `lean: <letter> <rule> | <METHOD> <path> | op: <operationId> | sum: <summary> | desc: <description>`. Leaning first so truncation never cuts it; HTML stripped; summary cut at 200 chars, description at 400; empty fields omitted.
+- 123,339 mechanical rows -> 87,657 train + 4,180 val (66 of 664 vendors in val, seed 20261103, split by vendor = first dotted token of provider). Dropped: 23,790 duplicate snapshots (provider+method+path+operationId, one kept), 201 non-asked non-DELETE (HEAD etc.), 295 wobble rows that straddle their tier cut (the POST-changes asks were not used for wobble), 1,481 gate ids, 5,716 v3-eval rows.
+- Train label balance: r 47,841 (54.6%), w 24,161 (27.6%), x 15,655 (17.9%). Status: kept 62,486, moved by Jev 16,557, DELETE 8,548, credential rule 66. Val: r 2,432, w 1,154, x 594. Raw Jev p (jev_p, pA, pB) and POST-changes p (jev_pC) are stored per row for a soft-target variant.
+- v3-truth eval: 5,716 rows (truth r 1,080, w 2,761, x 1,875), tier lower 1,641 / raise-wx 1,486 / raise-get 959 / none 1,630. The cuts were tuned on these rows, so read them as in-sample-ish. Other ops of the same vendors (github, microsoft) are still in train, so vendor style is not held out here.
+- Mode (a) = model only makes Jev's moves on pile rows (mechanical in charge). Variants: `a_cuts` (model p(x) / p(w)+p(x) against the PRD cuts; lower goes to r if p(changes) < 0.20 else w) and `a_argmax` (move when the argmax agrees). Credential rule applied in both. Mode (b) = plain argmax.
+
+### TF-IDF (word 1-2 + char_wb 3-5) + logistic regression, round-6 targets
+- Val accuracy vs target 96.2%. Fit 232 s on a loaded machine. Pickle 24.4 MB. Inference 19.8 ms/op one at a time (vectorisers dominate), 2.1 ms/op batched.
+- v3 truth, exact / too loose / too tight: mechanical 76.3 / 1.3 / 22.3; a_cuts 93.4 / 2.0 / 4.7; a_argmax 94.1 / 2.8 / 3.2; mode (b) 94.0 / 2.9 / 3.1. Non-DELETE: mechanical 69.1; a_cuts 91.5 / 2.6 / 5.9; a_argmax 92.4 / 3.7 / 4.0; b 92.3 / 3.7 / 3.9. DELETE 99.3 in every mode. Per tier at a_cuts: lower 83.3 / 2.6 / 14.1, raise-wx 95.6 / 4.2 / 0.1, raise-get 99.8, none 97.7. POST: mechanical 33.3, a_cuts 84.5, b 87.6.
+- Too loose is the weak side: 2.0% at a_cuts against mechanical's 1.3%, so mode (a) as is would not meet "no worse than mechanical" on this set. Tuned model cuts, not the PRD's Jev cuts, are the next step (the model's p is not Jev's p).
+
+### MiniLM (all-MiniLM-L6-v2 + 3-way head), CPU
+- Token length of the string: median 66, p90 124, p95 140, 8% over 128; max_len 128 used (leaning is first, so only description tail is cut). 22.7M params, fp32 90.9 MB (int8 should land near a quarter of that; export is M1).
+- The laptop was heavily shared with other jobs (load average 20-36 on 8 cores). Measured 0.2-0.46 steps/s at batch 32 (4-6 threads), i.e. 6-15 rows/s; a bare forward+backward on 32x80 tokens took 5-10 s at the worst. Batched inference under that load 52 ms/op; not a valid latency figure.
+- Smoke (1,600 rows, 1 epoch, 50 steps, old pre-round-6 targets): val acc 94.25%; v3 a_argmax 89.7 / 8.3 / 1.9, b 89.3 / 9.1 / 1.6. Pipeline check only.
+- Subsample run (36,000 rows, 1 epoch, 1,125 steps, old targets, log `data/train/finetune.log`, tag sub36k) was started before the recipe change and is kept only as a pipeline/timing check; its metrics are not round-6 results.
+- Full round-6 epoch (87,657 rows = 2,740 steps): about 100 min at the best observed 0.46 step/s, about 3 h at 0.25 step/s. Two epochs: 3.5 to 6 h. Needs a quiet machine.
