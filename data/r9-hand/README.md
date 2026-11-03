@@ -15,3 +15,13 @@ Counts removed from pool of 91837: {'gate_id_or_opkey': 1669, 'v3_tuning_id_or_o
 
 Counts (shape, method, current label): {('lower-post', 'POST', 'w'): 602, ('raise-wx-putpatch', 'PATCH', 'w'): 108, ('raise-wx-putpatch', 'PUT', 'w'): 292, ('lower-post', 'POST', 'r'): 198}
 Top vendors: [('googleapis', 40), ('azure', 40), ('amazonaws', 40), ('microsoft', 40), ('autotask', 40), ('netbox', 38), ('kubernetes', 30), ('vtex', 25), ('github', 24), ('twilio', 23)]
+
+## Labelling result (2026-11-03)
+
+Two blind labellers (A, B) under BRIEF-v3, each with its own scratch dir, never seeing key.csv: `labels-A.csv`, `labels-B.csv`. Agreement 1186/1200 (98.8%). Hand label = the stricter of A and B where they differ (no user rulings for training labels). Hand mix r 202 / w 966 / x 32.
+
+Against the current round-6 training label:
+- lower-post (800): 776 agree; training label too loose on 22 (w -> x), too tight on 4 (w -> r).
+- raise-wx PUT/PATCH (400): 390 agree; training label too loose on 10 (w -> x).
+
+Reading: on these two shapes the Jev-recipe training labels are too loose on only 32 of 1,200 rows (2.7%). The exam's 36 too-loose rows (30 cloudflare) are not a general labelling error in the training data; the exam was labelled under the same BRIEF-v3. A retrain adding these labels would change about 32 training rows of 87,657.
