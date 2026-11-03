@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: contract, round 6 signed off; M0 exam NO-GO (too loose), next step open. Date: 2026-11-03.
+Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); next step open. Date: 2026-11-03.
 
 ## Problem & goal
 
@@ -255,6 +255,27 @@ Reading:
 - The bar is a user setting in the product; the exam fixes one value so the test is fair.
 - Fresh exam: vendors never used in training or tuning, agreed with rwxmap; labelled blind under BRIEF-v3 by two labellers, disagreements ruled by the user; scored once.
 
+
+
+### Fresh exam result (2026-11-03): NO-GO by one row
+
+949 ops from coolify, workos, lago, resend (never seen by rwxlite or rwxmap; pinned specs; labels frozen in 312b23a before any prediction). Pre-registered in 0caa381, scored once in 402fea0. Same model as before (r8soft, sha256 974dff01...ae).
+
+Go/no-go (mode a, ask on lowerings under 0.97): **right 92.57% of answered (pass), asked 7.8% (pass), too loose 5 of 875 answered = 0.57% (fail; the line is 0.5%, i.e. 4 rows).**
+
+| setup | right | too loose | too tight | asked (held right/loose/tight) |
+|---|---|---|---|---|
+| mechanical alone | 736 (77.6%) | 6 (0.63%) | 207 (21.8%) | 0 |
+| rwxlite, trust blindly | 870 (91.7%) | 18 (1.90%) | 61 (6.4%) | 0 |
+| **rwxlite, ask on lowerings under 0.97 (go/no-go)** | **810 (92.6%)** | **5 (0.57%)** | 60 (6.9%) | **74 (7.8%)** (60/13/1) |
+| rwxlite, ask on every lowering | 718 (91.7%) | 5 (0.64%) | 60 (7.7%) | 166 (17.5%) |
+| rwxlite, MECH-THEN-ASK 0.95 (earlier rule) | 840 (89.3%) | 6 (0.64%) | 95 (10.1%) | 8 (0.8%) |
+
+What worked: the lowering flag did exactly its job. rwxlite lowered 166 rows; all 13 wrong lowerings were under 0.97 and were asked; all 92 accepted lowerings were right. No lowering caused a too-loose answer.
+
+What failed: the 5 too-loose rows are not lowerings. 3 are PUT/PATCH credential upserts where mechanical says w and rwxlite agreed (workos client-credentials, workos api-key, coolify integration token; truth x by clause b). 2 are logout GETs where mechanical says r and rwxlite raised to w, one step short of x. This is the "confident mistakes / mechanical too loose" floor named under "The flow". Mechanical alone is itself too loose here (6 rows, 0.63%).
+
+Per the rules: the bar is not loosened. Any fix (a credential-upsert or logout rule) needs a new fresh exam. Next step is open.
 
 ## The flow (user, 2026-11-03)
 
