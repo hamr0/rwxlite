@@ -1,0 +1,11 @@
+id,A,B,ruling,reason
+gate2-0023,x,r,r,"preview, nothing billed, clause i"
+gate2-0146,r,w,w,plain create
+gate2-0170,x,r,r,GET r unless text says change; no text
+gate2-0220,w,x,w,"update of a definition, can be set back"
+gate2-0322,r,w,r,eligibility check is a read
+gate2-0336,x,w,w,create the text says nothing about
+gate2-0377,x,r,r,"GET, no text, name alone not evidence"
+gate2-0527,w,x,w,"ledger adjustment undoable, not a payment"
+gate2-0560,w,x,w,create the text says nothing about
+gate2-0593,w,x,w,PATCH w unless text names an x thing

@@ -223,7 +223,7 @@ The true-x misses are sends/transfers/state actions with ordinary-sounding creat
 
 Source: `m0/gate-score.mjs`, `data/gate-2026-11-03/score.json`. Truth: two blind labellers, 588/600 agreed (98%), user ruled the other 12 (`rulings.csv`). Sample is now burned.
 
-**Verdict: FAIL.** Jev-derived labels at the PRD cuts (lower 0.20 / raise-wx 0.60 / raise-get 0.20) are 90.8% exact on all 600 (89.9% on the 523 rows outside the 14 rwxmap-tuning providers). The bar is 95%, so the cause goes back to the PRD; the bar is not loosened. Too-loose is 7 (1.2%), better than mechanical alone (13, 2.2%), so the safety half of the contract holds; the failure is all too-tight (48 rows, 8.0%).
+**Verdict: FAIL.** Jev-derived labels at the PRD cuts (lower 0.20 / raise-wx 0.60 / raise-get 0.20) are 90.8% exact on all 600 (90.0% on the 472 vendor-clean rows, see correction below). The bar is 95%, so the cause goes back to the PRD; the bar is not loosened. Too-loose is 7 (1.2%), better than mechanical alone (13, 2.2%), so the safety half of the contract holds; the failure is all too-tight (48 rows, 8.0%).
 
 | config (all 600) | exact | too loose | too tight |
 |---|---|---|---|
@@ -232,7 +232,7 @@ Source: `m0/gate-score.mjs`, `data/gate-2026-11-03/score.json`. Truth: two blind
 | mechanical + Jev, rwxmap cuts 0.10/0.80/0.50 | 88.5% | 8 (1.3%) | 61 (10.2%) |
 | Jev mode (b) alone, p 0.5 | 89.8% | 10 (1.7%) | 51 (8.5%) |
 
-Non-overlap (523 rows): 74.8 / 89.9 / 87.6 / 88.7 exact; too-loose 13 / 7 / 8 / 10.
+Vendor-clean line (472 rows; corrected 2026-11-03: the earlier 523-row line used a 14-name list, rwxmap's fuller 24-name list leaves 472): mechanical 75.4% exact / 13 too-loose / 103 too-tight; rwxmap cuts 87.9 / 8 / 49; rwxlite (PRD) cuts 90.0 / 7 / 40; Jev mode (b) alone 89.2 / 10 / 41.
 
 Gate line by tier (all 600): raise-get 325 rows 100% exact; raise-wx 97 rows 94.8% (5 too loose); lower 145 rows 68.3% (2 too loose, 44 too tight; mechanical alone 14.5%); no pile 33 rows 87.9% (4 too tight). By method: GET 100%, PATCH 96%, PUT 90%, POST 72.6%.
 
@@ -275,3 +275,34 @@ By tier, before -> two-step + credential (exact / too-loose / too-tight):
 - no pile, other (266): 237 / 6 / 23 (89.1%), unchanged
 
 Reading. The two-step lower alone adds 0.6 point; credential rule and budget reallocation add 1.2 more. The mechanical-only contract line holds (total too-loose 58 vs 77 mechanical). 95.8% on tuning data is optimistic by construction; the 95% bar is measured on gate-2 (`data/gate-2026-11-04/`, drawn, not labelled). The lower tier (88.8%) and the no-pile non-DELETE rows (89.1%, no cut defined) remain the weak spots.
+
+## 2026-11-03: Gate-2 scored (once)
+
+Source: `m0/gate-score.mjs --gate 2026-11-04`, `data/gate-2026-11-04/score.json`. Truth: two blind labellers (BRIEF-v3, high/low confidence only), 590/600 agreed (98.3%), user ruled the other 10 (`rulings.csv`). Truth mix r 353 / w 204 / x 43. Sample is now burned. Gate-1 outputs were not rewritten; the generalised scorer reproduces them byte for byte when run into a temp path.
+
+**Verdict: PASS.** The round-6 recipe (lower 0.20, POST two-step r cut 0.20 on the changes p, raise-wx 0.60, raise-get 0.20, narrow credential rule) is 96.5% exact on all 600 (579 rows; bar 95%). Too-loose is 4 (0.7%), no worse than mechanical alone (7). Recipe was fixed before scoring; nothing was tuned on this set.
+
+| config | all 600: exact / too-loose / too-tight | vendor-clean 483: exact / too-loose / too-tight |
+|---|---|---|
+| (i) mechanical alone | 79.3% / 7 / 117 | 77.8% / 7 / 100 |
+| (ii) round-6 recipe (THE GATE) | 96.5% / 4 / 17 | 95.9% / 4 / 16 |
+| (iii) round-5 (no two-step, no credential rule), 0.20/0.60/0.20 | 93.2% / 4 / 37 | 92.3% / 4 / 33 |
+| (iv) rwxmap shipped, 0.10/0.80/0.50, one-step | 91.5% / 3 / 48 | 90.3% / 3 / 44 |
+| (v) Jev mode (b) at 0.5 | 92.0% / 11 / 37 | 91.5% / 9 / 32 |
+
+Vendor-clean excludes the 24 rwxmap-tuning names (adyen ... zoom), 483 rows here.
+
+(ii) by tier, all 600 (exact / too-loose / too-tight): lower 142 (all POST) 93.0% / 1 / 9 (mechanical 21.1%); raise-wx 100 rows 99.0% / 1 / 0; raise-get 325 rows 98.5% / 2 / 3; no pile 33 rows 84.8% / 0 / 5. By mechanical letter: r 334 98.5%, w 110 98.2%, x 156 91.0%. By method: GET 98.5, PUT 100, PATCH 98, POST 91.4.
+
+**Two-step hits: 20 rows** (lower-tier POST with isX p < 0.20 and changes p < 0.20), all truth r, all gained (round-5 would label them w). Effect +20 exact, too-loose unchanged. **Credential rule hits: 0** on this set (no effect; the gate-1/tuning-set rule did not fire, so it is neither confirmed nor refuted here). The round-6 gain over round-5 (+20 rows, 3.3 points) is entirely the two-step.
+
+**The 21 misses of (ii), by pattern:**
+- 11 POST x kept as x, truth w (too-tight): 5 in the lower tier (p 0.24 to 0.6 with changes p high: code-references, Tokens writeCodespaces, hetzner create Certificate, magento increaseBalance, contract-p /auth login) and 4 outside any pile (cant-undo-verb: requestPasswordReset, azure StartTransition, mist locate, mandrill cancel-warmup). Plus 1 POST w with truth r outside any pile (pdfblocks remove_restrictions).
+- 4 POST read-by-POST in the lower tier: 2 kept x (zuora billing preview, quickchart /qr, truth r; the first is the user's preview ruling) and 2 sent to w instead of r (plaid precheck, taggun validate; changes p 0.83 and 0.32 above the 0.20 cut).
+- 3 GET raise-get false raises (truth r, predicted w): GET `/validate`, GET `/sms/send` summary "send", GET tokenburn (name alone, user ruling).
+- 2 GET raise-get truth x (too-loose): AWS GET `/#Action=DeleteNotificationConfiguration` (p 0.97) and smart-me GET FastSendDeviceValues; the raise-get cut sends them to w, not x.
+- 2 other too-loose: orthanc POST /tools/shutdown (lower tier p 0.16, truth x, now w); kumpeapps PATCH `/appkey` "Compromise app key" (raise-wx p 0.295, truth x; the credential rule did not match).
+
+Post-hoc, NOT for tuning (sample is burned): in the lower tier raising the isX cut from 0.20 to 0.30 would add 1 exact and 2 too-loose; the r cut is flat from 0.05 to 0.30 (132/142); raise-get at 0.30 to 0.50 would add 1 to 3 exact with no new too-loose. None of this selects cuts.
+
+Also corrected: gate-1's vendor-clean line is 472 rows (see the gate-1 entry above), not 523.

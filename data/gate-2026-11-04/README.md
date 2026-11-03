@@ -75,3 +75,10 @@ Replaced ids: gate2-0216 (all were xero.com, replaced in place).
 | gerermesaffaires | 6 |
 
 (218 vendors in all.)
+
+## Status: USED (scored once, 2026-11-03)
+
+Labelled by two blind workers, A and B (`labels-A.csv`, `labels-B.csv`), high/low confidence only. A and B agreed on 590 of 600 (98.3%). The user ruled the 10
+disputes (`rulings.csv`). `truth.csv` = agreed label, else the ruling (600 rows, no "?").
+`node m0/gate-score.mjs --gate 2026-11-04` scored the gate once; result in `score.json` (verdict PASS, 96.5% exact at the round-6 recipe, too-loose 4 vs mechanical 7).
+This sample is now BURNED: no tuning, sweeps, model selection or re-scoring on it.
