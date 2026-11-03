@@ -587,3 +587,56 @@ By provider (mode a): cloudflare 95.58% exact, 30 loose; pagerduty 97.63%, 4; se
 - Caveat: the exam truth is from rwxmap's labeller under BRIEF-v3, same label standard as the training truth; many of the 36 are borderline "create" or "update" rows where a reasonable labeller could say w. Label noise on the loose side is unmeasured here.
 
 Note for the prereg file: it states "0.6 in 18 of 23 folds (0.7 in 4, 0.9 in 1)"; the results file says 0.6 in 17, 0.7 in 5, 0.9 in 1. Descriptive only; the margin used (0.6) is unaffected.
+
+## 2026-11-03: Round 9b: unsure falls back to mechanical
+
+Practice (LOVO) rows, not an exam: v3 tuning truth only (n=5,716), honest per-fold cuts/margins exactly as `train/abstain.py` (new `train/fallback.py` reuses its `lovo_preds`), r8soft, calibrated p (T 0.844), confidence = max p. Exam and gate truth not touched. Results `data/train/fallback-r8soft.json` (all bars, all rules, both modes; includes ask-would-have-been right/loose/tight). Every row lands in exactly one of right / too loose / too tight / asked (asserted, sums to 5,716).
+
+Rules for rows below the bar. ASK: ask. MECH: use the mechanical letter, no asks. MECH-THEN-ASK: mechanical letter if it is at least as strict as the model's (r < w < x), else ask. Percentages are of answered rows; asked % is of all rows. 'none' = no bar (identical for all rules).
+
+Reference lines: mechanical alone 76.4 right / 76 too loose (1.33%) / 22.3 too tight (the old 76.3 / 77 is the same row count class; this run counts 76 at the LOVO fold level); r8soft mode (a) no bar 5303 right (92.8%) / 73 loose (1.28%) / 340 tight (5.95%); mode (b) no bar 5253 (91.9%) / 55 (0.96%) / 408 (7.14%). MECH at 0.99 is almost mechanical alone (76.4 / 76 loose).
+
+### Mode (a) mechanical + cuts
+| rule | bar | right | too loose | too tight | asked (would be right / loose / tight) |
+|---|---|---|---|---|---|
+| ASK | none | 5303 (92.77%) | 73 (1.28%) | 340 (5.95%) | 0 (0.0%) (0 / 0 / 0) |
+| ASK | 0.7 | 5186 (95.28%) | 65 (1.19%) | 192 (3.53%) | 273 (4.78%) (117 / 8 / 148) |
+| ASK | 0.9 | 4954 (97.71%) | 38 (0.75%) | 78 (1.54%) | 646 (11.3%) (349 / 35 / 262) |
+| ASK | 0.95 | 4675 (98.67%) | 24 (0.51%) | 39 (0.82%) | 978 (17.11%) (628 / 49 / 301) |
+| MECH | 0.7 | 5329 (93.23%) | 74 (1.29%) | 313 (5.48%) | 0 (0.0%) (0 / 0 / 0) |
+| MECH | 0.9 | 5269 (92.18%) | 96 (1.68%) | 351 (6.14%) | 0 (0.0%) (0 / 0 / 0) |
+| MECH | 0.95 | 5186 (90.73%) | 85 (1.49%) | 445 (7.79%) | 0 (0.0%) (0 / 0 / 0) |
+| MECH-THEN-ASK | 0.7 | 5281 (93.32%) | 65 (1.15%) | 313 (5.53%) | 57 (1.0%) (9 / 0 / 48) |
+| MECH-THEN-ASK | 0.9 | 5168 (92.98%) | 39 (0.7%) | 351 (6.32%) | 158 (2.76%) (57 / 0 / 101) |
+| MECH-THEN-ASK | 0.95 | 5050 (91.45%) | 27 (0.49%) | 445 (8.06%) | 194 (3.39%) (58 / 0 / 136) |
+
+### Mode (b) guarded standalone
+| rule | bar | right | too loose | too tight | asked (would be right / loose / tight) |
+|---|---|---|---|---|---|
+| ASK | none | 5253 (91.9%) | 55 (0.96%) | 408 (7.14%) | 0 (0.0%) (0 / 0 / 0) |
+| ASK | 0.7 | 5149 (94.6%) | 55 (1.01%) | 239 (4.39%) | 273 (4.78%) (104 / 0 / 169) |
+| ASK | 0.9 | 4933 (97.3%) | 38 (0.75%) | 99 (1.95%) | 646 (11.3%) (320 / 17 / 309) |
+| ASK | 0.95 | 4677 (98.71%) | 24 (0.51%) | 37 (0.78%) | 978 (17.11%) (576 / 31 / 371) |
+| MECH | 0.7 | 5292 (92.58%) | 64 (1.12%) | 360 (6.3%) | 0 (0.0%) (0 / 0 / 0) |
+| MECH | 0.9 | 5248 (91.81%) | 96 (1.68%) | 372 (6.51%) | 0 (0.0%) (0 / 0 / 0) |
+| MECH | 0.95 | 5188 (90.76%) | 85 (1.49%) | 443 (7.75%) | 0 (0.0%) (0 / 0 / 0) |
+| MECH-THEN-ASK | 0.7 | 5244 (92.67%) | 55 (0.97%) | 360 (6.36%) | 57 (1.0%) (9 / 0 / 48) |
+| MECH-THEN-ASK | 0.9 | 5154 (92.61%) | 39 (0.7%) | 372 (6.68%) | 151 (2.64%) (57 / 0 / 94) |
+| MECH-THEN-ASK | 0.95 | 5059 (91.5%) | 27 (0.49%) | 443 (8.01%) | 187 (3.27%) (58 / 0 / 129) |
+
+### Too-loose rows per tier (rows; MECH-THEN-ASK also shows asked)
+| mode | rule | bar | lower (1,641) | raise-wx (1,486) | raise-get (959) | none (1,630) |
+|---|---|---|---|---|---|---|
+| a | MECH | 0.9 | 23 | 67 | 0 | 6 |
+| a | MECH | 0.95 | 11 | 68 | 0 | 6 |
+| a | MECH-THEN-ASK | 0.9 | 23 | 10 (asked 158) | 0 | 6 |
+| a | MECH-THEN-ASK | 0.95 | 11 | 10 (asked 194) | 0 | 6 |
+| b | MECH | 0.9 | 23 | 67 | 0 | 6 |
+| b | MECH | 0.95 | 11 | 68 | 0 | 6 |
+| b | MECH-THEN-ASK | 0.9 | 23 | 10 (asked 151) | 0 | 6 |
+| b | MECH-THEN-ASK | 0.95 | 11 | 10 (asked 187) | 0 | 6 |
+
+Reading. MECH alone is not a fix: below the bar the mechanical letter is wrong in the loose direction on most raise-wx rows (PUT/PATCH where mechanical says w and truth is x), so MECH loose rises from 73 to 85 to 96 as the bar rises (mode a, 0.95: 85 loose, 90.7% right) and only gets worse than ASK. All the extra loose rows are in raise-wx (67-68 vs 10). Lower tier does improve (23 at 0.9, 11 at 0.95, vs 57 at none) because the mechanical x is stricter than the model's r/w there.
+MECH-THEN-ASK keeps that lower-tier gain and asks only on the raise-wx rows where mechanical is looser than the model, so it asks far less than ASK. Mode (a): 0.9 gives 39 loose with 2.8% asked (ASK 0.9: 38 loose, 11.3% asked); 0.95 gives 27 loose (0.49% of answered) with 3.4% asked, 91.5% right, 8.1% tight. ASK 0.95 gives 24 loose (0.51%) but asks 17.1% (over the 15% limit), 98.7% right, 0.82% tight. Mode (b) is the same story (MECH-THEN-ASK 0.95: 27 loose, 3.3% asked).
+Which gives the fewest loose rows at an ask rate of about 15% or less: in a strict sense MECH-THEN-ASK at 0.99 (16 loose, 3.5% asked) but it is nearly the mechanical letter everywhere (76.6% right, 23% too tight), so it is not useful. Among usable settings, MECH-THEN-ASK at 0.95 (27 loose, 3.4% asked) beats ASK at 0.9 (38 loose, 11.3% asked) on both loose and ask rate, and is within 3 loose rows of ASK 0.95 at a fifth of the asks. The price is too-tight: 8% of answered rows versus under 1% for ASK 0.95, because the mechanical fallback is blunt (it holds the mechanical letter everywhere the model is unsure, 445 tight rows). So the choice is loose vs tight: ASK 0.95 buys very high exactness with 17% asks; MECH-THEN-ASK 0.95 buys the same loose count with 3% asks and a lot of tight rows. Whether tight rows cost less than asks is a product call, not measured here.
+Caveat: practice rows, not an exam; the One-time exam showed the model is confidently wrong on its loose rows more than LOVO suggested (median max p 0.94), so the loose avoidance here may not transfer.
