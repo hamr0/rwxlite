@@ -1,0 +1,21 @@
+{
+ "vendor": "coolify",
+ "source_url": "https://raw.githubusercontent.com/coollabsio/coolify/main/openapi.json",
+ "ref": "git main e20e652c (repo coollabsio/coolify)",
+ "retrieved": "2026-11-03",
+ "sha256_of_raw_download": "bc7f83ff3e151843cf5d732a05620fad3127018379eed4890d70876988d276bb",
+ "file": "coolify.json",
+ "openapi": "3.1.0",
+ "title": "Coolify",
+ "ops": 321,
+ "by_method": {
+  "GET": 119,
+  "POST": 108,
+  "DELETE": 41,
+  "PATCH": 49,
+  "PUT": 4
+ },
+ "non_delete": 280,
+ "pct_summary_or_description": 100,
+ "pct_operationId": 100
+}

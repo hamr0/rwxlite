@@ -1,0 +1,21 @@
+{
+ "vendor": "workos",
+ "source_url": "https://raw.githubusercontent.com/workos/openapi-spec/main/spec/open-api-spec.yaml",
+ "ref": "git main 4873892f; spec 1.0",
+ "retrieved": "2026-11-03",
+ "sha256_of_raw_download": "1f91e7c3470bf9841a03464c415353d66c9139687f08218a142866c0d2a45829",
+ "file": "workos.yaml",
+ "openapi": "3.1.1",
+ "title": "WorkOS",
+ "ops": 269,
+ "by_method": {
+  "POST": 89,
+  "GET": 107,
+  "PATCH": 12,
+  "DELETE": 39,
+  "PUT": 22
+ },
+ "non_delete": 230,
+ "pct_summary_or_description": 100,
+ "pct_operationId": 100
+}

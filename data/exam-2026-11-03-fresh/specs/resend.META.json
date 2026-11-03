@@ -1,0 +1,21 @@
+{
+ "vendor": "resend",
+ "source_url": "https://raw.githubusercontent.com/resend/resend-openapi/main/resend.yaml",
+ "ref": "git main 0b2a456e; spec 1.5.1",
+ "retrieved": "2026-11-03",
+ "sha256_of_raw_download": "e706637116ab3cf6b3ca99854c4cab4933a193c607b2b18b9d79c0cb16c68dd8",
+ "file": "resend.yaml",
+ "openapi": "3.1.2",
+ "title": "Resend",
+ "ops": 142,
+ "by_method": {
+  "POST": 41,
+  "GET": 62,
+  "PATCH": 18,
+  "DELETE": 20,
+  "PUT": 1
+ },
+ "non_delete": 122,
+ "pct_summary_or_description": 100,
+ "pct_operationId": 100
+}
