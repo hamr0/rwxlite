@@ -69,6 +69,19 @@ As of 2026-11-03, rwxlite is in module 0 and not released.
 - **Labels are measured.** The label recipe passed a fresh blind gate at 96.5% exact and 0.7% too loose, against 79.3% and 1.2% for mechanical alone. Two findings went back into rwxmap (D129 two-step POST, D131 credential rule).
 - **The model failed its go/no-go exam, on one line.** The fine-tuned MiniLM was scored once on 4,279 operations from vendors it never saw (cloudflare, pagerduty, sentry). It answered 95.9% exact, ahead of mechanical + Jev (93.0%) and mechanical alone (82.3%). But 0.84% of its answers were too loose (36 rows), over the 0.5% line set by Jev. Most of those are Cloudflare "create" calls that move money or start jobs, which it confidently called editable. Next step is open.
 - **Asking helps, but wasn't the pass/fail check.** When the model answers only at 95% confidence or above and asks on the rest, it answers 90.2% of rows at 98.7% exact and 0.47% too loose. That was reported, not pre-registered, so it doesn't count as a pass. Full table in the [PRD](docs/product/prd.md#m0-exam-result-2026-11-03-no-go).
+
+**How to read "ask".** Every operation lands in one pile: right, too loose (called safer than it is, the dangerous one), too tight (called riskier, annoying but safe), or asked (the user decides). The confidence bar only moves rows into "asked". On the 4,279-row exam:
+
+| bar | right | too loose | too tight | asked | what the asks held (right + loose + tight) |
+|---|---|---|---|---|---|
+| none | 4104 | 36 | 139 | 0 | |
+| 70% | 4064 | 36 | 69 | 110 | 40 + **0** + 70 |
+| 90% | 3961 | 21 | 37 | 260 | 143 + **15** + 102 |
+| 95% | 3812 | 18 | 31 | 418 | 292 + **18** + 108 |
+
+At 70% all 36 dangerous mistakes are still answered: the model was sure of them. From 90% the asks start catching them, at the cost of asking on 6% to 10% of operations.
+
+- **Training labels aren't the cause.** Two blind labellers re-labelled 1,200 training rows of the failing shapes: the training labels were too loose on only 32 (2.7%). The exam misses are mostly one vendor's pattern (Cloudflare billing and jobs).
 - **"No answer if not confident" is measured, not built.** The model returns probabilities today. The "ask" rule exists only in the scoring scripts.
 - **"About 24 MB int8" is an estimate** for the neural model. The baseline is already about 24 MB. The int8 export is not built.
 - **Limits.** OpenAPI operations only. No request bodies, no query values, no hosts without a spec.

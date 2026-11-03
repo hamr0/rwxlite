@@ -177,7 +177,44 @@ Mode (a), no ask, was the go/no-go: **exact 95.91% passes, too loose 0.84% (36 r
 
 Where the 36 too-loose rows of (a) no ask are: 30 cloudflare, 4 pagerduty, 2 sentry. 22 are POST creates the mechanical rules called x and the model lowered (top-up, zone subscription, restore database, deletion job); 9 are PUT/PATCH credential updates whose p(x) (0.01 to 0.11) sat under the 0.15 raise cut; 5 others. The model is confident on them (median top p 0.94), so asking at 0.7 catches none and asking at 0.9 to 0.95 catches about half.
 
+#### How to read the ask table
+
+Every exam operation lands in exactly one of four piles:
+
+- **Right**: the model gave the correct letter.
+- **Too loose**: the model called it safer than it is. This is the dangerous one.
+- **Too tight**: the model called it riskier than it is. Annoying but safe.
+- **Asked**: the model stays quiet and the user decides.
+
+The confidence bar only moves rows into the Asked pile. A row is either answered or asked, never both. Raising the bar never adds too-loose rows; it can only move them into Asked.
+
+Mode (a), all 4279 rows:
+
+| bar | right | too loose | too tight | asked | asked = right + loose + tight |
+|---|---|---|---|---|---|
+| none | 4104 | 36 | 139 | 0 | |
+| 70% | 4064 | 36 | 69 | 110 | 40 + **0** + 70 |
+| 90% | 3961 | 21 | 37 | 260 | 143 + **15** + 102 |
+| 95% | 3812 | 18 | 31 | 418 | 292 + **18** + 108 |
+
+At 70% the 110 asks contain no too-loose rows: all 36 dangerous mistakes are still answered, because the model was more than 70% sure of every one. The 70% bar only removes half the too-tight rows. At 90% to 95% the asks start to catch the dangerous mistakes (15 to 18 of 36), at the cost of asking on 6% to 10% of operations, most of which it would have got right. "Exact" in the table above = right / answered (95%: 3812 / 3861 = 98.7%).
+
 Reading: rwxlite beats mechanical + Jev on exact by about 3 points but is looser than Jev, and as loose as mechanical alone. Asking at 0.95 would clear the 0.5% line, but it was not the pre-registered go/no-go, so it does not count as a pass. The exam is now burned for rwxlite. Next step (spec change) is open; see Open questions.
+
+
+### Round 9 hand labels (2026-11-03)
+
+To test whether the exam's too-loose rows came from bad training labels, 1,200 training rows of the two failing shapes (seeded random by shape, no word filter, no exam/gate/v3 rows) were labelled blind under BRIEF-v3 by two labellers (98.8% agreement; the stricter letter wins where they differ). Data: `data/r9-hand/` (d20b956).
+
+| shape | rows | hand labels agree with training | training label too loose | training label too tight |
+|---|---|---|---|---|
+| POST creates (lower tier, mechanical x lowered) | 800 | 774 | 22 | 4 |
+| PUT/PATCH updates (raise-wx, label w) | 400 | 390 | 10 | 0 |
+| **total** | 1,200 | 1,164 | **32 (2.7%)** | 4 |
+
+The too-loose ones are things like creating a payment, accepting a calendar invite (notifies the organizer), registering a campaign with an outside registry.
+
+Reading: the Jev-recipe training labels are mostly right on these shapes. The exam's 36 too-loose rows (30 cloudflare: billing top-ups, subscriptions, database restores, deletion jobs) are a vendor-specific pattern the corpus barely contains, not a general labelling error; the exam was labelled under the same BRIEF-v3. A retrain with these labels would change about 32 of 87,657 training rows, so it is not expected to move the exam result much.
 
 ## Out of scope (whole build)
 
