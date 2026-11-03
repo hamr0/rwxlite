@@ -1,0 +1,801 @@
+id,label,confidence,note
+gate3-0800,r,high,get changes
+gate3-0799,x,low,password reset by token b
+gate3-0798,w,high,ii copy creates object
+gate3-0797,r,high,post query only
+gate3-0796,r,high,get
+gate3-0795,r,high,list
+gate3-0794,r,high,get
+gate3-0793,w,high,updates session ping
+gate3-0792,w,high,associates spec to SKU
+gate3-0791,w,high,patch property
+gate3-0790,w,low,patch may remove fields but settable
+gate3-0789,w,high,ii create experiment
+gate3-0788,x,low,f cancel operation not restartable
+gate3-0787,w,high,ii create product
+gate3-0786,r,high,get
+gate3-0785,x,high,e triggers ping event delivery
+gate3-0784,w,high,sets db name
+gate3-0783,w,high,patch member
+gate3-0782,r,high,count
+gate3-0781,w,low,creates health id
+gate3-0780,r,high,get
+gate3-0779,r,high,get
+gate3-0778,w,high,bulk update keywords
+gate3-0777,w,low,add user maybe invite not stated
+gate3-0776,w,high,update api key
+gate3-0775,r,high,list
+gate3-0774,w,high,ii create IP
+gate3-0773,x,low,PUT triggers domain verification run
+gate3-0772,x,high,d funding transfer
+gate3-0771,w,high,adds favorite
+gate3-0770,r,high,list
+gate3-0769,r,high,get
+gate3-0768,x,low,iv invite create may be delivered
+gate3-0767,r,high,get
+gate3-0766,w,high,mark read
+gate3-0765,r,high,get
+gate3-0764,r,high,process returns result
+gate3-0763,r,high,get
+gate3-0762,r,high,query report
+gate3-0761,r,high,get
+gate3-0760,r,high,get
+gate3-0759,r,high,get status
+gate3-0758,w,low,confirms link token
+gate3-0757,r,high,list
+gate3-0756,w,high,ii create key
+gate3-0755,r,high,list
+gate3-0754,x,high,c sends email
+gate3-0753,r,high,list
+gate3-0752,r,high,get
+gate3-0751,r,high,list
+gate3-0750,r,high,get
+gate3-0749,r,high,search
+gate3-0748,r,high,get
+gate3-0747,w,high,patch
+gate3-0746,r,high,get
+gate3-0745,r,high,list
+gate3-0744,r,high,get
+gate3-0743,w,high,sets enforcement
+gate3-0742,w,high,edit post
+gate3-0741,w,high,patch
+gate3-0740,r,high,get
+gate3-0739,r,high,get
+gate3-0738,r,high,get
+gate3-0737,r,high,get
+gate3-0736,r,high,get
+gate3-0735,w,high,ii add record
+gate3-0734,w,high,create or update secret
+gate3-0733,r,high,get category
+gate3-0732,w,high,patch metadata
+gate3-0731,r,high,search
+gate3-0730,r,high,get
+gate3-0729,w,high,update key credentials
+gate3-0728,w,low,join swarm leave exists
+gate3-0727,r,low,compile pdf returned maybe stored
+gate3-0726,r,high,get
+gate3-0725,r,high,get
+gate3-0724,r,high,get
+gate3-0723,w,high,ii create token
+gate3-0722,w,high,update settings
+gate3-0721,x,low,b password reset
+gate3-0720,r,high,query
+gate3-0719,w,high,edit record
+gate3-0718,r,high,describe
+gate3-0717,w,high,ii upload part
+gate3-0716,w,high,update secret
+gate3-0715,x,high,d refund
+gate3-0714,w,high,update data
+gate3-0713,r,high,search
+gate3-0712,w,high,ii create auth key
+gate3-0711,r,high,get
+gate3-0710,r,high,list
+gate3-0709,w,high,ii add key
+gate3-0708,w,high,replace config
+gate3-0707,r,high,get
+gate3-0706,r,high,get
+gate3-0705,w,high,patch
+gate3-0704,w,high,create or update
+gate3-0703,r,high,query
+gate3-0702,r,high,get
+gate3-0701,w,high,update token
+gate3-0700,w,high,update lab result
+gate3-0699,w,high,ii create token
+gate3-0698,r,high,statistics query
+gate3-0697,r,high,get
+gate3-0696,r,high,market stat read
+gate3-0695,r,high,statistics
+gate3-0694,r,high,get
+gate3-0693,x,low,b password reset
+gate3-0692,w,high,ii batch create contacts
+gate3-0691,r,high,get
+gate3-0690,w,high,ii create token
+gate3-0689,x,low,validation request likely places call
+gate3-0688,r,high,get
+gate3-0687,r,high,get
+gate3-0686,r,high,get
+gate3-0685,r,high,list
+gate3-0684,w,high,ii create auth token
+gate3-0683,w,high,bulk patch
+gate3-0682,r,high,list
+gate3-0681,r,high,get
+gate3-0680,r,high,count
+gate3-0679,r,high,list
+gate3-0678,r,high,fields
+gate3-0677,w,high,ii create user
+gate3-0676,w,high,ii create allowlist
+gate3-0675,w,high,ii upload part copy
+gate3-0674,r,high,search
+gate3-0673,x,high,a deletes environments
+gate3-0672,r,high,download
+gate3-0671,r,high,fields
+gate3-0670,r,high,get
+gate3-0669,w,high,ii create token
+gate3-0668,r,high,get
+gate3-0667,w,low,token for write environments
+gate3-0666,w,high,ii create cart
+gate3-0665,w,high,suspend or re-enable settings
+gate3-0664,x,low,e create script likely runs it
+gate3-0663,w,high,ii issues access token
+gate3-0662,r,high,get
+gate3-0661,w,high,updates token contents
+gate3-0660,r,high,query
+gate3-0659,r,high,get
+gate3-0658,w,high,patch group
+gate3-0657,w,high,ii create user
+gate3-0656,w,high,ii create note
+gate3-0655,r,high,list
+gate3-0654,w,high,ii create subaccount
+gate3-0653,r,high,list
+gate3-0652,r,high,list
+gate3-0651,r,high,count
+gate3-0650,r,high,get
+gate3-0649,x,low,e starts session run
+gate3-0648,w,high,ii add holder
+gate3-0647,w,high,replace group
+gate3-0646,r,high,get
+gate3-0645,r,high,get
+gate3-0644,w,low,create member may invite
+gate3-0643,r,low,merge returned doc not stored
+gate3-0642,r,high,list
+gate3-0641,r,high,get
+gate3-0640,r,high,get
+gate3-0639,r,high,get
+gate3-0638,w,high,update note
+gate3-0637,r,low,login returns keys
+gate3-0636,w,high,toggle enable
+gate3-0635,x,low,f cancel operation not restartable
+gate3-0634,r,high,list
+gate3-0633,r,high,review check
+gate3-0632,r,high,verify
+gate3-0631,r,high,get
+gate3-0630,r,high,classify
+gate3-0629,r,high,test permissions
+gate3-0628,r,high,get
+gate3-0627,w,high,update assistant
+gate3-0626,x,low,generalize VM irreversible
+gate3-0625,r,high,get
+gate3-0624,r,high,get
+gate3-0623,w,high,ii create partner
+gate3-0622,w,high,edit credential roles
+gate3-0621,r,high,list
+gate3-0620,w,high,update ticket
+gate3-0619,r,high,list
+gate3-0618,r,high,list
+gate3-0617,w,low,exchange issues token
+gate3-0616,r,high,get location
+gate3-0615,w,high,patch
+gate3-0614,w,low,disassociate secret re-associable
+gate3-0613,r,high,get
+gate3-0612,w,high,update setting
+gate3-0611,r,high,fields
+gate3-0610,r,high,get
+gate3-0609,r,high,describe
+gate3-0608,r,high,list
+gate3-0607,w,high,update variable
+gate3-0606,w,high,update secret
+gate3-0605,w,high,update user
+gate3-0604,x,high,d places bet
+gate3-0603,x,low,commits agreement accept
+gate3-0602,r,high,list
+gate3-0601,w,high,update cert
+gate3-0600,r,high,count
+gate3-0599,w,high,update schema
+gate3-0598,r,high,list
+gate3-0597,w,high,ii create share
+gate3-0596,w,high,ii create module
+gate3-0595,w,high,update expiry setting
+gate3-0594,x,low,b changes password
+gate3-0593,w,high,update or create
+gate3-0592,w,high,edit key
+gate3-0591,w,high,patch photo
+gate3-0590,r,high,list
+gate3-0589,w,high,ii upload analysis
+gate3-0588,w,high,create or update schedule
+gate3-0587,r,high,get
+gate3-0586,r,high,get history
+gate3-0585,x,high,b ends session key
+gate3-0584,w,low,start replica toggle
+gate3-0583,w,high,ii create session
+gate3-0582,r,high,policy check
+gate3-0581,r,high,list
+gate3-0580,w,high,sets settings
+gate3-0579,w,high,ii create zone
+gate3-0578,r,high,get
+gate3-0577,w,high,toggle start ipalias
+gate3-0576,r,high,get
+gate3-0575,r,high,get
+gate3-0574,r,high,list
+gate3-0573,r,high,list
+gate3-0572,r,high,get
+gate3-0571,r,high,fields
+gate3-0570,r,high,search
+gate3-0569,w,high,ii create token
+gate3-0568,r,high,get
+gate3-0567,w,high,ii adds data
+gate3-0566,r,high,search
+gate3-0565,x,high,b expire credential no reactivate
+gate3-0564,r,high,get
+gate3-0563,w,low,activate token toggle
+gate3-0562,r,high,search
+gate3-0561,r,high,get
+gate3-0560,r,high,list
+gate3-0559,r,high,verify
+gate3-0558,r,high,ocr convert returned
+gate3-0557,w,high,create or modify cert
+gate3-0556,r,high,get
+gate3-0555,w,high,update user
+gate3-0554,r,high,get
+gate3-0553,r,high,get
+gate3-0552,r,high,get
+gate3-0551,w,high,patch
+gate3-0550,r,high,drift report read
+gate3-0549,r,high,list
+gate3-0548,w,high,ii add variant
+gate3-0547,r,high,get
+gate3-0546,x,low,d certificate purchase order
+gate3-0545,r,high,list
+gate3-0544,w,high,ii create profile
+gate3-0543,r,high,list
+gate3-0542,r,high,get
+gate3-0541,w,high,update variable
+gate3-0540,r,high,get log url
+gate3-0539,r,high,get
+gate3-0538,r,high,get
+gate3-0537,r,high,list
+gate3-0536,w,high,toggle start web job has stop
+gate3-0535,w,high,remove tag from item on POST
+gate3-0534,r,high,query
+gate3-0533,r,high,query
+gate3-0532,w,low,accept membership status
+gate3-0531,r,high,list
+gate3-0530,w,high,ii register subscription
+gate3-0529,r,high,get info
+gate3-0528,w,high,patch page content
+gate3-0527,w,high,update settings
+gate3-0526,w,high,update favourites
+gate3-0525,x,low,e create deployment runs deploy
+gate3-0524,w,high,ii create link
+gate3-0523,w,high,ii create short link
+gate3-0522,w,low,batch process suppliers
+gate3-0521,r,high,list snapshots
+gate3-0520,r,high,get
+gate3-0519,r,high,query
+gate3-0518,r,high,list
+gate3-0517,r,high,stats
+gate3-0516,w,high,ii create credentials
+gate3-0515,r,high,get
+gate3-0514,w,high,edit order shipping
+gate3-0513,w,high,update session
+gate3-0512,r,high,fields
+gate3-0511,w,high,ii create log drain
+gate3-0510,w,low,start agents has stop
+gate3-0509,w,high,bulk patch
+gate3-0508,r,high,verify
+gate3-0507,r,high,list
+gate3-0506,r,high,list
+gate3-0505,w,high,ii add call
+gate3-0504,w,high,update source
+gate3-0503,r,high,list
+gate3-0502,r,high,get
+gate3-0501,w,high,ii create token
+gate3-0500,r,high,get
+gate3-0499,w,high,update user
+gate3-0498,r,high,get
+gate3-0497,w,high,mark read
+gate3-0496,r,high,get
+gate3-0495,r,high,list
+gate3-0494,w,high,update key
+gate3-0493,r,high,list
+gate3-0492,w,high,ii issue token
+gate3-0491,r,high,list
+gate3-0490,x,low,approval of cert signing request
+gate3-0489,w,high,update volume
+gate3-0488,w,high,set credential
+gate3-0487,r,high,get
+gate3-0486,r,high,list
+gate3-0485,r,high,get
+gate3-0484,r,high,get
+gate3-0483,w,high,ii create secret value
+gate3-0482,x,high,d registers domain
+gate3-0481,r,high,get
+gate3-0480,w,high,undo close
+gate3-0479,w,high,ii create permission
+gate3-0478,r,high,list
+gate3-0477,r,high,list
+gate3-0476,w,high,edit user
+gate3-0475,w,high,ii create catalog
+gate3-0474,x,high,a deletes vectors
+gate3-0473,w,high,sets secret value
+gate3-0472,w,high,save rule
+gate3-0471,w,high,create or update key
+gate3-0470,w,high,bulk update keywords
+gate3-0469,r,high,get
+gate3-0468,r,high,get
+gate3-0467,w,high,create or update schema
+gate3-0466,w,high,ii create resource
+gate3-0465,x,high,c re-sends emails
+gate3-0464,w,high,sets property
+gate3-0463,r,high,check errors
+gate3-0462,r,high,watch
+gate3-0461,r,high,get
+gate3-0460,w,high,update catalog
+gate3-0459,w,high,patch status
+gate3-0458,w,high,sets property
+gate3-0457,w,high,pause has resume
+gate3-0456,r,high,verify
+gate3-0455,w,high,patch
+gate3-0454,r,low,authenticate returns token
+gate3-0453,r,high,generate card
+gate3-0452,w,high,ii create policy
+gate3-0451,r,high,compute
+gate3-0450,r,high,get
+gate3-0449,w,low,creates report may run job
+gate3-0448,w,high,update app
+gate3-0447,w,high,ii create relay token
+gate3-0446,r,high,get
+gate3-0445,w,high,update value
+gate3-0444,w,high,set metadata
+gate3-0443,r,high,list
+gate3-0442,r,high,verify
+gate3-0441,w,low,completes phone auth session
+gate3-0440,w,high,update site
+gate3-0439,r,high,get
+gate3-0438,w,high,marks as sent
+gate3-0437,w,high,create or update
+gate3-0436,w,high,ii add token
+gate3-0435,r,high,get
+gate3-0434,w,high,update collection
+gate3-0433,w,high,update token
+gate3-0432,w,high,ii create property
+gate3-0431,w,high,add tagpath
+gate3-0430,r,high,get
+gate3-0429,r,high,count
+gate3-0428,r,high,get
+gate3-0427,x,low,b completes password reset
+gate3-0426,r,high,list
+gate3-0425,r,high,compute
+gate3-0424,r,high,get
+gate3-0423,r,high,list
+gate3-0422,r,high,get
+gate3-0421,w,high,maps group id
+gate3-0420,w,high,ii create key
+gate3-0419,w,high,modify deployment
+gate3-0418,w,high,ii create transport
+gate3-0417,r,high,ocr returned
+gate3-0416,w,high,bulk patch
+gate3-0415,w,high,update cert
+gate3-0414,w,high,update config
+gate3-0413,r,high,verify
+gate3-0412,w,high,update settings
+gate3-0411,r,high,get
+gate3-0410,w,high,ii create filter
+gate3-0409,r,high,get
+gate3-0408,w,high,ii index data
+gate3-0407,w,low,GET that creates domain
+gate3-0406,w,high,update settings
+gate3-0405,w,high,update experiment
+gate3-0404,w,high,ii create property
+gate3-0403,r,high,get
+gate3-0402,r,high,get
+gate3-0401,r,high,list
+gate3-0400,w,high,ii create property
+gate3-0399,r,high,get
+gate3-0398,w,low,request unblock network
+gate3-0397,r,high,get
+gate3-0396,r,high,get
+gate3-0395,x,high,e creates and runs job
+gate3-0394,w,high,ii create upload session
+gate3-0393,x,high,c sends OTP
+gate3-0392,w,high,set easy password
+gate3-0391,r,high,get
+gate3-0390,r,high,get
+gate3-0389,r,high,get
+gate3-0388,r,high,list
+gate3-0387,r,high,verify
+gate3-0386,r,high,search
+gate3-0385,r,high,get
+gate3-0384,r,high,get
+gate3-0383,w,high,ii create upload session
+gate3-0382,r,high,query
+gate3-0381,x,high,b resets root password
+gate3-0380,w,high,update categories
+gate3-0379,r,high,get
+gate3-0378,r,high,get
+gate3-0377,w,high,update config
+gate3-0376,w,high,update entity
+gate3-0375,r,high,list
+gate3-0374,r,high,get
+gate3-0373,w,high,postpone reminder
+gate3-0372,r,high,get
+gate3-0371,w,high,update key
+gate3-0370,r,high,verify
+gate3-0369,w,high,bulk update
+gate3-0368,r,high,list
+gate3-0367,w,high,update user
+gate3-0366,x,low,flush requests unclear
+gate3-0365,r,high,verify
+gate3-0364,w,high,patch
+gate3-0363,r,high,list
+gate3-0362,r,high,function read
+gate3-0361,r,high,get
+gate3-0360,w,high,ii create project
+gate3-0359,w,high,ii create relation
+gate3-0358,r,high,get
+gate3-0357,x,high,d transfers credit
+gate3-0356,r,high,count
+gate3-0355,x,high,c sends reset email
+gate3-0354,r,high,fields
+gate3-0353,w,high,update account
+gate3-0352,r,high,list
+gate3-0351,r,high,check
+gate3-0350,w,high,update project type
+gate3-0349,w,high,sets phone number
+gate3-0348,w,high,assign products
+gate3-0347,r,high,get
+gate3-0346,r,high,get recommendations
+gate3-0345,r,high,describe
+gate3-0344,r,high,get
+gate3-0343,w,low,issues write token
+gate3-0342,r,high,get
+gate3-0341,r,low,discover schema runs probe
+gate3-0340,w,high,update policy
+gate3-0339,r,high,list
+gate3-0338,w,high,create or update link
+gate3-0337,r,high,get
+gate3-0336,x,low,processes return commits refund
+gate3-0335,w,high,ii create pod
+gate3-0334,x,high,e retry issuance job
+gate3-0333,w,high,update contact
+gate3-0332,w,high,modify notification
+gate3-0331,r,high,get
+gate3-0330,w,high,ii create screen
+gate3-0329,r,high,query
+gate3-0328,w,high,ii create credential
+gate3-0327,w,high,ii create subscription
+gate3-0326,r,high,get
+gate3-0325,w,high,bulk update
+gate3-0324,w,high,patch status
+gate3-0323,r,high,get
+gate3-0322,x,low,f stops session transfer lost
+gate3-0321,w,high,ii create episode
+gate3-0320,r,high,get
+gate3-0319,w,high,create or update actions
+gate3-0318,w,high,update account
+gate3-0317,r,high,view
+gate3-0316,r,high,get
+gate3-0315,r,high,stats
+gate3-0314,w,high,patch doc
+gate3-0313,r,high,get
+gate3-0312,w,high,ii create api
+gate3-0311,r,high,get
+gate3-0310,w,high,ii create label
+gate3-0309,w,high,ii create webhook
+gate3-0308,w,high,ii create token
+gate3-0307,w,high,set config
+gate3-0306,w,high,update screen
+gate3-0305,w,high,ii create override
+gate3-0304,w,high,update user
+gate3-0303,w,high,adds keyword
+gate3-0302,w,high,patch task
+gate3-0301,w,high,update user
+gate3-0300,r,high,get
+gate3-0299,w,high,ii create key
+gate3-0298,w,high,create or update table
+gate3-0297,w,high,create or update secret
+gate3-0296,r,high,availability check
+gate3-0295,r,high,list
+gate3-0294,w,high,update field
+gate3-0293,w,high,update cert info
+gate3-0292,r,high,get
+gate3-0291,w,high,reaction is w per D98
+gate3-0290,w,high,assign
+gate3-0289,x,high,e runs index job
+gate3-0288,r,high,list
+gate3-0287,r,high,get
+gate3-0286,w,high,ii create VC
+gate3-0285,r,high,list
+gate3-0284,w,high,update definition
+gate3-0283,r,high,lookup
+gate3-0282,x,high,a deletes token not restorable
+gate3-0281,r,high,get
+gate3-0280,w,high,update group
+gate3-0279,r,high,compute
+gate3-0278,r,high,list
+gate3-0277,r,high,get
+gate3-0276,r,high,list
+gate3-0275,r,high,get
+gate3-0274,x,low,b sets password
+gate3-0273,r,high,verify
+gate3-0272,r,high,get
+gate3-0271,r,high,get
+gate3-0270,r,high,get content
+gate3-0269,w,high,toggle enable
+gate3-0268,r,high,aggregate
+gate3-0267,r,high,export
+gate3-0266,r,high,get
+gate3-0265,r,high,compute
+gate3-0264,w,high,ii create token
+gate3-0263,w,high,update or toggle token
+gate3-0262,w,high,create or update
+gate3-0261,w,low,GET that creates group
+gate3-0260,r,high,get
+gate3-0259,r,high,get
+gate3-0258,w,low,issues read token
+gate3-0257,w,high,update attributes
+gate3-0256,r,high,lookup
+gate3-0255,w,high,ii create suite
+gate3-0254,w,high,patch
+gate3-0253,w,high,modify subaccount
+gate3-0252,r,high,get
+gate3-0251,r,high,get
+gate3-0250,w,high,remove tag on POST has tag
+gate3-0249,w,high,update project
+gate3-0248,w,low,refresh issues new token
+gate3-0247,r,high,get
+gate3-0246,r,high,get
+gate3-0245,r,high,get
+gate3-0244,w,low,register payment record only
+gate3-0243,r,high,get
+gate3-0242,w,high,ii add key
+gate3-0241,w,high,ii create policy
+gate3-0240,r,high,get
+gate3-0239,w,high,ii add notes
+gate3-0238,x,high,e refreshes from provider site
+gate3-0237,r,high,list tokens read
+gate3-0236,x,high,a deletes IdP
+gate3-0235,w,low,GET sets queue pointer
+gate3-0234,w,high,update region
+gate3-0233,r,high,get
+gate3-0232,w,high,set availability
+gate3-0231,r,high,list
+gate3-0230,r,high,list
+gate3-0229,w,high,ii add case
+gate3-0228,w,high,update comment
+gate3-0227,x,high,f stops mass action lost
+gate3-0226,w,high,ii add users
+gate3-0225,w,high,update group
+gate3-0224,x,high,d renews cert
+gate3-0223,r,high,search
+gate3-0222,r,high,get
+gate3-0221,w,high,ii create licensee
+gate3-0220,w,high,update
+gate3-0219,r,high,info
+gate3-0218,x,high,d card authorization
+gate3-0217,x,low,b sets password
+gate3-0216,r,high,get
+gate3-0215,w,high,patch
+gate3-0214,x,high,b regenerates key
+gate3-0213,w,high,update dashboard
+gate3-0212,w,high,create or update
+gate3-0211,r,high,get
+gate3-0210,w,high,update key
+gate3-0209,r,high,get
+gate3-0208,r,high,get
+gate3-0207,w,low,instructs session play
+gate3-0206,w,high,update pin
+gate3-0205,w,high,update status
+gate3-0204,w,high,update favourites
+gate3-0203,w,high,add listings
+gate3-0202,w,high,patch
+gate3-0201,w,high,power off has start
+gate3-0200,w,high,update property
+gate3-0199,w,high,ii create tab
+gate3-0198,r,high,list
+gate3-0197,w,high,update action
+gate3-0196,w,high,ii issue token
+gate3-0195,w,low,confirm license applied
+gate3-0194,r,high,get
+gate3-0193,r,high,get
+gate3-0192,r,high,get
+gate3-0191,r,high,text correction returned
+gate3-0190,w,high,patch
+gate3-0189,r,high,get
+gate3-0188,r,high,get
+gate3-0187,x,high,a b deletes report invalidates token
+gate3-0186,r,high,count
+gate3-0185,w,high,ii create group
+gate3-0184,r,high,verify
+gate3-0183,w,high,ii add attachment
+gate3-0182,w,high,toggle start port
+gate3-0181,w,high,ii upload cert
+gate3-0180,r,high,list
+gate3-0179,r,high,get
+gate3-0178,w,high,modify credential
+gate3-0177,r,high,list
+gate3-0176,w,high,set env var
+gate3-0175,w,high,ii create project
+gate3-0174,w,high,update source
+gate3-0173,r,high,list
+gate3-0172,r,high,list
+gate3-0171,r,high,get
+gate3-0170,w,high,update name
+gate3-0169,r,high,get
+gate3-0168,w,high,ii add key
+gate3-0167,w,high,update token
+gate3-0166,r,high,list
+gate3-0165,w,high,ii create key
+gate3-0164,r,high,list
+gate3-0163,r,high,translate
+gate3-0162,w,high,soft delete
+gate3-0161,w,high,bulk patch
+gate3-0160,r,high,list
+gate3-0159,r,high,list
+gate3-0158,w,high,update set
+gate3-0157,r,high,delta read
+gate3-0156,w,high,set repos
+gate3-0155,r,high,verify
+gate3-0154,r,high,query
+gate3-0153,r,high,list
+gate3-0152,x,high,e forces reprovision
+gate3-0151,w,high,ii create session
+gate3-0150,r,high,get
+gate3-0149,w,high,update connector
+gate3-0148,r,high,list
+gate3-0147,w,low,create remote help session
+gate3-0146,r,high,get spec
+gate3-0145,r,high,get
+gate3-0144,w,high,ii create token
+gate3-0143,r,low,GET builds archive returned
+gate3-0142,r,high,get
+gate3-0141,w,high,comment is w per D98
+gate3-0140,x,high,c sends reset email
+gate3-0139,r,high,get
+gate3-0138,r,high,list
+gate3-0137,x,high,c b password reset
+gate3-0136,r,high,get
+gate3-0135,w,high,ii upload file
+gate3-0134,w,high,stop has start
+gate3-0133,w,high,ii create share
+gate3-0132,r,high,verification check
+gate3-0131,w,low,start connection
+gate3-0130,w,high,create or modify csr
+gate3-0129,w,high,create or update
+gate3-0128,r,high,get
+gate3-0127,w,high,pings session
+gate3-0126,r,high,list
+gate3-0125,r,high,list
+gate3-0124,w,high,patch
+gate3-0123,r,high,get
+gate3-0122,r,high,get
+gate3-0121,w,low,issues write token
+gate3-0120,r,high,verify
+gate3-0119,r,high,verify
+gate3-0118,r,high,check
+gate3-0117,r,high,info
+gate3-0116,w,high,adds to blacklist removable
+gate3-0115,w,low,joins VM to domain
+gate3-0114,r,high,info
+gate3-0113,x,high,e schedules analysis
+gate3-0112,w,high,associate
+gate3-0111,r,high,get
+gate3-0110,w,high,add gift card to cart
+gate3-0109,w,high,ii create transport
+gate3-0108,w,high,ii create entity
+gate3-0107,x,low,marks key compromised
+gate3-0106,r,high,search
+gate3-0105,w,high,ii create form
+gate3-0104,r,high,query
+gate3-0103,r,low,login returns session
+gate3-0102,w,high,rename
+gate3-0101,r,high,get
+gate3-0100,r,high,list
+gate3-0099,w,high,ii add form
+gate3-0098,w,high,patch
+gate3-0097,w,high,update plan
+gate3-0096,w,high,ii add step
+gate3-0095,w,high,update list
+gate3-0094,w,high,update object
+gate3-0093,w,high,update
+gate3-0092,x,low,b sets password
+gate3-0091,r,high,list
+gate3-0090,r,high,search
+gate3-0089,w,high,update property
+gate3-0088,w,high,update key
+gate3-0087,w,high,update key toggle
+gate3-0086,r,high,list
+gate3-0085,x,high,e runs async job
+gate3-0084,r,high,get
+gate3-0083,w,high,replace user
+gate3-0082,w,high,set pref
+gate3-0081,r,high,get
+gate3-0080,w,high,set feature state
+gate3-0079,r,high,list
+gate3-0078,x,high,a deletes data
+gate3-0077,r,high,verify
+gate3-0076,r,high,ocr returned
+gate3-0075,x,low,resolves incidents not reopenable
+gate3-0074,w,high,ii copy creates folder
+gate3-0073,r,high,get
+gate3-0072,x,high,a deletes schedules
+gate3-0071,w,high,add group
+gate3-0070,w,high,set property
+gate3-0069,r,high,list
+gate3-0068,w,high,update products
+gate3-0067,r,high,get
+gate3-0066,w,high,ii create log group
+gate3-0065,r,high,get
+gate3-0064,w,low,manage tokens unclear
+gate3-0063,r,high,get
+gate3-0062,w,high,set subscriptions
+gate3-0061,r,high,list
+gate3-0060,w,high,set property
+gate3-0059,r,high,list
+gate3-0058,w,high,update resolution
+gate3-0057,r,high,list
+gate3-0056,r,high,list
+gate3-0055,w,high,stop has start
+gate3-0054,x,low,d transfers number between accounts
+gate3-0053,r,high,get
+gate3-0052,w,high,ii create key
+gate3-0051,w,low,retention lock may be permanent
+gate3-0050,w,high,update purchase
+gate3-0049,r,high,count
+gate3-0048,x,high,a GET that deletes versions
+gate3-0047,w,high,rating set
+gate3-0046,r,high,get
+gate3-0045,r,high,get data
+gate3-0044,r,high,get
+gate3-0043,x,low,e generates report job
+gate3-0042,r,high,get
+gate3-0041,r,high,get
+gate3-0040,r,high,get
+gate3-0039,w,high,update notification
+gate3-0038,w,high,ii create template
+gate3-0037,x,high,c sends email
+gate3-0036,r,high,get
+gate3-0035,r,low,login returns tokens
+gate3-0034,r,high,get
+gate3-0033,x,high,d cancels number subscription
+gate3-0032,r,high,lookup
+gate3-0031,r,high,list
+gate3-0030,w,high,update workflow
+gate3-0029,r,high,list
+gate3-0028,r,high,list
+gate3-0027,r,high,get
+gate3-0026,w,high,ii create secret
+gate3-0025,w,high,update field
+gate3-0024,r,high,search
+gate3-0023,r,high,get
+gate3-0022,r,high,get
+gate3-0021,r,high,function read
+gate3-0020,w,high,patch
+gate3-0019,w,high,ii allocate IP
+gate3-0018,w,high,update item
+gate3-0017,r,high,list
+gate3-0016,x,low,b sets password
+gate3-0015,w,high,patch
+gate3-0014,w,high,restore has undelete
+gate3-0013,w,high,ii create certificate
+gate3-0012,w,high,update token
+gate3-0011,r,high,get
+gate3-0010,w,low,recalculate workbook state
+gate3-0009,r,high,stats
+gate3-0008,r,high,count
+gate3-0007,w,high,move to folder
+gate3-0006,r,high,verify
+gate3-0005,x,high,c publishes events async
+gate3-0004,r,high,list
+gate3-0003,r,high,list
+gate3-0002,w,high,edit session
+gate3-0001,w,high,set region
