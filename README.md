@@ -80,4 +80,4 @@ As of 2026-11-03, rwxlite is in module 0 and not released.
 
 ## License
 
-Licence: not chosen yet (see PRD open questions).
+Apache License 2.0. See [LICENSE](LICENSE).

@@ -196,10 +196,10 @@ Only module 0 is sharp. The rest are sketches.
 - Thresholds: rwxlite tunes its own, under the global-budget rule (round 5).
 - Round 6: items 1-6 above (two-step POST lower, gate-2, credential rule, bar 95%, exam once, mutual-learning stance).
 - Round 5: BRIEF-v3 only; DELETE mechanical; fresh-sample gate used once; model/format decisions recorded above.
+- Licence: Apache-2.0, matching rwxmap (user, 2026-11-03).
 
 ## Open questions
 
 - **Which small encoder.** all-MiniLM-L6-v2 first, bge-small-en-v1.5 second, TF-IDF + LR as baseline; the bars decide.
 - **Model string.** What exact string rwxlite returns in `{p, model}`, and how it is versioned. rwxmap records the model string on every moved verdict (D88), so it must change whenever the weights change.
-- **Licence.** Match rwxmap (Apache 2.0)? Not decided.
 - **Distribution form.** npm package with the ONNX file, or a separate download. Decided in M1.
