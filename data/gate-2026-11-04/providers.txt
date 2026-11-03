@@ -212,7 +212,6 @@ webflow.com
 whapi.com
 windows.net
 wowza.com
-xero.com
 xtrf.eu
 zeno.fm
 zoom.us

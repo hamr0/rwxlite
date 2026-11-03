@@ -32,6 +32,21 @@ the other 7 locked vendors (auth0, hubspot, zendesk, dropbox, shopify, linear, m
 already in a v3 truth set (combined-2026-09-21, relabel-buildset-2026-09-23) 3723; already in gate-1 (any snapshot of an op key in data/gate-2026-11-03/ids.txt) 600; DELETE 8935; HEAD/OPTIONS/TRACE/other 201.
 Eligible: 83797.
 
+## Amendment: burned-exam vendors excluded by name (rwxmap lock check)
+
+rwxmap's lock check on this gate found xero.com in the draw: xero was an exam vendor in rwxmap `data/exam-2026-09-17`
+(with okta and docusign). rwxmap's rule is that a draw excludes prior exam vendors BY NAME, not only by row. The first
+draw only excluded exam rows/op keys and cloudflare/pagerduty/sentry by first token, so xero.com (1 row) slipped in.
+
+Fix (minimal): the original seeded draw above is unchanged; every row whose provider has a whole domain label (split on
+`.` and `:`) in the burned/locked name list is dropped, and only those slots are redrawn: 1 rows. Each new row takes
+the freed id/position, comes from a second seeded shuffle (seed 20261105, mulberry32, sorted op keys) of the by-name-eligible pool, same
+method stratum (POST 1), same 30-row vendor cap, same exclusions as above
+(including gate-1). All other 599 rows and ids are unchanged. ids.txt and providers.txt are rewritten.
+Names excluded: okta, docusign, xero, klaviyo, cloudflare, pagerduty, sentry, auth0, hubspot, zendesk, miro, dropbox, shopify, linear. Burned exam vendors: okta, docusign, xero (exam-2026-09-17); auth0, hubspot, klaviyo, miro, zendesk
+(exam-2026-09-20); cloudflare, pagerduty, sentry (exam-2026-09-22). Locked only: dropbox, shopify, linear.
+Replaced ids: gate2-0216 (all were xero.com, replaced in place).
+
 ## Counts
 
 | method | n |
@@ -59,4 +74,4 @@ Eligible: 83797.
 | apideck | 6 |
 | gerermesaffaires | 6 |
 
-(219 vendors in all.)
+(218 vendors in all.)
