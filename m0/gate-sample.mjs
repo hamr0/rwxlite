@@ -1,5 +1,7 @@
 // Draws the fresh BRIEF-v3 label-gate sample (blind). Deterministic: same seed + same inputs -> same files.
-//   node m0/gate-sample.mjs   -> data/gate-2026-11-03/{blind.csv,ids.txt,README.md}
+//   node m0/gate-sample.mjs           -> data/gate-2026-11-03/{blind.csv,ids.txt,README.md}   (gate-1, seed 20261103)
+//   node m0/gate-sample.mjs --gate 2  -> data/gate-2026-11-04/{blind.csv,ids.txt,README.md,providers.txt}   (gate-2, seed 20261104)
+// Gate-2 additionally excludes every op key in gate-1's ids.txt (all snapshots).
 // No network. Reads data/m0/mechanical.jsonl.gz and rwxmap truth sets in place (never written).
 // blind.csv carries no mechanical letter, no Jev p, nothing hinting at a class.
 import fs from 'node:fs';
@@ -8,10 +10,13 @@ import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(HERE, '..', 'data', 'gate-2026-11-03');
+const GATE2 = process.argv.includes('--gate') && process.argv[process.argv.indexOf('--gate') + 1] === '2';
+const DIR = GATE2 ? 'gate-2026-11-04' : 'gate-2026-11-03';
+const OUT = path.join(HERE, '..', 'data', DIR);
 const RWXMAP = process.env.RWXMAP_DIR || path.resolve(HERE, '..', '..', 'rwxmap');
 const D = (...p) => path.join(RWXMAP, 'data', ...p);
-const SEED = 20261103;
+const SEED = GATE2 ? 20261104 : 20261103;
+const GATE1_IDS = GATE2 ? new Set(fs.readFileSync(path.join(HERE, '..', 'data', 'gate-2026-11-03', 'ids.txt'), 'utf8').split('\n').filter(Boolean)) : new Set();
 const N = 600, MIN_GET = 100, MIN_PUTPATCH = 100, VENDOR_CAP = Math.floor(N * 0.05);
 const EXAM_AND_LOCKED = ['cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot', 'zendesk', 'miro', 'dropbox', 'shopify', 'linear'];
 const SAMPLED = ['GET', 'POST', 'PUT', 'PATCH'];
@@ -38,7 +43,7 @@ function mulberry32(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t 
 function shuffle(arr, rnd) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 const mech = zlib.gunzipSync(fs.readFileSync(path.join(HERE, '..', 'data', 'm0', 'mechanical.jsonl.gz'))).toString('utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
-const ex = { total: mech.length, exam_vendor: 0, locked_vendor: 0, exam_opkey_overlap: 0, in_v3_truth: 0, head_options_trace_other: 0, delete: 0 };
+const ex = { total: mech.length, exam_vendor: 0, locked_vendor: 0, exam_opkey_overlap: 0, in_v3_truth: 0, gate1: 0, head_options_trace_other: 0, delete: 0 };
 
 // ops already in any v3 truth set (provider-matched, as m0/parity.mjs joins them)
 const truthKeys = new Set();
@@ -55,6 +60,7 @@ for (const [k, rows] of groups) {
   if (rows.some((x) => x.exam) || r.vendor === 'cloudflare' || r.vendor === 'pagerduty' || r.vendor === 'sentry') { ex.exam_vendor++; continue; }
   if (EXAM_AND_LOCKED.includes(r.vendor)) { ex.locked_vendor++; continue; }
   if (rows.some((x) => x.exam_opkey_overlap)) { ex.exam_opkey_overlap++; continue; }
+  if (rows.some((x) => GATE1_IDS.has(x.id))) { ex.gate1++; continue; }
   const ok = opKey(r.method, r.path, r.operationId);
   if (truthKeys.has(`${r.provider}|${ok}`) || truthKeys.has(`vendor:${r.vendor}|${ok}`)) { ex.in_v3_truth++; continue; }
   if (m === 'DELETE') { ex.delete++; continue; }
@@ -86,7 +92,7 @@ const short = SAMPLED.filter((m) => (nM[m] || 0) < quota[m]);
 if (short.length) console.warn('quota short for', short, nM, quota);
 
 // blind order: pool is already seeded-shuffled; picked keeps that order. Ids gate-0001..
-const rows = picked.map((e, i) => ({ id: `gate-${String(i + 1).padStart(4, '0')}`, e }));
+const rows = picked.map((e, i) => ({ id: `${GATE2 ? 'gate2' : 'gate'}-${String(i + 1).padStart(4, '0')}`, e }));
 fs.mkdirSync(OUT, { recursive: true });
 const H = ['id', 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
 fs.writeFileSync(path.join(OUT, 'blind.csv'), [H.join(','), ...rows.map(({ id, e }) => [id, e.row.provider, e.row.method, e.row.path, e.row.operationId, e.row.summary, e.row.description].map(csvCell).join(','))].join('\n') + '\n');
@@ -96,7 +102,7 @@ fs.writeFileSync(path.join(OUT, 'ids.txt'), ids.join('\n') + '\n');
 const cnt = (f) => { const m = {}; for (const { e } of rows) m[f(e)] = (m[f(e)] || 0) + 1; return Object.entries(m).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)); };
 const byMethod = cnt((e) => e.method), byVendor = cnt((e) => e.vendor);
 const fmt = (a) => a.map(([k, v]) => `| ${k} | ${v} |`).join('\n');
-fs.writeFileSync(path.join(OUT, 'README.md'), `# data/gate-2026-11-03 — fresh BRIEF-v3 label-gate sample (blind)
+fs.writeFileSync(path.join(OUT, 'README.md'), `# data/${DIR} — fresh BRIEF-v3 label-gate sample (blind)
 
 ## What this is
 
@@ -118,7 +124,7 @@ selection or any repeated scoring. After the gate it is burned. Nothing is score
 
 ## Draw
 
-- Seed: ${SEED} (mulberry32; sort op keys, one Fisher-Yates shuffle, take in order subject to quotas). \`node m0/gate-sample.mjs\` reproduces these files byte for byte.
+- Seed: ${SEED} (mulberry32; sort op keys, one Fisher-Yates shuffle, take in order subject to quotas). \`node m0/gate-sample.mjs${GATE2 ? ' --gate 2' : ''}\` reproduces these files byte for byte.
 - Unit = op key (provider+method+path+operationId); one row per op key (first snapshot's text).
 - Quotas (GET/POST/PUT/PATCH): ${SAMPLED.map((m) => `${m} ${quota[m]}`).join(', ')}. Proportional to availability, with at least ${MIN_GET} GET and ${MIN_PUTPATCH} PUT+PATCH.
 - Vendor cap: ${VENDOR_CAP} rows per vendor (5% of ${N}); vendor = first dotted token of provider.
@@ -127,7 +133,7 @@ selection or any repeated scoring. After the gate it is burned. Nothing is score
 
 Total op keys: ${ex.op_keys_total} (from ${ex.total} rows). Excluded, in order: exam vendors (cloudflare, pagerduty, sentry) ${ex.exam_vendor};
 the other 7 locked vendors (auth0, hubspot, zendesk, dropbox, shopify, linear, miro) ${ex.locked_vendor}; exam_opkey_overlap ${ex.exam_opkey_overlap};
-already in a v3 truth set (combined-2026-09-21, relabel-buildset-2026-09-23) ${ex.in_v3_truth}; DELETE ${ex.delete}; HEAD/OPTIONS/TRACE/other ${ex.head_options_trace_other}.
+already in a v3 truth set (combined-2026-09-21, relabel-buildset-2026-09-23) ${ex.in_v3_truth};${GATE2 ? ` already in gate-1 (any snapshot of an op key in data/gate-2026-11-03/ids.txt) ${ex.gate1};` : ''} DELETE ${ex.delete}; HEAD/OPTIONS/TRACE/other ${ex.head_options_trace_other}.
 Eligible: ${ex.op_keys_eligible}.
 
 ## Counts
@@ -142,4 +148,5 @@ ${fmt(byVendor.slice(0, 15))}
 
 (${byVendor.length} vendors in all.)
 `);
+if (GATE2) fs.writeFileSync(path.join(OUT, 'providers.txt'), [...new Set(rows.map(({ e }) => e.row.provider))].sort().join('\n') + '\n');
 console.log(JSON.stringify({ ex, avail, quota, nM, sample: rows.length, ids: ids.length, vendors: byVendor.length, top: byVendor.slice(0, 8) }));

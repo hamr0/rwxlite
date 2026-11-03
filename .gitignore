@@ -5,4 +5,5 @@ __pycache__
 .env
 data/*
 !data/gate-2026-11-03/
+!data/gate-2026-11-04/
 runs/
