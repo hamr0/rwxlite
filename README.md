@@ -82,6 +82,7 @@ As of 2026-11-03, rwxlite is in module 0 and not released.
 At 70% all 36 dangerous mistakes are still answered: the model was sure of them. From 90% the asks start catching them, at the cost of asking on 6% to 10% of operations.
 
 - **Training labels aren't the cause.** Two blind labellers re-labelled 1,200 training rows of the failing shapes: the training labels were too loose on only 32 (2.7%). The exam misses are mostly one vendor's pattern (Cloudflare billing and jobs).
+- **Next: "unsure" built in.** When the model is under 95% sure, the mechanical letter stands if it is at least as strict; otherwise it asks. On practice rows that gives 0.49% too loose with asks on 3.4% of operations (ASK alone needed 17%). It will be pre-registered as the go/no-go on a fresh exam. Details in the [PRD](docs/product/prd.md#option-2-unsure-built-in-user-2026-11-03).
 - **"No answer if not confident" is measured, not built.** The model returns probabilities today. The "ask" rule exists only in the scoring scripts.
 - **"About 24 MB int8" is an estimate** for the neural model. The baseline is already about 24 MB. The int8 export is not built.
 - **Limits.** OpenAPI operations only. No request bodies, no query values, no hosts without a spec.

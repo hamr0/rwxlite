@@ -216,6 +216,45 @@ The too-loose ones are things like creating a payment, accepting a calendar invi
 
 Reading: the Jev-recipe training labels are mostly right on these shapes. The exam's 36 too-loose rows (30 cloudflare: billing top-ups, subscriptions, database restores, deletion jobs) are a vendor-specific pattern the corpus barely contains, not a general labelling error; the exam was labelled under the same BRIEF-v3. A retrain with these labels would change about 32 of 87,657 training rows, so it is not expected to move the exam result much.
 
+
+## Option 2: "unsure" built in (user, 2026-11-03)
+
+After the NO-GO the user chose option 2: the "unsure" rule becomes part of rwxlite and is pre-registered as the go/no-go on a fresh exam. Round 9's retrain is skipped (its hand labels showed the training labels too loose on only 32 of 1,200 rows; kept for the next training).
+
+What happens to an unsure row (top p under the bar). It is never re-asked to rwxlite: the same model gives the same answer.
+- **ASK**: the answer is "ask"; bareguard asks the user.
+- **MECH**: the mechanical letter stands; nobody is asked.
+- **MECH-THEN-ASK**: the mechanical letter stands if it is at least as strict as the model's letter (r < w < x); otherwise "ask".
+
+Measured on the practice rows (v3 tuning truth, 5,716 rows, leave-one-vendor-out; not an exam), mode (a). Right / too loose / too tight are rows with % of answered; asked is % of all rows with what the asks held (right / loose / tight). Every row is in exactly one pile.
+
+| rule | bar | right | too loose | too tight | asked |
+|---|---|---|---|---|---|
+| mechanical alone | — | 76.3% | 77 (1.3%) | 22.3% | 0 |
+| no bar | — | 5303 (92.8%) | 73 (1.28%) | 340 (5.95%) | 0 |
+| ASK | 0.7 | 5186 (95.3%) | 65 (1.19%) | 192 (3.5%) | 273 (4.8%) (117/8/148) |
+| ASK | 0.9 | 4954 (97.7%) | 38 (0.75%) | 78 (1.5%) | 646 (11.3%) (349/35/262) |
+| ASK | 0.95 | 4675 (98.7%) | 24 (0.51%) | 39 (0.8%) | 978 (17.1%) (628/49/301) |
+| MECH | 0.9 | 5269 (92.2%) | 96 (1.68%) | 351 (6.1%) | 0 |
+| MECH | 0.95 | 5186 (90.7%) | 85 (1.49%) | 445 (7.8%) | 0 |
+| MECH-THEN-ASK | 0.9 | 5168 (93.0%) | 39 (0.70%) | 351 (6.3%) | 158 (2.8%) (57/0/101) |
+| **MECH-THEN-ASK** | **0.95** | 5050 (91.5%) | **27 (0.49%)** | 445 (8.1%) | **194 (3.4%)** (58/0/136) |
+
+Mode (b) is within a few rows of mode (a) under every rule (findings, "Round 9b").
+
+Reading:
+- MECH alone makes things worse: on PUT/PATCH the mechanical letter is often w where the truth is x, so falling back to it adds loose rows.
+- MECH-THEN-ASK at 0.95 is the best trade: as few loose rows as ASK at 0.95 (27 vs 24) with a fifth of the asks (3.4% vs 17.1%). Its cost is too-tight rows (8% vs 0.8%), which are safe but may themselves turn into prompts if bareguard asks on x.
+- ASK at 0.95 gives the highest accuracy on what it answers but asks on 1 in 6 operations.
+- Caveat: on the exam the model's dangerous mistakes were confident (median top p 0.94), so the practice-row gain may not fully transfer. That is what the fresh exam tests.
+
+**Proposed go/no-go for the fresh exam** (to be pre-registered, frozen in a commit before scoring, once the exam vendors are agreed with rwxmap):
+- Rule: mode (a), MECH-THEN-ASK at 0.95.
+- Pass: too loose at most 0.5% of answered rows AND exact at least 91% of answered rows AND asked at most 15% of rows.
+- Reported only: mode (b), ASK at 0.7 / 0.9 / 0.95, MECH-THEN-ASK at 0.7 / 0.9, no bar.
+- The bar is a user setting in the product; the exam fixes one value so the test is fair.
+- Fresh exam: vendors never used in training or tuning, agreed with rwxmap; labelled blind under BRIEF-v3 by two labellers, disagreements ruled by the user; scored once.
+
 ## Out of scope (whole build)
 
 - Fine-tuning a generative or chat LLM.
@@ -262,7 +301,7 @@ Only module 0 is sharp. The rest are sketches.
 
 ## Open questions
 
-- **After the M0 NO-GO (2026-11-03).** Options: (1) round 9, a targeted retrain on the two failure shapes (POST creates that move money, start jobs or restore data; credential PUT/PATCH), then a fresh exam; (2) make "ask at p" part of the product and pre-register it as the go/no-go on a fresh exam; (3) accept and move to M1. Any fresh exam needs vendors never used in training; the exam vendors are burned and the remaining locked vendors belong to rwxmap's pre-registered split, so the vendors are agreed with rwxmap first.
+- **After the M0 NO-GO (2026-11-03).** Options: (1) round 9, a targeted retrain on the two failure shapes (POST creates that move money, start jobs or restore data; credential PUT/PATCH), then a fresh exam; (2) make "ask at p" part of the product and pre-register it as the go/no-go on a fresh exam; (3) accept and move to M1. Any fresh exam needs vendors never used in training; the exam vendors are burned and the remaining locked vendors belong to rwxmap's pre-registered split, so the vendors are agreed with rwxmap first. **Chosen: option 2** (see "Option 2"); the round-9 retrain is skipped. Open: the fresh-exam vendors (asked of rwxmap), and whether bareguard prompts on x (decides what too-tight costs).
 
 - **Which small encoder.** all-MiniLM-L6-v2 first, bge-small-en-v1.5 second, TF-IDF + LR as baseline; the bars decide.
 - **Model string.** What exact string rwxlite returns in `{p, model}`, and how it is versioned. rwxmap records the model string on every moved verdict (D88), so it must change whenever the weights change.
