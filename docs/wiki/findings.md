@@ -675,3 +675,91 @@ Remaining too-loose rows by type: BASE 57 lowered wrongly + 16 mechanical too lo
 
 Reading. Nearly all the model's looseness is in its lowerings (57 of 73); the 16 others are keeps where mechanical is already too loose and the model does not raise, and no rule here touches them (floor 16). Raises never go loose but are mostly tight (139 of 200), so trusting them is cheap in looseness and costly in tightness. Under about 15% asks, the fewest too-loose rows is rule 5 (or 3-style flagging) at bar 0.97: 21 loose with 9.6% asked, 93.2% right, 6.5% tight; the 0.99 bar reaches the floor of 16 but asks 19.8%, over the limit. Against MECH-THEN-ASK@0.95 (27 loose, 3.4% asked, 91.5% right, 8.1% tight): LOWER-BAR-ASK@0.95 ties it on loose (27) with 5.0% asks, and is better on right (93.3%) and tight (6.2%); it asks more rows, though. Rule 6 at 0.95 (27 loose, 8.4% asked, 95.7% right, 3.8% tight) is the best overall exactness at the same loose count. Bar-then-keep (rule 4) cuts loose the same way but pays in tight rows (10% at 0.95), so asking beats silently keeping the mechanical letter. Whether 5 extra asks per 100 rows are worth ~6 fewer loose than the 0.9 bar is a product call.
 Caveat: practice rows, not an exam; the exam showed the model is confidently wrong on its loose rows more than LOVO suggests, so high-bar loose reductions may not transfer.
+
+## 2026-11-03: Fresh exam: r8soft (coolify, workos, lago, resend)
+
+Pre-registered in `docs/wiki/exam-prereg-fresh.md` (0caa381) before any prediction or truth read. Scored once, 949 ops (coolify 321, workos 269, lago 217, resend 142), join 1:1, no rerun, nothing changed after seeing the numbers. Truth mix r/w/x = 406/328/215. Model r8soft (sha256 974dff01...ae, same as the burned exam), T 0.844, mode (a) cuts lower 0.30 / r 0.40 / raise-wx 0.15 / raise-get 0.05 + credential rule; mode (b) margin 0.6. Code: `m0/exam-inputs.mjs fresh` (ops.csv only), `train/exam_fresh.py predict` (never opens truth.csv), `train/exam_fresh.py score` (the only place truth.csv is opened; reuses `exam_score.py` and the lowerflag/fallback rules). Outputs `data/exam-fresh-r8soft/` (predictions.csv, results.json, score.log).
+
+### Verdict: NO-GO, by one row
+
+GO/NO-GO (mode a, LOWER-BAR-ASK at 0.97): right 92.57% of answered (passes >= 91%), asked 7.8% of all rows (passes <= 15%), **too loose 5 rows = 0.57% of 875 answered (fails <= 0.5%; 4 rows would have passed)**. The bar is a joint AND, so this is a NO-GO on the letter of the pre-registered rule. All 5 loose rows are in workos (4) and coolify (1); none is a lowering.
+
+### Four piles, every config (right / too loose / too tight % of answered; asked % of all; asked = what the asks held, R/L/T on the unasked mode (a) letter)
+| config | right | too loose | too tight | asked (R/L/T) |
+|---|---|---|---|---|
+| **GO/NO-GO: a, LOWER-BAR-ASK 0.97** | 810 (92.57%; 85.35% all) | 5 (0.57%; 0.53% all) | 60 (6.86%; 6.32% all) | 74 (7.80%; 60/13/1) |
+| a, no bar | 870 (91.68%) | 18 (1.90%) | 61 (6.43%) | 0 |
+| a, MECH-THEN-ASK 0.95 | 840 (89.27%) | 6 (0.64%) | 95 (10.10%) | 8 (0.84%; 1/1/6) |
+| a, ask on every lowering | 718 (91.70%) | 5 (0.64%) | 60 (7.66%) | 166 (17.49%; 152/13/1) |
+| a, LOWER-BAR-ASK 0.95 + MTA 0.95 | 829 (93.25%) | 6 (0.67%) | 54 (6.07%) | 60 (6.32%; 41/12/7) |
+| a, LOWER-BAR-ASK 0.95 | 830 (92.53%) | 7 (0.78%) | 60 (6.69%) | 52 (5.48%; 40/11/1) |
+| a, LOWER-BAR-ASK 0.99 | 718 (91.70%) | 5 (0.64%) | 60 (7.66%) | 166 (17.49%; 152/13/1) |
+| b, no bar | 867 (91.36%) | 17 (1.79%) | 65 (6.85%) | 0 |
+| mechanical alone | 736 (77.56%) | 6 (0.63%) | 207 (21.81%) | 0 |
+
+Every row sums to 949. At 0.99 every lowering is asked (same as asking all 166).
+
+### What the model did (mode a, no bar)
+| move | rows | right | too loose | too tight |
+|---|---|---|---|---|
+| lowering | 166 | 152 | 13 | 1 |
+| raise | 9 | 1 | 2 | 6 |
+| keep | 774 | 717 | 3 | 54 |
+
+The lowering flag works as designed: 13 of the 18 loose rows in the no-bar run were lowerings, and all 13 had top p < 0.97 so all were asked (74 asked: 60 would have been right, 13 loose, 1 tight). All 92 accepted lowerings were right. Left over: 3 keeps where mechanical is already w and the model agrees (all PUT/PATCH credential-like writes, truth x) and 2 raises that stopped one step short (GET logout r -> w, truth x).
+
+### Against expectations
+| | right (of answered) | too loose | asked |
+|---|---|---|---|
+| practice rows, round 9c (LOVO, 5,716) | 93.2% | 21 (0.41%) | 9.6% |
+| fresh exam, GO/NO-GO config | 92.57% | 5 (0.57%) | 7.8% |
+| burned exam, mode a no bar (4,279) | 95.91% | 36 (0.84%) | 0 |
+| fresh exam, mode a no bar | 91.68% | 18 (1.90%) | 0 |
+
+Right and asked land close to the practice estimate (-0.6 points, -1.8 points). Too loose rate is 0.57% vs 0.41% expected; 5 rows on 875 is within noise of the bar (one row decides the verdict). The lowering flag cut loose from 1.90% (no bar) to 0.57%, the same direction as practice (1.28% to 0.41%). Raw no-bar quality is lower than on the burned exam (91.7 vs 95.9 exact, 1.90% vs 0.84% loose); the too-tight rows below (mostly mechanical x kept, truth w) account for most of the exact gap. Mechanical alone is 0.63% loose here, so non-lowering mistakes set a floor near the bar.
+
+### Per vendor and per method (GO/NO-GO config)
+| vendor | n | right | too loose | too tight | asked |
+|---|---|---|---|---|---|
+| coolify.io | 321 | 279 (95.88%) | 1 (0.34%) | 11 (3.78%) | 30 (9.35%) |
+| workos.com | 269 | 218 (87.20%) | 4 (1.60%) | 28 (11.20%) | 19 (7.06%) |
+| getlago.com | 217 | 183 (91.50%) | 0 | 17 (8.50%) | 17 (7.83%) |
+| resend.com | 142 | 130 (97.01%) | 0 | 4 (2.99%) | 8 (5.63%) |
+
+| method | n | right | too loose | too tight | asked |
+|---|---|---|---|---|---|
+| GET | 383 | 378 (98.69%) | 2 (0.52%) | 3 (0.78%) | 0 |
+| POST | 290 | 167 (77.31%) | 0 | 49 (22.69%) | 74 (25.52%) |
+| PUT | 55 | 51 (92.73%) | 2 (3.64%) | 2 (3.64%) | 0 |
+| PATCH | 85 | 79 (92.94%) | 1 (1.18%) | 5 (5.88%) | 0 |
+| DELETE | 136 | 135 (99.26%) | 0 | 1 (0.74%) | 0 |
+
+Mode (a) no bar by vendor, loose rows: coolify 6, lago 5, resend 1, workos 6. Mechanical alone: coolify 1, lago 1, resend 0, workos 4.
+
+### Remaining too-loose rows (GO/NO-GO config; 5), by type
+Keep, mechanical w and model agrees, truth x (3):
+| vendor | method | path | summary | mech | model | max p | truth |
+|---|---|---|---|---|---|---|---|
+| workos | PUT | /data-integrations/{slug}/client-credentials | Upsert client credentials for a connected account | w | w | 0.977 | x |
+| workos | PUT | /data-integrations/{slug}/api-key | Upsert an API key for a connected account | w | w | 0.985 | x |
+| coolify | PATCH | /security/integration-tokens/{uuid} | Update Integration Token | w | w | 0.979 | x |
+
+Raise that stopped one step short, mechanical r, model w, truth x (2):
+| vendor | method | path | summary | mech | model | max p | truth |
+|---|---|---|---|---|---|---|---|
+| workos | GET | /sso/logout | Logout Redirect | r | w | 0.966 | x |
+| workos | GET | /user_management/sessions/logout | Logout | r | w | 0.935 | x |
+
+Lowered wrongly: 0. The three keeps are the "known limit" from the flow section (confident, not a lowering, mechanical already too loose): credential-ish writes the model is 98% sure are w. The two logouts are GET endpoints whose truth is x (truth x under BRIEF-v3) that the model reads as a change (w) but not as x.
+
+### Remaining too-tight rows (60 answered) and the asks
+- 47: mechanical x kept at x (tier lower, not lowered because p(x) >= 0.30), truth w. Examples: POST /databases/{uuid}/start (Start), POST /applied_coupons, POST /events (Send a usage event). Most are coolify start/stop/restart (ruled w) and lago POST creates that mechanical floors to x.
+- 7: mechanical x kept, truth r (e.g. POST /radar/attempts "Create an attempt", POST /data-integrations/{slug}/token, /authorize: token and URL getters over POST).
+- 3: raise r -> w, truth r (GET /sso/profile, /sso/authorize, /user_management/authorize).
+- 3: raise w -> x, truth w (PUT /invoices/{lago_id}/refresh; PUT and PATCH /authorization/groups/{group_id}/role_assignments).
+- 1 lowering too tight is in the asked pile, not answered.
+
+Asked rows (74, all POST, all mechanical x): 52 model w and truth w, 8 model r and truth r, 1 model w and truth r, 13 model w and truth x. The 13 are the would-be-loose rows the flag caught: e.g. POST /invoices (0.93), /credit_notes (0.96), /wallet_transactions (0.92), /servers/digitalocean, /vultr, /hetzner (paid servers at an outside provider, 0.92 each), /platform/teams (0.84), /emails/{email_id}/share (0.85), /{resource_type}/{uuid}/secret-manager/import (0.93), /user_management/waitlists/{id}/entries (0.96), /quote_versions/{lago_id}/clone (0.90), /invoices/{lago_id}/lose_dispute (0.89), /servers/hostinger (0.70). Several of these are the user-ruled rows (paid servers, secret-manager import, credit note). The 0.97 bar sits just above the highest of these (0.964), so the bar does separate the dangerous lowerings; the miss is entirely in keeps and raises that no lowering rule touches.
+
+### Reading
+The lowering flag does what round 9c promised: all 13 wrongly-lowered rows were stopped, no accepted lowering was wrong (92 of 92), asks stayed at 7.8%, exact 92.6%. The fail is five confident non-lowerings (three mechanical-w writes of credentials/tokens, two session logouts) that no bar on lowerings can reach, 0.57% vs the 0.5% bar. Per the pre-registration, no tweak is made on this exam; any change (e.g. a credential/token rule for PUT/PATCH upserts, a logout rule) needs another fresh exam. Reported-only configs: MECH-THEN-ASK 0.95 is the worst on tight (10.1%) with 6 loose; rule 6 at 0.95 is best on right (93.25%) with 6 loose and 6.3% asks; mechanical alone has 6 loose (0.63%) too, so the 0.5% bar was close to the floor for mechanical on this draw as well.
