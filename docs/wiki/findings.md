@@ -243,3 +243,35 @@ Where the 55 misses are (PRD cuts):
 - No-pile x rows (cant-undo-verb) with truth w: unsubscribe, approve, start, complete-registration (4 too tight). The PRD cuts do not touch these (Jev has p for 33 of them but no cut is defined).
 
 Post-hoc, NOT for tuning (sample is burned; this explains the number, it must not choose cuts): within the lower tier, moving the cut from 0.20 to 0.30 would add 4 exact rows and 0.40 to 0.50 would trade them for more too-loose; the tier ceiling is about 71% exact (about 103 of 145) at any cut because the true-r POST rows with p above 0.2 are not separable by p. raise-wx at 0.5 to 0.6 is flat; raise-get is flat (325/325). So no cut alone reaches 95%; the lower tier is the problem, not the threshold.
+
+## 2026-11-03: Two-step POST lower + credential rule (tuning)
+
+Source: `m0/parity.mjs --truth v3` (ROUND6 block, `data/m0/parity-report-v3.json`), `m0/jev-label.mjs --question changes --methods POST`. Tuning data only: the 5,716 joined v3 rows (23 vendors). Neither gate sample nor the exam is read.
+
+**Paid pass.** The "changes" question (`m0/questions/criteria-changes.mjs`, byte-identical to rwxmap a7bc855) was asked on all 34,800 non-DELETE POST rows (not the ~28-30k estimated; 19 `exam_opkey_overlap` rows excluded, no exam/locked vendors present), then re-asked on 2,981 rows with p in 0.1..0.9. Zero errors. Smoke 20 rows: 0 errors, $0.0000887 per answer (target 0.000085). Spend this step $3.39; cumulative $14.83 of the $45 stop ($50 cap). Concurrency 8, about 2,400 rows/min.
+
+**Rule.** POST x row in the lower tier: if isX p < lower cut then (changes p < r cut -> r, else w), else x stays. r cut grid 0, .02, .03, .05, .07, .1, .15, .2, .3, .4, .5. Tuned by the global-budget rule (max exact s.t. total too-loose no worse than mechanical), leave-one-vendor-out (23 folds).
+
+**Tuned r cut: 0.20** (all-data fit and LOVO median); LOVO range 0.15 to 0.40. Other cuts unchanged: lower 0.20 (LOVO 0.10 to 0.30), raise-wx 0.60, raise-get 0.20. The lower tier is 1,641 rows, all POST.
+
+**Credential rule.** x when a non-GET operation (operationId, summary or path, camelCase split) has change/reset/rotate/regenerate/renew/revoke/invalidate/expire within 3 words before password, passcode, passphrase, PIN, auth key, API key/secret, secret key or client secret; not when followed by policy/rule/requirement/setting/config. It does not match create/issue/login token or session. Per BRIEF-v3 clause (b). First draft hit "Change password policies" (truth w); excluded as a policy, not a credential. Final narrow rule: 9 hits (6 PUT, 3 POST), truth all x. At the all-data tuned cuts: exact +4, -0, too-loose -4, too-tight +0. Wider variants (add description text, or update/set/replace) hit 11 to 12 rows and change nothing. Applied: adds no too-loose and gains net. Only 9 hits, so it is small; the gain beyond 4 rows in the LOVO table below is mostly budget reallocation (4 freed too-loose rows let the lower cut rise), not 9 rows.
+
+**LOVO, global budget (5,716 rows; mechanical alone 76.3 / 1.3 / 22.3):**
+
+| config | exact | too loose | too tight |
+|---|---|---|---|
+| before: one-step lower | 5374 (94.0%) | 54 (0.9%) | 288 (5.0%) |
+| two-step lower | 5410 (94.6%) | 54 (0.9%) | 252 (4.4%) |
+| one-step + credential | 5422 (94.9%) | 58 (1.0%) | 236 (4.1%) |
+| two-step + credential | 5475 (95.8%) | 58 (1.0%) | 183 (3.2%) |
+
+Non-DELETE rows (4,352): before 92.3%, two-step 93.2%, two-step + credential 94.7% (too-loose 54, 54, 58).
+
+By tier, before -> two-step + credential (exact / too-loose / too-tight):
+- lower (1,641): 1361 / 30 / 250 (82.9%) -> 1458 / 38 / 145 (88.8%)
+- raise-wx (1,486): 1462 / 18 / 6 (98.4%) -> 1466 / 14 / 6 (98.7%)
+- raise-get (959): 959 / 0 / 0 (100%), unchanged
+- no pile, DELETE (1,364): 1355 / 0 / 9 (99.3%), unchanged
+- no pile, other (266): 237 / 6 / 23 (89.1%), unchanged
+
+Reading. The two-step lower alone adds 0.6 point; credential rule and budget reallocation add 1.2 more. The mechanical-only contract line holds (total too-loose 58 vs 77 mechanical). 95.8% on tuning data is optimistic by construction; the 95% bar is measured on gate-2 (`data/gate-2026-11-04/`, drawn, not labelled). The lower tier (88.8%) and the no-pile non-DELETE rows (89.1%, no cut defined) remain the weak spots.

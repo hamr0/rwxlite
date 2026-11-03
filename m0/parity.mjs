@@ -3,7 +3,9 @@
 //   node m0/parity.mjs --truth v3 -> data/m0/parity-report-v3.json (BRIEF-v3 truth from rwxmap)
 // Reads data/m0/mechanical.jsonl.gz, jev-pass1.jsonl, jev-pass2.jsonl and
 // rwxmap's hand labels / calibration labels (read in place, never written).
-// The exam (rwxmap data/exam-2026-09-22) is never read here.
+// Round 6 (--truth v3 only, when data/m0/jev-post-changes*.jsonl exist): POST "changes" p (pC), the two-step
+// lower (x -> w OR r on POST) with a tuned r cut, and the narrow credential rule; see the ROUND6 block.
+// The exam (rwxmap data/exam-2026-09-22) is never read here. Neither gate sample is read here.
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
@@ -69,6 +71,11 @@ for (const r of mech) {
   }
   r.noDesc = !String(r.description || '').trim();
 }
+// round 6: POST "changes" answers (pass 1 + optional re-ask, averaged like p)
+const PC1 = path.join(DATA, 'jev-post-changes.jsonl'), PC2 = path.join(DATA, 'jev-post-changes-2.jsonl');
+const pcMap = (f) => new Map(fs.existsSync(f) ? readJsonl(f).filter((x) => typeof x.p === 'number').map((x) => [x.id, x.p]) : []);
+const c1 = pcMap(PC1), c2 = pcMap(PC2);
+for (const r of mech) { const a = c1.get(r.id); r.pC = a === undefined ? null : (c2.has(r.id) ? (a + c2.get(r.id)) / 2 : a); }
 const asked = mech.filter((r) => r.p !== null);
 
 // the cut that matters for a row, from its mechanical letter
@@ -354,7 +361,95 @@ if (TRUTH === 'v3') {
   ex.v3join = v3join;
   gate.v3 = ex;
 }
-const report = { truth: TRUTH, generated: new Date().toISOString().slice(0, 10), checks, counts: { mechanicalRows: mech.length, asked: asked.length, reasked: reRows.length }, wobble: wob, parity, gate };
+
+// ---- ROUND 6: two-step POST lower + credential rule (tuning only, v3 truth, LOVO, global budget)
+let round6 = null;
+if (TRUTH === 'v3' && c1.size) {
+  const normText = (s) => String(s || '').replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[^A-Za-z0-9]+/g, ' ').toLowerCase();
+  const NOUN = '(?:password|passcode|passphrase|pin|pin code|auth key|authkey|api key|apikey|api secret|secret key|client secret)s?';
+  const mkRe = (verbs) => new RegExp(`\\b(?:${verbs})\\b(?: \\w+){0,3}? ${NOUN}\\b(?! (?:polic|rule|requirement|complexity|setting|config))`);
+  const CRED = {
+    // narrow: change/reset/rotate/regenerate/renew a credential, in operationId + summary + path
+    narrow: { re: mkRe('change|reset|rotate|regenerate|renew|revoke|invalidate|expire'), fields: ['operationId', 'summary', 'path'] },
+    narrowDesc: { re: mkRe('change|reset|rotate|regenerate|renew|revoke|invalidate|expire'), fields: ['operationId', 'summary', 'path', 'description'] },
+    wide: { re: mkRe('change|reset|rotate|regenerate|renew|revoke|invalidate|expire|update|set|replace'), fields: ['operationId', 'summary', 'path'] },
+  };
+  const credHit = (r, v) => r.method.toUpperCase() !== 'GET' && CRED[v].fields.some((f) => CRED[v].re.test(normText(r[f])));
+  const RC_GRID = [0, 0.02, 0.03, 0.05, 0.07, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5];
+  const label2 = (r, th, cred) => {
+    const t = pileOf(r); let l;
+    if (t === 'lower' && r.p !== null && r.p < th.lower) l = r.pC !== null && r.pC !== undefined && r.pC < th.rcut ? 'r' : 'w';
+    else l = labelOf(r, th);
+    if (cred && credHit(r, cred)) l = 'x';
+    return l;
+  };
+  const bucket = (r) => { const t = pileOf(r); return t || (r.method.toUpperCase() === 'DELETE' ? 'none-DELETE' : 'none-other'); };
+  const BUCKETS = ['lower', 'raise-wx', 'raise-get', 'none-DELETE', 'none-other'];
+  const rows6 = gateAll;
+  const vendors6 = [...new Set(rows6.map((r) => r.vendor))].sort();
+  const tally = (rows, f) => { const o = { n: 0, e: 0, l: 0 }; for (const r of rows) { o.n++; const l = f(r); if (l === r.truth) o.e++; else if (ORDER[l] < ORDER[r.truth]) o.l++; } return o; };
+  // per vendor, per bucket, per cut value: tallies (additive across vendors)
+  const A = GRID.lower, B = GRID['raise-wx'], C = GRID['raise-get'];
+  function tables(cred) {
+    const T = {};
+    for (const v of vendors6) {
+      const rv = rows6.filter((r) => r.vendor === v); const by = (b) => rv.filter((r) => bucket(r) === b);
+      const t = { mech: tally(rv, (r) => r.class), lower: [], wx: [], get: [], fixD: null, fixO: null };
+      const lw = by('lower'), wx = by('raise-wx'), gt = by('raise-get');
+      t.lower = A.map((a) => RC_GRID.map((rc) => tally(lw, (r) => label2(r, { ...RW, lower: a, rcut: rc }, cred))));
+      t.wx = B.map((b) => tally(wx, (r) => label2(r, { ...RW, 'raise-wx': b, rcut: 0 }, cred)));
+      t.get = C.map((c) => tally(gt, (r) => label2(r, { ...RW, 'raise-get': c, rcut: 0 }, cred)));
+      t.fixD = tally(by('none-DELETE'), (r) => label2(r, RW, cred)); t.fixO = tally(by('none-other'), (r) => label2(r, RW, cred));
+      T[v] = t;
+    }
+    return T;
+  }
+  const add = (a, b) => ({ n: a.n + b.n, e: a.e + b.e, l: a.l + b.l });
+  const Z = { n: 0, e: 0, l: 0 };
+  function pick(T, vs, rcIdx) { // global budget over the vendor set vs: max exact s.t. total loose <= mechanical loose
+    let mechL = 0; let lowS = A.map(() => RC_GRID.map(() => Z)), wxS = B.map(() => Z), getS = C.map(() => Z), fix = Z;
+    for (const v of vs) { const t = T[v]; mechL += t.mech.l; fix = add(add(fix, t.fixD), t.fixO); lowS = lowS.map((row, i) => row.map((x, j) => add(x, t.lower[i][j]))); wxS = wxS.map((x, i) => add(x, t.wx[i])); getS = getS.map((x, i) => add(x, t.get[i])); }
+    let best = null;
+    for (let i = 0; i < A.length; i++) for (const j of rcIdx) for (let k = 0; k < B.length; k++) for (let m = 0; m < C.length; m++) {
+      const L = lowS[i][j].l + wxS[k].l + getS[m].l + fix.l; if (L > mechL) continue;
+      const E = lowS[i][j].e + wxS[k].e + getS[m].e + fix.e;
+      if (!best || E > best.E) best = { E, L, i, j, k, m };
+    }
+    return best;
+  }
+  const thOf = (b) => ({ lower: A[b.i], rcut: RC_GRID[b.j], 'raise-wx': B[b.k], 'raise-get': C[b.m] });
+  function lovo(T, rcIdx) {
+    const agg = Object.fromEntries(BUCKETS.map((b) => [b, { ...Z }])); const chosen = { lower: [], rcut: [], 'raise-wx': [], 'raise-get': [] };
+    for (const v of vendors6) {
+      const b = pick(T, vendors6.filter((x) => x !== v), rcIdx); const t = T[v]; const th = thOf(b);
+      for (const k of Object.keys(chosen)) chosen[k].push(th[k]);
+      agg.lower = add(agg.lower, t.lower[b.i][b.j]); agg['raise-wx'] = add(agg['raise-wx'], t.wx[b.k]); agg['raise-get'] = add(agg['raise-get'], t.get[b.m]);
+      agg['none-DELETE'] = add(agg['none-DELETE'], t.fixD); agg['none-other'] = add(agg['none-other'], t.fixO);
+    }
+    const sum = (bs) => bs.reduce((a, k) => add(a, agg[k]), Z);
+    const fin = (o) => ({ n: o.n, exact: o.e, tooLoose: o.l, tooTight: o.n - o.e - o.l, exactPct: pct(o.e, o.n), tooLoosePct: pct(o.l, o.n), tooTightPct: pct(o.n - o.e - o.l, o.n) });
+    const med = (a) => [...a].sort((x, y) => x - y)[a.length >> 1];
+    return { all: fin(sum(BUCKETS)), nonDELETE: fin(sum(['lower', 'raise-wx', 'raise-get', 'none-other'])), byTier: Object.fromEntries(BUCKETS.map((k) => [k, fin(agg[k])])), medianCuts: Object.fromEntries(Object.entries(chosen).map(([k, a]) => [k, med(a)])), cutRange: Object.fromEntries(Object.entries(chosen).map(([k, a]) => [k, [Math.min(...a), Math.max(...a)]])) };
+  }
+  const ALL = RC_GRID.map((_, i) => i), NOR = [0];
+  round6 = { rows: rows6.length, vendors: vendors6.length, postRowsWithoutPC: rows6.filter((r) => pileOf(r) === 'lower' && r.pC === null).length, lowerTierMethods: Object.fromEntries([...group(rows6.filter((r) => pileOf(r) === 'lower'), (r) => r.method.toUpperCase())].map(([k, v]) => [k, v.length])), rcGrid: RC_GRID, pcStats: { pass1: c1.size, reask: c2.size }, lovo: {}, cred: {} };
+  const T0 = tables(null);
+  round6.lovo.mechanical = (() => { const s = tally(rows6, (r) => r.class); return { n: s.n, exact: s.e, tooLoose: s.l, tooTight: s.n - s.e - s.l, exactPct: pct(s.e, s.n), tooLoosePct: pct(s.l, s.n), tooTightPct: pct(s.n - s.e - s.l, s.n) }; })();
+  round6.lovo.before_oneStep = lovo(T0, NOR);
+  round6.lovo.after_twoStep = lovo(T0, ALL);
+  const fullB = pick(T0, vendors6, ALL); round6.twoStepTunedOnAll = { cuts: thOf(fullB), exact: fullB.E, tooLoose: fullB.L };
+  // credential rule variants: hits and effect, at the all-data tuned cuts and in LOVO
+  for (const v of Object.keys(CRED)) {
+    const hits = rows6.filter((r) => credHit(r, v));
+    const cuts = thOf(fullB);
+    const was = hits.map((r) => label2(r, cuts, null)), now = hits.map(() => 'x');
+    const g = hits.filter((r, i) => was[i] !== r.truth && now[i] === r.truth).length, lost = hits.filter((r, i) => was[i] === r.truth && now[i] !== r.truth).length;
+    const tightAdded = hits.filter((r, i) => ORDER[was[i]] <= ORDER[r.truth] && r.truth !== 'x').length, looseRemoved = hits.filter((r, i) => ORDER[was[i]] < ORDER[r.truth]).length; // x label can never be too loose
+    const Tc = tables(v);
+    round6.cred[v] = { hits: hits.length, truthMix: { r: hits.filter((r) => r.truth === 'r').length, w: hits.filter((r) => r.truth === 'w').length, x: hits.filter((r) => r.truth === 'x').length }, byMethod: Object.fromEntries([...group(hits, (r) => r.method.toUpperCase())].map(([k, a]) => [k, a.length])), atAllDataCuts: { exactGained: g, exactLost: lost, tooLooseAdded: 0, tooLooseRemoved: looseRemoved, tooTightAdded: tightAdded }, lovo_afterTwoStep_plusCred: lovo(Tc, ALL), lovo_oneStep_plusCred: lovo(Tc, NOR), hitList: hits.map((r, i) => ({ id: r.id, vendor: r.provider, m: r.method, op: r.operationId, summary: String(r.summary || '').slice(0, 100), mech: r.class, was: was[i], truth: r.truth })) };
+  }
+}
+const report = { truth: TRUTH, generated: new Date().toISOString().slice(0, 10), checks, counts: { mechanicalRows: mech.length, asked: asked.length, reasked: reRows.length }, wobble: wob, parity, gate, ...(round6 ? { round6 } : {}) };
 fs.writeFileSync(path.join(DATA, TRUTH === 'v3' ? 'parity-report-v3.json' : 'parity-report.json'), JSON.stringify(report, null, 1));
 
 // ---- print
@@ -376,3 +471,11 @@ console.log('tuned'); J(gate.tuned); console.log('lovo'); J(gate.lovo); console.
 console.log('misses rwxmap'); J({ ...gate.misses.rwxmapThresholds, examples: undefined });
 console.log('misses budget'); J({ ...gate.misses.tunedBudget, examples: undefined });
 for (const e of gate.misses.tunedBudget.examples) J(e);
+if (round6) {
+  console.log('ROUND6');
+  const slim = (o) => ({ all: o.all, nonDELETE: o.nonDELETE, medianCuts: o.medianCuts, cutRange: o.cutRange });
+  J({ rows: round6.rows, vendors: round6.vendors, postRowsWithoutPC: round6.postRowsWithoutPC, lowerTierMethods: round6.lowerTierMethods, pcStats: round6.pcStats, twoStepTunedOnAll: round6.twoStepTunedOnAll });
+  console.log(' mechanical'); J(round6.lovo.mechanical);
+  for (const k of ['before_oneStep', 'after_twoStep']) { console.log(' ', k); J(slim(round6.lovo[k])); J(round6.lovo[k].byTier); }
+  for (const [v, c] of Object.entries(round6.cred)) { console.log('  cred', v); J({ hits: c.hits, truthMix: c.truthMix, byMethod: c.byMethod, atAllDataCuts: c.atAllDataCuts }); J({ twoStepPlusCred: slim(c.lovo_afterTwoStep_plusCred) }); J(c.lovo_afterTwoStep_plusCred.byTier); J({ oneStepPlusCred: slim(c.lovo_oneStep_plusCred) }); }
+}
