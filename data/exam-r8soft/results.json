@@ -1,0 +1,3974 @@
+{
+ "truth_file": "/home/hamr/PycharmProjects/rwxmap/data/exam-2026-09-22/labelled.csv",
+ "n": 4279,
+ "T": 0.844,
+ "cuts": {
+  "lower": 0.3,
+  "rcut": 0.4,
+  "raise-wx": 0.15,
+  "raise-get": 0.05
+ },
+ "margin": 0.6,
+ "mechanical": {
+  "overall": {
+   "n": 4279,
+   "answered": 4279,
+   "answered_pct": 100.0,
+   "asked": 0,
+   "asked_would_be_loose": 0,
+   "exact": 3520,
+   "loose": 34,
+   "tight": 725,
+   "exact_pct": 82.26,
+   "loose_pct": 0.79,
+   "tight_pct": 16.94
+  },
+  "by_method": {
+   "DELETE": {
+    "n": 558,
+    "answered": 558,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 548,
+    "loose": 0,
+    "tight": 10,
+    "exact_pct": 98.21,
+    "loose_pct": 0.0,
+    "tight_pct": 1.79
+   },
+   "GET": {
+    "n": 2099,
+    "answered": 2099,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 2094,
+    "loose": 5,
+    "tight": 0,
+    "exact_pct": 99.76,
+    "loose_pct": 0.24,
+    "tight_pct": 0.0
+   },
+   "PATCH": {
+    "n": 270,
+    "answered": 270,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 256,
+    "loose": 12,
+    "tight": 2,
+    "exact_pct": 94.81,
+    "loose_pct": 4.44,
+    "tight_pct": 0.74
+   },
+   "POST": {
+    "n": 892,
+    "answered": 892,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 179,
+    "loose": 3,
+    "tight": 710,
+    "exact_pct": 20.07,
+    "loose_pct": 0.34,
+    "tight_pct": 79.6
+   },
+   "PUT": {
+    "n": 460,
+    "answered": 460,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 443,
+    "loose": 14,
+    "tight": 3,
+    "exact_pct": 96.3,
+    "loose_pct": 3.04,
+    "tight_pct": 0.65
+   }
+  },
+  "by_tier": {
+   "lower": {
+    "n": 808,
+    "answered": 808,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 113,
+    "loose": 0,
+    "tight": 695,
+    "exact_pct": 13.99,
+    "loose_pct": 0.0,
+    "tight_pct": 86.01
+   },
+   "none": {
+    "n": 648,
+    "answered": 648,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 617,
+    "loose": 3,
+    "tight": 28,
+    "exact_pct": 95.22,
+    "loose_pct": 0.46,
+    "tight_pct": 4.32
+   },
+   "raise-get": {
+    "n": 2099,
+    "answered": 2099,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 2094,
+    "loose": 5,
+    "tight": 0,
+    "exact_pct": 99.76,
+    "loose_pct": 0.24,
+    "tight_pct": 0.0
+   },
+   "raise-wx": {
+    "n": 724,
+    "answered": 724,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 696,
+    "loose": 26,
+    "tight": 2,
+    "exact_pct": 96.13,
+    "loose_pct": 3.59,
+    "tight_pct": 0.28
+   }
+  },
+  "by_provider": {
+   "cloudflare": {
+    "n": 3575,
+    "answered": 3575,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 2924,
+    "loose": 31,
+    "tight": 620,
+    "exact_pct": 81.79,
+    "loose_pct": 0.87,
+    "tight_pct": 17.34
+   },
+   "pagerduty": {
+    "n": 465,
+    "answered": 465,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 387,
+    "loose": 2,
+    "tight": 76,
+    "exact_pct": 83.23,
+    "loose_pct": 0.43,
+    "tight_pct": 16.34
+   },
+   "sentry": {
+    "n": 239,
+    "answered": 239,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 209,
+    "loose": 1,
+    "tight": 29,
+    "exact_pct": 87.45,
+    "loose_pct": 0.42,
+    "tight_pct": 12.13
+   }
+  },
+  "by_rule": {
+   "r/method": {
+    "n": 2099,
+    "answered": 2099,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 2094,
+    "loose": 5,
+    "tight": 0,
+    "exact_pct": 99.76,
+    "loose_pct": 0.24,
+    "tight_pct": 0.0
+   },
+   "r/read-verb": {
+    "n": 19,
+    "answered": 19,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 17,
+    "loose": 2,
+    "tight": 0,
+    "exact_pct": 89.47,
+    "loose_pct": 10.53,
+    "tight_pct": 0.0
+   },
+   "r/read-verb-anywhere": {
+    "n": 17,
+    "answered": 17,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 17,
+    "loose": 0,
+    "tight": 0,
+    "exact_pct": 100.0,
+    "loose_pct": 0.0,
+    "tight_pct": 0.0
+   },
+   "w/method-floor": {
+    "n": 724,
+    "answered": 724,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 696,
+    "loose": 26,
+    "tight": 2,
+    "exact_pct": 96.13,
+    "loose_pct": 3.59,
+    "tight_pct": 0.28
+   },
+   "w/modify-verb": {
+    "n": 21,
+    "answered": 21,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 20,
+    "loose": 1,
+    "tight": 0,
+    "exact_pct": 95.24,
+    "loose_pct": 4.76,
+    "tight_pct": 0.0
+   },
+   "x/cant-undo-verb": {
+    "n": 32,
+    "answered": 32,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 15,
+    "loose": 0,
+    "tight": 17,
+    "exact_pct": 46.88,
+    "loose_pct": 0.0,
+    "tight_pct": 53.12
+   },
+   "x/cant-undo-verb-summary": {
+    "n": 1,
+    "answered": 1,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 0,
+    "loose": 0,
+    "tight": 1,
+    "exact_pct": 0.0,
+    "loose_pct": 0.0,
+    "tight_pct": 100.0
+   },
+   "x/floor-post": {
+    "n": 808,
+    "answered": 808,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 113,
+    "loose": 0,
+    "tight": 695,
+    "exact_pct": 13.99,
+    "loose_pct": 0.0,
+    "tight_pct": 86.01
+   },
+   "x/method-delete": {
+    "n": 558,
+    "answered": 558,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 548,
+    "loose": 0,
+    "tight": 10,
+    "exact_pct": 98.21,
+    "loose_pct": 0.0,
+    "tight_pct": 1.79
+   }
+  }
+ },
+ "configs": {
+  "a_none": {
+   "overall": {
+    "n": 4279,
+    "answered": 4279,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 4104,
+    "loose": 36,
+    "tight": 139,
+    "exact_pct": 95.91,
+    "loose_pct": 0.84,
+    "tight_pct": 3.25
+   },
+   "by_method": {
+    "DELETE": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    },
+    "GET": {
+     "n": 2099,
+     "answered": 2099,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 2086,
+     "loose": 2,
+     "tight": 11,
+     "exact_pct": 99.38,
+     "loose_pct": 0.1,
+     "tight_pct": 0.52
+    },
+    "PATCH": {
+     "n": 270,
+     "answered": 270,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 256,
+     "loose": 3,
+     "tight": 11,
+     "exact_pct": 94.81,
+     "loose_pct": 1.11,
+     "tight_pct": 4.07
+    },
+    "POST": {
+     "n": 892,
+     "answered": 892,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 770,
+     "loose": 25,
+     "tight": 97,
+     "exact_pct": 86.32,
+     "loose_pct": 2.8,
+     "tight_pct": 10.87
+    },
+    "PUT": {
+     "n": 460,
+     "answered": 460,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 444,
+     "loose": 6,
+     "tight": 10,
+     "exact_pct": 96.52,
+     "loose_pct": 1.3,
+     "tight_pct": 2.17
+    }
+   },
+   "by_tier": {
+    "lower": {
+     "n": 808,
+     "answered": 808,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 704,
+     "loose": 22,
+     "tight": 82,
+     "exact_pct": 87.13,
+     "loose_pct": 2.72,
+     "tight_pct": 10.15
+    },
+    "none": {
+     "n": 648,
+     "answered": 648,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 617,
+     "loose": 3,
+     "tight": 28,
+     "exact_pct": 95.22,
+     "loose_pct": 0.46,
+     "tight_pct": 4.32
+    },
+    "raise-get": {
+     "n": 2099,
+     "answered": 2099,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 2086,
+     "loose": 2,
+     "tight": 11,
+     "exact_pct": 99.38,
+     "loose_pct": 0.1,
+     "tight_pct": 0.52
+    },
+    "raise-wx": {
+     "n": 724,
+     "answered": 724,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 697,
+     "loose": 9,
+     "tight": 18,
+     "exact_pct": 96.27,
+     "loose_pct": 1.24,
+     "tight_pct": 2.49
+    }
+   },
+   "by_provider": {
+    "cloudflare": {
+     "n": 3575,
+     "answered": 3575,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 3417,
+     "loose": 30,
+     "tight": 128,
+     "exact_pct": 95.58,
+     "loose_pct": 0.84,
+     "tight_pct": 3.58
+    },
+    "pagerduty": {
+     "n": 465,
+     "answered": 465,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 454,
+     "loose": 4,
+     "tight": 7,
+     "exact_pct": 97.63,
+     "loose_pct": 0.86,
+     "tight_pct": 1.51
+    },
+    "sentry": {
+     "n": 239,
+     "answered": 239,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 233,
+     "loose": 2,
+     "tight": 4,
+     "exact_pct": 97.49,
+     "loose_pct": 0.84,
+     "tight_pct": 1.67
+    }
+   },
+   "by_rule": {
+    "r/method": {
+     "n": 2099,
+     "answered": 2099,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 2086,
+     "loose": 2,
+     "tight": 11,
+     "exact_pct": 99.38,
+     "loose_pct": 0.1,
+     "tight_pct": 0.52
+    },
+    "r/read-verb": {
+     "n": 19,
+     "answered": 19,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 89.47,
+     "loose_pct": 10.53,
+     "tight_pct": 0.0
+    },
+    "r/read-verb-anywhere": {
+     "n": 17,
+     "answered": 17,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 0,
+     "tight": 0,
+     "exact_pct": 100.0,
+     "loose_pct": 0.0,
+     "tight_pct": 0.0
+    },
+    "w/method-floor": {
+     "n": 724,
+     "answered": 724,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 697,
+     "loose": 9,
+     "tight": 18,
+     "exact_pct": 96.27,
+     "loose_pct": 1.24,
+     "tight_pct": 2.49
+    },
+    "w/modify-verb": {
+     "n": 21,
+     "answered": 21,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 20,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 95.24,
+     "loose_pct": 4.76,
+     "tight_pct": 0.0
+    },
+    "x/cant-undo-verb": {
+     "n": 32,
+     "answered": 32,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 15,
+     "loose": 0,
+     "tight": 17,
+     "exact_pct": 46.88,
+     "loose_pct": 0.0,
+     "tight_pct": 53.12
+    },
+    "x/cant-undo-verb-summary": {
+     "n": 1,
+     "answered": 1,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 0,
+     "loose": 0,
+     "tight": 1,
+     "exact_pct": 0.0,
+     "loose_pct": 0.0,
+     "tight_pct": 100.0
+    },
+    "x/floor-post": {
+     "n": 808,
+     "answered": 808,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 704,
+     "loose": 22,
+     "tight": 82,
+     "exact_pct": 87.13,
+     "loose_pct": 2.72,
+     "tight_pct": 10.15
+    },
+    "x/method-delete": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    }
+   }
+  },
+  "a_0.7": {
+   "overall": {
+    "n": 4279,
+    "answered": 4169,
+    "answered_pct": 97.4,
+    "asked": 110,
+    "asked_would_be_loose": 0,
+    "exact": 4064,
+    "loose": 36,
+    "tight": 69,
+    "exact_pct": 97.48,
+    "loose_pct": 0.86,
+    "tight_pct": 1.66
+   },
+   "by_method": {
+    "DELETE": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    },
+    "GET": {
+     "n": 2099,
+     "answered": 2096,
+     "answered_pct": 99.9,
+     "asked": 3,
+     "asked_would_be_loose": 0,
+     "exact": 2085,
+     "loose": 2,
+     "tight": 9,
+     "exact_pct": 99.48,
+     "loose_pct": 0.1,
+     "tight_pct": 0.43
+    },
+    "PATCH": {
+     "n": 270,
+     "answered": 265,
+     "answered_pct": 98.1,
+     "asked": 5,
+     "asked_would_be_loose": 0,
+     "exact": 254,
+     "loose": 3,
+     "tight": 8,
+     "exact_pct": 95.85,
+     "loose_pct": 1.13,
+     "tight_pct": 3.02
+    },
+    "POST": {
+     "n": 892,
+     "answered": 791,
+     "answered_pct": 88.7,
+     "asked": 101,
+     "asked_would_be_loose": 0,
+     "exact": 733,
+     "loose": 25,
+     "tight": 33,
+     "exact_pct": 92.67,
+     "loose_pct": 3.16,
+     "tight_pct": 4.17
+    },
+    "PUT": {
+     "n": 460,
+     "answered": 459,
+     "answered_pct": 99.8,
+     "asked": 1,
+     "asked_would_be_loose": 0,
+     "exact": 444,
+     "loose": 6,
+     "tight": 9,
+     "exact_pct": 96.73,
+     "loose_pct": 1.31,
+     "tight_pct": 1.96
+    }
+   },
+   "by_tier": {
+    "lower": {
+     "n": 808,
+     "answered": 707,
+     "answered_pct": 87.5,
+     "asked": 101,
+     "asked_would_be_loose": 0,
+     "exact": 667,
+     "loose": 22,
+     "tight": 18,
+     "exact_pct": 94.34,
+     "loose_pct": 3.11,
+     "tight_pct": 2.55
+    },
+    "none": {
+     "n": 648,
+     "answered": 648,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 617,
+     "loose": 3,
+     "tight": 28,
+     "exact_pct": 95.22,
+     "loose_pct": 0.46,
+     "tight_pct": 4.32
+    },
+    "raise-get": {
+     "n": 2099,
+     "answered": 2096,
+     "answered_pct": 99.9,
+     "asked": 3,
+     "asked_would_be_loose": 0,
+     "exact": 2085,
+     "loose": 2,
+     "tight": 9,
+     "exact_pct": 99.48,
+     "loose_pct": 0.1,
+     "tight_pct": 0.43
+    },
+    "raise-wx": {
+     "n": 724,
+     "answered": 718,
+     "answered_pct": 99.2,
+     "asked": 6,
+     "asked_would_be_loose": 0,
+     "exact": 695,
+     "loose": 9,
+     "tight": 14,
+     "exact_pct": 96.8,
+     "loose_pct": 1.25,
+     "tight_pct": 1.95
+    }
+   },
+   "by_provider": {
+    "cloudflare": {
+     "n": 3575,
+     "answered": 3473,
+     "answered_pct": 97.1,
+     "asked": 102,
+     "asked_would_be_loose": 0,
+     "exact": 3380,
+     "loose": 30,
+     "tight": 63,
+     "exact_pct": 97.32,
+     "loose_pct": 0.86,
+     "tight_pct": 1.81
+    },
+    "pagerduty": {
+     "n": 465,
+     "answered": 460,
+     "answered_pct": 98.9,
+     "asked": 5,
+     "asked_would_be_loose": 0,
+     "exact": 451,
+     "loose": 4,
+     "tight": 5,
+     "exact_pct": 98.04,
+     "loose_pct": 0.87,
+     "tight_pct": 1.09
+    },
+    "sentry": {
+     "n": 239,
+     "answered": 236,
+     "answered_pct": 98.7,
+     "asked": 3,
+     "asked_would_be_loose": 0,
+     "exact": 233,
+     "loose": 2,
+     "tight": 1,
+     "exact_pct": 98.73,
+     "loose_pct": 0.85,
+     "tight_pct": 0.42
+    }
+   },
+   "by_rule": {
+    "r/method": {
+     "n": 2099,
+     "answered": 2096,
+     "answered_pct": 99.9,
+     "asked": 3,
+     "asked_would_be_loose": 0,
+     "exact": 2085,
+     "loose": 2,
+     "tight": 9,
+     "exact_pct": 99.48,
+     "loose_pct": 0.1,
+     "tight_pct": 0.43
+    },
+    "r/read-verb": {
+     "n": 19,
+     "answered": 19,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 89.47,
+     "loose_pct": 10.53,
+     "tight_pct": 0.0
+    },
+    "r/read-verb-anywhere": {
+     "n": 17,
+     "answered": 17,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 0,
+     "tight": 0,
+     "exact_pct": 100.0,
+     "loose_pct": 0.0,
+     "tight_pct": 0.0
+    },
+    "w/method-floor": {
+     "n": 724,
+     "answered": 718,
+     "answered_pct": 99.2,
+     "asked": 6,
+     "asked_would_be_loose": 0,
+     "exact": 695,
+     "loose": 9,
+     "tight": 14,
+     "exact_pct": 96.8,
+     "loose_pct": 1.25,
+     "tight_pct": 1.95
+    },
+    "w/modify-verb": {
+     "n": 21,
+     "answered": 21,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 20,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 95.24,
+     "loose_pct": 4.76,
+     "tight_pct": 0.0
+    },
+    "x/cant-undo-verb": {
+     "n": 32,
+     "answered": 32,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 15,
+     "loose": 0,
+     "tight": 17,
+     "exact_pct": 46.88,
+     "loose_pct": 0.0,
+     "tight_pct": 53.12
+    },
+    "x/cant-undo-verb-summary": {
+     "n": 1,
+     "answered": 1,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 0,
+     "loose": 0,
+     "tight": 1,
+     "exact_pct": 0.0,
+     "loose_pct": 0.0,
+     "tight_pct": 100.0
+    },
+    "x/floor-post": {
+     "n": 808,
+     "answered": 707,
+     "answered_pct": 87.5,
+     "asked": 101,
+     "asked_would_be_loose": 0,
+     "exact": 667,
+     "loose": 22,
+     "tight": 18,
+     "exact_pct": 94.34,
+     "loose_pct": 3.11,
+     "tight_pct": 2.55
+    },
+    "x/method-delete": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    }
+   }
+  },
+  "a_0.9": {
+   "overall": {
+    "n": 4279,
+    "answered": 4019,
+    "answered_pct": 93.9,
+    "asked": 260,
+    "asked_would_be_loose": 15,
+    "exact": 3961,
+    "loose": 21,
+    "tight": 37,
+    "exact_pct": 98.56,
+    "loose_pct": 0.52,
+    "tight_pct": 0.92
+   },
+   "by_method": {
+    "DELETE": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    },
+    "GET": {
+     "n": 2099,
+     "answered": 2091,
+     "answered_pct": 99.6,
+     "asked": 8,
+     "asked_would_be_loose": 0,
+     "exact": 2085,
+     "loose": 2,
+     "tight": 4,
+     "exact_pct": 99.71,
+     "loose_pct": 0.1,
+     "tight_pct": 0.19
+    },
+    "PATCH": {
+     "n": 270,
+     "answered": 249,
+     "answered_pct": 92.2,
+     "asked": 21,
+     "asked_would_be_loose": 0,
+     "exact": 244,
+     "loose": 3,
+     "tight": 2,
+     "exact_pct": 97.99,
+     "loose_pct": 1.2,
+     "tight_pct": 0.8
+    },
+    "POST": {
+     "n": 892,
+     "answered": 684,
+     "answered_pct": 76.7,
+     "asked": 208,
+     "asked_would_be_loose": 14,
+     "exact": 654,
+     "loose": 11,
+     "tight": 19,
+     "exact_pct": 95.61,
+     "loose_pct": 1.61,
+     "tight_pct": 2.78
+    },
+    "PUT": {
+     "n": 460,
+     "answered": 437,
+     "answered_pct": 95.0,
+     "asked": 23,
+     "asked_would_be_loose": 1,
+     "exact": 430,
+     "loose": 5,
+     "tight": 2,
+     "exact_pct": 98.4,
+     "loose_pct": 1.14,
+     "tight_pct": 0.46
+    }
+   },
+   "by_tier": {
+    "lower": {
+     "n": 808,
+     "answered": 600,
+     "answered_pct": 74.3,
+     "asked": 208,
+     "asked_would_be_loose": 14,
+     "exact": 588,
+     "loose": 8,
+     "tight": 4,
+     "exact_pct": 98.0,
+     "loose_pct": 1.33,
+     "tight_pct": 0.67
+    },
+    "none": {
+     "n": 648,
+     "answered": 648,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 617,
+     "loose": 3,
+     "tight": 28,
+     "exact_pct": 95.22,
+     "loose_pct": 0.46,
+     "tight_pct": 4.32
+    },
+    "raise-get": {
+     "n": 2099,
+     "answered": 2091,
+     "answered_pct": 99.6,
+     "asked": 8,
+     "asked_would_be_loose": 0,
+     "exact": 2085,
+     "loose": 2,
+     "tight": 4,
+     "exact_pct": 99.71,
+     "loose_pct": 0.1,
+     "tight_pct": 0.19
+    },
+    "raise-wx": {
+     "n": 724,
+     "answered": 680,
+     "answered_pct": 93.9,
+     "asked": 44,
+     "asked_would_be_loose": 1,
+     "exact": 671,
+     "loose": 8,
+     "tight": 1,
+     "exact_pct": 98.68,
+     "loose_pct": 1.18,
+     "tight_pct": 0.15
+    }
+   },
+   "by_provider": {
+    "cloudflare": {
+     "n": 3575,
+     "answered": 3334,
+     "answered_pct": 93.3,
+     "asked": 241,
+     "asked_would_be_loose": 12,
+     "exact": 3285,
+     "loose": 18,
+     "tight": 31,
+     "exact_pct": 98.53,
+     "loose_pct": 0.54,
+     "tight_pct": 0.93
+    },
+    "pagerduty": {
+     "n": 465,
+     "answered": 452,
+     "answered_pct": 97.2,
+     "asked": 13,
+     "asked_would_be_loose": 2,
+     "exact": 445,
+     "loose": 2,
+     "tight": 5,
+     "exact_pct": 98.45,
+     "loose_pct": 0.44,
+     "tight_pct": 1.11
+    },
+    "sentry": {
+     "n": 239,
+     "answered": 233,
+     "answered_pct": 97.5,
+     "asked": 6,
+     "asked_would_be_loose": 1,
+     "exact": 231,
+     "loose": 1,
+     "tight": 1,
+     "exact_pct": 99.14,
+     "loose_pct": 0.43,
+     "tight_pct": 0.43
+    }
+   },
+   "by_rule": {
+    "r/method": {
+     "n": 2099,
+     "answered": 2091,
+     "answered_pct": 99.6,
+     "asked": 8,
+     "asked_would_be_loose": 0,
+     "exact": 2085,
+     "loose": 2,
+     "tight": 4,
+     "exact_pct": 99.71,
+     "loose_pct": 0.1,
+     "tight_pct": 0.19
+    },
+    "r/read-verb": {
+     "n": 19,
+     "answered": 19,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 89.47,
+     "loose_pct": 10.53,
+     "tight_pct": 0.0
+    },
+    "r/read-verb-anywhere": {
+     "n": 17,
+     "answered": 17,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 0,
+     "tight": 0,
+     "exact_pct": 100.0,
+     "loose_pct": 0.0,
+     "tight_pct": 0.0
+    },
+    "w/method-floor": {
+     "n": 724,
+     "answered": 680,
+     "answered_pct": 93.9,
+     "asked": 44,
+     "asked_would_be_loose": 1,
+     "exact": 671,
+     "loose": 8,
+     "tight": 1,
+     "exact_pct": 98.68,
+     "loose_pct": 1.18,
+     "tight_pct": 0.15
+    },
+    "w/modify-verb": {
+     "n": 21,
+     "answered": 21,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 20,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 95.24,
+     "loose_pct": 4.76,
+     "tight_pct": 0.0
+    },
+    "x/cant-undo-verb": {
+     "n": 32,
+     "answered": 32,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 15,
+     "loose": 0,
+     "tight": 17,
+     "exact_pct": 46.88,
+     "loose_pct": 0.0,
+     "tight_pct": 53.12
+    },
+    "x/cant-undo-verb-summary": {
+     "n": 1,
+     "answered": 1,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 0,
+     "loose": 0,
+     "tight": 1,
+     "exact_pct": 0.0,
+     "loose_pct": 0.0,
+     "tight_pct": 100.0
+    },
+    "x/floor-post": {
+     "n": 808,
+     "answered": 600,
+     "answered_pct": 74.3,
+     "asked": 208,
+     "asked_would_be_loose": 14,
+     "exact": 588,
+     "loose": 8,
+     "tight": 4,
+     "exact_pct": 98.0,
+     "loose_pct": 1.33,
+     "tight_pct": 0.67
+    },
+    "x/method-delete": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    }
+   }
+  },
+  "a_0.95": {
+   "overall": {
+    "n": 4279,
+    "answered": 3861,
+    "answered_pct": 90.2,
+    "asked": 418,
+    "asked_would_be_loose": 18,
+    "exact": 3812,
+    "loose": 18,
+    "tight": 31,
+    "exact_pct": 98.73,
+    "loose_pct": 0.47,
+    "tight_pct": 0.8
+   },
+   "by_method": {
+    "DELETE": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    },
+    "GET": {
+     "n": 2099,
+     "answered": 2085,
+     "answered_pct": 99.3,
+     "asked": 14,
+     "asked_would_be_loose": 0,
+     "exact": 2083,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "PATCH": {
+     "n": 270,
+     "answered": 233,
+     "answered_pct": 86.3,
+     "asked": 37,
+     "asked_would_be_loose": 0,
+     "exact": 228,
+     "loose": 3,
+     "tight": 2,
+     "exact_pct": 97.85,
+     "loose_pct": 1.29,
+     "tight_pct": 0.86
+    },
+    "POST": {
+     "n": 892,
+     "answered": 572,
+     "answered_pct": 64.1,
+     "asked": 320,
+     "asked_would_be_loose": 17,
+     "exact": 546,
+     "loose": 8,
+     "tight": 18,
+     "exact_pct": 95.45,
+     "loose_pct": 1.4,
+     "tight_pct": 3.15
+    },
+    "PUT": {
+     "n": 460,
+     "answered": 413,
+     "answered_pct": 89.8,
+     "asked": 47,
+     "asked_would_be_loose": 1,
+     "exact": 407,
+     "loose": 5,
+     "tight": 1,
+     "exact_pct": 98.55,
+     "loose_pct": 1.21,
+     "tight_pct": 0.24
+    }
+   },
+   "by_tier": {
+    "lower": {
+     "n": 808,
+     "answered": 488,
+     "answered_pct": 60.4,
+     "asked": 320,
+     "asked_would_be_loose": 17,
+     "exact": 480,
+     "loose": 5,
+     "tight": 3,
+     "exact_pct": 98.36,
+     "loose_pct": 1.02,
+     "tight_pct": 0.61
+    },
+    "none": {
+     "n": 648,
+     "answered": 648,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 617,
+     "loose": 3,
+     "tight": 28,
+     "exact_pct": 95.22,
+     "loose_pct": 0.46,
+     "tight_pct": 4.32
+    },
+    "raise-get": {
+     "n": 2099,
+     "answered": 2085,
+     "answered_pct": 99.3,
+     "asked": 14,
+     "asked_would_be_loose": 0,
+     "exact": 2083,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "raise-wx": {
+     "n": 724,
+     "answered": 640,
+     "answered_pct": 88.4,
+     "asked": 84,
+     "asked_would_be_loose": 1,
+     "exact": 632,
+     "loose": 8,
+     "tight": 0,
+     "exact_pct": 98.75,
+     "loose_pct": 1.25,
+     "tight_pct": 0.0
+    }
+   },
+   "by_provider": {
+    "cloudflare": {
+     "n": 3575,
+     "answered": 3189,
+     "answered_pct": 89.2,
+     "asked": 386,
+     "asked_would_be_loose": 14,
+     "exact": 3147,
+     "loose": 16,
+     "tight": 26,
+     "exact_pct": 98.68,
+     "loose_pct": 0.5,
+     "tight_pct": 0.82
+    },
+    "pagerduty": {
+     "n": 465,
+     "answered": 442,
+     "answered_pct": 95.1,
+     "asked": 23,
+     "asked_would_be_loose": 3,
+     "exact": 436,
+     "loose": 1,
+     "tight": 5,
+     "exact_pct": 98.64,
+     "loose_pct": 0.23,
+     "tight_pct": 1.13
+    },
+    "sentry": {
+     "n": 239,
+     "answered": 230,
+     "answered_pct": 96.2,
+     "asked": 9,
+     "asked_would_be_loose": 1,
+     "exact": 229,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 99.57,
+     "loose_pct": 0.43,
+     "tight_pct": 0.0
+    }
+   },
+   "by_rule": {
+    "r/method": {
+     "n": 2099,
+     "answered": 2085,
+     "answered_pct": 99.3,
+     "asked": 14,
+     "asked_would_be_loose": 0,
+     "exact": 2083,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "r/read-verb": {
+     "n": 19,
+     "answered": 19,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 89.47,
+     "loose_pct": 10.53,
+     "tight_pct": 0.0
+    },
+    "r/read-verb-anywhere": {
+     "n": 17,
+     "answered": 17,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 0,
+     "tight": 0,
+     "exact_pct": 100.0,
+     "loose_pct": 0.0,
+     "tight_pct": 0.0
+    },
+    "w/method-floor": {
+     "n": 724,
+     "answered": 640,
+     "answered_pct": 88.4,
+     "asked": 84,
+     "asked_would_be_loose": 1,
+     "exact": 632,
+     "loose": 8,
+     "tight": 0,
+     "exact_pct": 98.75,
+     "loose_pct": 1.25,
+     "tight_pct": 0.0
+    },
+    "w/modify-verb": {
+     "n": 21,
+     "answered": 21,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 20,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 95.24,
+     "loose_pct": 4.76,
+     "tight_pct": 0.0
+    },
+    "x/cant-undo-verb": {
+     "n": 32,
+     "answered": 32,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 15,
+     "loose": 0,
+     "tight": 17,
+     "exact_pct": 46.88,
+     "loose_pct": 0.0,
+     "tight_pct": 53.12
+    },
+    "x/cant-undo-verb-summary": {
+     "n": 1,
+     "answered": 1,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 0,
+     "loose": 0,
+     "tight": 1,
+     "exact_pct": 0.0,
+     "loose_pct": 0.0,
+     "tight_pct": 100.0
+    },
+    "x/floor-post": {
+     "n": 808,
+     "answered": 488,
+     "answered_pct": 60.4,
+     "asked": 320,
+     "asked_would_be_loose": 17,
+     "exact": 480,
+     "loose": 5,
+     "tight": 3,
+     "exact_pct": 98.36,
+     "loose_pct": 1.02,
+     "tight_pct": 0.61
+    },
+    "x/method-delete": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    }
+   }
+  },
+  "b_none": {
+   "overall": {
+    "n": 4279,
+    "answered": 4279,
+    "answered_pct": 100.0,
+    "asked": 0,
+    "asked_would_be_loose": 0,
+    "exact": 4088,
+    "loose": 32,
+    "tight": 159,
+    "exact_pct": 95.54,
+    "loose_pct": 0.75,
+    "tight_pct": 3.72
+   },
+   "by_method": {
+    "DELETE": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    },
+    "GET": {
+     "n": 2099,
+     "answered": 2099,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 2091,
+     "loose": 2,
+     "tight": 6,
+     "exact_pct": 99.62,
+     "loose_pct": 0.1,
+     "tight_pct": 0.29
+    },
+    "PATCH": {
+     "n": 270,
+     "answered": 270,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 257,
+     "loose": 4,
+     "tight": 9,
+     "exact_pct": 95.19,
+     "loose_pct": 1.48,
+     "tight_pct": 3.33
+    },
+    "POST": {
+     "n": 892,
+     "answered": 892,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 747,
+     "loose": 19,
+     "tight": 126,
+     "exact_pct": 83.74,
+     "loose_pct": 2.13,
+     "tight_pct": 14.13
+    },
+    "PUT": {
+     "n": 460,
+     "answered": 460,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 445,
+     "loose": 7,
+     "tight": 8,
+     "exact_pct": 96.74,
+     "loose_pct": 1.52,
+     "tight_pct": 1.74
+    }
+   },
+   "by_tier": {
+    "lower": {
+     "n": 808,
+     "answered": 808,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 681,
+     "loose": 16,
+     "tight": 111,
+     "exact_pct": 84.28,
+     "loose_pct": 1.98,
+     "tight_pct": 13.74
+    },
+    "none": {
+     "n": 648,
+     "answered": 648,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 617,
+     "loose": 3,
+     "tight": 28,
+     "exact_pct": 95.22,
+     "loose_pct": 0.46,
+     "tight_pct": 4.32
+    },
+    "raise-get": {
+     "n": 2099,
+     "answered": 2099,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 2091,
+     "loose": 2,
+     "tight": 6,
+     "exact_pct": 99.62,
+     "loose_pct": 0.1,
+     "tight_pct": 0.29
+    },
+    "raise-wx": {
+     "n": 724,
+     "answered": 724,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 699,
+     "loose": 11,
+     "tight": 14,
+     "exact_pct": 96.55,
+     "loose_pct": 1.52,
+     "tight_pct": 1.93
+    }
+   },
+   "by_provider": {
+    "cloudflare": {
+     "n": 3575,
+     "answered": 3575,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 3402,
+     "loose": 27,
+     "tight": 146,
+     "exact_pct": 95.16,
+     "loose_pct": 0.76,
+     "tight_pct": 4.08
+    },
+    "pagerduty": {
+     "n": 465,
+     "answered": 465,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 451,
+     "loose": 4,
+     "tight": 10,
+     "exact_pct": 96.99,
+     "loose_pct": 0.86,
+     "tight_pct": 2.15
+    },
+    "sentry": {
+     "n": 239,
+     "answered": 239,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 235,
+     "loose": 1,
+     "tight": 3,
+     "exact_pct": 98.33,
+     "loose_pct": 0.42,
+     "tight_pct": 1.26
+    }
+   },
+   "by_rule": {
+    "r/method": {
+     "n": 2099,
+     "answered": 2099,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 2091,
+     "loose": 2,
+     "tight": 6,
+     "exact_pct": 99.62,
+     "loose_pct": 0.1,
+     "tight_pct": 0.29
+    },
+    "r/read-verb": {
+     "n": 19,
+     "answered": 19,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 89.47,
+     "loose_pct": 10.53,
+     "tight_pct": 0.0
+    },
+    "r/read-verb-anywhere": {
+     "n": 17,
+     "answered": 17,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 0,
+     "tight": 0,
+     "exact_pct": 100.0,
+     "loose_pct": 0.0,
+     "tight_pct": 0.0
+    },
+    "w/method-floor": {
+     "n": 724,
+     "answered": 724,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 699,
+     "loose": 11,
+     "tight": 14,
+     "exact_pct": 96.55,
+     "loose_pct": 1.52,
+     "tight_pct": 1.93
+    },
+    "w/modify-verb": {
+     "n": 21,
+     "answered": 21,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 20,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 95.24,
+     "loose_pct": 4.76,
+     "tight_pct": 0.0
+    },
+    "x/cant-undo-verb": {
+     "n": 32,
+     "answered": 32,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 15,
+     "loose": 0,
+     "tight": 17,
+     "exact_pct": 46.88,
+     "loose_pct": 0.0,
+     "tight_pct": 53.12
+    },
+    "x/cant-undo-verb-summary": {
+     "n": 1,
+     "answered": 1,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 0,
+     "loose": 0,
+     "tight": 1,
+     "exact_pct": 0.0,
+     "loose_pct": 0.0,
+     "tight_pct": 100.0
+    },
+    "x/floor-post": {
+     "n": 808,
+     "answered": 808,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 681,
+     "loose": 16,
+     "tight": 111,
+     "exact_pct": 84.28,
+     "loose_pct": 1.98,
+     "tight_pct": 13.74
+    },
+    "x/method-delete": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    }
+   }
+  },
+  "b_0.7": {
+   "overall": {
+    "n": 4279,
+    "answered": 4169,
+    "answered_pct": 97.4,
+    "asked": 110,
+    "asked_would_be_loose": 0,
+    "exact": 4060,
+    "loose": 32,
+    "tight": 77,
+    "exact_pct": 97.39,
+    "loose_pct": 0.77,
+    "tight_pct": 1.85
+   },
+   "by_method": {
+    "DELETE": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    },
+    "GET": {
+     "n": 2099,
+     "answered": 2096,
+     "answered_pct": 99.9,
+     "asked": 3,
+     "asked_would_be_loose": 0,
+     "exact": 2091,
+     "loose": 2,
+     "tight": 3,
+     "exact_pct": 99.76,
+     "loose_pct": 0.1,
+     "tight_pct": 0.14
+    },
+    "PATCH": {
+     "n": 270,
+     "answered": 265,
+     "answered_pct": 98.1,
+     "asked": 5,
+     "asked_would_be_loose": 0,
+     "exact": 255,
+     "loose": 4,
+     "tight": 6,
+     "exact_pct": 96.23,
+     "loose_pct": 1.51,
+     "tight_pct": 2.26
+    },
+    "POST": {
+     "n": 892,
+     "answered": 791,
+     "answered_pct": 88.7,
+     "asked": 101,
+     "asked_would_be_loose": 0,
+     "exact": 721,
+     "loose": 19,
+     "tight": 51,
+     "exact_pct": 91.15,
+     "loose_pct": 2.4,
+     "tight_pct": 6.45
+    },
+    "PUT": {
+     "n": 460,
+     "answered": 459,
+     "answered_pct": 99.8,
+     "asked": 1,
+     "asked_would_be_loose": 0,
+     "exact": 445,
+     "loose": 7,
+     "tight": 7,
+     "exact_pct": 96.95,
+     "loose_pct": 1.53,
+     "tight_pct": 1.53
+    }
+   },
+   "by_tier": {
+    "lower": {
+     "n": 808,
+     "answered": 707,
+     "answered_pct": 87.5,
+     "asked": 101,
+     "asked_would_be_loose": 0,
+     "exact": 655,
+     "loose": 16,
+     "tight": 36,
+     "exact_pct": 92.64,
+     "loose_pct": 2.26,
+     "tight_pct": 5.09
+    },
+    "none": {
+     "n": 648,
+     "answered": 648,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 617,
+     "loose": 3,
+     "tight": 28,
+     "exact_pct": 95.22,
+     "loose_pct": 0.46,
+     "tight_pct": 4.32
+    },
+    "raise-get": {
+     "n": 2099,
+     "answered": 2096,
+     "answered_pct": 99.9,
+     "asked": 3,
+     "asked_would_be_loose": 0,
+     "exact": 2091,
+     "loose": 2,
+     "tight": 3,
+     "exact_pct": 99.76,
+     "loose_pct": 0.1,
+     "tight_pct": 0.14
+    },
+    "raise-wx": {
+     "n": 724,
+     "answered": 718,
+     "answered_pct": 99.2,
+     "asked": 6,
+     "asked_would_be_loose": 0,
+     "exact": 697,
+     "loose": 11,
+     "tight": 10,
+     "exact_pct": 97.08,
+     "loose_pct": 1.53,
+     "tight_pct": 1.39
+    }
+   },
+   "by_provider": {
+    "cloudflare": {
+     "n": 3575,
+     "answered": 3473,
+     "answered_pct": 97.1,
+     "asked": 102,
+     "asked_would_be_loose": 0,
+     "exact": 3376,
+     "loose": 27,
+     "tight": 70,
+     "exact_pct": 97.21,
+     "loose_pct": 0.78,
+     "tight_pct": 2.02
+    },
+    "pagerduty": {
+     "n": 465,
+     "answered": 460,
+     "answered_pct": 98.9,
+     "asked": 5,
+     "asked_would_be_loose": 0,
+     "exact": 449,
+     "loose": 4,
+     "tight": 7,
+     "exact_pct": 97.61,
+     "loose_pct": 0.87,
+     "tight_pct": 1.52
+    },
+    "sentry": {
+     "n": 239,
+     "answered": 236,
+     "answered_pct": 98.7,
+     "asked": 3,
+     "asked_would_be_loose": 0,
+     "exact": 235,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 99.58,
+     "loose_pct": 0.42,
+     "tight_pct": 0.0
+    }
+   },
+   "by_rule": {
+    "r/method": {
+     "n": 2099,
+     "answered": 2096,
+     "answered_pct": 99.9,
+     "asked": 3,
+     "asked_would_be_loose": 0,
+     "exact": 2091,
+     "loose": 2,
+     "tight": 3,
+     "exact_pct": 99.76,
+     "loose_pct": 0.1,
+     "tight_pct": 0.14
+    },
+    "r/read-verb": {
+     "n": 19,
+     "answered": 19,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 89.47,
+     "loose_pct": 10.53,
+     "tight_pct": 0.0
+    },
+    "r/read-verb-anywhere": {
+     "n": 17,
+     "answered": 17,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 0,
+     "tight": 0,
+     "exact_pct": 100.0,
+     "loose_pct": 0.0,
+     "tight_pct": 0.0
+    },
+    "w/method-floor": {
+     "n": 724,
+     "answered": 718,
+     "answered_pct": 99.2,
+     "asked": 6,
+     "asked_would_be_loose": 0,
+     "exact": 697,
+     "loose": 11,
+     "tight": 10,
+     "exact_pct": 97.08,
+     "loose_pct": 1.53,
+     "tight_pct": 1.39
+    },
+    "w/modify-verb": {
+     "n": 21,
+     "answered": 21,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 20,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 95.24,
+     "loose_pct": 4.76,
+     "tight_pct": 0.0
+    },
+    "x/cant-undo-verb": {
+     "n": 32,
+     "answered": 32,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 15,
+     "loose": 0,
+     "tight": 17,
+     "exact_pct": 46.88,
+     "loose_pct": 0.0,
+     "tight_pct": 53.12
+    },
+    "x/cant-undo-verb-summary": {
+     "n": 1,
+     "answered": 1,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 0,
+     "loose": 0,
+     "tight": 1,
+     "exact_pct": 0.0,
+     "loose_pct": 0.0,
+     "tight_pct": 100.0
+    },
+    "x/floor-post": {
+     "n": 808,
+     "answered": 707,
+     "answered_pct": 87.5,
+     "asked": 101,
+     "asked_would_be_loose": 0,
+     "exact": 655,
+     "loose": 16,
+     "tight": 36,
+     "exact_pct": 92.64,
+     "loose_pct": 2.26,
+     "tight_pct": 5.09
+    },
+    "x/method-delete": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    }
+   }
+  },
+  "b_0.9": {
+   "overall": {
+    "n": 4279,
+    "answered": 4019,
+    "answered_pct": 93.9,
+    "asked": 260,
+    "asked_would_be_loose": 11,
+    "exact": 3965,
+    "loose": 21,
+    "tight": 33,
+    "exact_pct": 98.66,
+    "loose_pct": 0.52,
+    "tight_pct": 0.82
+   },
+   "by_method": {
+    "DELETE": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    },
+    "GET": {
+     "n": 2099,
+     "answered": 2091,
+     "answered_pct": 99.6,
+     "asked": 8,
+     "asked_would_be_loose": 0,
+     "exact": 2089,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "PATCH": {
+     "n": 270,
+     "answered": 249,
+     "answered_pct": 92.2,
+     "asked": 21,
+     "asked_would_be_loose": 1,
+     "exact": 244,
+     "loose": 3,
+     "tight": 2,
+     "exact_pct": 97.99,
+     "loose_pct": 1.2,
+     "tight_pct": 0.8
+    },
+    "POST": {
+     "n": 892,
+     "answered": 684,
+     "answered_pct": 76.7,
+     "asked": 208,
+     "asked_would_be_loose": 8,
+     "exact": 654,
+     "loose": 11,
+     "tight": 19,
+     "exact_pct": 95.61,
+     "loose_pct": 1.61,
+     "tight_pct": 2.78
+    },
+    "PUT": {
+     "n": 460,
+     "answered": 437,
+     "answered_pct": 95.0,
+     "asked": 23,
+     "asked_would_be_loose": 2,
+     "exact": 430,
+     "loose": 5,
+     "tight": 2,
+     "exact_pct": 98.4,
+     "loose_pct": 1.14,
+     "tight_pct": 0.46
+    }
+   },
+   "by_tier": {
+    "lower": {
+     "n": 808,
+     "answered": 600,
+     "answered_pct": 74.3,
+     "asked": 208,
+     "asked_would_be_loose": 8,
+     "exact": 588,
+     "loose": 8,
+     "tight": 4,
+     "exact_pct": 98.0,
+     "loose_pct": 1.33,
+     "tight_pct": 0.67
+    },
+    "none": {
+     "n": 648,
+     "answered": 648,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 617,
+     "loose": 3,
+     "tight": 28,
+     "exact_pct": 95.22,
+     "loose_pct": 0.46,
+     "tight_pct": 4.32
+    },
+    "raise-get": {
+     "n": 2099,
+     "answered": 2091,
+     "answered_pct": 99.6,
+     "asked": 8,
+     "asked_would_be_loose": 0,
+     "exact": 2089,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "raise-wx": {
+     "n": 724,
+     "answered": 680,
+     "answered_pct": 93.9,
+     "asked": 44,
+     "asked_would_be_loose": 3,
+     "exact": 671,
+     "loose": 8,
+     "tight": 1,
+     "exact_pct": 98.68,
+     "loose_pct": 1.18,
+     "tight_pct": 0.15
+    }
+   },
+   "by_provider": {
+    "cloudflare": {
+     "n": 3575,
+     "answered": 3334,
+     "answered_pct": 93.3,
+     "asked": 241,
+     "asked_would_be_loose": 9,
+     "exact": 3288,
+     "loose": 18,
+     "tight": 28,
+     "exact_pct": 98.62,
+     "loose_pct": 0.54,
+     "tight_pct": 0.84
+    },
+    "pagerduty": {
+     "n": 465,
+     "answered": 452,
+     "answered_pct": 97.2,
+     "asked": 13,
+     "asked_would_be_loose": 2,
+     "exact": 445,
+     "loose": 2,
+     "tight": 5,
+     "exact_pct": 98.45,
+     "loose_pct": 0.44,
+     "tight_pct": 1.11
+    },
+    "sentry": {
+     "n": 239,
+     "answered": 233,
+     "answered_pct": 97.5,
+     "asked": 6,
+     "asked_would_be_loose": 0,
+     "exact": 232,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 99.57,
+     "loose_pct": 0.43,
+     "tight_pct": 0.0
+    }
+   },
+   "by_rule": {
+    "r/method": {
+     "n": 2099,
+     "answered": 2091,
+     "answered_pct": 99.6,
+     "asked": 8,
+     "asked_would_be_loose": 0,
+     "exact": 2089,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "r/read-verb": {
+     "n": 19,
+     "answered": 19,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 89.47,
+     "loose_pct": 10.53,
+     "tight_pct": 0.0
+    },
+    "r/read-verb-anywhere": {
+     "n": 17,
+     "answered": 17,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 0,
+     "tight": 0,
+     "exact_pct": 100.0,
+     "loose_pct": 0.0,
+     "tight_pct": 0.0
+    },
+    "w/method-floor": {
+     "n": 724,
+     "answered": 680,
+     "answered_pct": 93.9,
+     "asked": 44,
+     "asked_would_be_loose": 3,
+     "exact": 671,
+     "loose": 8,
+     "tight": 1,
+     "exact_pct": 98.68,
+     "loose_pct": 1.18,
+     "tight_pct": 0.15
+    },
+    "w/modify-verb": {
+     "n": 21,
+     "answered": 21,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 20,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 95.24,
+     "loose_pct": 4.76,
+     "tight_pct": 0.0
+    },
+    "x/cant-undo-verb": {
+     "n": 32,
+     "answered": 32,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 15,
+     "loose": 0,
+     "tight": 17,
+     "exact_pct": 46.88,
+     "loose_pct": 0.0,
+     "tight_pct": 53.12
+    },
+    "x/cant-undo-verb-summary": {
+     "n": 1,
+     "answered": 1,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 0,
+     "loose": 0,
+     "tight": 1,
+     "exact_pct": 0.0,
+     "loose_pct": 0.0,
+     "tight_pct": 100.0
+    },
+    "x/floor-post": {
+     "n": 808,
+     "answered": 600,
+     "answered_pct": 74.3,
+     "asked": 208,
+     "asked_would_be_loose": 8,
+     "exact": 588,
+     "loose": 8,
+     "tight": 4,
+     "exact_pct": 98.0,
+     "loose_pct": 1.33,
+     "tight_pct": 0.67
+    },
+    "x/method-delete": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    }
+   }
+  },
+  "b_0.95": {
+   "overall": {
+    "n": 4279,
+    "answered": 3861,
+    "answered_pct": 90.2,
+    "asked": 418,
+    "asked_would_be_loose": 14,
+    "exact": 3812,
+    "loose": 18,
+    "tight": 31,
+    "exact_pct": 98.73,
+    "loose_pct": 0.47,
+    "tight_pct": 0.8
+   },
+   "by_method": {
+    "DELETE": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    },
+    "GET": {
+     "n": 2099,
+     "answered": 2085,
+     "answered_pct": 99.3,
+     "asked": 14,
+     "asked_would_be_loose": 0,
+     "exact": 2083,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "PATCH": {
+     "n": 270,
+     "answered": 233,
+     "answered_pct": 86.3,
+     "asked": 37,
+     "asked_would_be_loose": 1,
+     "exact": 228,
+     "loose": 3,
+     "tight": 2,
+     "exact_pct": 97.85,
+     "loose_pct": 1.29,
+     "tight_pct": 0.86
+    },
+    "POST": {
+     "n": 892,
+     "answered": 572,
+     "answered_pct": 64.1,
+     "asked": 320,
+     "asked_would_be_loose": 11,
+     "exact": 546,
+     "loose": 8,
+     "tight": 18,
+     "exact_pct": 95.45,
+     "loose_pct": 1.4,
+     "tight_pct": 3.15
+    },
+    "PUT": {
+     "n": 460,
+     "answered": 413,
+     "answered_pct": 89.8,
+     "asked": 47,
+     "asked_would_be_loose": 2,
+     "exact": 407,
+     "loose": 5,
+     "tight": 1,
+     "exact_pct": 98.55,
+     "loose_pct": 1.21,
+     "tight_pct": 0.24
+    }
+   },
+   "by_tier": {
+    "lower": {
+     "n": 808,
+     "answered": 488,
+     "answered_pct": 60.4,
+     "asked": 320,
+     "asked_would_be_loose": 11,
+     "exact": 480,
+     "loose": 5,
+     "tight": 3,
+     "exact_pct": 98.36,
+     "loose_pct": 1.02,
+     "tight_pct": 0.61
+    },
+    "none": {
+     "n": 648,
+     "answered": 648,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 617,
+     "loose": 3,
+     "tight": 28,
+     "exact_pct": 95.22,
+     "loose_pct": 0.46,
+     "tight_pct": 4.32
+    },
+    "raise-get": {
+     "n": 2099,
+     "answered": 2085,
+     "answered_pct": 99.3,
+     "asked": 14,
+     "asked_would_be_loose": 0,
+     "exact": 2083,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "raise-wx": {
+     "n": 724,
+     "answered": 640,
+     "answered_pct": 88.4,
+     "asked": 84,
+     "asked_would_be_loose": 3,
+     "exact": 632,
+     "loose": 8,
+     "tight": 0,
+     "exact_pct": 98.75,
+     "loose_pct": 1.25,
+     "tight_pct": 0.0
+    }
+   },
+   "by_provider": {
+    "cloudflare": {
+     "n": 3575,
+     "answered": 3189,
+     "answered_pct": 89.2,
+     "asked": 386,
+     "asked_would_be_loose": 11,
+     "exact": 3147,
+     "loose": 16,
+     "tight": 26,
+     "exact_pct": 98.68,
+     "loose_pct": 0.5,
+     "tight_pct": 0.82
+    },
+    "pagerduty": {
+     "n": 465,
+     "answered": 442,
+     "answered_pct": 95.1,
+     "asked": 23,
+     "asked_would_be_loose": 3,
+     "exact": 436,
+     "loose": 1,
+     "tight": 5,
+     "exact_pct": 98.64,
+     "loose_pct": 0.23,
+     "tight_pct": 1.13
+    },
+    "sentry": {
+     "n": 239,
+     "answered": 230,
+     "answered_pct": 96.2,
+     "asked": 9,
+     "asked_would_be_loose": 0,
+     "exact": 229,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 99.57,
+     "loose_pct": 0.43,
+     "tight_pct": 0.0
+    }
+   },
+   "by_rule": {
+    "r/method": {
+     "n": 2099,
+     "answered": 2085,
+     "answered_pct": 99.3,
+     "asked": 14,
+     "asked_would_be_loose": 0,
+     "exact": 2083,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 99.9,
+     "loose_pct": 0.1,
+     "tight_pct": 0.0
+    },
+    "r/read-verb": {
+     "n": 19,
+     "answered": 19,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 2,
+     "tight": 0,
+     "exact_pct": 89.47,
+     "loose_pct": 10.53,
+     "tight_pct": 0.0
+    },
+    "r/read-verb-anywhere": {
+     "n": 17,
+     "answered": 17,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 17,
+     "loose": 0,
+     "tight": 0,
+     "exact_pct": 100.0,
+     "loose_pct": 0.0,
+     "tight_pct": 0.0
+    },
+    "w/method-floor": {
+     "n": 724,
+     "answered": 640,
+     "answered_pct": 88.4,
+     "asked": 84,
+     "asked_would_be_loose": 3,
+     "exact": 632,
+     "loose": 8,
+     "tight": 0,
+     "exact_pct": 98.75,
+     "loose_pct": 1.25,
+     "tight_pct": 0.0
+    },
+    "w/modify-verb": {
+     "n": 21,
+     "answered": 21,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 20,
+     "loose": 1,
+     "tight": 0,
+     "exact_pct": 95.24,
+     "loose_pct": 4.76,
+     "tight_pct": 0.0
+    },
+    "x/cant-undo-verb": {
+     "n": 32,
+     "answered": 32,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 15,
+     "loose": 0,
+     "tight": 17,
+     "exact_pct": 46.88,
+     "loose_pct": 0.0,
+     "tight_pct": 53.12
+    },
+    "x/cant-undo-verb-summary": {
+     "n": 1,
+     "answered": 1,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 0,
+     "loose": 0,
+     "tight": 1,
+     "exact_pct": 0.0,
+     "loose_pct": 0.0,
+     "tight_pct": 100.0
+    },
+    "x/floor-post": {
+     "n": 808,
+     "answered": 488,
+     "answered_pct": 60.4,
+     "asked": 320,
+     "asked_would_be_loose": 11,
+     "exact": 480,
+     "loose": 5,
+     "tight": 3,
+     "exact_pct": 98.36,
+     "loose_pct": 1.02,
+     "tight_pct": 0.61
+    },
+    "x/method-delete": {
+     "n": 558,
+     "answered": 558,
+     "answered_pct": 100.0,
+     "asked": 0,
+     "asked_would_be_loose": 0,
+     "exact": 548,
+     "loose": 0,
+     "tight": 10,
+     "exact_pct": 98.21,
+     "loose_pct": 0.0,
+     "tight_pct": 1.79
+    }
+   }
+  }
+ },
+ "loose_rows_a_none": [
+  {
+   "id": "x22-0214",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/ai-gateway/billing/topup",
+   "operationId": "aig-billing-create-topup",
+   "summary": "Create a top-up",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.950553,
+   "p": [
+    0.005314,
+    0.950553,
+    0.044133
+   ]
+  },
+  {
+   "id": "x22-0281",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/ai-search/instances/{id}/jobs",
+   "operationId": "ai-search-instance-create-job",
+   "summary": "Create new job",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.766943,
+   "p": [
+    0.006524,
+    0.766943,
+    0.226533
+   ]
+  },
+  {
+   "id": "x22-0310",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/ai-search/namespaces/{name}/instances/{id}/jobs",
+   "operationId": "ai-search-namespace-instance-create-job",
+   "summary": "Create new job",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.749312,
+   "p": [
+    0.005678,
+    0.749312,
+    0.24501
+   ]
+  },
+  {
+   "id": "x22-0325",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/ai/finetunes",
+   "operationId": "workers-ai-create-finetune",
+   "summary": "Create a new Finetune",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.752567,
+   "p": [
+    0.008282,
+    0.752567,
+    0.239151
+   ]
+  },
+  {
+   "id": "x22-0342",
+   "provider": "cloudflare",
+   "method": "GET",
+   "path": "/accounts/{account_id}/alerting/v3/destinations/pagerduty/connect/{token_id}",
+   "operationId": "notification-destinations-with-pager-duty-connect-pager-duty-token",
+   "summary": "Connect PagerDuty",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "pred": "r",
+   "truth": "w",
+   "max_p": 0.952539,
+   "p": [
+    0.952539,
+    0.047426,
+    3.5e-05
+   ]
+  },
+  {
+   "id": "x22-0469",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/browser-rendering/devtools/browser",
+   "operationId": "brapi-post_DevtoolsAcquire",
+   "summary": "Get a browser session ID.",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "r",
+   "truth": "w",
+   "max_p": 0.72405,
+   "p": [
+    0.72405,
+    0.105144,
+    0.170805
+   ]
+  },
+  {
+   "id": "x22-0474",
+   "provider": "cloudflare",
+   "method": "GET",
+   "path": "/accounts/{account_id}/browser-rendering/devtools/browser/{session_id}/json/close/{target_id}",
+   "operationId": "brapi-get_DevtoolsJsonClose",
+   "summary": "Close a browser target.",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "pred": "r",
+   "truth": "w",
+   "max_p": 0.966376,
+   "p": [
+    0.966376,
+    0.03359,
+    3.4e-05
+   ]
+  },
+  {
+   "id": "x22-0545",
+   "provider": "cloudflare",
+   "method": "PATCH",
+   "path": "/accounts/{account_id}/cfd_tunnel/{tunnel_id}",
+   "operationId": "cloudflare-tunnel-update-a-cloudflare-tunnel",
+   "summary": "Update a Cloudflare Tunnel",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.992946,
+   "p": [
+    0.000284,
+    0.992946,
+    0.00677
+   ]
+  },
+  {
+   "id": "x22-0751",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/accounts/{account_id}/cloudforce-one/v2/brand-protection/takedown-notices/{notice_id}",
+   "operationId": "put_TakedownNoticeUpdate",
+   "summary": "Update takedown notice",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.977529,
+   "p": [
+    0.000238,
+    0.977529,
+    0.022233
+   ]
+  },
+  {
+   "id": "x22-0808",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/cloudforce-one/v2/requests/{project_type}/{request_id}/messages/new",
+   "operationId": "post_MessageCreate",
+   "summary": "Create a customer follow-on message on an RFI request",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.851433,
+   "p": [
+    0.007508,
+    0.851433,
+    0.141058
+   ]
+  },
+  {
+   "id": "x22-0873",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/containers/applications/{application_id}/rollouts",
+   "operationId": "createApplicationRollout",
+   "summary": "Create a new rollout for an application",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.914999,
+   "p": [
+    0.005093,
+    0.914999,
+    0.079908
+   ]
+  },
+  {
+   "id": "x22-0898",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/d1/database/{database_id}/time_travel/restore",
+   "operationId": "d1-time-travel-restore",
+   "summary": "Restore D1 Database to a bookmark or point in time",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.804752,
+   "p": [
+    0.01017,
+    0.804752,
+    0.185078
+   ]
+  },
+  {
+   "id": "x22-0925",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/data-security/posture/remediations/jobs",
+   "operationId": "CreateRemediationJobs",
+   "summary": "Creates remediation jobs",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.86281,
+   "p": [
+    0.003734,
+    0.86281,
+    0.133456
+   ]
+  },
+  {
+   "id": "x22-0929",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/data-security/posture/webhooks/evaluate",
+   "operationId": "EvaluateNewWebhook",
+   "summary": "Test a webhook configuration before creating it",
+   "mech": "r/read-verb",
+   "tier": "none",
+   "pred": "r",
+   "truth": "x",
+   "max_p": 0.999106,
+   "p": [
+    0.999106,
+    0.000839,
+    5.5e-05
+   ]
+  },
+  {
+   "id": "x22-0934",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/data-security/posture/webhooks/{webhook_id}/evaluate",
+   "operationId": "EvaluateExistingWebhook",
+   "summary": "Test an existing webhook configuration",
+   "mech": "r/read-verb",
+   "tier": "none",
+   "pred": "r",
+   "truth": "x",
+   "max_p": 0.998976,
+   "p": [
+    0.998976,
+    0.000977,
+    4.7e-05
+   ]
+  },
+  {
+   "id": "x22-1005",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/dex/commands",
+   "operationId": "post-commands",
+   "summary": "Create account commands",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.77105,
+   "p": [
+    0.010777,
+    0.77105,
+    0.218173
+   ]
+  },
+  {
+   "id": "x22-1165",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/email-security/investigate/move",
+   "operationId": "email_security_post_bulk_move",
+   "summary": "Move multiple messages",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.847221,
+   "p": [
+    0.002889,
+    0.847221,
+    0.14989
+   ]
+  },
+  {
+   "id": "x22-1890",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/accounts/{account_id}/r2/buckets/{bucket_name}/domains/managed",
+   "operationId": "r2-put-bucket-public-policy",
+   "summary": "Update r2.dev Domain of Bucket",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.991226,
+   "p": [
+    0.000278,
+    0.991226,
+    0.008496
+   ]
+  },
+  {
+   "id": "x22-1980",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/registrar-sandbox/registrations",
+   "operationId": "sandbox-registrar-domain-registration-create",
+   "summary": "Create Registration",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.795665,
+   "p": [
+    0.006735,
+    0.795665,
+    0.197601
+   ]
+  },
+  {
+   "id": "x22-2222",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/subscriptions/{subscription_identifier}/action/append",
+   "operationId": "account-subscriptions-action-append-subscription",
+   "summary": "Append Subscription Action",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.79928,
+   "p": [
+    0.004094,
+    0.79928,
+    0.196626
+   ]
+  },
+  {
+   "id": "x22-2473",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/workflows/{workflow_name}/instances",
+   "operationId": "wor-create-new-workflow-instance",
+   "summary": "Create a new workflow instance",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.916477,
+   "p": [
+    0.005156,
+    0.916477,
+    0.078367
+   ]
+  },
+  {
+   "id": "x22-2474",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/workflows/{workflow_name}/instances/batch",
+   "operationId": "wor-batch-create-workflow-instance",
+   "summary": "Batch create new Workflow instances",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.974366,
+   "p": [
+    0.003079,
+    0.974366,
+    0.022555
+   ]
+  },
+  {
+   "id": "x22-2481",
+   "provider": "cloudflare",
+   "method": "PATCH",
+   "path": "/accounts/{account_id}/workflows/{workflow_name}/instances/{instance_id}/status",
+   "operationId": "wor-change-status-workflow-instance",
+   "summary": "Change status of instance",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.961877,
+   "p": [
+    0.000355,
+    0.961877,
+    0.037768
+   ]
+  },
+  {
+   "id": "x22-3081",
+   "provider": "cloudflare",
+   "method": "PATCH",
+   "path": "/zones/{zone_id}/custom_certificates/{custom_certificate_id}",
+   "operationId": "custom-ssl-for-a-zone-edit-ssl-configuration",
+   "summary": "Edit SSL Configuration",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.962998,
+   "p": [
+    0.000375,
+    0.962998,
+    0.036628
+   ]
+  },
+  {
+   "id": "x22-3303",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/zones/{zone_id}/origin_tls_client_auth/hostnames",
+   "operationId": "per-hostname-authenticated-origin-pull-enable-or-disable-a-hostname-for-client-authentication",
+   "summary": "Enable or Disable a Hostname for Client Authentication",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.971093,
+   "p": [
+    0.00066,
+    0.971093,
+    0.028247
+   ]
+  },
+  {
+   "id": "x22-3386",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/zones/{zone_id}/secondary_dns/outgoing/disable",
+   "operationId": "secondary-dns-(-primary-zone)-disable-outgoing-zone-transfers",
+   "summary": "Disable Outgoing Zone Transfers",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.860778,
+   "p": [
+    0.007846,
+    0.860778,
+    0.131376
+   ]
+  },
+  {
+   "id": "x22-3493",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/zones/{zone_id}/speed_api/schedule/{url}",
+   "operationId": "speed-create-scheduled-test",
+   "summary": "Create scheduled page test",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.962956,
+   "p": [
+    0.004997,
+    0.962956,
+    0.032047
+   ]
+  },
+  {
+   "id": "x22-3509",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/zones/{zone_id}/subscription",
+   "operationId": "zone-subscription-create-zone-subscription",
+   "summary": "Create Zone Subscription",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.975758,
+   "p": [
+    0.003882,
+    0.975758,
+    0.02036
+   ]
+  },
+  {
+   "id": "x22-3512",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/zones/{zone_id}/subscriptions",
+   "operationId": "zone-subscription-create-zone-subscriptions",
+   "summary": "Create Zone Subscription",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.973525,
+   "p": [
+    0.003942,
+    0.973525,
+    0.022533
+   ]
+  },
+  {
+   "id": "x22-3523",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/zones/{zone_id}/token_validation/config/{config_id}/credentials",
+   "operationId": "token-validation-config-credentials-update",
+   "summary": "Replace token validation credentials",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.959894,
+   "p": [
+    0.00027,
+    0.959894,
+    0.039835
+   ]
+  },
+  {
+   "id": "x22-3663",
+   "provider": "pagerduty",
+   "method": "PUT",
+   "path": "/enrichment/integrations/servicenow/credentials/{credentials_id}",
+   "operationId": "updateServiceNowCredentials",
+   "summary": "Update ServiceNow credentials",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.889777,
+   "p": [
+    0.000257,
+    0.889777,
+    0.109966
+   ]
+  },
+  {
+   "id": "x22-3780",
+   "provider": "pagerduty",
+   "method": "POST",
+   "path": "/incidents/{id}/status_updates",
+   "operationId": "createIncidentStatusUpdate",
+   "summary": "Create a status update on an incident",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.894103,
+   "p": [
+    0.006434,
+    0.894103,
+    0.099463
+   ]
+  },
+  {
+   "id": "x22-3886",
+   "provider": "pagerduty",
+   "method": "PUT",
+   "path": "/session_configurations",
+   "operationId": "updateSessionConfigurations",
+   "summary": "Configure an account's session configurations",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.960723,
+   "p": [
+    0.000371,
+    0.960723,
+    0.038906
+   ]
+  },
+  {
+   "id": "x22-3907",
+   "provider": "pagerduty",
+   "method": "POST",
+   "path": "/status_pages/{id}/posts",
+   "operationId": "createStatusPagePost",
+   "summary": "Create a Status Page Post",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.939179,
+   "p": [
+    0.004177,
+    0.939179,
+    0.056644
+   ]
+  },
+  {
+   "id": "x22-4084",
+   "provider": "sentry",
+   "method": "POST",
+   "path": "/api/0/organizations/{organization_id_or_slug}/members/",
+   "operationId": "addOrganizationMember",
+   "summary": "Add a Member to an Organization",
+   "mech": "w/modify-verb",
+   "tier": "none",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.998365,
+   "p": [
+    0.000731,
+    0.998365,
+    0.000904
+   ]
+  },
+  {
+   "id": "x22-4219",
+   "provider": "sentry",
+   "method": "POST",
+   "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/replays/jobs/delete/",
+   "operationId": "createProjectReplayDeletionJob",
+   "summary": "Create Replay Batch Deletion Job",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.716943,
+   "p": [
+    0.008915,
+    0.716943,
+    0.274142
+   ]
+  }
+ ],
+ "loose_rows_b_none": [
+  {
+   "id": "x22-0214",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/ai-gateway/billing/topup",
+   "operationId": "aig-billing-create-topup",
+   "summary": "Create a top-up",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.950553,
+   "p": [
+    0.005314,
+    0.950553,
+    0.044133
+   ]
+  },
+  {
+   "id": "x22-0342",
+   "provider": "cloudflare",
+   "method": "GET",
+   "path": "/accounts/{account_id}/alerting/v3/destinations/pagerduty/connect/{token_id}",
+   "operationId": "notification-destinations-with-pager-duty-connect-pager-duty-token",
+   "summary": "Connect PagerDuty",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "pred": "r",
+   "truth": "w",
+   "max_p": 0.952539,
+   "p": [
+    0.952539,
+    0.047426,
+    3.5e-05
+   ]
+  },
+  {
+   "id": "x22-0396",
+   "provider": "cloudflare",
+   "method": "PATCH",
+   "path": "/accounts/{account_id}/autorag/rags/{id}/sync",
+   "operationId": "autorag-config-sync",
+   "summary": "Sync",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.804749,
+   "p": [
+    0.000261,
+    0.804749,
+    0.19499
+   ]
+  },
+  {
+   "id": "x22-0474",
+   "provider": "cloudflare",
+   "method": "GET",
+   "path": "/accounts/{account_id}/browser-rendering/devtools/browser/{session_id}/json/close/{target_id}",
+   "operationId": "brapi-get_DevtoolsJsonClose",
+   "summary": "Close a browser target.",
+   "mech": "r/method",
+   "tier": "raise-get",
+   "pred": "r",
+   "truth": "w",
+   "max_p": 0.966376,
+   "p": [
+    0.966376,
+    0.03359,
+    3.4e-05
+   ]
+  },
+  {
+   "id": "x22-0545",
+   "provider": "cloudflare",
+   "method": "PATCH",
+   "path": "/accounts/{account_id}/cfd_tunnel/{tunnel_id}",
+   "operationId": "cloudflare-tunnel-update-a-cloudflare-tunnel",
+   "summary": "Update a Cloudflare Tunnel",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.992946,
+   "p": [
+    0.000284,
+    0.992946,
+    0.00677
+   ]
+  },
+  {
+   "id": "x22-0751",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/accounts/{account_id}/cloudforce-one/v2/brand-protection/takedown-notices/{notice_id}",
+   "operationId": "put_TakedownNoticeUpdate",
+   "summary": "Update takedown notice",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.977529,
+   "p": [
+    0.000238,
+    0.977529,
+    0.022233
+   ]
+  },
+  {
+   "id": "x22-0808",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/cloudforce-one/v2/requests/{project_type}/{request_id}/messages/new",
+   "operationId": "post_MessageCreate",
+   "summary": "Create a customer follow-on message on an RFI request",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.851433,
+   "p": [
+    0.007508,
+    0.851433,
+    0.141058
+   ]
+  },
+  {
+   "id": "x22-0810",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/accounts/{account_id}/cloudforce-one/v2/requests/{project_type}/{request_id}/messages/{message_id}",
+   "operationId": "put_MessageUpdate",
+   "summary": "Update/publish a message for an RFI request",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.827524,
+   "p": [
+    0.00027,
+    0.827524,
+    0.172206
+   ]
+  },
+  {
+   "id": "x22-0873",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/containers/applications/{application_id}/rollouts",
+   "operationId": "createApplicationRollout",
+   "summary": "Create a new rollout for an application",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.914999,
+   "p": [
+    0.005093,
+    0.914999,
+    0.079908
+   ]
+  },
+  {
+   "id": "x22-0898",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/d1/database/{database_id}/time_travel/restore",
+   "operationId": "d1-time-travel-restore",
+   "summary": "Restore D1 Database to a bookmark or point in time",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.804752,
+   "p": [
+    0.01017,
+    0.804752,
+    0.185078
+   ]
+  },
+  {
+   "id": "x22-0925",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/data-security/posture/remediations/jobs",
+   "operationId": "CreateRemediationJobs",
+   "summary": "Creates remediation jobs",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.86281,
+   "p": [
+    0.003734,
+    0.86281,
+    0.133456
+   ]
+  },
+  {
+   "id": "x22-0929",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/data-security/posture/webhooks/evaluate",
+   "operationId": "EvaluateNewWebhook",
+   "summary": "Test a webhook configuration before creating it",
+   "mech": "r/read-verb",
+   "tier": "none",
+   "pred": "r",
+   "truth": "x",
+   "max_p": 0.999106,
+   "p": [
+    0.999106,
+    0.000839,
+    5.5e-05
+   ]
+  },
+  {
+   "id": "x22-0934",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/data-security/posture/webhooks/{webhook_id}/evaluate",
+   "operationId": "EvaluateExistingWebhook",
+   "summary": "Test an existing webhook configuration",
+   "mech": "r/read-verb",
+   "tier": "none",
+   "pred": "r",
+   "truth": "x",
+   "max_p": 0.998976,
+   "p": [
+    0.998976,
+    0.000977,
+    4.7e-05
+   ]
+  },
+  {
+   "id": "x22-1165",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/email-security/investigate/move",
+   "operationId": "email_security_post_bulk_move",
+   "summary": "Move multiple messages",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.847221,
+   "p": [
+    0.002889,
+    0.847221,
+    0.14989
+   ]
+  },
+  {
+   "id": "x22-1749",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/oauth_clients/{oauth_client_id}/rotate_secret",
+   "operationId": "oauth-clients-rotate-secret",
+   "summary": "Rotate OAuth Client Secret",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.81798,
+   "p": [
+    0.011835,
+    0.81798,
+    0.170185
+   ]
+  },
+  {
+   "id": "x22-1890",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/accounts/{account_id}/r2/buckets/{bucket_name}/domains/managed",
+   "operationId": "r2-put-bucket-public-policy",
+   "summary": "Update r2.dev Domain of Bucket",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.991226,
+   "p": [
+    0.000278,
+    0.991226,
+    0.008496
+   ]
+  },
+  {
+   "id": "x22-2222",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/subscriptions/{subscription_identifier}/action/append",
+   "operationId": "account-subscriptions-action-append-subscription",
+   "summary": "Append Subscription Action",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.79928,
+   "p": [
+    0.004094,
+    0.79928,
+    0.196626
+   ]
+  },
+  {
+   "id": "x22-2473",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/workflows/{workflow_name}/instances",
+   "operationId": "wor-create-new-workflow-instance",
+   "summary": "Create a new workflow instance",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.916477,
+   "p": [
+    0.005156,
+    0.916477,
+    0.078367
+   ]
+  },
+  {
+   "id": "x22-2474",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/accounts/{account_id}/workflows/{workflow_name}/instances/batch",
+   "operationId": "wor-batch-create-workflow-instance",
+   "summary": "Batch create new Workflow instances",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.974366,
+   "p": [
+    0.003079,
+    0.974366,
+    0.022555
+   ]
+  },
+  {
+   "id": "x22-2481",
+   "provider": "cloudflare",
+   "method": "PATCH",
+   "path": "/accounts/{account_id}/workflows/{workflow_name}/instances/{instance_id}/status",
+   "operationId": "wor-change-status-workflow-instance",
+   "summary": "Change status of instance",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.961877,
+   "p": [
+    0.000355,
+    0.961877,
+    0.037768
+   ]
+  },
+  {
+   "id": "x22-3081",
+   "provider": "cloudflare",
+   "method": "PATCH",
+   "path": "/zones/{zone_id}/custom_certificates/{custom_certificate_id}",
+   "operationId": "custom-ssl-for-a-zone-edit-ssl-configuration",
+   "summary": "Edit SSL Configuration",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.962998,
+   "p": [
+    0.000375,
+    0.962998,
+    0.036628
+   ]
+  },
+  {
+   "id": "x22-3303",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/zones/{zone_id}/origin_tls_client_auth/hostnames",
+   "operationId": "per-hostname-authenticated-origin-pull-enable-or-disable-a-hostname-for-client-authentication",
+   "summary": "Enable or Disable a Hostname for Client Authentication",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.971093,
+   "p": [
+    0.00066,
+    0.971093,
+    0.028247
+   ]
+  },
+  {
+   "id": "x22-3386",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/zones/{zone_id}/secondary_dns/outgoing/disable",
+   "operationId": "secondary-dns-(-primary-zone)-disable-outgoing-zone-transfers",
+   "summary": "Disable Outgoing Zone Transfers",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.860778,
+   "p": [
+    0.007846,
+    0.860778,
+    0.131376
+   ]
+  },
+  {
+   "id": "x22-3493",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/zones/{zone_id}/speed_api/schedule/{url}",
+   "operationId": "speed-create-scheduled-test",
+   "summary": "Create scheduled page test",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.962956,
+   "p": [
+    0.004997,
+    0.962956,
+    0.032047
+   ]
+  },
+  {
+   "id": "x22-3509",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/zones/{zone_id}/subscription",
+   "operationId": "zone-subscription-create-zone-subscription",
+   "summary": "Create Zone Subscription",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.975758,
+   "p": [
+    0.003882,
+    0.975758,
+    0.02036
+   ]
+  },
+  {
+   "id": "x22-3512",
+   "provider": "cloudflare",
+   "method": "POST",
+   "path": "/zones/{zone_id}/subscriptions",
+   "operationId": "zone-subscription-create-zone-subscriptions",
+   "summary": "Create Zone Subscription",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.973525,
+   "p": [
+    0.003942,
+    0.973525,
+    0.022533
+   ]
+  },
+  {
+   "id": "x22-3523",
+   "provider": "cloudflare",
+   "method": "PUT",
+   "path": "/zones/{zone_id}/token_validation/config/{config_id}/credentials",
+   "operationId": "token-validation-config-credentials-update",
+   "summary": "Replace token validation credentials",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.959894,
+   "p": [
+    0.00027,
+    0.959894,
+    0.039835
+   ]
+  },
+  {
+   "id": "x22-3663",
+   "provider": "pagerduty",
+   "method": "PUT",
+   "path": "/enrichment/integrations/servicenow/credentials/{credentials_id}",
+   "operationId": "updateServiceNowCredentials",
+   "summary": "Update ServiceNow credentials",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.889777,
+   "p": [
+    0.000257,
+    0.889777,
+    0.109966
+   ]
+  },
+  {
+   "id": "x22-3780",
+   "provider": "pagerduty",
+   "method": "POST",
+   "path": "/incidents/{id}/status_updates",
+   "operationId": "createIncidentStatusUpdate",
+   "summary": "Create a status update on an incident",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.894103,
+   "p": [
+    0.006434,
+    0.894103,
+    0.099463
+   ]
+  },
+  {
+   "id": "x22-3886",
+   "provider": "pagerduty",
+   "method": "PUT",
+   "path": "/session_configurations",
+   "operationId": "updateSessionConfigurations",
+   "summary": "Configure an account's session configurations",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.960723,
+   "p": [
+    0.000371,
+    0.960723,
+    0.038906
+   ]
+  },
+  {
+   "id": "x22-3907",
+   "provider": "pagerduty",
+   "method": "POST",
+   "path": "/status_pages/{id}/posts",
+   "operationId": "createStatusPagePost",
+   "summary": "Create a Status Page Post",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.939179,
+   "p": [
+    0.004177,
+    0.939179,
+    0.056644
+   ]
+  },
+  {
+   "id": "x22-4084",
+   "provider": "sentry",
+   "method": "POST",
+   "path": "/api/0/organizations/{organization_id_or_slug}/members/",
+   "operationId": "addOrganizationMember",
+   "summary": "Add a Member to an Organization",
+   "mech": "w/modify-verb",
+   "tier": "none",
+   "pred": "w",
+   "truth": "x",
+   "max_p": 0.998365,
+   "p": [
+    0.000731,
+    0.998365,
+    0.000904
+   ]
+  }
+ ],
+ "confusion": {
+  "a_none": [
+   [
+    2179,
+    14,
+    34
+   ],
+   [
+    3,
+    1253,
+    91
+   ],
+   [
+    2,
+    31,
+    672
+   ]
+  ],
+  "b_none": [
+   [
+    2180,
+    4,
+    43
+   ],
+   [
+    2,
+    1233,
+    112
+   ],
+   [
+    2,
+    28,
+    675
+   ]
+  ],
+  "mechanical": [
+   [
+    2128,
+    2,
+    97
+   ],
+   [
+    5,
+    716,
+    626
+   ],
+   [
+    2,
+    27,
+    676
+   ]
+  ]
+ },
+ "truth_dist": {
+  "r": 2227,
+  "w": 1347,
+  "x": 705
+ },
+ "go_no_go": {
+  "exact_pct": 95.91,
+  "loose_pct": 0.84,
+  "loose_rows": 36,
+  "bar_exact": 91.0,
+  "bar_loose": 0.5,
+  "pass_exact": true,
+  "pass_loose": false,
+  "verdict": "NO-GO"
+ }
+}

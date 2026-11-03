@@ -521,3 +521,69 @@ Band abstain, mode (a) (abstain when the tier-relevant p is within +-0.1 of its 
 Reading: r8soft is also better calibrated for abstaining. At 0.9 it answers 88.7% at 97.7% exact with 38 too-loose rows (mode a), abstaining on 646 rows of which 35 would have been too-loose; r6full at 0.9 answers 92.8% at 96.2% exact with 85 loose. The confidence of the r6 model carries almost no loose signal in mode (b) (its 76 loose rows are all answered with confidence >= 0.95), whereas r8soft's loose rows are concentrated at low confidence. Band abstain is a weak ask rule: it catches only 7 to 12 loose rows for about 500 asks; the max-p threshold is the better signal. About 98.7% exact is reached at p >= 0.95 (83% coverage) and 0.99 (54%).
 
 Caveats: one seed, one epoch, one 23-vendor split; thresholds are not tuned on v3 (grid reported as is); truth is Jev-derived labels; LOVO cuts differ per fold. Latency/size unchanged from r6 (same architecture).
+
+## 2026-11-03: One-time exam: r8soft
+
+Pre-registered in `docs/wiki/exam-prereg-r8soft.md` (f05ec42) before any exam truth was read. Scored once, 4,279 rows (cloudflare, pagerduty, sentry), join 1:1, no rerun, nothing changed after seeing the numbers. Code: `m0/exam-inputs.mjs` (reads input columns only), `train/exam_score.py predict` (never opens truth), `train/exam_score.py score` (only place truth is opened). Outputs in `data/exam-r8soft/` (`predictions.csv`, `results.json`, `score.log`). Model MiniLM r8soft fp32 on CPU, T 0.844, mode (a) cuts lower 0.30 / r 0.40 / raise-wx 0.15 / raise-get 0.05 + credential rule, mode (b) guarded margin 0.6. Before scoring, the inference path was checked against the saved v3 probabilities (286 rows, max abs diff 2e-7).
+
+### Verdict: NO-GO on the letter of the bar
+
+Mode (a), no ask: **exact 95.91% (passes >= 91%), too loose 0.84% = 36 rows (fails <= 0.5%, which allows 21 rows)**. Exact clears by 4.9 points; too loose misses by 15 rows. The bar is a joint AND, so M0 does not pass as pre-registered.
+
+### Reference lines (same exam, overall)
+| | exact | too loose | too tight |
+|---|---|---|---|
+| mechanical (re-scored here) | 82.26 (3520) | 0.79 (34) | 16.94 (725) |
+| mechanical + Jev (rwxmap, PRD) | 93.0 | 0.5 | 6.5 |
+| r8soft mode (a), none | 95.91 (4104) | 0.84 (36) | 3.25 (139) |
+| r8soft mode (b), none | 95.54 (4088) | 0.75 (32) | 3.72 (159) |
+
+Mechanical reproduces rwxmap exactly (82.3 / 0.8 / 16.9). The model is better than Jev on exact by about 3 points and on too-tight by half, but 36 loose rows is more than Jev's ~21 and about the same as mechanical's own 34. The LOVO tuning estimate was 1.3% loose on v3 data, so the tuning rule (loose no worse than mechanical's) is essentially met here (36 vs mechanical's 34), but mechanical's own 0.79% is already above the 0.5% bar, so that rule could not have delivered it.
+
+### Mode (a) vs mode (b), all configs (answered rows; "asked, loose" = asked rows the unasked answer would have had too loose)
+| ask thr | mode | answered % | exact % | too loose rows (%) | too tight rows (%) | asked (loose avoided) |
+|---|---|---|---|---|---|---|
+| none | a | 100.0 | 95.91 | 36 (0.84) | 139 (3.25) | 0 |
+| none | b | 100.0 | 95.54 | 32 (0.75) | 159 (3.72) | 0 |
+| 0.7 | a | 97.4 | 97.48 | 36 (0.86) | 69 (1.66) | 110 (0) |
+| 0.7 | b | 97.4 | 97.39 | 32 (0.77) | 77 (1.85) | 110 (0) |
+| 0.9 | a | 93.9 | 98.56 | 21 (0.52) | 37 (0.92) | 260 (15) |
+| 0.9 | b | 93.9 | 98.66 | 21 (0.52) | 33 (0.82) | 260 (11) |
+| 0.95 | a | 90.2 | 98.73 | 18 (0.47) | 31 (0.80) | 418 (18) |
+| 0.95 | b | 90.2 | 98.73 | 18 (0.47) | 31 (0.80) | 418 (14) |
+
+Reading the ask tables: asking at 0.7 (110 rows) removes 70 too-tight rows and zero too-loose rows, because every too-loose row is answered with high confidence. Only at 0.9 does it start to catch loose rows (15 of 36 in mode a), and at 0.9 / 0.95 the answered set passes the loose bar (21 rows = 0.5225%, just over by rounding at 0.9; 0.47% at 0.95) at the cost of asking 6.1% / 9.8% of rows. This is for information only; the bar was set on mode (a) with no ask. The v3 LOVO abstain table predicted more loose avoidance at 0.9 (35 of 73); here the model is confidently wrong on the loose rows (median max p of the 36 loose rows is 0.94).
+
+### By method (none ask; exact % / loose rows / tight rows)
+| method | n | mode (a) | mode (b) |
+|---|---|---|---|
+| GET | 2,099 | 99.38 / 2 / 11 | 99.62 / 2 / 6 |
+| POST | 892 | 86.32 / 25 / 97 | 83.74 / 19 / 126 |
+| PUT | 460 | 96.52 / 6 / 10 | 96.74 / 7 / 8 |
+| PATCH | 270 | 94.81 / 3 / 11 | 95.19 / 4 / 9 |
+| DELETE | 558 | 98.21 / 0 / 10 | 98.21 / 0 / 10 |
+
+### By tier (none ask)
+| tier | n | mode (a) | mode (b) |
+|---|---|---|---|
+| lower (POST x) | 808 | 87.13 / 22 loose / 82 tight | 84.28 / 16 / 111 |
+| raise-wx | 724 | 96.27 / 9 / 18 | 96.55 / 11 / 14 |
+| raise-get | 2,099 | 99.38 / 2 / 11 | 99.62 / 2 / 6 |
+| none | 648 | 95.22 / 3 / 28 | 95.22 / 3 / 28 |
+
+By provider (mode a): cloudflare 95.58% exact, 30 loose; pagerduty 97.63%, 4; sentry 97.49%, 2.
+
+### Where the 36 too-loose rows are (mode a)
+- 22 in the lower tier, all POST: 21 are mechanical x/floor-post lowered to w where truth is x (one more lowered to r where truth is w). Truth x for a POST "create" is typically a create with side effects or cost: "Create a top-up" (ai-gateway billing), "Create Zone Subscription" (x2), "Create a new rollout for an application", "Restore D1 Database to a bookmark", "Create Registration" (registrar sandbox), "Disable Outgoing Zone Transfers", "Create a Status Page Post" (pagerduty), "Create Replay Batch Deletion Job" (sentry). Model p(x) on these is 0.1 to 0.27, just above the 0.30 lower cut when it fails, with max p (on w) between 0.72 and 0.98.
+- 9 are raise-wx PUT/PATCH rows left at w where truth is x: "Update a Cloudflare Tunnel", "Update takedown notice", "Update r2.dev Domain of Bucket", "Replace token validation credentials" (cloudflare), "Update ServiceNow credentials" and "Configure an account's session configurations" (pagerduty). The model gives p(x) 0.01 to 0.11, below the raise-wx cut 0.15.
+- 3 outside the pile and 2 raise-get GET: sentry "Add a Member to an Organization" (POST, mechanical w/modify-verb, p(x) about 0), cloudflare "Test a webhook configuration" POST (mech r/read-verb, truth x, p(r) 1.0, twice); GET "Connect PagerDuty" and "Close a browser target" (mech r, truth w, p(r) 0.95 and 0.97).
+- One POST "Get a browser session ID" lowered to r where truth is w (p(r) 0.72).
+- Confusion (truth rows x predicted r/w/x), mode (a): r [2179, 14, 34], w [3, 1253, 91], x [2, 31, 672]. Mode (b): r [2180, 4, 43], w [2, 1233, 112], x [2, 28, 675].
+- 29 of the 36 loose rows are shared with mode (b); 7 are mode (a) only, 3 mode (b) only.
+
+### Mode (a) vs mode (b), and tweaks
+- Mode (b) standalone is nearly as good as mode (a) on this exam: exact 95.54 vs 95.91, loose 32 vs 36 rows. It wins on too-loose (POST lower tier 16 vs 22) and on GET; it loses on too-tight (159 vs 139), almost all in POST (126 vs 97). Its guard (margin 0.6) is a cheaper way to keep loose down, since it needs no mechanical letter. Neither mode meets the 0.5% bar without asking.
+- What suggests a tweak (for a fresh exam, never this one): (1) the lower tier is the problem in both modes (22 / 16 loose rows of 808): a lower cut under 0.30 or a stricter lower guard, for POST "create" rows that touch money, subscriptions, jobs, restores or deletions; a lower cut would trade more too-tight, and the lower tier is already 10% tight. (2) raise-wx cut 0.15 misses 9 PUT/PATCH x rows whose p(x) is 0.01 to 0.11; at v3 tuning the cut was already at the bottom of its LOVO range. (3) Ask at 0.9 or 0.95 is the practical lever: it catches 15 to 18 of the 36 loose rows; this exam shows no loose-row catch at 0.7. These are observations, not changes; nothing has been retuned.
+- Caveat: the exam truth is from rwxmap's labeller under BRIEF-v3, same label standard as the training truth; many of the 36 are borderline "create" or "update" rows where a reasonable labeller could say w. Label noise on the loose side is unmeasured here.
+
+Note for the prereg file: it states "0.6 in 18 of 23 folds (0.7 in 4, 0.9 in 1)"; the results file says 0.6 in 17, 0.7 in 5, 0.9 in 1. Descriptive only; the margin used (0.6) is unaffected.
