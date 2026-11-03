@@ -1,0 +1,13 @@
+id,A,B,ruling,reason
+gate-0026,x,w,w,"POST list removal, re-register is one call"
+gate-0037,x,w,w,restart: stop of something that can be started again
+gate-0048,x,w,w,"POST list removal, re-register is one call"
+gate-0145,x,w,w,restart: stop of something that can be started again
+gate-0146,x,w,w,nameserver update can be set back
+gate-0191,x,w,w,create with no send named; do not infer a send
+gate-0288,x,w,w,"creates a job definition, text does not say it runs now"
+gate-0299,r,w,w,text says create entry
+gate-0306,r,w,w,text says create entry
+gate-0422,x,w,x,device sends support files out to vendor support
+gate-0574,x,w,x,clause (b) credential change
+gate-0595,w,x,w,start of something that can be stopped

@@ -1,0 +1,601 @@
+id,label,confidence,note
+gate-0600,w,high,
+gate-0599,w,high,
+gate-0598,w,high,
+gate-0597,x,medium,publishes the page
+gate-0596,w,high,
+gate-0595,x,medium,starts a stream run
+gate-0594,w,high,
+gate-0593,w,medium,patch message values
+gate-0592,w,high,
+gate-0591,w,high,
+gate-0590,w,high,
+gate-0589,w,high,
+gate-0588,w,high,
+gate-0587,w,high,
+gate-0586,w,medium,update order details
+gate-0585,w,high,
+gate-0584,w,high,
+gate-0583,w,medium,opens access; settable back
+gate-0582,x,medium,invalidates key (b)
+gate-0581,w,high,
+gate-0580,w,high,
+gate-0579,x,medium,cancels all queued runs (f)
+gate-0578,w,high,
+gate-0577,w,high,
+gate-0576,r,high,
+gate-0575,r,high,
+gate-0574,w,high,
+gate-0573,r,high,
+gate-0572,r,high,
+gate-0571,r,high,
+gate-0570,r,high,
+gate-0569,r,high,
+gate-0568,r,high,
+gate-0567,r,high,
+gate-0566,r,high,
+gate-0565,r,high,
+gate-0564,r,high,
+gate-0563,r,high,
+gate-0562,r,high,
+gate-0561,r,high,
+gate-0560,r,high,
+gate-0559,r,high,
+gate-0558,w,medium,PUT no text
+gate-0557,x,high,
+gate-0556,r,high,
+gate-0555,r,high,
+gate-0554,x,low,reject application state change; tighter
+gate-0553,x,low,simulated mailing of check; tighter
+gate-0552,r,high,
+gate-0551,w,medium,modifies in-progress call
+gate-0550,r,high,
+gate-0549,x,medium,cancels bulk job (f)
+gate-0548,r,high,
+gate-0547,r,high,
+gate-0546,r,high,
+gate-0545,r,high,
+gate-0544,r,high,
+gate-0543,r,high,
+gate-0542,r,high,
+gate-0541,r,high,
+gate-0540,w,high,
+gate-0539,w,high,
+gate-0538,w,high,create bucket
+gate-0537,r,high,
+gate-0536,r,high,
+gate-0535,r,high,
+gate-0534,r,high,
+gate-0533,r,high,
+gate-0532,w,high,
+gate-0531,r,high,
+gate-0530,r,high,
+gate-0529,r,high,
+gate-0528,x,medium,places order (d)
+gate-0527,r,high,
+gate-0526,x,low,changes password credential (b); tighter
+gate-0525,r,high,
+gate-0524,w,medium,creates account
+gate-0523,w,high,
+gate-0522,r,high,
+gate-0521,w,high,
+gate-0520,r,high,
+gate-0519,w,high,
+gate-0518,r,high,
+gate-0517,r,high,
+gate-0516,r,high,
+gate-0515,w,high,
+gate-0514,w,medium,add user no invite stated
+gate-0513,r,high,
+gate-0512,w,high,
+gate-0511,r,high,
+gate-0510,r,high,
+gate-0509,r,high,
+gate-0508,r,medium,POST verify
+gate-0507,w,high,
+gate-0506,r,high,
+gate-0505,w,high,
+gate-0504,r,high,
+gate-0503,r,high,
+gate-0502,r,high,
+gate-0501,w,high,
+gate-0500,r,high,
+gate-0499,r,high,
+gate-0498,r,high,
+gate-0497,r,high,
+gate-0496,r,high,
+gate-0495,r,high,
+gate-0494,r,high,
+gate-0493,r,high,
+gate-0492,x,medium,invite delivered (c)
+gate-0491,w,low,feedback stored; maybe sent
+gate-0490,r,high,
+gate-0489,w,high,
+gate-0488,r,high,
+gate-0487,w,high,
+gate-0486,r,high,
+gate-0485,r,high,
+gate-0484,w,high,
+gate-0483,w,high,create upload session
+gate-0482,r,high,
+gate-0481,r,high,
+gate-0480,r,high,
+gate-0479,w,high,
+gate-0478,r,high,
+gate-0477,r,high,
+gate-0476,w,high,add member
+gate-0475,r,high,POST calc
+gate-0474,w,high,
+gate-0473,r,high,
+gate-0472,r,high,
+gate-0471,r,high,
+gate-0470,r,high,
+gate-0469,r,high,
+gate-0468,r,high,
+gate-0467,w,medium,stop playback restartable
+gate-0466,w,high,
+gate-0465,r,high,
+gate-0464,w,high,
+gate-0463,r,high,
+gate-0462,x,low,initiates pension declaration to outside party; tighter
+gate-0461,w,medium,GET saves revision
+gate-0460,r,high,
+gate-0459,w,high,draft bill
+gate-0458,r,high,
+gate-0457,w,high,create channel
+gate-0456,r,high,
+gate-0455,r,high,
+gate-0454,r,high,
+gate-0453,x,high,deletes version (a)
+gate-0452,x,high,sends mail (c)
+gate-0451,r,high,
+gate-0450,r,high,
+gate-0449,r,high,
+gate-0448,w,medium,sync state notify group
+gate-0447,r,high,
+gate-0446,w,high,sandbox create token
+gate-0445,r,high,
+gate-0444,w,high,
+gate-0443,r,high,
+gate-0442,r,high,POST compute
+gate-0441,w,high,
+gate-0440,w,high,
+gate-0439,r,high,
+gate-0438,r,high,
+gate-0437,r,high,POST list
+gate-0436,r,high,
+gate-0435,r,high,
+gate-0434,w,high,
+gate-0433,w,high,
+gate-0432,r,high,
+gate-0431,r,high,
+gate-0430,w,high,
+gate-0429,w,high,
+gate-0428,r,high,
+gate-0427,r,high,
+gate-0426,r,high,
+gate-0425,r,high,
+gate-0424,r,high,
+gate-0423,w,medium,saves revision
+gate-0422,w,medium,uploads support files
+gate-0421,r,high,
+gate-0420,r,high,
+gate-0419,x,medium,forgets saved network (a)
+gate-0418,w,high,
+gate-0417,r,high,
+gate-0416,r,high,POST query
+gate-0415,r,high,
+gate-0414,w,medium,approve has unapprove
+gate-0413,x,low,arbitrary proxied PUT; tighter
+gate-0412,w,high,
+gate-0411,w,high,
+gate-0410,r,high,
+gate-0409,r,high,
+gate-0408,w,high,
+gate-0407,r,high,
+gate-0406,w,high,disable
+gate-0405,x,low,changes password credential (b); tighter
+gate-0404,w,high,
+gate-0403,r,high,
+gate-0402,r,high,
+gate-0401,r,high,
+gate-0400,r,high,POST search
+gate-0399,r,medium,POST enrich returns data
+gate-0398,w,high,
+gate-0397,r,high,
+gate-0396,r,high,
+gate-0395,w,high,
+gate-0394,w,medium,completes registration sets password
+gate-0393,r,high,
+gate-0392,r,high,
+gate-0391,r,high,
+gate-0390,r,high,
+gate-0389,r,high,
+gate-0388,r,high,POST get
+gate-0387,r,high,
+gate-0386,r,high,
+gate-0385,r,low,model transform returned not stored
+gate-0384,w,high,create monitor
+gate-0383,r,high,
+gate-0382,r,high,
+gate-0381,r,high,
+gate-0380,r,high,POST verify
+gate-0379,w,high,
+gate-0378,r,high,
+gate-0377,r,high,
+gate-0376,r,high,
+gate-0375,r,high,
+gate-0374,r,high,
+gate-0373,r,high,
+gate-0372,r,high,
+gate-0371,w,high,
+gate-0370,r,high,
+gate-0369,w,medium,adds job to project
+gate-0368,r,high,
+gate-0367,r,high,
+gate-0366,r,high,
+gate-0365,r,high,
+gate-0364,w,high,
+gate-0363,r,high,
+gate-0362,r,high,
+gate-0361,r,high,
+gate-0360,w,high,
+gate-0359,r,high,
+gate-0358,r,high,
+gate-0357,x,medium,retry manifest to carrier (e)
+gate-0356,w,high,
+gate-0355,w,high,
+gate-0354,w,medium,provisions addon
+gate-0353,w,high,
+gate-0352,r,high,
+gate-0351,w,high,
+gate-0350,r,high,
+gate-0349,w,high,
+gate-0348,r,high,
+gate-0347,w,high,settable back
+gate-0346,r,high,
+gate-0345,r,high,
+gate-0344,r,high,
+gate-0343,r,high,
+gate-0342,w,high,
+gate-0341,r,high,POST calc
+gate-0340,w,high,
+gate-0339,w,high,
+gate-0338,w,high,
+gate-0337,r,high,
+gate-0336,r,high,
+gate-0335,r,high,
+gate-0334,r,high,
+gate-0333,r,high,
+gate-0332,w,high,
+gate-0331,r,medium,POST get
+gate-0330,r,high,
+gate-0329,r,high,
+gate-0328,r,high,
+gate-0327,r,high,POST verify
+gate-0326,r,high,
+gate-0325,r,high,
+gate-0324,r,high,
+gate-0323,r,high,
+gate-0322,r,high,
+gate-0321,r,high,
+gate-0320,w,high,create session
+gate-0319,w,high,upload
+gate-0318,w,high,rename user
+gate-0317,x,high,buys number (d)
+gate-0316,r,high,
+gate-0315,w,medium,update card info
+gate-0314,w,high,
+gate-0313,r,high,
+gate-0312,r,high,
+gate-0311,w,high,
+gate-0310,w,high,
+gate-0309,r,high,
+gate-0308,r,high,
+gate-0307,r,high,
+gate-0306,w,low,text says create entry; maybe only generated
+gate-0305,r,high,
+gate-0304,r,high,
+gate-0303,w,high,
+gate-0302,r,high,
+gate-0301,r,high,
+gate-0300,w,high,
+gate-0299,w,low,text says create entry; maybe only generated
+gate-0298,r,high,
+gate-0297,r,high,
+gate-0296,r,high,POST verify
+gate-0295,r,high,
+gate-0294,r,high,
+gate-0293,r,high,
+gate-0292,r,high,
+gate-0291,r,high,
+gate-0290,r,high,
+gate-0289,r,high,
+gate-0288,w,low,creates job definition; runs periodically
+gate-0287,x,medium,copies live data to proforma job (e)
+gate-0286,r,high,
+gate-0285,r,high,
+gate-0284,r,high,
+gate-0283,r,high,
+gate-0282,r,high,
+gate-0281,r,high,
+gate-0280,w,high,
+gate-0279,w,high,
+gate-0278,r,high,
+gate-0277,x,low,executes DML statements; tighter
+gate-0276,r,high,
+gate-0275,r,high,
+gate-0274,r,high,
+gate-0273,r,high,
+gate-0272,r,medium,redownload already licensed
+gate-0271,r,high,
+gate-0270,w,high,
+gate-0269,w,high,
+gate-0268,w,high,mark read
+gate-0267,w,high,
+gate-0266,r,high,
+gate-0265,w,high,
+gate-0264,r,high,
+gate-0263,r,high,
+gate-0262,r,high,
+gate-0261,w,medium,creates call
+gate-0260,r,high,
+gate-0259,r,high,
+gate-0258,w,high,
+gate-0257,r,high,
+gate-0256,r,high,
+gate-0255,r,high,
+gate-0254,r,high,
+gate-0253,r,high,
+gate-0252,r,high,
+gate-0251,w,high,
+gate-0250,w,high,
+gate-0249,w,high,
+gate-0248,w,high,
+gate-0247,w,high,register provider
+gate-0246,r,high,
+gate-0245,r,high,
+gate-0244,r,high,POST query
+gate-0243,w,high,
+gate-0242,w,medium,resize tty
+gate-0241,r,high,POST get
+gate-0240,w,high,
+gate-0239,w,high,
+gate-0238,w,high,add method
+gate-0237,w,high,
+gate-0236,r,medium,POST get url
+gate-0235,r,high,
+gate-0234,r,high,
+gate-0233,r,high,
+gate-0232,r,high,
+gate-0231,r,high,POST read
+gate-0230,r,high,
+gate-0229,x,high,places order (d)
+gate-0228,r,medium,builds unsigned tx only
+gate-0227,r,high,
+gate-0226,r,high,
+gate-0225,w,high,stop restartable
+gate-0224,w,high,
+gate-0223,w,high,
+gate-0222,r,high,
+gate-0221,w,high,
+gate-0220,r,high,
+gate-0219,r,high,
+gate-0218,w,high,
+gate-0217,r,high,
+gate-0216,r,high,POST get
+gate-0215,r,high,POST validate
+gate-0214,w,high,
+gate-0213,r,high,
+gate-0212,r,high,POST preview
+gate-0211,r,high,
+gate-0210,r,high,
+gate-0209,r,high,
+gate-0208,w,high,create orgs
+gate-0207,x,medium,cancels operation (f)
+gate-0206,r,high,POST read
+gate-0205,r,high,
+gate-0204,r,high,
+gate-0203,r,high,
+gate-0202,w,medium,extends session
+gate-0201,r,high,
+gate-0200,w,high,
+gate-0199,r,high,
+gate-0198,r,high,
+gate-0197,r,high,POST search
+gate-0196,w,high,
+gate-0195,r,high,
+gate-0194,r,high,
+gate-0193,r,high,POST get
+gate-0192,r,high,
+gate-0191,w,low,creates queued updates; publish not named
+gate-0190,w,high,grant access
+gate-0189,r,high,POST count
+gate-0188,w,high,
+gate-0187,w,medium,ban has unban
+gate-0186,r,medium,returns challenge
+gate-0185,r,high,POST lookup
+gate-0184,r,high,
+gate-0183,r,high,
+gate-0182,r,high,
+gate-0181,r,high,
+gate-0180,r,high,POST get
+gate-0179,w,high,
+gate-0178,r,high,
+gate-0177,r,medium,renders markdown
+gate-0176,r,high,
+gate-0175,x,high,deletes (a)
+gate-0174,x,high,runs query (e)
+gate-0173,r,high,POST get
+gate-0172,r,high,POST query
+gate-0171,r,high,POST verify
+gate-0170,w,medium,swap repeatable
+gate-0169,w,high,
+gate-0168,r,high,
+gate-0167,r,high,
+gate-0166,r,high,
+gate-0165,r,high,
+gate-0164,r,high,POST list
+gate-0163,r,high,POST query
+gate-0162,x,medium,scrubs sensitive data irrecoverably (a)
+gate-0161,r,high,
+gate-0160,r,high,
+gate-0159,w,high,activate/deactivate toggle
+gate-0158,x,high,stops job in progress (f)
+gate-0157,r,high,
+gate-0156,r,high,
+gate-0155,w,medium,GET enables alarm actions; has disable
+gate-0154,r,high,
+gate-0153,x,high,deletes (a)
+gate-0152,r,high,
+gate-0151,r,high,
+gate-0150,r,high,
+gate-0149,w,high,
+gate-0148,r,high,
+gate-0147,w,medium,GET creates target group
+gate-0146,w,high,
+gate-0145,w,medium,restart; process restartable
+gate-0144,r,high,
+gate-0143,r,high,
+gate-0142,r,high,
+gate-0141,w,medium,PUT no text
+gate-0140,r,high,
+gate-0139,r,high,
+gate-0138,r,high,POST describe
+gate-0137,r,high,
+gate-0136,r,high,POST compute
+gate-0135,r,high,
+gate-0134,w,medium,moves stock to inventory
+gate-0133,w,high,role change
+gate-0132,r,high,
+gate-0131,w,high,
+gate-0130,r,high,
+gate-0129,r,high,
+gate-0128,x,high,deletes snapshot (a)
+gate-0127,r,high,
+gate-0126,w,high,
+gate-0125,r,high,
+gate-0124,r,high,POST list
+gate-0123,r,high,
+gate-0122,r,high,
+gate-0121,r,high,
+gate-0120,w,high,
+gate-0119,w,medium,creates sharing link; no send named
+gate-0118,r,high,POST fetch
+gate-0117,w,high,attach
+gate-0116,w,high,
+gate-0115,x,medium,sends data frame to device (c)
+gate-0114,x,high,resets password (b)
+gate-0113,w,high,
+gate-0112,r,high,
+gate-0111,w,high,
+gate-0110,r,high,
+gate-0109,r,high,
+gate-0108,r,high,
+gate-0107,r,high,
+gate-0106,r,high,
+gate-0105,w,high,
+gate-0104,r,high,
+gate-0103,r,high,
+gate-0102,r,high,
+gate-0101,r,high,
+gate-0100,r,high,
+gate-0099,r,high,
+gate-0098,r,high,
+gate-0097,r,high,
+gate-0096,w,high,
+gate-0095,w,high,
+gate-0094,w,high,
+gate-0093,w,high,
+gate-0092,r,high,POST calc function
+gate-0091,r,high,
+gate-0090,w,high,
+gate-0089,x,high,revokes access grants (b)
+gate-0088,r,high,
+gate-0087,w,medium,POST edits person
+gate-0086,r,high,
+gate-0085,w,high,
+gate-0084,r,high,
+gate-0083,w,high,create schedule
+gate-0082,r,high,
+gate-0081,r,high,
+gate-0080,w,high,undelete
+gate-0079,r,high,
+gate-0078,w,high,
+gate-0077,r,high,
+gate-0076,r,high,POST retrieve history
+gate-0075,r,medium,POST list keys
+gate-0074,r,high,
+gate-0073,w,high,
+gate-0072,r,high,
+gate-0071,r,high,
+gate-0070,r,high,
+gate-0069,w,high,
+gate-0068,r,high,POST get
+gate-0067,x,high,starts job (e)
+gate-0066,r,high,
+gate-0065,r,high,
+gate-0064,r,high,
+gate-0063,w,high,subscribe
+gate-0062,w,high,
+gate-0061,w,high,detach has attach
+gate-0060,r,high,POST query
+gate-0059,r,high,
+gate-0058,r,high,
+gate-0057,w,high,
+gate-0056,w,medium,connect carrier account
+gate-0055,w,high,
+gate-0054,w,medium,adds protectable item
+gate-0053,r,high,
+gate-0052,r,high,
+gate-0051,w,high,
+gate-0050,w,high,
+gate-0049,w,medium,add attachment; no send named
+gate-0048,w,low,POST remove from group; re-register exists
+gate-0047,r,high,
+gate-0046,x,high,triggers discovery (e)
+gate-0045,r,high,
+gate-0044,r,high,
+gate-0043,r,high,
+gate-0042,r,high,
+gate-0041,w,high,
+gate-0040,r,high,
+gate-0039,r,high,
+gate-0038,r,high,
+gate-0037,w,medium,restart instance
+gate-0036,x,high,forwards meeting request sends (c)
+gate-0035,r,high,
+gate-0034,w,high,
+gate-0033,w,high,
+gate-0032,w,high,
+gate-0031,w,high,
+gate-0030,r,high,
+gate-0029,x,low,message shown to ticket holders (c); tighter
+gate-0028,r,high,POST get settings
+gate-0027,r,high,
+gate-0026,w,low,POST remove from cluster; re-register exists
+gate-0025,w,high,
+gate-0024,r,high,
+gate-0023,w,high,
+gate-0022,w,high,
+gate-0021,r,high,
+gate-0020,r,high,
+gate-0019,w,high,
+gate-0018,w,high,
+gate-0017,r,high,
+gate-0016,r,high,
+gate-0015,x,high,triggers build (e)
+gate-0014,w,medium,unsubscribe has subscribe
+gate-0013,r,high,
+gate-0012,w,high,
+gate-0011,r,high,
+gate-0010,w,high,
+gate-0009,r,high,
+gate-0008,r,high,
+gate-0007,r,high,
+gate-0006,r,high,
+gate-0005,r,high,
+gate-0004,r,high,
+gate-0003,r,high,
+gate-0002,r,high,
+gate-0001,r,high,

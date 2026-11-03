@@ -218,3 +218,28 @@ The true-x misses are sends/transfers/state actions with ordinary-sounding creat
 4. Tuning rule: replace "leave-one-vendor-out, minimise too-loose first" (collapses to never move) and the per-tier budget (collapses to lower 0.03 when a tier's mechanical too-loose is 0) with "max exact subject to total too-loose across all tiers no worse than mechanical alone". Starting cuts: lower 0.20, raise-wx 0.60, raise-get 0.20 (or keep raise-get off; it changes nothing on this set).
 5. Lower tier: keep it, with its cut near 0.20 (not 0.10); do not drop it. The v1-based proposal to keep mechanical x unless p under 0.03 should be withdrawn.
 6. Add a note that the gate set is tuning data with 65% buildset rows and duplicate snapshots; a fresh v3-labelled sample drawn from the full APIs.guru corpus (non-DELETE, stratified by tier) would give an honest gate.
+
+## 2026-11-03: Fresh v3 gate scored (once)
+
+Source: `m0/gate-score.mjs`, `data/gate-2026-11-03/score.json`. Truth: two blind labellers, 588/600 agreed (98%), user ruled the other 12 (`rulings.csv`). Sample is now burned.
+
+**Verdict: FAIL.** Jev-derived labels at the PRD cuts (lower 0.20 / raise-wx 0.60 / raise-get 0.20) are 90.8% exact on all 600 (89.9% on the 523 rows outside the 14 rwxmap-tuning providers). The bar is 95%, so the cause goes back to the PRD; the bar is not loosened. Too-loose is 7 (1.2%), better than mechanical alone (13, 2.2%), so the safety half of the contract holds; the failure is all too-tight (48 rows, 8.0%).
+
+| config (all 600) | exact | too loose | too tight |
+|---|---|---|---|
+| mechanical alone | 76.5% | 13 (2.2%) | 128 (21.3%) |
+| mechanical + Jev, PRD cuts (the gate) | 90.8% | 7 (1.2%) | 48 (8.0%) |
+| mechanical + Jev, rwxmap cuts 0.10/0.80/0.50 | 88.5% | 8 (1.3%) | 61 (10.2%) |
+| Jev mode (b) alone, p 0.5 | 89.8% | 10 (1.7%) | 51 (8.5%) |
+
+Non-overlap (523 rows): 74.8 / 89.9 / 87.6 / 88.7 exact; too-loose 13 / 7 / 8 / 10.
+
+Gate line by tier (all 600): raise-get 325 rows 100% exact; raise-wx 97 rows 94.8% (5 too loose); lower 145 rows 68.3% (2 too loose, 44 too tight; mechanical alone 14.5%); no pile 33 rows 87.9% (4 too tight). By method: GET 100%, PATCH 96%, PUT 90%, POST 72.6%.
+
+Where the 55 misses are (PRD cuts): 
+- 46 lower-tier POST rows left or put wrong: 44 too tight, mostly read-by-POST (query, get, list, retrieve: autotask `/query`, plaid `/get`, azure `/list*`/`getX`, apisetu certificate lookups) where Jev p sits at 0.04 to 0.20, plus a few at p 0.2 to 0.5 (a "download", "start", "burntoken", "enrich", "markdown") that stay x. Truth is r (about 36 of them). Mechanical floor-post x is simply a bad prior for POST in this corpus, and Jev's 0.20 cut still leaves the 0.20 to 0.50 band at x.
+- Genuine w kept at x (p 0.2 to 0.57): deregister, restart, transferJobs create, SyncPlay ready, feedback; these were the user's rulings on borderline cases.
+- Too loose, 7 rows: 2 in lower (addMessage p 0.115, mist support-files upload p 0.12, truth x) and 5 password/credential PUT/PATCH in raise-wx at p 0.04 to 0.49 (letmc, kubernetes node proxy, blazemeter, britbox pin, kumpeapps authkey; truth x).
+- No-pile x rows (cant-undo-verb) with truth w: unsubscribe, approve, start, complete-registration (4 too tight). The PRD cuts do not touch these (Jev has p for 33 of them but no cut is defined).
+
+Post-hoc, NOT for tuning (sample is burned; this explains the number, it must not choose cuts): within the lower tier, moving the cut from 0.20 to 0.30 would add 4 exact rows and 0.40 to 0.50 would trade them for more too-loose; the tier ceiling is about 71% exact (about 103 of 145) at any cut because the true-r POST rows with p above 0.2 are not separable by p. raise-wx at 0.5 to 0.6 is flat; raise-get is flat (325/325). So no cut alone reaches 95%; the lower tier is the problem, not the threshold.

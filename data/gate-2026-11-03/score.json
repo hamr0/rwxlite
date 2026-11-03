@@ -1,0 +1,1907 @@
+{
+ "generated": "2026-11-03",
+ "usedOnce": true,
+ "labelAgreement": {
+  "agree": 588,
+  "total": 600,
+  "pct": 98
+ },
+ "cuts": {
+  "prd": {
+   "lower": 0.2,
+   "raise-wx": 0.6,
+   "raise-get": 0.2
+  },
+  "rwxmap": {
+   "lower": 0.1,
+   "raise-wx": 0.8,
+   "raise-get": 0.5
+  }
+ },
+ "join": {
+  "tierWithoutP": 0,
+  "pWithoutTier": 33,
+  "asked": 600
+ },
+ "truthMix": {
+  "r": 368,
+  "w": 194,
+  "x": 38
+ },
+ "lines": {
+  "all600": {
+   "n": 600,
+   "overall": {
+    "i_mechanical": {
+     "n": 600,
+     "exact": 459,
+     "tooLoose": 13,
+     "tooTight": 128,
+     "exactPct": 76.5,
+     "tooLoosePct": 2.2,
+     "tooTightPct": 21.3
+    },
+    "ii_prd_cuts": {
+     "n": 600,
+     "exact": 545,
+     "tooLoose": 7,
+     "tooTight": 48,
+     "exactPct": 90.8,
+     "tooLoosePct": 1.2,
+     "tooTightPct": 8
+    },
+    "iii_rwxmap_cuts": {
+     "n": 600,
+     "exact": 531,
+     "tooLoose": 8,
+     "tooTight": 61,
+     "exactPct": 88.5,
+     "tooLoosePct": 1.3,
+     "tooTightPct": 10.2
+    },
+    "iv_modeB_p05": {
+     "n": 600,
+     "exact": 539,
+     "tooLoose": 10,
+     "tooTight": 51,
+     "exactPct": 89.8,
+     "tooLoosePct": 1.7,
+     "tooTightPct": 8.5
+    }
+   },
+   "byMethod": {
+    "GET": {
+     "i_mechanical": {
+      "n": 325,
+      "exact": 321,
+      "tooLoose": 4,
+      "tooTight": 0,
+      "exactPct": 98.8,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 325,
+      "exact": 325,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 325,
+      "exact": 325,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 325,
+      "exact": 325,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     }
+    },
+    "POST": {
+     "i_mechanical": {
+      "n": 175,
+      "exact": 49,
+      "tooLoose": 0,
+      "tooTight": 126,
+      "exactPct": 28,
+      "tooLoosePct": 0,
+      "tooTightPct": 72
+     },
+     "ii_prd_cuts": {
+      "n": 175,
+      "exact": 127,
+      "tooLoose": 2,
+      "tooTight": 46,
+      "exactPct": 72.6,
+      "tooLoosePct": 1.1,
+      "tooTightPct": 26.3
+     },
+     "iii_rwxmap_cuts": {
+      "n": 175,
+      "exact": 116,
+      "tooLoose": 0,
+      "tooTight": 59,
+      "exactPct": 66.3,
+      "tooLoosePct": 0,
+      "tooTightPct": 33.7
+     },
+     "iv_modeB_p05": {
+      "n": 175,
+      "exact": 120,
+      "tooLoose": 5,
+      "tooTight": 50,
+      "exactPct": 68.6,
+      "tooLoosePct": 2.9,
+      "tooTightPct": 28.6
+     }
+    },
+    "PATCH": {
+     "i_mechanical": {
+      "n": 50,
+      "exact": 46,
+      "tooLoose": 3,
+      "tooTight": 1,
+      "exactPct": 92,
+      "tooLoosePct": 6,
+      "tooTightPct": 2
+     },
+     "ii_prd_cuts": {
+      "n": 50,
+      "exact": 48,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 96,
+      "tooLoosePct": 2,
+      "tooTightPct": 2
+     },
+     "iii_rwxmap_cuts": {
+      "n": 50,
+      "exact": 46,
+      "tooLoose": 3,
+      "tooTight": 1,
+      "exactPct": 92,
+      "tooLoosePct": 6,
+      "tooTightPct": 2
+     },
+     "iv_modeB_p05": {
+      "n": 50,
+      "exact": 48,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 96,
+      "tooLoosePct": 2,
+      "tooTightPct": 2
+     }
+    },
+    "PUT": {
+     "i_mechanical": {
+      "n": 50,
+      "exact": 43,
+      "tooLoose": 6,
+      "tooTight": 1,
+      "exactPct": 86,
+      "tooLoosePct": 12,
+      "tooTightPct": 2
+     },
+     "ii_prd_cuts": {
+      "n": 50,
+      "exact": 45,
+      "tooLoose": 4,
+      "tooTight": 1,
+      "exactPct": 90,
+      "tooLoosePct": 8,
+      "tooTightPct": 2
+     },
+     "iii_rwxmap_cuts": {
+      "n": 50,
+      "exact": 44,
+      "tooLoose": 5,
+      "tooTight": 1,
+      "exactPct": 88,
+      "tooLoosePct": 10,
+      "tooTightPct": 2
+     },
+     "iv_modeB_p05": {
+      "n": 50,
+      "exact": 46,
+      "tooLoose": 4,
+      "tooTight": 0,
+      "exactPct": 92,
+      "tooLoosePct": 8,
+      "tooTightPct": 0
+     }
+    }
+   },
+   "byTier": {
+    "raise-get": {
+     "i_mechanical": {
+      "n": 325,
+      "exact": 321,
+      "tooLoose": 4,
+      "tooTight": 0,
+      "exactPct": 98.8,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 325,
+      "exact": 325,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 325,
+      "exact": 325,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 325,
+      "exact": 325,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     }
+    },
+    "lower": {
+     "i_mechanical": {
+      "n": 145,
+      "exact": 21,
+      "tooLoose": 0,
+      "tooTight": 124,
+      "exactPct": 14.5,
+      "tooLoosePct": 0,
+      "tooTightPct": 85.5
+     },
+     "ii_prd_cuts": {
+      "n": 145,
+      "exact": 99,
+      "tooLoose": 2,
+      "tooTight": 44,
+      "exactPct": 68.3,
+      "tooLoosePct": 1.4,
+      "tooTightPct": 30.3
+     },
+     "iii_rwxmap_cuts": {
+      "n": 145,
+      "exact": 88,
+      "tooLoose": 0,
+      "tooTight": 57,
+      "exactPct": 60.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 39.3
+     },
+     "iv_modeB_p05": {
+      "n": 145,
+      "exact": 102,
+      "tooLoose": 4,
+      "tooTight": 39,
+      "exactPct": 70.3,
+      "tooLoosePct": 2.8,
+      "tooTightPct": 26.9
+     }
+    },
+    "raise-wx": {
+     "i_mechanical": {
+      "n": 97,
+      "exact": 88,
+      "tooLoose": 9,
+      "tooTight": 0,
+      "exactPct": 90.7,
+      "tooLoosePct": 9.3,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 97,
+      "exact": 92,
+      "tooLoose": 5,
+      "tooTight": 0,
+      "exactPct": 94.8,
+      "tooLoosePct": 5.2,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 97,
+      "exact": 89,
+      "tooLoose": 8,
+      "tooTight": 0,
+      "exactPct": 91.8,
+      "tooLoosePct": 8.2,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 97,
+      "exact": 92,
+      "tooLoose": 5,
+      "tooTight": 0,
+      "exactPct": 94.8,
+      "tooLoosePct": 5.2,
+      "tooTightPct": 0
+     }
+    },
+    "none": {
+     "i_mechanical": {
+      "n": 33,
+      "exact": 29,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 87.9,
+      "tooLoosePct": 0,
+      "tooTightPct": 12.1
+     },
+     "ii_prd_cuts": {
+      "n": 33,
+      "exact": 29,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 87.9,
+      "tooLoosePct": 0,
+      "tooTightPct": 12.1
+     },
+     "iii_rwxmap_cuts": {
+      "n": 33,
+      "exact": 29,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 87.9,
+      "tooLoosePct": 0,
+      "tooTightPct": 12.1
+     },
+     "iv_modeB_p05": {
+      "n": 33,
+      "exact": 20,
+      "tooLoose": 1,
+      "tooTight": 12,
+      "exactPct": 60.6,
+      "tooLoosePct": 3,
+      "tooTightPct": 36.4
+     }
+    }
+   },
+   "byMechLetter": {
+    "r": {
+     "i_mechanical": {
+      "n": 336,
+      "exact": 332,
+      "tooLoose": 4,
+      "tooTight": 0,
+      "exactPct": 98.8,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 336,
+      "exact": 336,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 336,
+      "exact": 336,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 336,
+      "exact": 325,
+      "tooLoose": 0,
+      "tooTight": 11,
+      "exactPct": 96.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 3.3
+     }
+    },
+    "x": {
+     "i_mechanical": {
+      "n": 157,
+      "exact": 29,
+      "tooLoose": 0,
+      "tooTight": 128,
+      "exactPct": 18.5,
+      "tooLoosePct": 0,
+      "tooTightPct": 81.5
+     },
+     "ii_prd_cuts": {
+      "n": 157,
+      "exact": 107,
+      "tooLoose": 2,
+      "tooTight": 48,
+      "exactPct": 68.2,
+      "tooLoosePct": 1.3,
+      "tooTightPct": 30.6
+     },
+     "iii_rwxmap_cuts": {
+      "n": 157,
+      "exact": 96,
+      "tooLoose": 0,
+      "tooTight": 61,
+      "exactPct": 61.1,
+      "tooLoosePct": 0,
+      "tooTightPct": 38.9
+     },
+     "iv_modeB_p05": {
+      "n": 157,
+      "exact": 112,
+      "tooLoose": 5,
+      "tooTight": 40,
+      "exactPct": 71.3,
+      "tooLoosePct": 3.2,
+      "tooTightPct": 25.5
+     }
+    },
+    "w": {
+     "i_mechanical": {
+      "n": 107,
+      "exact": 98,
+      "tooLoose": 9,
+      "tooTight": 0,
+      "exactPct": 91.6,
+      "tooLoosePct": 8.4,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 107,
+      "exact": 102,
+      "tooLoose": 5,
+      "tooTight": 0,
+      "exactPct": 95.3,
+      "tooLoosePct": 4.7,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 107,
+      "exact": 99,
+      "tooLoose": 8,
+      "tooTight": 0,
+      "exactPct": 92.5,
+      "tooLoosePct": 7.5,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 107,
+      "exact": 102,
+      "tooLoose": 5,
+      "tooTight": 0,
+      "exactPct": 95.3,
+      "tooLoosePct": 4.7,
+      "tooTightPct": 0
+     }
+    }
+   },
+   "modeB_askedOnly": {
+    "n": 600,
+    "exact": 539,
+    "tooLoose": 10,
+    "tooTight": 51,
+    "exactPct": 89.8,
+    "tooLoosePct": 1.7,
+    "tooTightPct": 8.5
+   }
+  },
+  "nonOverlap": {
+   "n": 523,
+   "overall": {
+    "i_mechanical": {
+     "n": 523,
+     "exact": 391,
+     "tooLoose": 13,
+     "tooTight": 119,
+     "exactPct": 74.8,
+     "tooLoosePct": 2.5,
+     "tooTightPct": 22.8
+    },
+    "ii_prd_cuts": {
+     "n": 523,
+     "exact": 470,
+     "tooLoose": 7,
+     "tooTight": 46,
+     "exactPct": 89.9,
+     "tooLoosePct": 1.3,
+     "tooTightPct": 8.8
+    },
+    "iii_rwxmap_cuts": {
+     "n": 523,
+     "exact": 458,
+     "tooLoose": 8,
+     "tooTight": 57,
+     "exactPct": 87.6,
+     "tooLoosePct": 1.5,
+     "tooTightPct": 10.9
+    },
+    "iv_modeB_p05": {
+     "n": 523,
+     "exact": 464,
+     "tooLoose": 10,
+     "tooTight": 49,
+     "exactPct": 88.7,
+     "tooLoosePct": 1.9,
+     "tooTightPct": 9.4
+    }
+   },
+   "byMethod": {
+    "GET": {
+     "i_mechanical": {
+      "n": 280,
+      "exact": 276,
+      "tooLoose": 4,
+      "tooTight": 0,
+      "exactPct": 98.6,
+      "tooLoosePct": 1.4,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 280,
+      "exact": 280,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 280,
+      "exact": 280,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 280,
+      "exact": 280,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     }
+    },
+    "POST": {
+     "i_mechanical": {
+      "n": 164,
+      "exact": 47,
+      "tooLoose": 0,
+      "tooTight": 117,
+      "exactPct": 28.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 71.3
+     },
+     "ii_prd_cuts": {
+      "n": 164,
+      "exact": 118,
+      "tooLoose": 2,
+      "tooTight": 44,
+      "exactPct": 72,
+      "tooLoosePct": 1.2,
+      "tooTightPct": 26.8
+     },
+     "iii_rwxmap_cuts": {
+      "n": 164,
+      "exact": 109,
+      "tooLoose": 0,
+      "tooTight": 55,
+      "exactPct": 66.5,
+      "tooLoosePct": 0,
+      "tooTightPct": 33.5
+     },
+     "iv_modeB_p05": {
+      "n": 164,
+      "exact": 111,
+      "tooLoose": 5,
+      "tooTight": 48,
+      "exactPct": 67.7,
+      "tooLoosePct": 3,
+      "tooTightPct": 29.3
+     }
+    },
+    "PUT": {
+     "i_mechanical": {
+      "n": 44,
+      "exact": 37,
+      "tooLoose": 6,
+      "tooTight": 1,
+      "exactPct": 84.1,
+      "tooLoosePct": 13.6,
+      "tooTightPct": 2.3
+     },
+     "ii_prd_cuts": {
+      "n": 44,
+      "exact": 39,
+      "tooLoose": 4,
+      "tooTight": 1,
+      "exactPct": 88.6,
+      "tooLoosePct": 9.1,
+      "tooTightPct": 2.3
+     },
+     "iii_rwxmap_cuts": {
+      "n": 44,
+      "exact": 38,
+      "tooLoose": 5,
+      "tooTight": 1,
+      "exactPct": 86.4,
+      "tooLoosePct": 11.4,
+      "tooTightPct": 2.3
+     },
+     "iv_modeB_p05": {
+      "n": 44,
+      "exact": 40,
+      "tooLoose": 4,
+      "tooTight": 0,
+      "exactPct": 90.9,
+      "tooLoosePct": 9.1,
+      "tooTightPct": 0
+     }
+    },
+    "PATCH": {
+     "i_mechanical": {
+      "n": 35,
+      "exact": 31,
+      "tooLoose": 3,
+      "tooTight": 1,
+      "exactPct": 88.6,
+      "tooLoosePct": 8.6,
+      "tooTightPct": 2.9
+     },
+     "ii_prd_cuts": {
+      "n": 35,
+      "exact": 33,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 94.3,
+      "tooLoosePct": 2.9,
+      "tooTightPct": 2.9
+     },
+     "iii_rwxmap_cuts": {
+      "n": 35,
+      "exact": 31,
+      "tooLoose": 3,
+      "tooTight": 1,
+      "exactPct": 88.6,
+      "tooLoosePct": 8.6,
+      "tooTightPct": 2.9
+     },
+     "iv_modeB_p05": {
+      "n": 35,
+      "exact": 33,
+      "tooLoose": 1,
+      "tooTight": 1,
+      "exactPct": 94.3,
+      "tooLoosePct": 2.9,
+      "tooTightPct": 2.9
+     }
+    }
+   },
+   "byTier": {
+    "raise-get": {
+     "i_mechanical": {
+      "n": 280,
+      "exact": 276,
+      "tooLoose": 4,
+      "tooTight": 0,
+      "exactPct": 98.6,
+      "tooLoosePct": 1.4,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 280,
+      "exact": 280,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 280,
+      "exact": 280,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 280,
+      "exact": 280,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     }
+    },
+    "none": {
+     "i_mechanical": {
+      "n": 32,
+      "exact": 28,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 87.5,
+      "tooLoosePct": 0,
+      "tooTightPct": 12.5
+     },
+     "ii_prd_cuts": {
+      "n": 32,
+      "exact": 28,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 87.5,
+      "tooLoosePct": 0,
+      "tooTightPct": 12.5
+     },
+     "iii_rwxmap_cuts": {
+      "n": 32,
+      "exact": 28,
+      "tooLoose": 0,
+      "tooTight": 4,
+      "exactPct": 87.5,
+      "tooLoosePct": 0,
+      "tooTightPct": 12.5
+     },
+     "iv_modeB_p05": {
+      "n": 32,
+      "exact": 19,
+      "tooLoose": 1,
+      "tooTight": 12,
+      "exactPct": 59.4,
+      "tooLoosePct": 3.1,
+      "tooTightPct": 37.5
+     }
+    },
+    "lower": {
+     "i_mechanical": {
+      "n": 134,
+      "exact": 19,
+      "tooLoose": 0,
+      "tooTight": 115,
+      "exactPct": 14.2,
+      "tooLoosePct": 0,
+      "tooTightPct": 85.8
+     },
+     "ii_prd_cuts": {
+      "n": 134,
+      "exact": 90,
+      "tooLoose": 2,
+      "tooTight": 42,
+      "exactPct": 67.2,
+      "tooLoosePct": 1.5,
+      "tooTightPct": 31.3
+     },
+     "iii_rwxmap_cuts": {
+      "n": 134,
+      "exact": 81,
+      "tooLoose": 0,
+      "tooTight": 53,
+      "exactPct": 60.4,
+      "tooLoosePct": 0,
+      "tooTightPct": 39.6
+     },
+     "iv_modeB_p05": {
+      "n": 134,
+      "exact": 93,
+      "tooLoose": 4,
+      "tooTight": 37,
+      "exactPct": 69.4,
+      "tooLoosePct": 3,
+      "tooTightPct": 27.6
+     }
+    },
+    "raise-wx": {
+     "i_mechanical": {
+      "n": 77,
+      "exact": 68,
+      "tooLoose": 9,
+      "tooTight": 0,
+      "exactPct": 88.3,
+      "tooLoosePct": 11.7,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 77,
+      "exact": 72,
+      "tooLoose": 5,
+      "tooTight": 0,
+      "exactPct": 93.5,
+      "tooLoosePct": 6.5,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 77,
+      "exact": 69,
+      "tooLoose": 8,
+      "tooTight": 0,
+      "exactPct": 89.6,
+      "tooLoosePct": 10.4,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 77,
+      "exact": 72,
+      "tooLoose": 5,
+      "tooTight": 0,
+      "exactPct": 93.5,
+      "tooLoosePct": 6.5,
+      "tooTightPct": 0
+     }
+    }
+   },
+   "byMechLetter": {
+    "r": {
+     "i_mechanical": {
+      "n": 291,
+      "exact": 287,
+      "tooLoose": 4,
+      "tooTight": 0,
+      "exactPct": 98.6,
+      "tooLoosePct": 1.4,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 291,
+      "exact": 291,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 291,
+      "exact": 291,
+      "tooLoose": 0,
+      "tooTight": 0,
+      "exactPct": 100,
+      "tooLoosePct": 0,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 291,
+      "exact": 280,
+      "tooLoose": 0,
+      "tooTight": 11,
+      "exactPct": 96.2,
+      "tooLoosePct": 0,
+      "tooTightPct": 3.8
+     }
+    },
+    "x": {
+     "i_mechanical": {
+      "n": 145,
+      "exact": 26,
+      "tooLoose": 0,
+      "tooTight": 119,
+      "exactPct": 17.9,
+      "tooLoosePct": 0,
+      "tooTightPct": 82.1
+     },
+     "ii_prd_cuts": {
+      "n": 145,
+      "exact": 97,
+      "tooLoose": 2,
+      "tooTight": 46,
+      "exactPct": 66.9,
+      "tooLoosePct": 1.4,
+      "tooTightPct": 31.7
+     },
+     "iii_rwxmap_cuts": {
+      "n": 145,
+      "exact": 88,
+      "tooLoose": 0,
+      "tooTight": 57,
+      "exactPct": 60.7,
+      "tooLoosePct": 0,
+      "tooTightPct": 39.3
+     },
+     "iv_modeB_p05": {
+      "n": 145,
+      "exact": 102,
+      "tooLoose": 5,
+      "tooTight": 38,
+      "exactPct": 70.3,
+      "tooLoosePct": 3.4,
+      "tooTightPct": 26.2
+     }
+    },
+    "w": {
+     "i_mechanical": {
+      "n": 87,
+      "exact": 78,
+      "tooLoose": 9,
+      "tooTight": 0,
+      "exactPct": 89.7,
+      "tooLoosePct": 10.3,
+      "tooTightPct": 0
+     },
+     "ii_prd_cuts": {
+      "n": 87,
+      "exact": 82,
+      "tooLoose": 5,
+      "tooTight": 0,
+      "exactPct": 94.3,
+      "tooLoosePct": 5.7,
+      "tooTightPct": 0
+     },
+     "iii_rwxmap_cuts": {
+      "n": 87,
+      "exact": 79,
+      "tooLoose": 8,
+      "tooTight": 0,
+      "exactPct": 90.8,
+      "tooLoosePct": 9.2,
+      "tooTightPct": 0
+     },
+     "iv_modeB_p05": {
+      "n": 87,
+      "exact": 82,
+      "tooLoose": 5,
+      "tooTight": 0,
+      "exactPct": 94.3,
+      "tooLoosePct": 5.7,
+      "tooTightPct": 0
+     }
+    }
+   },
+   "modeB_askedOnly": {
+    "n": 523,
+    "exact": 464,
+    "tooLoose": 10,
+    "tooTight": 49,
+    "exactPct": 88.7,
+    "tooLoosePct": 1.9,
+    "tooTightPct": 9.4
+   }
+  }
+ },
+ "missesPrdCuts": [
+  {
+   "id": "gate-0014",
+   "provider": "amazonaws.com",
+   "method": "POST",
+   "path": "/#X-Amz-Target=InspectorService.UnsubscribeFromEvent",
+   "summary": "",
+   "mech": "x/cant-undo-verb",
+   "tier": "none",
+   "p": 0.09,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0026",
+   "provider": "amazonaws.com",
+   "method": "POST",
+   "path": "/#X-Amz-Target=AmazonEC2ContainerServiceV20141113.DeregisterContainerInstance",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.53,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0028",
+   "provider": "azure.com",
+   "method": "POST",
+   "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/config/authsettings/list",
+   "summary": "Gets the Authentication/Authorization settings of an app.",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.05,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0029",
+   "provider": "walletobjects.googleapis.com",
+   "method": "POST",
+   "path": "/walletobjects/v1/eventTicketClass/{resourceId}/addMessage",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.11499999999999999,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate-0037",
+   "provider": "googleapis.com",
+   "method": "POST",
+   "path": "/v1/projects/{project}/instances/{instance}/restart",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.26,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0048",
+   "provider": "amazonaws.com",
+   "method": "POST",
+   "path": "/#X-Amz-Target=GameLift.DeregisterGameServer",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.565,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0060",
+   "provider": "autotask.net",
+   "method": "POST",
+   "path": "/V1.0/ConfigurationItemWebhookUdfFields/query",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.08,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0075",
+   "provider": "azure.com",
+   "method": "POST",
+   "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/keys/{keyName}/listkeys",
+   "summary": "Get a shared access policy by name from a provisioning service.",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.09,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0076",
+   "provider": "azure.com",
+   "method": "POST",
+   "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name}/retrieveEmailHistory",
+   "summary": "Retrieve email history",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.07,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0092",
+   "provider": "microsoft.com",
+   "method": "POST",
+   "path": "/drives/{drive-id}/items/{driveItem-id}/workbook/functions/microsoft.graph.imDiv",
+   "summary": "Invoke action imDiv",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.16,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0118",
+   "provider": "plaid.com",
+   "method": "POST",
+   "path": "/wallet/get",
+   "summary": "Fetch an e-wallet",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.04,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0134",
+   "provider": "vtex.local",
+   "method": "POST",
+   "path": "/api/logistics/pvt/inventory/items/{skuId}/warehouses/{warehouseId}/supplyLots/{supplyLotId}/transfer",
+   "summary": "Transfer supply lot",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.2,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0136",
+   "provider": "googleapis.com",
+   "method": "POST",
+   "path": "/v1/{profileEnvironment}:computeEnvironmentScores",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.19,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0138",
+   "provider": "amazonaws.com",
+   "method": "POST",
+   "path": "/#Action=DescribeOrderableDBInstanceOptions",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.04,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0163",
+   "provider": "googleapis.com",
+   "method": "POST",
+   "path": "/v1/records:queryRecord",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.05,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0171",
+   "provider": "apisetu.gov.in",
+   "method": "POST",
+   "path": "/nncer/certificate",
+   "summary": "Non-Encumbrance Certificate",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.13,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0172",
+   "provider": "autotask.net",
+   "method": "POST",
+   "path": "/V1.0/AttachmentInfo/query",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.06,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0177",
+   "provider": "daniweb.com",
+   "method": "POST",
+   "path": "/markdown",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.275,
+   "truth": "r",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0186",
+   "provider": "googleapis.com",
+   "method": "POST",
+   "path": "/v2/accounts/passkeySignIn:start",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.31,
+   "truth": "r",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0189",
+   "provider": "autotask.net",
+   "method": "POST",
+   "path": "/V1.0/AdditionalInvoiceFieldValues/query/count",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.06,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0193",
+   "provider": "azure.com",
+   "method": "POST",
+   "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/getRdpFileContents",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.09,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0197",
+   "provider": "openai.com",
+   "method": "POST",
+   "path": "/engines/{engine_id}/search",
+   "summary": "The search endpoint computes similarity scores between provided query and documents. Documents can b",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.11,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0206",
+   "provider": "statsocial.com",
+   "method": "POST",
+   "path": "/reports/dates/",
+   "summary": "Get report dates available for a specific report",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.07,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0212",
+   "provider": "telnyx.com",
+   "method": "POST",
+   "path": "/sim_card_order_preview",
+   "summary": "Preview SIM card orders",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.06,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0216",
+   "provider": "plaid.com",
+   "method": "POST",
+   "path": "/liabilities/get",
+   "summary": "Retrieve Liabilities data",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.05,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0228",
+   "provider": "nebl.io",
+   "method": "POST",
+   "path": "/ntp1/burntoken",
+   "summary": "Builds a transaction that burns an NTP1 Token",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.495,
+   "truth": "r",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0231",
+   "provider": "epa.gov",
+   "method": "POST",
+   "path": "/eff_rest_services.get_effluent_chart",
+   "summary": "Detailed Effluent Chart Service",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.095,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0236",
+   "provider": "azure.com",
+   "method": "POST",
+   "path": "/{scope}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}/getFullUrl",
+   "summary": "Get full URL of an event subscription.",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.09,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0241",
+   "provider": "azure.com",
+   "method": "POST",
+   "path": "/providers/Microsoft.Capacity/reservationOrders/{reservationOrderId}/reservations/{reservationId}/availableScopes",
+   "summary": "Get Available Scopes for `Reservation`.",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.07,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0244",
+   "provider": "autotask.net",
+   "method": "POST",
+   "path": "/V1.0/HolidaySets/query",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.06,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0261",
+   "provider": "stream-io-api.com",
+   "method": "POST",
+   "path": "/channels/{type}/{id}/call",
+   "summary": "Create a call",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.295,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0272",
+   "provider": "shutterstock.com",
+   "method": "POST",
+   "path": "/v2/videos/licenses/{id}/downloads",
+   "summary": "Download videos",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.485,
+   "truth": "r",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0288",
+   "provider": "googleapis.com",
+   "method": "POST",
+   "path": "/v1/transferJobs",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.26,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0296",
+   "provider": "apisetu.gov.in",
+   "method": "POST",
+   "path": "/bpcrd/certificate",
+   "summary": "BPL Card",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.11,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0327",
+   "provider": "apisetu.gov.in",
+   "method": "POST",
+   "path": "/malcs/certificate",
+   "summary": "Manufacturer License",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.13,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0331",
+   "provider": "plaid.com",
+   "method": "POST",
+   "path": "/application/get",
+   "summary": "Retrieve information about a Plaid application",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.06,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0380",
+   "provider": "apisetu.gov.in",
+   "method": "POST",
+   "path": "/shcer/certificate",
+   "summary": "SC/ST  Certificate",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.10500000000000001,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0385",
+   "provider": "seldon.local",
+   "method": "POST",
+   "path": "/transform-output",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.495,
+   "truth": "r",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0388",
+   "provider": "plaid.com",
+   "method": "POST",
+   "path": "/transfer/intent/get",
+   "summary": "Retrieve more information about a transfer intent",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.07,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0394",
+   "provider": "id4i.de",
+   "method": "PUT",
+   "path": "/account/registration",
+   "summary": "Complete registration",
+   "mech": "x/cant-undo-verb",
+   "tier": "none",
+   "p": 0.13,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0399",
+   "provider": "plaid.com",
+   "method": "POST",
+   "path": "/transactions/enrich",
+   "summary": "Enrich locally-held transaction data",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.39,
+   "truth": "r",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0405",
+   "provider": "letmc.com",
+   "method": "PUT",
+   "path": "/v2/customer/{shortName}/session/password",
+   "summary": "Change the password of a customer given their existing and new password.",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "p": 0.455,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate-0413",
+   "provider": "kubernetes.io",
+   "method": "PUT",
+   "path": "/api/v1/nodes/{name}/proxy/{path}",
+   "summary": "",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "p": 0.04,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate-0414",
+   "provider": "bitbucket.org",
+   "method": "POST",
+   "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/approve",
+   "summary": "Approve a pull request",
+   "mech": "x/cant-undo-verb",
+   "tier": "none",
+   "p": 0.09,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0416",
+   "provider": "autotask.net",
+   "method": "POST",
+   "path": "/V1.0/TaxCategories/query",
+   "summary": "",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.06,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0422",
+   "provider": "mist.com",
+   "method": "POST",
+   "path": "/api/v1/sites/{site_id}/mxedges/{mxedge_id}/support",
+   "summary": "uploadSiteMxEdgeSupportFiles",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.12,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate-0442",
+   "provider": "portfoliooptimizer.io",
+   "method": "POST",
+   "path": "/portfolio/optimization/hierarchical-risk-parity/clustering-based",
+   "summary": "Hierarchical Clustering-Based Risk Parity Portfolio",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.09,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0448",
+   "provider": "jellyfin.local",
+   "method": "POST",
+   "path": "/SyncPlay/Ready",
+   "summary": "Notify SyncPlay group that member is ready for playback.",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.56,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0449",
+   "provider": "ljaero.com",
+   "method": "POST",
+   "path": "/us/v1/uoa/route-query",
+   "summary": "Retrieve UAS Operating Areas (UOAs) found along route.",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.06,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0491",
+   "provider": "contract-p.fit",
+   "method": "POST",
+   "path": "/documents/{document_id}/feedback",
+   "summary": "Submit a feedback",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.33999999999999997,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0508",
+   "provider": "apisetu.gov.in",
+   "method": "POST",
+   "path": "/pscer/certificate",
+   "summary": "Possession Certificate",
+   "mech": "x/floor-post",
+   "tier": "lower",
+   "p": 0.1,
+   "truth": "r",
+   "predicted": "w",
+   "kind": "too-tight"
+  },
+  {
+   "id": "gate-0526",
+   "provider": "blazemeter.com",
+   "method": "PUT",
+   "path": "/user/password",
+   "summary": "Update user name&nbsp; <i class=\"fa fa-lg fa-unlock-alt\"></i>",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "p": 0.22999999999999998,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate-0574",
+   "provider": "britbox.co.uk",
+   "method": "PUT",
+   "path": "/account/pin",
+   "summary": "",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "p": 0.39,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate-0582",
+   "provider": "kumpeapps.com",
+   "method": "PATCH",
+   "path": "/authentication/authkey",
+   "summary": "Compromise auth key",
+   "mech": "w/method-floor",
+   "tier": "raise-wx",
+   "p": 0.485,
+   "truth": "x",
+   "predicted": "w",
+   "kind": "too-loose"
+  },
+  {
+   "id": "gate-0595",
+   "provider": "visagecloud.com",
+   "method": "PATCH",
+   "path": "/rest/v1.1/stream/start",
+   "summary": "Start existing stream",
+   "mech": "x/cant-undo-verb",
+   "tier": "none",
+   "p": 0.56,
+   "truth": "w",
+   "predicted": "x",
+   "kind": "too-tight"
+  }
+ ],
+ "verdict": {
+  "gateExactPct": 90.8,
+  "bar": 95,
+  "tooLoose": 7,
+  "mechanicalTooLoose": 13,
+  "tooLooseNoWorseThanMechanical": true,
+  "result": "FAIL"
+ },
+ "posthocSweepNotForTuning": {
+  "note": "POST-HOC, NOT FOR TUNING: sample is burned; reported only to explain the gate number",
+  "perTier": {
+   "lower": [
+    {
+     "cut": 0,
+     "n": 145,
+     "exact": 21,
+     "tooLoose": 0,
+     "tooTight": 124,
+     "exactPct": 14.5,
+     "tooLoosePct": 0,
+     "tooTightPct": 85.5
+    },
+    {
+     "cut": 0.05,
+     "n": 145,
+     "exact": 32,
+     "tooLoose": 0,
+     "tooTight": 113,
+     "exactPct": 22.1,
+     "tooLoosePct": 0,
+     "tooTightPct": 77.9
+    },
+    {
+     "cut": 0.1,
+     "n": 145,
+     "exact": 88,
+     "tooLoose": 0,
+     "tooTight": 57,
+     "exactPct": 60.7,
+     "tooLoosePct": 0,
+     "tooTightPct": 39.3
+    },
+    {
+     "cut": 0.15,
+     "n": 145,
+     "exact": 93,
+     "tooLoose": 2,
+     "tooTight": 50,
+     "exactPct": 64.1,
+     "tooLoosePct": 1.4,
+     "tooTightPct": 34.5
+    },
+    {
+     "cut": 0.2,
+     "n": 145,
+     "exact": 99,
+     "tooLoose": 2,
+     "tooTight": 44,
+     "exactPct": 68.3,
+     "tooLoosePct": 1.4,
+     "tooTightPct": 30.3
+    },
+    {
+     "cut": 0.3,
+     "n": 145,
+     "exact": 103,
+     "tooLoose": 2,
+     "tooTight": 40,
+     "exactPct": 71,
+     "tooLoosePct": 1.4,
+     "tooTightPct": 27.6
+    },
+    {
+     "cut": 0.4,
+     "n": 145,
+     "exact": 103,
+     "tooLoose": 3,
+     "tooTight": 39,
+     "exactPct": 71,
+     "tooLoosePct": 2.1,
+     "tooTightPct": 26.9
+    },
+    {
+     "cut": 0.5,
+     "n": 145,
+     "exact": 102,
+     "tooLoose": 4,
+     "tooTight": 39,
+     "exactPct": 70.3,
+     "tooLoosePct": 2.8,
+     "tooTightPct": 26.9
+    }
+   ],
+   "raise-wx": [
+    {
+     "cut": 0.5,
+     "n": 97,
+     "exact": 92,
+     "tooLoose": 5,
+     "tooTight": 0,
+     "exactPct": 94.8,
+     "tooLoosePct": 5.2,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.6,
+     "n": 97,
+     "exact": 92,
+     "tooLoose": 5,
+     "tooTight": 0,
+     "exactPct": 94.8,
+     "tooLoosePct": 5.2,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.7,
+     "n": 97,
+     "exact": 91,
+     "tooLoose": 6,
+     "tooTight": 0,
+     "exactPct": 93.8,
+     "tooLoosePct": 6.2,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.8,
+     "n": 97,
+     "exact": 89,
+     "tooLoose": 8,
+     "tooTight": 0,
+     "exactPct": 91.8,
+     "tooLoosePct": 8.2,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.9,
+     "n": 97,
+     "exact": 88,
+     "tooLoose": 9,
+     "tooTight": 0,
+     "exactPct": 90.7,
+     "tooLoosePct": 9.3,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 1.01,
+     "n": 97,
+     "exact": 88,
+     "tooLoose": 9,
+     "tooTight": 0,
+     "exactPct": 90.7,
+     "tooLoosePct": 9.3,
+     "tooTightPct": 0
+    }
+   ],
+   "raise-get": [
+    {
+     "cut": 0.2,
+     "n": 325,
+     "exact": 325,
+     "tooLoose": 0,
+     "tooTight": 0,
+     "exactPct": 100,
+     "tooLoosePct": 0,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.3,
+     "n": 325,
+     "exact": 325,
+     "tooLoose": 0,
+     "tooTight": 0,
+     "exactPct": 100,
+     "tooLoosePct": 0,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.5,
+     "n": 325,
+     "exact": 325,
+     "tooLoose": 0,
+     "tooTight": 0,
+     "exactPct": 100,
+     "tooLoosePct": 0,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 0.8,
+     "n": 325,
+     "exact": 325,
+     "tooLoose": 0,
+     "tooTight": 0,
+     "exactPct": 100,
+     "tooLoosePct": 0,
+     "tooTightPct": 0
+    },
+    {
+     "cut": 1.01,
+     "n": 325,
+     "exact": 321,
+     "tooLoose": 4,
+     "tooTight": 0,
+     "exactPct": 98.8,
+     "tooLoosePct": 1.2,
+     "tooTightPct": 0
+    }
+   ]
+  }
+ }
+}

@@ -60,3 +60,11 @@ Eligible: 84397.
 | vtex | 6 |
 
 (227 vendors in all.)
+
+## Status: USED (scored once, 2026-11-03)
+
+Labelled by two blind workers, A and B (`labels-A.csv`, `labels-B.csv`). Labellers used high/medium/low confidence
+(the brief says high/low only); labels are unaffected. A and B agreed on 588 of 600 (98%). The user ruled the 12
+disputes (`rulings.csv`). `truth.csv` = agreed label, else the ruling (600 rows, no "?").
+`m0/gate-score.mjs` scored the gate once; result in `score.json` (verdict FAIL, 90.8% exact at the PRD cuts).
+This sample is now BURNED: no tuning, sweeps, model selection or re-scoring on it.
