@@ -331,3 +331,38 @@ Code: `train/common.py`, `train/build_dataset.py`, `train/baseline.py`, `train/f
 - Smoke (1,600 rows, 1 epoch, 50 steps, old pre-round-6 targets): val acc 94.25%; v3 a_argmax 89.7 / 8.3 / 1.9, b 89.3 / 9.1 / 1.6. Pipeline check only.
 - Subsample run (36,000 rows, 1 epoch, 1,125 steps, old targets, log `data/train/finetune.log`, tag sub36k) was started before the recipe change and is kept only as a pipeline/timing check; its metrics are not round-6 results.
 - Full round-6 epoch (87,657 rows = 2,740 steps): about 100 min at the best observed 0.46 step/s, about 3 h at 0.25 step/s. Two epochs: 3.5 to 6 h. Needs a quiet machine.
+
+## 2026-11-03: Baseline: own cuts (LOVO)
+
+Code: `train/tune_cuts.py` (results in `data/train/tune-cuts-results.json`, gitignored). TF-IDF baseline from the step-4 entry (trained on rows that exclude every v3 row, so p on the 5,716 v3 tuning rows is out-of-sample w.r.t. training). Mode (a) recipe as round 6 with the model's p in place of Jev's: lower on isX = p(x), raise-wx on p(x), raise-get on changes = p(w)+p(x), POST two-step r cut on changes, narrow credential rule. Cuts picked by the PRD global-budget rule (max exact s.t. TOTAL too-loose <= mechanical's), leave-one-vendor-out: each of the 23 held-out vendors is scored with cuts chosen on the other 22. Grids are wider than parity.mjs (lower 0..0.8, raise-wx 0.02..1.01, raise-get 0.02..1.01, r cut 0..0.8), because the model's p is not Jev's. Calibration: one temperature T=1.274 fit on the val split (not v3).
+
+### LOVO, exact / too loose / too tight (v3 tuning truth, n=5,716; loose rows in brackets)
+| | all | non-DELETE | DELETE |
+|---|---|---|---|
+| mechanical | 76.3 / 1.3 / 22.3 (74) | 69.1 | 99.3 |
+| Jev labels, own LOVO (round 6) | 95.8 / 1.0 / 3.2 | | |
+| baseline PRD cuts (0.20/0.60/0.20, not tuned) | 93.4 / 2.0 / 4.7 | 91.5 / 2.6 / 5.9 | 99.3 |
+| (a) own cuts, raw p | 89.8 / 1.3 / 8.9 (74) | 86.8 / 1.7 / 11.5 | 99.3 / 0.0 / 0.7 |
+| (a) own cuts, temperature-calibrated p | **91.0 / 1.3 / 7.8 (74)** | 88.3 / 1.7 / 10.0 | 99.3 / 0.0 / 0.7 |
+| (b) argmax + too-loose guard, raw | 87.9 / 1.0 / 11.2 (57) | 84.3 / 1.3 / 14.5 | 99.3 |
+| (b) argmax + too-loose guard, calibrated | 88.3 / 1.0 / 10.7 (57) | 84.9 / 1.3 / 13.8 | 99.3 |
+| (b) plain argmax, no guard | 94.0 / 2.9 / 3.1 (166) | 92.3 / 3.7 / 3.9 | 99.3 |
+
+Per tier, mode (a) calibrated (exact / loose / tight): lower 79.3 / 3.5 / 17.2, raise-wx 90.6 / 0.7 / 8.7, raise-get 100.0 / 0.0 / 0.0, none-DELETE 99.3 / 0.0 / 0.7, none-other 89.1 / 2.3 / 8.6. Raw: lower 79.2 / 3.2 / 17.6, raise-wx 86.5 / 0.9 / 12.7, raise-get 99.9.
+
+### Cuts
+- Calibrated (on p after T=1.274), chosen on all 23 vendors: lower 0.40, r cut 0.20, raise-wx 0.10, raise-get 0.70. LOVO ranges over the 23 folds: lower 0.10 to 0.40, r cut 0.02 to 0.50, raise-wx 0.10 to 0.15, raise-get 0.70 (fixed).
+- Raw p: lower 0.20, r cut 0.15, raise-wx 0.10, raise-get 0.80. LOVO ranges: lower 0.07 to 0.40, r cut 0.05 to 0.50, raise-wx 0.02 to 0.10, raise-get 0.70 to 0.80.
+- Calibration helps stability: raise-wx and raise-get ranges collapse to nearly one value and exact rises 1.2 points, all of it in raise-wx (+4 points in that tier). The lower and r cuts stay loose (flat optimum); do not read them to two decimals.
+
+### Verdicts (indicators only; the exam decides)
+- Mode (a) with own calibrated cuts: too loose 74 rows = mechanical's 74 (budget met by construction under LOVO, held-out total equals mechanical's), exact 91.0, so it clears "too loose no worse than mechanical, exact >= 91" by 0.0 to 0.1 points. Thin: the 91 line is on the edge and 3 points under the Jev labels' 95.8.
+- Why the PRD-cut run (93.4 / 2.0) is not simply better: it sits above the budget (2.0% vs 1.3% too loose). The budget costs about 2.4 exact points; where it costs is the lower tier (POST), which is also where the baseline is weakest (tight 17%, loose 3.5%).
+- Mode (b) guarded argmax meets the budget on loose (1.0%, below mechanical) but only 88.3 exact. Plain argmax gets 94.0 but 2.9% too loose, which fails the budget. No cheap guard sits between them: the margin guard converts too-loose into too-tight at nearly 1:1 on the lower and raise-wx tiers. Mode (b) does not meet exact >= 91 under the budget.
+- Mode (a) calibrated is the better option for the baseline.
+
+### Latency (laptop, load average varied 3 to 25 during the work)
+- Single op, full sklearn path: 5.8 to 6.2 ms when the machine is quiet; the earlier 19.8 ms was under heavy load, not representative.
+- Breakdown (ms/op): word vectoriser 0.5, char vectoriser 0.7 to 1.1, sklearn `predict_proba` on the 383k-feature sparse row 4.2 to 5.1. So the vectorisers do NOT dominate; sklearn's predict_proba overhead (input validation plus the dense 383k x 3 coef path) does. Replacing it with `X @ coef.T + b` and a hand softmax (numerically identical, `allclose` True) gives 1.5 ms single op total. That is already well under 20 ms with no accuracy change; no lighter vectoriser needed for latency.
+- Lighter vectoriser setups (refit, same LOVO mode (a) tuning, raw p): char 3-5 + word cap 100k each 90.5 / 1.2 / 8.3 (val acc 95.98); char 3-4 cap 50k each 89.9 / 1.4 / 8.7 (96.17); word 1-2 only cap 100k 88.6 / 1.3 / 10.1 (96.05, 63 s fit). Versus 89.8 raw for the full 383k setup: capping at 100k per vectoriser loses nothing (+0.7, within noise), dropping chars loses 1.2 points. Single-op times for these were measured while the machine was at load 20+ and are not comparable (3.8 to 4.7 ms); the quiet-machine number to cite is the 1.5 ms above. A smaller feature cap mainly shrinks the pickle (24 MB now), which matters for the package size.
+- Hashing vectoriser not tried: the fast matvec path already makes latency a non-issue and the hashing trades away the vocabulary needed for the lighter cap above.
