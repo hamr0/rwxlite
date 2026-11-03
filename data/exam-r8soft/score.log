@@ -1,0 +1,32 @@
+mechanical           answered 100.0% (4279/4279)  exact 82.26% (3520)  loose 0.79% (34)  tight 16.94% (725)  asked 0 (would-be-loose 0)
+a_none               answered 100.0% (4279/4279)  exact 95.91% (4104)  loose 0.84% (36)  tight 3.25% (139)  asked 0 (would-be-loose 0)
+a_0.7                answered 97.4% (4169/4279)  exact 97.48% (4064)  loose 0.86% (36)  tight 1.66% (69)  asked 110 (would-be-loose 0)
+a_0.9                answered 93.9% (4019/4279)  exact 98.56% (3961)  loose 0.52% (21)  tight 0.92% (37)  asked 260 (would-be-loose 15)
+a_0.95               answered 90.2% (3861/4279)  exact 98.73% (3812)  loose 0.47% (18)  tight 0.8% (31)  asked 418 (would-be-loose 18)
+b_none               answered 100.0% (4279/4279)  exact 95.54% (4088)  loose 0.75% (32)  tight 3.72% (159)  asked 0 (would-be-loose 0)
+b_0.7                answered 97.4% (4169/4279)  exact 97.39% (4060)  loose 0.77% (32)  tight 1.85% (77)  asked 110 (would-be-loose 0)
+b_0.9                answered 93.9% (4019/4279)  exact 98.66% (3965)  loose 0.52% (21)  tight 0.82% (33)  asked 260 (would-be-loose 11)
+b_0.95               answered 90.2% (3861/4279)  exact 98.73% (3812)  loose 0.47% (18)  tight 0.8% (31)  asked 418 (would-be-loose 14)
+--- a_none by method
+  DELETE     answered 100.0% (558/558)  exact 98.21% (548)  loose 0.0% (0)  tight 1.79% (10)  asked 0 (would-be-loose 0)
+  GET        answered 100.0% (2099/2099)  exact 99.38% (2086)  loose 0.1% (2)  tight 0.52% (11)  asked 0 (would-be-loose 0)
+  PATCH      answered 100.0% (270/270)  exact 94.81% (256)  loose 1.11% (3)  tight 4.07% (11)  asked 0 (would-be-loose 0)
+  POST       answered 100.0% (892/892)  exact 86.32% (770)  loose 2.8% (25)  tight 10.87% (97)  asked 0 (would-be-loose 0)
+  PUT        answered 100.0% (460/460)  exact 96.52% (444)  loose 1.3% (6)  tight 2.17% (10)  asked 0 (would-be-loose 0)
+--- b_none by method
+  DELETE     answered 100.0% (558/558)  exact 98.21% (548)  loose 0.0% (0)  tight 1.79% (10)  asked 0 (would-be-loose 0)
+  GET        answered 100.0% (2099/2099)  exact 99.62% (2091)  loose 0.1% (2)  tight 0.29% (6)  asked 0 (would-be-loose 0)
+  PATCH      answered 100.0% (270/270)  exact 95.19% (257)  loose 1.48% (4)  tight 3.33% (9)  asked 0 (would-be-loose 0)
+  POST       answered 100.0% (892/892)  exact 83.74% (747)  loose 2.13% (19)  tight 14.13% (126)  asked 0 (would-be-loose 0)
+  PUT        answered 100.0% (460/460)  exact 96.74% (445)  loose 1.52% (7)  tight 1.74% (8)  asked 0 (would-be-loose 0)
+--- a_none by tier
+  lower      answered 100.0% (808/808)  exact 87.13% (704)  loose 2.72% (22)  tight 10.15% (82)  asked 0 (would-be-loose 0)
+  none       answered 100.0% (648/648)  exact 95.22% (617)  loose 0.46% (3)  tight 4.32% (28)  asked 0 (would-be-loose 0)
+  raise-get  answered 100.0% (2099/2099)  exact 99.38% (2086)  loose 0.1% (2)  tight 0.52% (11)  asked 0 (would-be-loose 0)
+  raise-wx   answered 100.0% (724/724)  exact 96.27% (697)  loose 1.24% (9)  tight 2.49% (18)  asked 0 (would-be-loose 0)
+--- b_none by tier
+  lower      answered 100.0% (808/808)  exact 84.28% (681)  loose 1.98% (16)  tight 13.74% (111)  asked 0 (would-be-loose 0)
+  none       answered 100.0% (648/648)  exact 95.22% (617)  loose 0.46% (3)  tight 4.32% (28)  asked 0 (would-be-loose 0)
+  raise-get  answered 100.0% (2099/2099)  exact 99.62% (2091)  loose 0.1% (2)  tight 0.29% (6)  asked 0 (would-be-loose 0)
+  raise-wx   answered 100.0% (724/724)  exact 96.55% (699)  loose 1.52% (11)  tight 1.93% (14)  asked 0 (would-be-loose 0)
+GO/NO-GO {"exact_pct": 95.91, "loose_pct": 0.84, "loose_rows": 36, "bar_exact": 91.0, "bar_loose": 0.5, "pass_exact": true, "pass_loose": false, "verdict": "NO-GO"}
