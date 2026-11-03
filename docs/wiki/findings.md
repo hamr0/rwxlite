@@ -366,3 +366,50 @@ Per tier, mode (a) calibrated (exact / loose / tight): lower 79.3 / 3.5 / 17.2, 
 - Breakdown (ms/op): word vectoriser 0.5, char vectoriser 0.7 to 1.1, sklearn `predict_proba` on the 383k-feature sparse row 4.2 to 5.1. So the vectorisers do NOT dominate; sklearn's predict_proba overhead (input validation plus the dense 383k x 3 coef path) does. Replacing it with `X @ coef.T + b` and a hand softmax (numerically identical, `allclose` True) gives 1.5 ms single op total. That is already well under 20 ms with no accuracy change; no lighter vectoriser needed for latency.
 - Lighter vectoriser setups (refit, same LOVO mode (a) tuning, raw p): char 3-5 + word cap 100k each 90.5 / 1.2 / 8.3 (val acc 95.98); char 3-4 cap 50k each 89.9 / 1.4 / 8.7 (96.17); word 1-2 only cap 100k 88.6 / 1.3 / 10.1 (96.05, 63 s fit). Versus 89.8 raw for the full 383k setup: capping at 100k per vectoriser loses nothing (+0.7, within noise), dropping chars loses 1.2 points. Single-op times for these were measured while the machine was at load 20+ and are not comparable (3.8 to 4.7 ms); the quiet-machine number to cite is the 1.5 ms above. A smaller feature cap mainly shrinks the pickle (24 MB now), which matters for the package size.
 - Hashing vectoriser not tried: the fast matvec path already makes latency a non-issue and the hashing trades away the vocabulary needed for the lighter cap above.
+
+## 2026-11-03: MiniLM round-6: own cuts (LOVO) vs baseline
+
+Model: all-MiniLM-L6-v2 + 3-way head, round-6 full run on the home server (1 epoch, 87,657 rows, 48.8 min, val acc 97.27%). Probs pulled to `data/train/probs-r6full-{val,v3eval}.npy`, HF model to `data/train/ckpt-r6full/final/` (gitignored). Same procedure as the baseline entry above, run by `python3 train/tune_cuts.py --tag r6full` (results `data/train/tune-cuts-r6full-results.json`): temperature fit on the val split only (T=1.322), global-budget rule (max exact s.t. TOTAL too-loose <= mechanical's), leave-one-vendor-out over the 23 v3 vendors, model p in place of Jev p, POST two-step r cut on p(w)+p(x), credential rule, DELETE stays x; plus guarded-argmax mode (b). One change: the model's p is far more peaked than TF-IDF's, so every grid got extra points near 0 and 1 (0.001/0.005/0.01, 0.99/0.995/0.999; margin 0.95..0.999). Baseline grids were left as they were.
+
+Count correction: mechanical's too-loose is 77 rows (1.35%), not 74. The "74" in earlier tables was 1.3% x 5,716, a rounding artifact; `tune_cuts.py` now prints exact row counts (`looseRows`). Re-scoring the cached baseline probs (`--tag baseline`) gives the same percentages with true counts: baseline (a) calibrated = 74 loose rows (under the 77 budget), baseline (b) calibrated = 57.
+
+### LOVO, exact / too loose / too tight (v3 tuning truth, n=5,716; loose rows in brackets)
+| | overall | non-DELETE | DELETE |
+|---|---|---|---|
+| mechanical | 76.3 / 1.3 / 22.3 (77) | 69.1 | 99.3 |
+| Jev labels, own LOVO (round 6) | 95.8 / 1.0 / 3.2 | | |
+| baseline (a) own cuts, calibrated | 91.0 / 1.3 / 7.8 (74) | 88.3 / 1.7 / 10.0 | 99.3 / 0.0 / 0.7 |
+| MiniLM (a) PRD cuts, no tuning (model's own eval) | 94.4 / 2.0 / 3.5 | | |
+| MiniLM (a) own cuts, raw | 92.3 / 1.9 / 5.8 (108) | 90.1 / 2.5 / 7.4 | 99.3 / 0.0 / 0.7 |
+| **MiniLM (a) own cuts, calibrated** | **92.0 / 1.9 / 6.1 (108)** | 89.7 / 2.5 / 7.9 | 99.3 / 0.0 / 0.7 |
+| MiniLM (b) guarded, raw | 89.4 / 1.3 / 9.3 (74) | 86.2 / 1.7 / 12.1 | 99.3 / 0.0 / 0.7 |
+| **MiniLM (b) guarded, calibrated** | **88.6 / 1.3 / 10.1 (76)** | 85.2 / 1.7 / 13.1 | 99.3 / 0.0 / 0.7 |
+| MiniLM (b) plain argmax, no guard | 95.1 / 2.5 / 2.4 (142) | | |
+
+Per tier, exact / loose / tight (calibrated):
+| tier (n) | baseline (a) | MiniLM (a) | MiniLM (b) |
+|---|---|---|---|
+| lower (1,641) | 79.3 / 3.5 / 17.2 | 82.6 / 3.4 / 14.0 | 71.4 / 1.3 / 27.4 |
+| raise-wx (1,486) | 90.6 / 0.7 / 8.7 | 90.8 / 3.2 / 6.0 | 90.4 / 3.3 / 6.3 |
+| raise-get (959) | 100.0 / 0.0 / 0.0 | 100.0 / 0.0 / 0.0 | 99.8 / 0.0 / 0.2 |
+| none-DELETE (1,364) | 99.3 / 0.0 / 0.7 | 99.3 / 0.0 / 0.7 | (none, 1,630) 97.6 / 0.4 / 2.0 |
+| none-other (266) | 89.1 / 2.3 / 8.6 | 89.1 / 2.3 / 8.6 | |
+
+### Cuts (calibrated p, chosen on all 23 vendors; LOVO range over the 23 folds)
+- Mode (a): lower 0.20 (0.05 to 0.50), r cut 0.30 (0.07 to 0.80), raise-wx 0.02 (0.02 to 0.20), raise-get 0.05 (fixed). Raw p: lower 0.15, r cut 0.07, raise-wx 0.01, raise-get 0.02.
+- Mode (b): guard margin 0.90 to 0.95 per fold (raw 0.95 to 0.98).
+- In-sample (cuts fit and scored on all 23 vendors, not honest): 92.4 / 1.35 / 6.3, 77 loose rows, so exactly at the budget. Honest LOVO puts the same procedure at 108 loose rows: the cuts that satisfy the budget on 22 vendors do not hold on the 23rd.
+
+### What this says
+- The MiniLM is a better ranker than the baseline (val 97.27 vs 96.20, plain argmax 95.1 vs 94.0 exact), and mode (a) calibrated gains 1.0 exact point over the baseline's own cuts (92.0 vs 91.0, DELETE identical, all of the gain in lower and raise-wx tight).
+- But it is too sure of itself on the rows it gets wrong. Raise-wx is the problem tier: the chosen cut sinks to 0.02 (the model puts almost no mass on x for w rows it should raise), and with those cuts the held-out vendors give 47 too-loose rows in raise-wx alone (baseline: 11). Total 108 too loose vs mechanical's 77 (1.9% vs 1.35%). Mode (a) fails the budget by 31 rows, under honest LOVO.
+- Mode (b) holds the budget (76 rows, 1.33%, within 1 row of 77) but exact falls to 88.6, below 91; the guard again converts too-loose into too-tight (lower tier tight 27.4%). Same shape as the baseline's (b).
+- So neither MiniLM mode clears the PRD rule here, and the baseline mode (a) calibrated (91.0 / 74 rows) is the only one that does, by a hair.
+
+### Latency and size (local laptop, PyTorch fp32, batch 1, max_len 128, torch threads 4, load average 3 to 4; 300 v3 texts after 20 warm-up)
+- Two runs: mean 22.6 ms (p50 22.5, p95 33.2, max 40.9) and mean 28.4 ms (p50 26.9, p95 45.8). Tokenizer 0.8 ms of that. Model forward is the rest. Not quiet-machine certain, so read as 22 to 28 ms; this is fp32 PyTorch, not the int8 ONNX that M1 will measure.
+- 22.7M parameters, fp32 weights 90.9 MB (`model.safetensors` 90,869,484 bytes). Baseline for comparison: 24 MB pickle, 1.5 ms single op.
+
+### Verdicts (indicators only; the exam decides)
+- By the PRD rule (exact >= 91 and too-loose no worse than mechanical) on these tuning rows: baseline (a) calibrated passes (91.0, 74 vs 77 rows); MiniLM (a) fails on loose (108 vs 77); MiniLM (b) fails on exact (88.6). Edge cases: the baseline's pass is 0.0 above the exact line, and MiniLM (a) would pass if the budget were judged in-sample (92.4 / 77) rather than LOVO.
+- Caveats: one split of 23 vendors, rows within a vendor are correlated; the cut grid was extended for MiniLM only; v3 truth is Jev-derived labels, so every figure is against labels, not ground truth; the MiniLM is one seed, one epoch; loose differences of 30 rows are a few vendors' worth.
