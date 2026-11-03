@@ -26,8 +26,12 @@ const EXAM_AND_LOCKED = ['cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot'
 // provider, split on '.' and ':'), not only by row. Burned exam vendors: okta, docusign, xero (exam-2026-09-17);
 // klaviyo (exam-2026-09-20, plus auth0/hubspot/miro/zendesk); cloudflare, pagerduty, sentry (exam-2026-09-22).
 // Locked: auth0, hubspot, zendesk, miro, dropbox, shopify, linear.
-const BURNED_NAMES = ['okta', 'docusign', 'xero', 'klaviyo', 'cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot', 'zendesk', 'miro', 'dropbox', 'shopify', 'linear'];
-const byName = (provider) => String(provider || '').toLowerCase().split(/[.:]/).some((l) => BURNED_NAMES.includes(l));
+const BURNED_BASE = ['okta', 'docusign', 'xero', 'klaviyo', 'cloudflare', 'pagerduty', 'sentry', 'auth0', 'hubspot', 'zendesk', 'miro', 'dropbox', 'shopify', 'linear'];
+// Gate-3 amendment (rwxmap lock check 2026-11-03): hubapi.com = HubSpot (burned x20). Added for gate 3 and future gates;
+// gate-1/2 keep BURNED_BASE so their outputs stay byte-identical.
+const BURNED_NAMES = GATEARG === '1' || GATEARG === '2' ? BURNED_BASE : [...BURNED_BASE, 'hubapi'];
+const byNameL = (list) => (provider) => String(provider || '').toLowerCase().split(/[.:]/).some((l) => list.includes(l));
+const byName = byNameL(BURNED_NAMES);
 const SAMPLED = ['GET', 'POST', 'PUT', 'PATCH'];
 const first = (s) => String(s || '').toLowerCase().split(/[.:]/)[0];
 const opKey = (m, p, o) => `${String(m).toUpperCase()}|${p}|${o}`;
@@ -71,7 +75,7 @@ if (GATE3) {
   const el = [];
   for (const [k, rs] of groups) {
     const r = rs[0]; const m = r.method.toUpperCase(); const ok = opKey(r.method, r.path, r.operationId);
-    if (byName(r.provider)) { x3.by_name++; continue; }
+    if (byNameL(BURNED_BASE)(r.provider)) { x3.by_name++; continue; } // original draw; hubapi redrawn below
     if (rs.some((x) => x.exam_opkey_overlap || x.exam)) { x3.exam_opkey_overlap++; continue; }
     if (rs.some((x) => PRIOR.has(x.id))) { x3.prior_gates++; continue; }
     if (truthKeys.has(`${r.provider}|${ok}`) || truthKeys.has(`vendor:${r.vendor}|${ok}`)) { x3.in_v3_truth++; continue; }
@@ -97,6 +101,29 @@ if (GATE3) {
   for (const m of SAMPLED) if (gM[m] !== GQ[m]) console.warn('general quota short', m, gM[m]);
   const all = shuffle([...cred.map((e) => ({ e, part: 'cred' })), ...gen.map((e) => ({ e, part: 'general' }))], rnd3);
   const rows3 = all.map((x, i) => ({ id: `gate3-${String(i + 1).padStart(4, '0')}`, ...x }));
+  // Gate-3 minimal fix: redraw ONLY slots whose provider is excluded by the amended name list (hubapi), same part and
+  // method stratum, same caps, from a second seeded shuffle (seed 20261107); excludes every op key in gate-1/2/3.
+  const swaps = [];
+  {
+    const out = rows3.filter((x) => byName(x.e.row.provider));
+    const usedK = new Set(rows3.map((x) => x.e.key));
+    const okE = el.filter((e) => !byName(e.row.provider) && !usedK.has(e.key));
+    const rnd4 = mulberry32(SEED + 1);
+    const cPool = shuffle(okE.filter((e) => ['POST', 'PUT', 'PATCH'].includes(e.method) && CRED.test(`${e.row.path} ${e.row.operationId} ${e.row.summary}`)), rnd4);
+    const cK = new Set(cPool.map((e) => e.key));
+    const gPool = shuffle(okE.filter((e) => !cK.has(e.key)), rnd4);
+    const cc = {}, gc = {};
+    for (const x of rows3) if (!out.includes(x)) { const t = x.part === 'cred' ? cc : gc; t[x.e.vendor] = (t[x.e.vendor] || 0) + 1; }
+    for (const x of out) {
+      const isC = x.part === 'cred'; const t = isC ? cc : gc; const cap = isC ? 10 : 30;
+      const n = (isC ? cPool : gPool).find((e) => e.method === x.e.method && (t[e.vendor] || 0) < cap && !usedK.has(e.key));
+      if (!n) throw new Error('redraw short ' + x.id);
+      t[n.vendor] = (t[n.vendor] || 0) + 1; usedK.add(n.key);
+      swaps.push({ id: x.id, part: x.part, method: x.e.method, old: x.e.row, now: n.row });
+      x.e = n;
+    }
+    for (const w of swaps) console.log('swap', w.id, w.part, w.method, w.old.provider, w.old.path, '->', w.now.provider, w.now.path);
+  }
   fs.mkdirSync(OUT, { recursive: true });
   const H3 = ['id', 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
   fs.writeFileSync(path.join(OUT, 'blind.csv'), [H3.join(','), ...rows3.map(({ id, e }) => [id, e.row.provider, e.row.method, e.row.path, e.row.operationId, e.row.summary, e.row.description].map(csvCell).join(','))].join('\n') + '\n');
@@ -165,6 +192,15 @@ ${tbl(cm('general'))}
 
 Top vendors, credential: ${cv('cred').slice(0, 8).map(([k, v]) => `${k} ${v}`).join(', ')}.
 Top vendors, general: ${cv('general').slice(0, 8).map(([k, v]) => `${k} ${v}`).join(', ')}.
+
+## Amendment: hubapi.com dropped by name (rwxmap lock check 2026-11-03)
+
+rwxmap's lock check on this gate found hubapi.com in the draw: hubapi.com is HubSpot, a burned x20 exam vendor. \`hubapi\` was added to the by-name exclusion list (the "whole domain label" list above includes it). Minimal fix, as with gate-2's xero: every row whose provider had the domain label hubapi (${swaps.length}) was replaced in place, same part and same method stratum, same rules (credential: regex, same method as the replaced row so PUT+PATCH-first logic is preserved, vendor cap 10; general: vendor cap 30), from a second seeded shuffle (seed ${SEED + 1}, mulberry32) excluding every op key already in gate-1/2/3. All other rows and their gate3- ids are unchanged. blind.csv, part.csv, ids.txt and providers.txt were rewritten. The Draw/Pool/Exclusion counts above describe the original draw; the Counts tables and Top vendors are final.
+Replaced ids: ${swaps.map((w) => w.id).join(', ')}.
+
+## Vendor-clean line for scoring
+
+Exclude providers whose whole domain label is in: adyen appcenter atlassian azure box clearblade dracoon gitea github gitlab jira keycloak linode microsoft netbox notion openai slack trello twilio vercel whatsapp xero zoom.
 `);
   console.log(JSON.stringify({ x3, eligible: el.length, credAvail, genAvail, ppN, cm_cred: cm('cred'), cm_gen: cm('general'), topCred: cv('cred').slice(0, 6), topGen: cv('general').slice(0, 6), ids: ids3.length, providers: new Set(rows3.map(({ e }) => e.row.provider)).size }));
   process.exit(0);

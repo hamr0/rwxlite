@@ -13,7 +13,7 @@ scoring rwxlite on them would be contaminated.
 - `blind.csv`: id, provider, method, path, operationId, summary, description. 800 rows, ids gate3-0001..0800 assigned after one seeded shuffle of all 800, so credential-stratum rows are indistinguishable from general rows.
 - `part.csv`: id,part (cred|general). This is the KEY saying which part a row is in. **Labellers must never see part.csv.**
 - `ids.txt`: 1067 `ag-` row ids = the 800 sampled rows PLUS every APIs.guru snapshot sharing their op key (provider+method+path+operationId). Training exclusion list.
-- `providers.txt`: sorted provider list (258).
+- `providers.txt`: sorted provider list (257).
 - `BRIEF-v3.md`: byte copy of gate-2's.
 
 ## Draw
@@ -21,7 +21,7 @@ scoring rwxlite on them would be contaminated.
 Seed 20261106 (mulberry32), one rng stream: shuffle of the credential pool, shuffle of the general pool, then the final shuffle of all 800. Reproduce: `node m0/gate-sample.mjs --gate 3`.
 Unit = op key (provider+method+path+operationId); one row per op key (first snapshot's text).
 
-Eligibility (both parts): exclude op keys in data/gate-2026-11-03/ids.txt and data/gate-2026-11-04/ids.txt (any snapshot); ops in rwxmap combined-2026-09-21 and relabel-buildset-2026-09-23; exam / exam_opkey_overlap rows; HEAD/OPTIONS/TRACE; DELETE; and by whole domain label (split on "." and ":") okta docusign xero klaviyo cloudflare pagerduty sentry auth0 hubspot zendesk miro dropbox shopify linear.
+Eligibility (both parts): exclude op keys in data/gate-2026-11-03/ids.txt and data/gate-2026-11-04/ids.txt (any snapshot); ops in rwxmap combined-2026-09-21 and relabel-buildset-2026-09-23; exam / exam_opkey_overlap rows; HEAD/OPTIONS/TRACE; DELETE; and by whole domain label (split on "." and ":") okta docusign xero klaviyo cloudflare pagerduty sentry auth0 hubspot zendesk miro dropbox shopify linear hubapi.
 
 Part 1, credential stratum (200): method in POST/PUT/PATCH AND the string (path + " " + operationId + " " + summary; description NOT used) matches, case-insensitive:
 
@@ -60,3 +60,12 @@ General part:
 
 Top vendors, credential: amazonaws 10, apisetu 10, azure 10, googleapis 10, microsoft 10, jira 6, visualstudio 5, citrixonline 4.
 Top vendors, general: amazonaws 30, azure 30, googleapis 30, microsoft 30, autotask 24, github 12, vtex 11, netbox 10.
+
+## Amendment: hubapi.com dropped by name (rwxmap lock check 2026-11-03)
+
+rwxmap's lock check on this gate found hubapi.com in the draw: hubapi.com is HubSpot, a burned x20 exam vendor. `hubapi` was added to the by-name exclusion list (the "whole domain label" list above includes it). Minimal fix, as with gate-2's xero: every row whose provider had the domain label hubapi (2) was replaced in place, same part and same method stratum, same rules (credential: regex, same method as the replaced row so PUT+PATCH-first logic is preserved, vendor cap 10; general: vendor cap 30), from a second seeded shuffle (seed 20261107, mulberry32) excluding every op key already in gate-1/2/3. All other rows and their gate3- ids are unchanged. blind.csv, part.csv, ids.txt and providers.txt were rewritten. The Draw/Pool/Exclusion counts above describe the original draw; the Counts tables and Top vendors are final.
+Replaced ids: gate3-0127, gate3-0207.
+
+## Vendor-clean line for scoring
+
+Exclude providers whose whole domain label is in: adyen appcenter atlassian azure box clearblade dracoon gitea github gitlab jira keycloak linode microsoft netbox notion openai slack trello twilio vercel whatsapp xero zoom.
