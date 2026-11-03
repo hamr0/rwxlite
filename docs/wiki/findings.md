@@ -1,5 +1,7 @@
 # Findings
 
+See also: [classifier-training.md](classifier-training.md) (how the model is trained and how it answers)
+
 Dated learnings, newest last. Plain English. The contract lives in `docs/product/prd.md`.
 
 ## 2026-11-03: M0 step 1, mechanical pass
