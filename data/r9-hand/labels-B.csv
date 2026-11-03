@@ -1,0 +1,1201 @@
+id,label,confidence,note
+r9-0001,w,high,pause job back to queue
+r9-0002,w,high,edit comments
+r9-0003,w,high,resolve/reopen toggle
+r9-0004,w,high,upsert filter
+r9-0005,x,low,cancel appointment likely not reopenable
+r9-0006,r,high,query count
+r9-0007,w,high,connect container network
+r9-0008,w,high,upload file
+r9-0009,r,high,describe list
+r9-0010,r,high,verify lookup
+r9-0011,w,high,ii create
+r9-0012,w,high,update
+r9-0013,w,high,update
+r9-0014,w,high,ii create
+r9-0015,w,high,update order
+r9-0016,w,high,bulk update
+r9-0017,w,high,add doc version
+r9-0018,w,high,update
+r9-0019,w,high,reversible plug
+r9-0020,w,high,update key
+r9-0021,r,high,verify
+r9-0022,w,high,set commands
+r9-0023,w,high,create
+r9-0024,w,high,update
+r9-0025,w,high,update
+r9-0026,w,low,add attachment maybe notifies
+r9-0027,w,high,upload image
+r9-0028,w,high,update
+r9-0029,w,high,create
+r9-0030,w,high,update profile
+r9-0031,w,high,toggle setting
+r9-0032,w,high,dissociate has associate
+r9-0033,w,high,add members
+r9-0034,w,high,unfavourite has favourite
+r9-0035,w,high,create
+r9-0036,w,high,create
+r9-0037,w,high,update
+r9-0038,w,high,set permissions
+r9-0039,w,high,create
+r9-0040,w,high,register
+r9-0041,w,high,create
+r9-0042,w,high,create webhook
+r9-0043,r,high,query
+r9-0044,w,high,add favourites
+r9-0045,w,high,bulk update
+r9-0046,w,high,create
+r9-0047,w,high,persist config
+r9-0048,r,high,query count
+r9-0049,w,high,create upload
+r9-0050,w,low,create export doc
+r9-0051,w,high,create check
+r9-0052,w,low,upload logs
+r9-0053,w,high,update
+r9-0054,w,high,fork creates copy
+r9-0055,w,high,update unexecuted run
+r9-0056,w,high,update draft
+r9-0057,w,high,bulk update
+r9-0058,w,high,create
+r9-0059,w,high,create draft
+r9-0060,w,high,create
+r9-0061,w,high,create
+r9-0062,r,high,simulation
+r9-0063,w,high,update
+r9-0064,w,high,set config
+r9-0065,x,low,disconnect channel unsure
+r9-0066,w,low,upload creates search
+r9-0067,w,high,add attachment
+r9-0068,w,high,create
+r9-0069,w,high,update user
+r9-0070,w,high,disassociate
+r9-0071,w,high,create
+r9-0072,w,high,create scan schedule
+r9-0073,w,high,associate toggle
+r9-0074,w,high,tag
+r9-0075,w,high,update
+r9-0076,w,high,pause has resume
+r9-0077,w,high,update
+r9-0078,w,high,update
+r9-0079,r,high,query
+r9-0080,w,high,update
+r9-0081,w,high,update
+r9-0082,w,high,update
+r9-0083,w,low,create coorganizers
+r9-0084,w,high,grant access
+r9-0085,w,high,add origin
+r9-0086,w,high,edit
+r9-0087,r,high,verify
+r9-0088,r,high,read only
+r9-0089,w,low,debit balance entry
+r9-0090,w,high,update
+r9-0091,w,high,create
+r9-0092,w,high,create export set
+r9-0093,r,high,test permissions
+r9-0094,w,high,create
+r9-0095,w,high,modify
+r9-0096,w,high,change
+r9-0097,w,high,create
+r9-0098,r,high,search
+r9-0099,w,high,create booking
+r9-0100,w,high,update
+r9-0101,w,high,write settable back
+r9-0102,w,high,write settable back
+r9-0103,r,high,read only
+r9-0104,w,high,write settable back
+r9-0105,w,high,write settable back
+r9-0106,w,low,write settable back
+r9-0107,w,high,write settable back
+r9-0108,r,high,read only
+r9-0109,w,high,write settable back
+r9-0110,r,high,read only
+r9-0111,w,high,comment
+r9-0112,w,high,write settable back
+r9-0113,w,high,write settable back
+r9-0114,w,high,write settable back
+r9-0115,r,high,preview
+r9-0116,w,high,write settable back
+r9-0117,r,high,read only
+r9-0118,w,high,write settable back
+r9-0119,w,high,write settable back
+r9-0120,w,high,write settable back
+r9-0121,w,low,write settable back
+r9-0122,w,high,write settable back
+r9-0123,w,high,deactivate toggle
+r9-0124,w,high,write settable back
+r9-0125,w,high,owner change
+r9-0126,w,high,write settable back
+r9-0127,w,high,write settable back
+r9-0128,w,high,associate
+r9-0129,w,high,write settable back
+r9-0130,w,high,write settable back
+r9-0131,w,high,write settable back
+r9-0132,w,high,write settable back
+r9-0133,w,high,write settable back
+r9-0134,w,low,write settable back
+r9-0135,w,high,write settable back
+r9-0136,w,low,write settable back
+r9-0137,w,high,write settable back
+r9-0138,r,high,read only
+r9-0139,r,low,read only
+r9-0140,w,high,write settable back
+r9-0141,r,high,read only
+r9-0142,w,high,write settable back
+r9-0143,w,high,write settable back
+r9-0144,w,high,write settable back
+r9-0145,w,high,write settable back
+r9-0146,w,high,write settable back
+r9-0147,r,high,read only
+r9-0148,w,high,write settable back
+r9-0149,w,high,write settable back
+r9-0150,w,high,write settable back
+r9-0151,w,high,lock
+r9-0152,w,high,write settable back
+r9-0153,w,high,write settable back
+r9-0154,r,high,read only
+r9-0155,w,high,write settable back
+r9-0156,r,high,read only
+r9-0157,r,high,read only
+r9-0158,r,high,read only
+r9-0159,w,high,write settable back
+r9-0160,w,high,write settable back
+r9-0161,w,high,write settable back
+r9-0162,w,high,write settable back
+r9-0163,w,high,create token
+r9-0164,w,high,write settable back
+r9-0165,w,high,upload
+r9-0166,r,high,read only
+r9-0167,r,high,read only
+r9-0168,w,high,write settable back
+r9-0169,w,high,write settable back
+r9-0170,r,high,read only
+r9-0171,r,high,read only
+r9-0172,w,high,archive
+r9-0173,w,high,write settable back
+r9-0174,w,high,write settable back
+r9-0175,r,high,read only
+r9-0176,w,high,write settable back
+r9-0177,w,high,recover
+r9-0178,w,high,write settable back
+r9-0179,w,high,write settable back
+r9-0180,w,high,write settable back
+r9-0181,w,high,write settable back
+r9-0182,w,high,write settable back
+r9-0183,w,high,write settable back
+r9-0184,w,high,write settable back
+r9-0185,w,high,write settable back
+r9-0186,w,high,write settable back
+r9-0187,r,high,read only
+r9-0188,w,high,write settable back
+r9-0189,r,high,read only
+r9-0190,w,high,write settable back
+r9-0191,w,high,write settable back
+r9-0192,w,high,write settable back
+r9-0193,w,high,write settable back
+r9-0194,w,high,write settable back
+r9-0195,r,high,read only
+r9-0196,w,high,stop restartable
+r9-0197,r,high,read only
+r9-0198,w,high,write settable back
+r9-0199,w,high,write settable back
+r9-0200,w,high,write settable back
+r9-0201,w,high,write settable back
+r9-0202,w,high,write settable back
+r9-0203,w,high,write settable back
+r9-0204,w,high,write settable back
+r9-0205,w,high,write settable back
+r9-0206,r,high,read only
+r9-0207,r,high,read only
+r9-0208,w,high,reactivate toggle
+r9-0209,w,high,block has unblock
+r9-0210,w,high,write settable back
+r9-0211,w,high,write settable back
+r9-0212,w,high,write settable back
+r9-0213,r,high,read only
+r9-0214,w,high,write settable back
+r9-0215,w,high,create token
+r9-0216,w,high,write settable back
+r9-0217,w,high,write settable back
+r9-0218,w,high,write settable back
+r9-0219,w,high,write settable back
+r9-0220,w,high,disable toggle
+r9-0221,r,high,read only
+r9-0222,r,high,read only
+r9-0223,w,high,write settable back
+r9-0224,w,high,write settable back
+r9-0225,w,high,create token
+r9-0226,w,high,write settable back
+r9-0227,r,high,read only
+r9-0228,w,high,write settable back
+r9-0229,w,high,write settable back
+r9-0230,w,high,write settable back
+r9-0231,w,low,create purchase record
+r9-0232,w,high,write settable back
+r9-0233,w,high,write settable back
+r9-0234,w,high,write settable back
+r9-0235,r,high,read only
+r9-0236,w,high,write settable back
+r9-0237,w,high,write settable back
+r9-0238,w,high,write settable back
+r9-0239,w,high,write settable back
+r9-0240,r,high,read only
+r9-0241,w,high,write settable back
+r9-0242,w,high,write settable back
+r9-0243,w,high,write settable back
+r9-0244,r,high,read only
+r9-0245,w,high,write settable back
+r9-0246,w,high,enable toggle
+r9-0247,w,high,write settable back
+r9-0248,w,high,write settable back
+r9-0249,w,high,write settable back
+r9-0250,w,high,write settable back
+r9-0251,w,high,write settable back
+r9-0252,w,high,write settable back
+r9-0253,r,high,read only
+r9-0254,w,high,write settable back
+r9-0255,r,high,read only
+r9-0256,w,high,write settable back
+r9-0257,w,low,creates session
+r9-0258,w,high,write settable back
+r9-0259,w,high,write settable back
+r9-0260,w,high,write settable back
+r9-0261,r,high,read only
+r9-0262,w,high,write settable back
+r9-0263,w,low,pushes record to accounting pkg
+r9-0264,w,high,mute toggle
+r9-0265,w,high,write settable back
+r9-0266,w,high,write settable back
+r9-0267,w,high,write settable back
+r9-0268,w,high,write settable back
+r9-0269,w,high,write settable back
+r9-0270,w,high,write settable back
+r9-0271,w,high,write settable back
+r9-0272,w,high,write settable back
+r9-0273,w,high,toggle
+r9-0274,w,high,write settable back
+r9-0275,w,high,write settable back
+r9-0276,w,high,write settable back
+r9-0277,w,high,write settable back
+r9-0278,w,high,write settable back
+r9-0279,r,high,read only
+r9-0280,w,high,write settable back
+r9-0281,w,high,write settable back
+r9-0282,r,high,read only
+r9-0283,w,high,write settable back
+r9-0284,w,high,write settable back
+r9-0285,w,high,write settable back
+r9-0286,w,high,write settable back
+r9-0287,w,high,write settable back
+r9-0288,w,high,resume
+r9-0289,r,high,read only
+r9-0290,w,high,write settable back
+r9-0291,w,high,write settable back
+r9-0292,w,high,write settable back
+r9-0293,r,high,read only
+r9-0294,w,high,write settable back
+r9-0295,r,high,read only
+r9-0296,w,high,write settable back
+r9-0297,w,high,write settable back
+r9-0298,w,high,write settable back
+r9-0299,r,high,read only
+r9-0300,w,high,write settable back
+r9-0301,w,high,write settable back
+r9-0302,w,high,write settable back
+r9-0303,w,high,write settable back
+r9-0304,w,high,write settable back
+r9-0305,w,high,write settable back
+r9-0306,r,high,read only
+r9-0307,w,high,untag
+r9-0308,r,high,read only
+r9-0309,w,high,write settable back
+r9-0310,w,high,write settable back
+r9-0311,r,high,read only
+r9-0312,w,high,write settable back
+r9-0313,w,high,write settable back
+r9-0314,x,high,payment create
+r9-0315,w,high,write settable back
+r9-0316,w,high,write settable back
+r9-0317,w,high,write settable back
+r9-0318,w,high,write settable back
+r9-0319,w,high,write settable back
+r9-0320,w,high,write settable back
+r9-0321,w,high,write settable back
+r9-0322,w,high,write settable back
+r9-0323,w,high,write settable back
+r9-0324,w,high,rollback creates new revision
+r9-0325,w,high,write settable back
+r9-0326,w,high,write settable back
+r9-0327,r,high,read only
+r9-0328,w,high,write settable back
+r9-0329,w,high,write settable back
+r9-0330,w,high,write settable back
+r9-0331,r,high,read only
+r9-0332,x,low,creates experiment run
+r9-0333,w,high,write settable back
+r9-0334,w,high,write settable back
+r9-0335,r,high,read only
+r9-0336,w,high,write settable back
+r9-0337,r,high,read only
+r9-0338,w,high,write settable back
+r9-0339,w,high,write settable back
+r9-0340,r,high,read only
+r9-0341,w,low,reset policy config
+r9-0342,w,high,toggle
+r9-0343,w,high,write settable back
+r9-0344,w,high,write settable back
+r9-0345,x,low,starts transfer session
+r9-0346,w,high,write settable back
+r9-0347,r,high,read only
+r9-0348,w,low,quote
+r9-0349,r,high,read only
+r9-0350,w,high,write settable back
+r9-0351,w,high,write settable back
+r9-0352,w,high,write settable back
+r9-0353,w,high,write settable back
+r9-0354,r,high,read only
+r9-0355,r,high,read only
+r9-0356,w,high,write settable back
+r9-0357,w,high,write settable back
+r9-0358,w,high,start has stop
+r9-0359,w,high,write settable back
+r9-0360,w,high,detach
+r9-0361,w,high,write settable back
+r9-0362,w,high,write settable back
+r9-0363,r,low,placeholder
+r9-0364,w,low,write settable back
+r9-0365,w,high,write settable back
+r9-0366,w,low,write settable back
+r9-0367,w,high,write settable back
+r9-0368,w,low,write settable back
+r9-0369,w,high,write settable back
+r9-0370,r,high,read only
+r9-0371,r,high,read only
+r9-0372,w,high,write settable back
+r9-0373,r,high,read only
+r9-0374,w,low,write settable back
+r9-0375,w,high,write settable back
+r9-0376,w,high,write settable back
+r9-0377,r,high,read only
+r9-0378,w,high,write settable back
+r9-0379,r,low,unsigned tx only
+r9-0380,w,high,write settable back
+r9-0381,w,high,write settable back
+r9-0382,w,high,write settable back
+r9-0383,r,high,read only
+r9-0384,w,high,write settable back
+r9-0385,r,high,read only
+r9-0386,x,low,likely notifies customer
+r9-0387,r,high,read only
+r9-0388,w,high,write settable back
+r9-0389,w,high,write settable back
+r9-0390,w,high,write settable back
+r9-0391,r,high,read only
+r9-0392,w,high,write settable back
+r9-0393,w,high,write settable back
+r9-0394,w,high,write settable back
+r9-0395,w,high,write settable back
+r9-0396,w,high,write settable back
+r9-0397,w,high,write settable back
+r9-0398,w,high,write settable back
+r9-0399,w,high,write settable back
+r9-0400,w,high,write settable back
+r9-0401,w,high,write settable back
+r9-0402,r,high,read only
+r9-0403,r,high,read only
+r9-0404,w,low,write settable back
+r9-0405,w,high,write settable back
+r9-0406,w,high,write settable back
+r9-0407,r,high,read only
+r9-0408,w,high,toggle
+r9-0409,w,high,write settable back
+r9-0410,w,high,write settable back
+r9-0411,x,low,sends payment requests to others
+r9-0412,w,high,write settable back
+r9-0413,w,high,write settable back
+r9-0414,w,high,write settable back
+r9-0415,r,high,read only
+r9-0416,w,high,write settable back
+r9-0417,r,high,read only
+r9-0418,w,high,write settable back
+r9-0419,w,high,write settable back
+r9-0420,w,high,write settable back
+r9-0421,w,high,write settable back
+r9-0422,w,high,write settable back
+r9-0423,w,high,write settable back
+r9-0424,w,high,write settable back
+r9-0425,w,high,write settable back
+r9-0426,w,high,write settable back
+r9-0427,w,high,write settable back
+r9-0428,r,high,read only
+r9-0429,w,high,write settable back
+r9-0430,w,high,write settable back
+r9-0431,w,high,write settable back
+r9-0432,w,low,write settable back
+r9-0433,w,high,write settable back
+r9-0434,r,high,read only
+r9-0435,x,low,orders shipment with carrier
+r9-0436,r,low,read only
+r9-0437,w,high,mute
+r9-0438,w,high,write settable back
+r9-0439,w,high,write settable back
+r9-0440,w,high,write settable back
+r9-0441,w,high,block
+r9-0442,w,high,write settable back
+r9-0443,w,high,write settable back
+r9-0444,w,high,write settable back
+r9-0445,w,high,write settable back
+r9-0446,w,high,write settable back
+r9-0447,w,high,write settable back
+r9-0448,w,high,write settable back
+r9-0449,w,low,close alert
+r9-0450,w,high,write settable back
+r9-0451,w,high,write settable back
+r9-0452,w,high,write settable back
+r9-0453,w,high,write settable back
+r9-0454,w,high,write settable back
+r9-0455,w,high,write settable back
+r9-0456,w,high,write settable back
+r9-0457,w,high,write settable back
+r9-0458,w,high,write settable back
+r9-0459,w,high,write settable back
+r9-0460,w,high,write settable back
+r9-0461,w,high,write settable back
+r9-0462,w,low,batch needs approval
+r9-0463,w,high,write settable back
+r9-0464,w,high,write settable back
+r9-0465,w,high,write settable back
+r9-0466,w,high,write settable back
+r9-0467,w,high,write settable back
+r9-0468,r,high,read only
+r9-0469,w,high,write settable back
+r9-0470,w,low,write settable back
+r9-0471,w,high,write settable back
+r9-0472,w,high,write settable back
+r9-0473,w,low,write settable back
+r9-0474,w,high,write settable back
+r9-0475,w,high,write settable back
+r9-0476,w,high,write settable back
+r9-0477,w,high,write settable back
+r9-0478,w,high,write settable back
+r9-0479,r,high,read only
+r9-0480,r,high,read only
+r9-0481,w,high,write settable back
+r9-0482,w,high,write settable back
+r9-0483,w,high,toggle
+r9-0484,w,high,write settable back
+r9-0485,w,high,write settable back
+r9-0486,w,high,write settable back
+r9-0487,w,high,write settable back
+r9-0488,w,high,write settable back
+r9-0489,w,high,write settable back
+r9-0490,w,high,write settable back
+r9-0491,w,high,write settable back
+r9-0492,w,high,write settable back
+r9-0493,w,high,write settable back
+r9-0494,w,high,write settable back
+r9-0495,w,high,write settable back
+r9-0496,r,low,read only
+r9-0497,w,high,write settable back
+r9-0498,w,low,write settable back
+r9-0499,w,high,write settable back
+r9-0500,w,high,write settable back
+r9-0501,w,high,write settable back
+r9-0502,w,high,write settable back
+r9-0503,w,high,write settable back
+r9-0504,w,high,write settable back
+r9-0505,w,high,write settable back
+r9-0506,w,high,write settable back
+r9-0507,w,high,write settable back
+r9-0508,w,high,write settable back
+r9-0509,w,high,write settable back
+r9-0510,w,high,write settable back
+r9-0511,w,high,write settable back
+r9-0512,w,high,write settable back
+r9-0513,w,high,write settable back
+r9-0514,w,high,write settable back
+r9-0515,w,high,write settable back
+r9-0516,w,high,write settable back
+r9-0517,r,high,read only
+r9-0518,r,high,read only
+r9-0519,w,high,write settable back
+r9-0520,w,high,write settable back
+r9-0521,w,high,write settable back
+r9-0522,w,high,write settable back
+r9-0523,w,high,write settable back
+r9-0524,r,high,read only
+r9-0525,w,high,write settable back
+r9-0526,w,high,no charge
+r9-0527,r,high,read only
+r9-0528,w,high,write settable back
+r9-0529,w,high,write settable back
+r9-0530,w,high,write settable back
+r9-0531,w,high,write settable back
+r9-0532,r,high,read only
+r9-0533,w,high,write settable back
+r9-0534,w,high,write settable back
+r9-0535,w,high,write settable back
+r9-0536,w,high,write settable back
+r9-0537,r,high,read only
+r9-0538,w,high,write settable back
+r9-0539,w,high,write settable back
+r9-0540,w,high,write settable back
+r9-0541,w,high,write settable back
+r9-0542,r,high,read only
+r9-0543,x,low,runs audit
+r9-0544,w,low,write settable back
+r9-0545,w,high,write settable back
+r9-0546,w,high,write settable back
+r9-0547,w,high,write settable back
+r9-0548,w,low,write settable back
+r9-0549,w,high,write settable back
+r9-0550,w,high,write settable back
+r9-0551,w,high,write settable back
+r9-0552,r,high,read only
+r9-0553,w,high,write settable back
+r9-0554,w,low,unpublish has publish
+r9-0555,w,high,write settable back
+r9-0556,w,high,write settable back
+r9-0557,r,high,read only
+r9-0558,w,high,write settable back
+r9-0559,w,high,write settable back
+r9-0560,w,high,write settable back
+r9-0561,w,high,write settable back
+r9-0562,w,high,write settable back
+r9-0563,w,high,write settable back
+r9-0564,w,high,write settable back
+r9-0565,w,high,write settable back
+r9-0566,w,high,write settable back
+r9-0567,w,high,write settable back
+r9-0568,w,high,undelete
+r9-0569,w,high,write settable back
+r9-0570,w,high,write settable back
+r9-0571,w,high,write settable back
+r9-0572,w,high,write settable back
+r9-0573,w,high,write settable back
+r9-0574,r,high,read only
+r9-0575,r,high,read only
+r9-0576,w,high,write settable back
+r9-0577,x,low,sends response to organizer
+r9-0578,r,high,read only
+r9-0579,w,high,write settable back
+r9-0580,w,high,write settable back
+r9-0581,w,high,write settable back
+r9-0582,w,high,write settable back
+r9-0583,r,high,read only
+r9-0584,w,high,write settable back
+r9-0585,w,high,write settable back
+r9-0586,w,high,write settable back
+r9-0587,w,high,write settable back
+r9-0588,w,high,write settable back
+r9-0589,r,high,read only
+r9-0590,w,high,write settable back
+r9-0591,w,high,write settable back
+r9-0592,w,high,write settable back
+r9-0593,w,high,write settable back
+r9-0594,w,high,write settable back
+r9-0595,r,high,read only
+r9-0596,r,high,read only
+r9-0597,r,high,read only
+r9-0598,w,high,write settable back
+r9-0599,w,high,write settable back
+r9-0600,w,high,write settable back
+r9-0601,r,high,read only
+r9-0602,w,high,write settable back
+r9-0603,w,high,write settable back
+r9-0604,w,high,write settable back
+r9-0605,r,high,read only
+r9-0606,w,high,write settable back
+r9-0607,r,high,read only
+r9-0608,r,high,read only
+r9-0609,w,high,write settable back
+r9-0610,w,high,write settable back
+r9-0611,w,high,write settable back
+r9-0612,w,high,write settable back
+r9-0613,r,high,read only
+r9-0614,w,high,write settable back
+r9-0615,w,low,deactivate card
+r9-0616,w,high,write settable back
+r9-0617,w,high,write settable back
+r9-0618,w,high,write settable back
+r9-0619,r,high,read only
+r9-0620,w,high,write settable back
+r9-0621,w,high,write settable back
+r9-0622,r,low,unsigned tx only
+r9-0623,w,high,write settable back
+r9-0624,r,low,verify ownership
+r9-0625,w,high,write settable back
+r9-0626,r,high,read only
+r9-0627,r,high,read only
+r9-0628,w,high,write settable back
+r9-0629,w,high,write settable back
+r9-0630,w,high,write settable back
+r9-0631,w,high,write settable back
+r9-0632,w,high,write settable back
+r9-0633,w,high,write settable back
+r9-0634,w,high,write settable back
+r9-0635,w,high,write settable back
+r9-0636,w,high,write settable back
+r9-0637,w,high,write settable back
+r9-0638,w,high,write settable back
+r9-0639,r,high,read only
+r9-0640,w,high,write settable back
+r9-0641,w,high,write settable back
+r9-0642,w,high,write settable back
+r9-0643,w,high,write settable back
+r9-0644,r,high,read only
+r9-0645,w,high,write settable back
+r9-0646,w,high,write settable back
+r9-0647,r,high,read only
+r9-0648,w,high,write settable back
+r9-0649,w,high,write settable back
+r9-0650,w,high,write settable back
+r9-0651,w,high,write settable back
+r9-0652,r,high,read only
+r9-0653,w,high,write settable back
+r9-0654,w,high,write settable back
+r9-0655,w,high,write settable back
+r9-0656,w,high,write settable back
+r9-0657,r,high,read only
+r9-0658,x,low,confirms carbon offset purchase
+r9-0659,w,high,write settable back
+r9-0660,w,low,close stores
+r9-0661,w,high,write settable back
+r9-0662,w,high,write settable back
+r9-0663,w,high,write settable back
+r9-0664,w,high,write settable back
+r9-0665,w,high,write settable back
+r9-0666,w,high,write settable back
+r9-0667,w,high,write settable back
+r9-0668,r,high,read only
+r9-0669,w,high,write settable back
+r9-0670,r,high,read only
+r9-0671,w,high,write settable back
+r9-0672,w,high,write settable back
+r9-0673,w,high,write settable back
+r9-0674,r,high,read only
+r9-0675,w,high,write settable back
+r9-0676,w,high,write settable back
+r9-0677,w,high,write settable back
+r9-0678,w,high,write settable back
+r9-0679,w,high,write settable back
+r9-0680,r,high,read only
+r9-0681,r,high,read only
+r9-0682,w,high,write settable back
+r9-0683,r,high,read only
+r9-0684,w,high,write settable back
+r9-0685,x,low,registers campaign w carrier
+r9-0686,w,high,write settable back
+r9-0687,w,high,write settable back
+r9-0688,w,high,write settable back
+r9-0689,w,high,write settable back
+r9-0690,w,high,write settable back
+r9-0691,w,high,write settable back
+r9-0692,w,high,write settable back
+r9-0693,w,high,write settable back
+r9-0694,w,high,write settable back
+r9-0695,w,high,write settable back
+r9-0696,w,high,write settable back
+r9-0697,w,high,write settable back
+r9-0698,w,high,write settable back
+r9-0699,w,high,write settable back
+r9-0700,w,high,write settable back
+r9-0701,w,high,write settable back
+r9-0702,w,low,add message
+r9-0703,w,high,write settable back
+r9-0704,r,high,read only
+r9-0705,w,high,write settable back
+r9-0706,w,high,write settable back
+r9-0707,w,high,write settable back
+r9-0708,r,high,read only
+r9-0709,w,high,write settable back
+r9-0710,w,high,write settable back
+r9-0711,r,high,read only
+r9-0712,w,high,write settable back
+r9-0713,x,low,sends response to organizer
+r9-0714,w,high,write settable back
+r9-0715,w,high,write settable back
+r9-0716,w,high,write settable back
+r9-0717,r,high,read only
+r9-0718,w,high,write settable back
+r9-0719,w,high,write settable back
+r9-0720,w,low,ambiguous create transaction
+r9-0721,w,high,write settable back
+r9-0722,w,high,write settable back
+r9-0723,w,high,write settable back
+r9-0724,w,high,write settable back
+r9-0725,r,high,read only
+r9-0726,w,high,write settable back
+r9-0727,w,low,modify order
+r9-0728,w,high,write settable back
+r9-0729,r,high,read only
+r9-0730,w,high,write settable back
+r9-0731,w,high,write settable back
+r9-0732,r,high,read only
+r9-0733,w,high,write settable back
+r9-0734,w,high,write settable back
+r9-0735,r,high,read only
+r9-0736,w,high,write settable back
+r9-0737,w,high,write settable back
+r9-0738,w,low,add message
+r9-0739,x,low,sends response to organizer
+r9-0740,r,high,read only
+r9-0741,w,high,write settable back
+r9-0742,w,high,write settable back
+r9-0743,w,low,register account
+r9-0744,w,high,write settable back
+r9-0745,x,low,likely notifies customer
+r9-0746,r,high,read only
+r9-0747,w,high,write settable back
+r9-0748,r,high,read only
+r9-0749,w,high,write settable back
+r9-0750,w,high,write settable back
+r9-0751,w,high,write settable back
+r9-0752,w,low,transfer product
+r9-0753,w,low,add batch job
+r9-0754,r,high,read only
+r9-0755,w,high,write settable back
+r9-0756,w,high,write settable back
+r9-0757,w,high,write settable back
+r9-0758,w,high,write settable back
+r9-0759,w,high,write settable back
+r9-0760,x,low,reroute notifies destinations
+r9-0761,r,high,read only
+r9-0762,w,high,write settable back
+r9-0763,w,high,write settable back
+r9-0764,w,low,push customer
+r9-0765,w,high,write settable back
+r9-0766,w,low,upload support files
+r9-0767,w,high,write settable back
+r9-0768,r,high,read only
+r9-0769,r,high,read only
+r9-0770,r,high,read only
+r9-0771,w,high,write settable back
+r9-0772,w,high,write settable back
+r9-0773,w,high,write settable back
+r9-0774,w,high,write settable back
+r9-0775,w,high,write settable back
+r9-0776,r,high,read only
+r9-0777,r,high,read only
+r9-0778,w,high,write settable back
+r9-0779,w,high,write settable back
+r9-0780,w,high,write settable back
+r9-0781,w,high,write settable back
+r9-0782,r,high,read only
+r9-0783,w,high,write settable back
+r9-0784,w,high,write settable back
+r9-0785,w,high,write settable back
+r9-0786,w,high,write settable back
+r9-0787,w,high,write settable back
+r9-0788,x,low,approves CSR irreversible
+r9-0789,w,high,write settable back
+r9-0790,w,high,write settable back
+r9-0791,w,high,write settable back
+r9-0792,w,high,write settable back
+r9-0793,w,high,write settable back
+r9-0794,w,high,write settable back
+r9-0795,w,high,write settable back
+r9-0796,w,low,debit memo
+r9-0797,w,high,write settable back
+r9-0798,w,high,write settable back
+r9-0799,w,high,write settable back
+r9-0800,w,high,write settable back
+r9-0801,w,high,write settable back
+r9-0802,r,high,read only
+r9-0803,w,high,write settable back
+r9-0804,w,high,write settable back
+r9-0805,w,high,write settable back
+r9-0806,w,high,write settable back
+r9-0807,w,high,write settable back
+r9-0808,w,high,write settable back
+r9-0809,r,high,read only
+r9-0810,w,high,write settable back
+r9-0811,r,high,read only
+r9-0812,w,high,write settable back
+r9-0813,w,high,write settable back
+r9-0814,x,low,challenge likely sends push/SMS
+r9-0815,w,high,write settable back
+r9-0816,r,high,read only
+r9-0817,w,high,write settable back
+r9-0818,w,high,write settable back
+r9-0819,w,high,write settable back
+r9-0820,w,high,write settable back
+r9-0821,w,high,write settable back
+r9-0822,w,high,write settable back
+r9-0823,w,high,write settable back
+r9-0824,w,high,write settable back
+r9-0825,w,high,write settable back
+r9-0826,r,high,read only
+r9-0827,w,high,write settable back
+r9-0828,w,high,write settable back
+r9-0829,w,high,write settable back
+r9-0830,w,high,write settable back
+r9-0831,w,high,write settable back
+r9-0832,w,high,write settable back
+r9-0833,r,high,read only
+r9-0834,w,high,write settable back
+r9-0835,w,high,write settable back
+r9-0836,w,high,write settable back
+r9-0837,r,high,read only
+r9-0838,w,low,online region
+r9-0839,w,high,write settable back
+r9-0840,w,high,write settable back
+r9-0841,w,high,write settable back
+r9-0842,w,high,write settable back
+r9-0843,r,low,returns verified listings
+r9-0844,w,high,write settable back
+r9-0845,w,high,write settable back
+r9-0846,r,high,read only
+r9-0847,w,high,write settable back
+r9-0848,w,high,write settable back
+r9-0849,w,high,write settable back
+r9-0850,w,low,creates employment record
+r9-0851,w,high,write settable back
+r9-0852,r,high,read only
+r9-0853,w,high,write settable back
+r9-0854,w,high,write settable back
+r9-0855,w,high,write settable back
+r9-0856,w,high,write settable back
+r9-0857,w,high,write settable back
+r9-0858,r,high,read only
+r9-0859,w,high,write settable back
+r9-0860,w,high,write settable back
+r9-0861,w,low,membership update
+r9-0862,w,high,write settable back
+r9-0863,r,high,read only
+r9-0864,w,high,write settable back
+r9-0865,r,high,read only
+r9-0866,w,high,write settable back
+r9-0867,w,high,write settable back
+r9-0868,w,high,write settable back
+r9-0869,w,high,write settable back
+r9-0870,w,high,write settable back
+r9-0871,w,low,status change generic
+r9-0872,w,low,enable customer
+r9-0873,r,high,read only
+r9-0874,w,high,write settable back
+r9-0875,w,high,write settable back
+r9-0876,w,high,write settable back
+r9-0877,w,high,write settable back
+r9-0878,w,high,write settable back
+r9-0879,w,high,write settable back
+r9-0880,w,high,write settable back
+r9-0881,w,high,write settable back
+r9-0882,w,high,write settable back
+r9-0883,w,high,write settable back
+r9-0884,r,high,read only
+r9-0885,w,high,write settable back
+r9-0886,w,high,write settable back
+r9-0887,w,high,write settable back
+r9-0888,w,high,write settable back
+r9-0889,w,high,write settable back
+r9-0890,w,high,write settable back
+r9-0891,r,high,read only
+r9-0892,r,high,read only
+r9-0893,w,high,write settable back
+r9-0894,w,high,write settable back
+r9-0895,r,high,read only
+r9-0896,r,high,read only
+r9-0897,x,low,runs system services update
+r9-0898,r,high,read only
+r9-0899,w,high,write settable back
+r9-0900,w,high,write settable back
+r9-0901,w,high,write settable back
+r9-0902,w,high,write settable back
+r9-0903,w,high,write settable back
+r9-0904,r,high,read only
+r9-0905,w,high,write settable back
+r9-0906,w,high,write settable back
+r9-0907,w,low,start live event has stop
+r9-0908,w,high,write settable back
+r9-0909,w,high,write settable back
+r9-0910,w,high,write settable back
+r9-0911,w,high,write settable back
+r9-0912,w,high,write settable back
+r9-0913,w,low,post appointment
+r9-0914,w,high,write settable back
+r9-0915,w,high,write settable back
+r9-0916,r,high,read only
+r9-0917,w,high,write settable back
+r9-0918,w,high,write settable back
+r9-0919,w,high,write settable back
+r9-0920,w,high,write settable back
+r9-0921,w,low,create gift card
+r9-0922,w,high,write settable back
+r9-0923,r,high,read only
+r9-0924,r,high,read only
+r9-0925,r,high,read only
+r9-0926,w,high,write settable back
+r9-0927,w,high,write settable back
+r9-0928,w,high,write settable back
+r9-0929,w,high,write settable back
+r9-0930,w,high,write settable back
+r9-0931,w,high,write settable back
+r9-0932,w,high,write settable back
+r9-0933,w,high,write settable back
+r9-0934,w,high,write settable back
+r9-0935,w,high,write settable back
+r9-0936,w,high,write settable back
+r9-0937,w,high,write settable back
+r9-0938,w,high,write settable back
+r9-0939,w,low,add learners
+r9-0940,w,high,write settable back
+r9-0941,r,high,read only
+r9-0942,w,high,write settable back
+r9-0943,w,high,write settable back
+r9-0944,w,high,write settable back
+r9-0945,w,high,write settable back
+r9-0946,w,high,write settable back
+r9-0947,w,high,write settable back
+r9-0948,w,high,write settable back
+r9-0949,w,high,write settable back
+r9-0950,r,high,read only
+r9-0951,w,high,write settable back
+r9-0952,w,low,open support ticket
+r9-0953,w,high,write settable back
+r9-0954,w,high,write settable back
+r9-0955,w,high,write settable back
+r9-0956,w,high,write settable back
+r9-0957,w,high,write settable back
+r9-0958,w,high,write settable back
+r9-0959,w,high,write settable back
+r9-0960,w,high,write settable back
+r9-0961,w,high,write settable back
+r9-0962,w,high,write settable back
+r9-0963,r,high,read only
+r9-0964,w,high,write settable back
+r9-0965,w,high,write settable back
+r9-0966,w,high,write settable back
+r9-0967,w,high,write settable back
+r9-0968,w,high,write settable back
+r9-0969,w,low,publish toggle
+r9-0970,w,high,write settable back
+r9-0971,w,high,write settable back
+r9-0972,w,high,write settable back
+r9-0973,w,high,write settable back
+r9-0974,w,high,write settable back
+r9-0975,w,high,write settable back
+r9-0976,w,high,write settable back
+r9-0977,w,high,write settable back
+r9-0978,w,high,write settable back
+r9-0979,r,high,read only
+r9-0980,w,high,write settable back
+r9-0981,w,high,write settable back
+r9-0982,w,high,write settable back
+r9-0983,w,high,write settable back
+r9-0984,w,high,write settable back
+r9-0985,w,high,write settable back
+r9-0986,r,high,read only
+r9-0987,w,high,write settable back
+r9-0988,w,high,write settable back
+r9-0989,x,low,contacts reviewers
+r9-0990,w,low,create external order
+r9-0991,r,high,read only
+r9-0992,w,high,write settable back
+r9-0993,w,high,write settable back
+r9-0994,w,low,load config
+r9-0995,w,high,write settable back
+r9-0996,w,high,write settable back
+r9-0997,w,low,create payor link
+r9-0998,r,high,read only
+r9-0999,x,low,patient message likely sent
+r9-1000,w,high,write settable back
+r9-1001,w,high,write settable back
+r9-1002,w,high,write settable back
+r9-1003,w,high,write settable back
+r9-1004,w,high,write settable back
+r9-1005,w,high,write settable back
+r9-1006,w,high,write settable back
+r9-1007,w,high,write settable back
+r9-1008,w,high,write settable back
+r9-1009,w,high,write settable back
+r9-1010,r,high,read only
+r9-1011,w,high,write settable back
+r9-1012,w,high,write settable back
+r9-1013,w,high,write settable back
+r9-1014,w,high,write settable back
+r9-1015,w,high,write settable back
+r9-1016,w,high,write settable back
+r9-1017,w,high,write settable back
+r9-1018,w,high,write settable back
+r9-1019,w,high,write settable back
+r9-1020,w,high,write settable back
+r9-1021,w,high,write settable back
+r9-1022,w,high,write settable back
+r9-1023,w,high,write settable back
+r9-1024,w,high,write settable back
+r9-1025,w,high,write settable back
+r9-1026,w,high,write settable back
+r9-1027,w,high,write settable back
+r9-1028,w,high,write settable back
+r9-1029,w,high,write settable back
+r9-1030,w,high,write settable back
+r9-1031,r,high,read only
+r9-1032,r,high,read only
+r9-1033,w,high,write settable back
+r9-1034,w,high,write settable back
+r9-1035,w,high,write settable back
+r9-1036,w,high,write settable back
+r9-1037,w,high,write settable back
+r9-1038,w,high,write settable back
+r9-1039,w,high,write settable back
+r9-1040,w,high,write settable back
+r9-1041,w,high,write settable back
+r9-1042,w,high,write settable back
+r9-1043,r,high,read only
+r9-1044,w,low,proxy put unknown
+r9-1045,w,high,write settable back
+r9-1046,w,high,write settable back
+r9-1047,w,high,write settable back
+r9-1048,w,high,write settable back
+r9-1049,w,low,consent not payment
+r9-1050,w,high,write settable back
+r9-1051,w,high,write settable back
+r9-1052,w,high,write settable back
+r9-1053,w,high,write settable back
+r9-1054,r,low,scan reads
+r9-1055,w,high,write settable back
+r9-1056,r,high,read only
+r9-1057,w,high,write settable back
+r9-1058,w,high,write settable back
+r9-1059,w,high,write settable back
+r9-1060,w,high,write settable back
+r9-1061,w,high,write settable back
+r9-1062,w,low,compress
+r9-1063,w,high,write settable back
+r9-1064,w,high,write settable back
+r9-1065,w,high,write settable back
+r9-1066,r,high,read only
+r9-1067,w,high,write settable back
+r9-1068,w,high,write settable back
+r9-1069,w,low,process batch
+r9-1070,r,high,read only
+r9-1071,w,high,write settable back
+r9-1072,w,high,write settable back
+r9-1073,w,high,write settable back
+r9-1074,r,high,read only
+r9-1075,w,high,write settable back
+r9-1076,w,high,write settable back
+r9-1077,w,high,write settable back
+r9-1078,x,low,contacts reviewers
+r9-1079,w,high,write settable back
+r9-1080,w,high,write settable back
+r9-1081,r,high,read only
+r9-1082,w,high,write settable back
+r9-1083,w,high,write settable back
+r9-1084,w,high,write settable back
+r9-1085,w,high,write settable back
+r9-1086,w,high,write settable back
+r9-1087,r,high,read only
+r9-1088,w,high,write settable back
+r9-1089,r,high,read only
+r9-1090,w,high,write settable back
+r9-1091,w,high,write settable back
+r9-1092,r,high,read only
+r9-1093,w,high,write settable back
+r9-1094,w,high,write settable back
+r9-1095,w,high,write settable back
+r9-1096,w,high,write settable back
+r9-1097,w,high,write settable back
+r9-1098,w,high,write settable back
+r9-1099,r,high,read only
+r9-1100,r,high,read only
+r9-1101,w,high,write settable back
+r9-1102,w,high,write settable back
+r9-1103,w,high,write settable back
+r9-1104,w,high,write settable back
+r9-1105,w,high,write settable back
+r9-1106,w,high,write settable back
+r9-1107,w,high,write settable back
+r9-1108,w,high,write settable back
+r9-1109,x,low,manifest submitted to carrier
+r9-1110,w,low,deploy update unclear
+r9-1111,w,high,write settable back
+r9-1112,w,high,write settable back
+r9-1113,w,high,write settable back
+r9-1114,r,high,read only
+r9-1115,w,high,write settable back
+r9-1116,w,high,write settable back
+r9-1117,w,high,write settable back
+r9-1118,r,high,read only
+r9-1119,w,high,write settable back
+r9-1120,w,low,distribute revenue
+r9-1121,w,high,write settable back
+r9-1122,w,low,add firebase
+r9-1123,w,high,write settable back
+r9-1124,w,high,write settable back
+r9-1125,r,high,read only
+r9-1126,w,high,write settable back
+r9-1127,w,high,write settable back
+r9-1128,r,high,read only
+r9-1129,x,low,message likely sent
+r9-1130,w,high,write settable back
+r9-1131,w,high,write settable back
+r9-1132,w,high,write settable back
+r9-1133,w,high,write settable back
+r9-1134,w,high,write settable back
+r9-1135,w,low,create screening
+r9-1136,w,high,write settable back
+r9-1137,w,high,write settable back
+r9-1138,w,high,write settable back
+r9-1139,w,high,write settable back
+r9-1140,w,low,create receipt
+r9-1141,w,high,write settable back
+r9-1142,w,low,translation request
+r9-1143,w,high,write settable back
+r9-1144,w,high,write settable back
+r9-1145,w,high,write settable back
+r9-1146,w,high,write settable back
+r9-1147,w,high,write settable back
+r9-1148,w,high,write settable back
+r9-1149,r,high,read only
+r9-1150,w,high,write settable back
+r9-1151,w,high,write settable back
+r9-1152,w,high,write settable back
+r9-1153,w,high,write settable back
+r9-1154,r,high,read only
+r9-1155,w,high,write settable back
+r9-1156,w,high,write settable back
+r9-1157,w,high,write settable back
+r9-1158,w,high,write settable back
+r9-1159,w,high,write settable back
+r9-1160,w,high,write settable back
+r9-1161,w,high,write settable back
+r9-1162,w,high,write settable back
+r9-1163,w,high,write settable back
+r9-1164,x,low,cluster master update runs
+r9-1165,w,high,write settable back
+r9-1166,w,high,write settable back
+r9-1167,w,high,write settable back
+r9-1168,w,high,write settable back
+r9-1169,w,high,write settable back
+r9-1170,w,high,write settable back
+r9-1171,w,high,write settable back
+r9-1172,r,high,read only
+r9-1173,w,high,write settable back
+r9-1174,w,low,offline event
+r9-1175,w,high,write settable back
+r9-1176,w,high,write settable back
+r9-1177,w,high,write settable back
+r9-1178,w,high,write settable back
+r9-1179,r,high,read only
+r9-1180,r,high,read only
+r9-1181,w,high,write settable back
+r9-1182,w,high,write settable back
+r9-1183,w,high,write settable back
+r9-1184,w,low,reset opt-out settings
+r9-1185,w,high,write settable back
+r9-1186,w,high,write settable back
+r9-1187,w,high,write settable back
+r9-1188,w,high,write settable back
+r9-1189,w,high,write settable back
+r9-1190,w,high,write settable back
+r9-1191,w,high,write settable back
+r9-1192,r,high,read only
+r9-1193,w,high,write settable back
+r9-1194,w,high,write settable back
+r9-1195,r,high,read only
+r9-1196,r,high,read only
+r9-1197,w,high,write settable back
+r9-1198,w,high,write settable back
+r9-1199,w,high,write settable back
+r9-1200,w,low,set away
