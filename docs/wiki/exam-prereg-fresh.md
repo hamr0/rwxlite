@@ -62,3 +62,10 @@ Truth = `truth.csv` label (r/w/x), joined by id, 1:1 over 949 rows or the run st
 2. `node m0/exam-inputs.mjs fresh` then `python3 train/exam_fresh.py predict` (never opens truth.csv) -> `data/exam-fresh-r8soft/predictions.csv`.
 3. `python3 train/exam_fresh.py score` joins truth once -> `results.json`, `score.log`.
 4. Findings entry; any tweak suggested by the results needs yet another fresh exam.
+
+
+## Addendum (2026-11-03, after scoring; the rules above are unchanged)
+
+Two facts a reader of this pre-registration should know, from /self-review:
+- This file pinned the model (sha256), calibration and cuts, but not the code. `train/exam_fresh.py` and the fresh mode of `m0/exam-inputs.mjs` were first committed in the scoring commit 402fea0, together with the predictions, 2 minutes after this file (0caa381). So "scored once with this code" cannot be checked from git alone; it rests on the commit order and the worker's report. From now on a pre-registration commits the predict and score code with it, before any prediction.
+- The go/no-go rule was changed from MECH-THEN-ASK 0.95 to LOWER-BAR-ASK 0.97 by the user after the exam labels and the 15 rulings were frozen (312b23a), so after the user had seen the answer labels, but before any model or mechanical prediction on these rows existed. The change was decided on practice rows only (round 9c). The result (NO-GO by one row) is the same under both rules: MECH-THEN-ASK 0.95 scored 6 too loose (0.64%).

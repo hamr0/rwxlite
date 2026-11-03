@@ -763,3 +763,8 @@ Asked rows (74, all POST, all mechanical x): 52 model w and truth w, 8 model r a
 
 ### Reading
 The lowering flag does what round 9c promised: all 13 wrongly-lowered rows were stopped, no accepted lowering was wrong (92 of 92), asks stayed at 7.8%, exact 92.6%. The fail is five confident non-lowerings (three mechanical-w writes of credentials/tokens, two session logouts) that no bar on lowerings can reach, 0.57% vs the 0.5% bar. Per the pre-registration, no tweak is made on this exam; any change (e.g. a credential/token rule for PUT/PATCH upserts, a logout rule) needs another fresh exam. Reported-only configs: MECH-THEN-ASK 0.95 is the worst on tight (10.1%) with 6 loose; rule 6 at 0.95 is best on right (93.25%) with 6 loose and 6.3% asks; mechanical alone has 6 loose (0.63%) too, so the 0.5% bar was close to the floor for mechanical on this draw as well.
+
+
+## 2026-11-03: Note on the fresh exam's pre-registration
+
+From /self-review (ledger): the fresh-exam pre-registration (0caa381) pinned the model and settings but not the code, which was first committed with the results (402fea0); and the go/no-go rule was switched to LOWER-BAR-ASK 0.97 after the user had seen the frozen answer labels, though before any prediction. Both facts are now stated in an addendum to `docs/wiki/exam-prereg-fresh.md`. The verdict does not depend on the switch: the earlier rule (MECH-THEN-ASK 0.95) would also have failed, with 6 too loose (0.64%). Lesson: a pre-registration commits the predict and score code with it, before any prediction; and a rule change after labels are seen is recorded as such.
