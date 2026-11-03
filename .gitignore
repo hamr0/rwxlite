@@ -3,5 +3,6 @@ node_modules
 __pycache__
 *.onnx
 .env
-data/
+data/*
+!data/gate-2026-11-03/
 runs/
