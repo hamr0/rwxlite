@@ -103,6 +103,30 @@ jobs:
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: GitHub release has the model files (repo-specific gate, not part of the template)
+        # Repo-specific, outside the PER-REPO block: rwxlite's npm package does not
+        # carry the model; loadAnswerer fetches it from the GitHub release v<version>.
+        # Publishing to npm before those assets exist makes the first load 404, so
+        # fail here, before the publish, with the missing names. Order: merge m1,
+        # create release v<version> with `node m1/release-assets.mjs`, then run this.
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if ! JSON=$(gh release view "v${VERSION}" --repo "${{ github.repository }}" --json assets); then
+            echo "::error::No GitHub release v${VERSION}. Create it with the assets from 'node m1/release-assets.mjs' before publishing to npm."
+            exit 1
+          fi
+          MISSING=""
+          for f in manifest.json manifest-exact.json vocab.txt model-int8-pc.onnx model-fp32.onnx; do
+            echo "$JSON" | node -e 'const n=process.argv[1];const a=JSON.parse(require("fs").readFileSync(0,"utf8")).assets;process.exit(a.some((x)=>x.name===n)?0:1)' "$f" || MISSING="$MISSING $f"
+          done
+          if [ -n "$MISSING" ]; then
+            echo "::error::GitHub release v${VERSION} is missing:${MISSING}. Upload them (node m1/release-assets.mjs) before publishing to npm."
+            exit 1
+          fi
+          echo "Release v${VERSION} has all five model assets."
       - name: Build types
         # `npm pack` does not run `prepublishOnly`, so without this the adopter
         # check below would pack a tarball with no `.d.ts`; repos that use

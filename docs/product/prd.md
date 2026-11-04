@@ -466,6 +466,7 @@ Only module 0 is sharp. The rest are sketches.
 - `publish.yml` is manual (Run workflow), OIDC trusted publishing, no token in CI.
 - Done by the user on 2026-11-04: the name is reserved with a placeholder `rwxlite@0.0.1` (`npm view rwxlite version` shows 0.0.1), and the npm Trusted Publisher is configured for hamr0/rwxlite, workflow `publish.yml`.
 - The real code ships as the next release version through the `publish.yml` "Run workflow" button (no token). The model files go to the GitHub release via `m1/release-assets.mjs`.
+- **Release order (the model files must be on the release before npm has the version):** 1. merge `m1` into `main`; 2. create the GitHub release `v<version>` with the assets from `node m1/release-assets.mjs` (manifest.json, manifest-exact.json, vocab.txt, model-int8-pc.onnx, model-fp32.onnx); 3. then "Run workflow" for `publish.yml`. The workflow enforces step 2: it fails before publishing if the release or any of those five assets is missing.
 
 ## Round 10 (planned, 2026-11-04)
 
@@ -481,7 +482,7 @@ User decisions, 2026-11-04. Nothing is trained yet. rwxmap reports R1 and R2 bot
 4. **QUERY augmentation.** Copy about 10% of GET rows (train has 42,581; about 4,250 rows), stratified by label and vendor, with method set to QUERY and the same label, so the model learns QUERY behaves like GET. After the retrain, measure GET vs QUERY agreement on held-out rows (argmax changes, rows crossing 0.97) and decide whether to keep the QUERY-to-GET mapping in `src/text.js`. Until then the mapping stays.
 
 **Order**
-1. Rebuild leans from current rwxmap (no R1/R2 names). 2. Relabel the leak shapes (pattern, then hand check). 3. Merge items 3 and 4. 4. Train on the home server sandbox `~/rwxlite-train` with the same recipe as r8soft (soft targets; reasons to change are stated here if any). 5. Refit T on val. 6. Re-export int8-pc + fp32 and repeat the int8 parity. 7. New model sha and model string (the string must change with the weights).
+1. Rebuild leans from current rwxmap (no R1/R2 names). 2. Hand-check the leak shapes (the pattern finds candidates only; every match is hand checked, and only rows judged x change; R1/R2 failed, so no pattern relabel; files.com PATCH /api_key and okta .../pages/sign-out/customized are known false positives). 3. Merge items 3 and 4. 4. Train on the home server sandbox `~/rwxlite-train` with the same recipe as r8soft (soft targets; reasons to change are stated here if any). 5. Refit T on val. 6. Re-export int8-pc + fp32 and repeat the int8 parity. 7. New model sha and model string (the string must change with the weights).
 
 **Hard constraint.** Round 10 must finish BEFORE shared exam #3 is pre-registered. Exam #3's prereg must commit the predict and score code with it (fresh-exam lesson, findings "Note on the fresh exam's pre-registration").
 

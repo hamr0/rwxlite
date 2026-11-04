@@ -1,20 +1,14 @@
 """Write test/fixtures/unescape.jsonl: Python's html.unescape (and the full clean pipeline) on many probes.
-Run: python3 -I m1/make-unescape-fixture.py"""
+Run from the repo root with the training env (train/common.py imports numpy): .venv/bin/python m1/make-unescape-fixture.py"""
 import json
 import random
-import re
 import sys
 from html import unescape
 from html.entities import html5
 
 sys.path.insert(0, 'train')
+from common import clean  # the training pipeline's own function, so the 'clean' rows test it, not a copy
 rng = random.Random(1337)
-
-def clean(s, n):  # train/common.py clean, restated so this script needs no imports from train/
-    s = '' if s is None else str(s)
-    s = re.sub(r'<[^>]+>', ' ', s)
-    s = unescape(s)
-    return re.sub(r'\s+', ' ', s).strip()[:n]
 
 probes = ["Caf&eacute; &copy 2020 &frac12; &check; &lsqb;x&rsqb;", "&amp b", "&lt;x&gt", "&ensp;&emsp;", "&nbsp",
           "&#1;", "&#x7f;", "&#xfffe;", "&#0;", "&#128;", "&#x110000;", "&#xd800;", "&#65;bc", "&ampx", "&notit;",

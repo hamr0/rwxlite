@@ -776,7 +776,7 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 
 ### Tokenizer and text format parity
 - A Node port of `fmt_text` and the BERT WordPiece tokenizer matches the Python on all 102,781 local texts (both exams' 5,228 rows plus every train, val and v3eval text): 0 text mismatches, 0 token-id mismatches. `node m1/check-corpus.mjs` checks it.
-- Two things the port had to copy exactly: Python's `\s` is `str.isspace` (includes `\x1c` to `\x1f`, excludes the byte-order mark), which differs from JavaScript's `\s`; and `html.unescape` knows 2,200 named entities, of which the port carries the ones seen in the corpora plus invalid numeric references. An entity outside the list would stay undecoded in Node and be decoded in Python. None occurs in the 102k texts.
+- Two things the port had to copy exactly: Python's `\s` is `str.isspace` (includes `\x1c` to `\x1f`, excludes the byte-order mark), which differs from JavaScript's `\s`; and `html.unescape`: the port carries the full `html.entities.html5` table (2,231 names, `src/entities.js`) and CPython's `_replace_charref` ported to `src/text.js`, so every named and numeric reference decodes as in Python. 759 Python-written rows (`test/fixtures/unescape.jsonl`) come out equal.
 - Gotcha: a source file with a raw U+2028 inside a regex literal is a syntax error in JavaScript. Write such characters as `\uXXXX` escapes.
 
 ### fp32 ONNX is exact, default int8 is not

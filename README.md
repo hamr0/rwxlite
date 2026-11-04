@@ -27,22 +27,22 @@ rwxlite is meant to solve that on the fly. Jev-shaped three questions in, JSON o
 // request (same as Jev's)
 { "state": { "method": "POST", "path": "/v1/search", "operationId": "search",
              "summary": "Search records", "description": "" },
-  "model": "rwxlite-0.1.0",
+  "model": "rwxlite-0.2.0",
   "questions": { "isX": "<the a7bc855 question text>" } }
 
 // answer (same shape as Jev's)
 { "answers": { "isX": { "noul": 0.04 } },
-  "model": "rwxlite-0.1.0+<weights-hash>" }
+  "model": "rwxlite-0.2.0+<weights-hash>" }
 
 // standalone (mode b)
-{ "letter": "r", "p": { "r": 0.91, "w": 0.07, "x": 0.02 }, "model": "rwxlite-0.1.0+<hash>" }
+{ "letter": "r", "p": { "r": 0.91, "w": 0.07, "x": 0.02 }, "model": "rwxlite-0.2.0+<hash>" }
 ```
 
 The model outputs three probabilities. Every Jev question is arithmetic on them: `isX` is p(x), `changes` is p(w) + p(x).
 
 ## Start here
 
-Install the package: `npm i rwxlite` (set `ONNXRUNTIME_NODE_INSTALL=skip` to avoid a 285 MB GPU download; the CPU build is enough). The model files are not in the npm package; get them from the GitHub releases (see "Using the answerer").
+Install the package: `npm i rwxlite` (set `ONNXRUNTIME_NODE_INSTALL=skip` to avoid a 285 MB GPU download; the CPU build is enough). The model files are not in the npm package; get them from the GitHub releases (see "Using the answerer"). Release order, because the package fetches those files at first load: 1. merge `m1`; 2. create the GitHub release `v<version>` with the assets from `node m1/release-assets.mjs`; 3. then "Run workflow" for `publish.yml` (it fails if the release or its assets are missing).
 
 The rest of this repo is research (module 0): read on for the scripts.
 
