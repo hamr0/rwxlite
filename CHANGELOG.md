@@ -3,13 +3,17 @@
 All notable changes to rwxlite are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.2.0] - 2026-11-04
 
 M1: a local, Jev-shaped answerer in Node. Package default model file: int8 per-channel; option "exact": fp32. rwxmap's own default is the exact fp32 model.
 
 ### Added
 - Round 10 plan (PRD, "Round 10 (planned)"): rebuild leans from current rwxmap, hand-check two leak shapes (credential replace PUT/PATCH, 59 candidate rows; logout, 45 candidate rows; the pattern only finds candidates, and only rows judged x by BRIEF-v3 change; R1/R2 failed, so no pattern relabel; the known false positives files.com PATCH /api_key and okta .../pages/sign-out/customized stay as they are), add the fresh-exam and round 9 labels, QUERY augmentation. `m1/round10-shapes.py` counts the shapes. Measured: the shipped model on the 32 `credential-set` ops (a rule name it never saw) lowers 12 of 32 below x, 3 at p >= 0.97 (findings). No training yet.
-- Publish workflow (`.github/workflows/publish.yml`, manual, npm trusted publishing, adopter type-check gate); package public as `rwxlite` (`private` removed, `files` = src, types, README, LICENSE, CHANGELOG; `prepack` builds the types). Models stay on GitHub releases.
+- Publish workflow (`.github/workflows/publish.yml`, manual, npm trusted publishing, adopter type-check gate, and a release-before-publish gate: it fails unless GitHub release `v<version>` carries `manifest.json`, `manifest-exact.json`, `vocab.txt` and both models, no asset is zero-size, and `manifest.json`'s version equals `package.json`'s); package public as `rwxlite` (`private` removed, `files` = src, types, README, LICENSE, CHANGELOG; `prepack` builds the types). Models stay on GitHub releases.
+- `answerMany` slots are plain JSON data, `{model, answers}` or `{model, error}`; `answer()` still throws on no answer. Tests cover the JSON round trip, p in [0,1], and `changes >= isX` at extreme logits.
+- `test/fixtures/decision.jsonl` and `test/decision.test.js`: 949 fresh-exam ops (isX, changes, expected `{letter, asked}`) reproduce the written decision rule exactly (mode a tier cuts, credential rule, lowering asked under max p 0.97).
+- `test/fixtures/credential-set.jsonl`: the 32 `credential-set` ops with the model's answers before the guard (x 20, w 12, 3 lowerings at max p >= 0.97) and after it (x 32, 0 lowerings), for rwxmap's `secondPass` floor check on identical rows.
+- README badge row (CI, version, classifier, license).
 - `m1/release-assets.mjs`: builds the GitHub release set (`manifest.json`, `manifest-exact.json`, `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`) into `data/m1/release/`, recomputes every sha256, prints the `gh release upload` command; uploads nothing.
 - `src/`: `loadAnswerer`, `Answerer` (`answer`, `answerMany`), `checkRequest`, `calibrated`, `modelString`, plus Node ports of the text format and the BERT tokenizer (0 mismatches: token ids on 102,781 texts, text format on 5,228). Request is Jev's `{state, model, questions}` plus `lean: {class, rule}` (proposed for D133); answer is `{model, answers: {isX: {noul}, changes: {noul}}}`. Bad input throws, a bad slot in `answerMany` is isolated, a model failure fails every slot, files are sha256-checked against `manifest.json`.
 - `m1/`: ONNX export (`export_onnx.py`), quantisation variants and their comparison on both burned exams (`variants.py`), manifest writer (`manifest.mjs`), Node benchmark (`bench.mjs`), corpus parity check (`check-corpus.mjs`).
