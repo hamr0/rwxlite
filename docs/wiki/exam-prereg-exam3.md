@@ -1,18 +1,24 @@
-# Pre-registration (DRAFT): shared exam #3, MiniLM round 10 (r10)
+# Pre-registration: shared exam #3, MiniLM round 10 (r10)
 
-**Status: DRAFT, written 2026-11-04. Not yet frozen.** It freezes when the "Truth source and rwxmap side" section is filled in with rwxmap and
-this file is committed alone with the code listed below. Until then nothing about exam #3 has been built or predicted on:
-`truth.csv` for exam #3 does not exist in this repo, `ops.csv` for exam #3 does not exist in this repo, and no model has been run on any
-of its vendors. Round 10 (training, T refit, exports, parity) finished before this draft (PRD, "Round 10", hard constraint).
+**Status: FROZEN, 2026-11-04.** This file is committed alone, with the code listed below, before any prediction exists. Until this commit nothing about
+exam #3 had been built or predicted on: `truth.csv` for exam #3 does not exist in this repo and no model had been run on any of its vendors.
+Round 10 (training, T refit, exports, parity) finished before this prereg (PRD, "Round 10", hard constraint). The rwxlite build ref is `fe374c0`
+(0.3.0); the commits after it are docs only.
+
+**Run order:** this prereg commit -> inputs + predict (no truth) -> prediction-file sha256s committed -> truth shared by rwxmap -> score once.
+A rerun only for a crash or a row-join bug.
 
 ## Vendors
 
 clerk, neon, supabase, mux, netbird, ory, novu (rwxmap's spares; untouched by every rwxlite training, tuning and exam set; checked: 0 rows with
-these names in the r10 train, val or v3eval provider/vendor columns, 92,864 / 4,180 / 5,716 rows, and the round-10 assembly asserts `no_exam3_vendor`). Row counts: TBD with rwxmap (from their ops file).
+these names in the r10 train, val or v3eval provider/vendor columns, 92,864 / 4,180 / 5,716 rows, and the round-10 assembly asserts `no_exam3_vendor`). Final list (all seven kept) and row counts, from rwxmap's `ops.csv`: clerk.com 263, neon.com 193, supabase.com 170, mux.com 192, netbird.io 231, ory.sh 179, novu.co 149; total 1377 rows. Methods: GET 574, POST 401, DELETE 197, PATCH 105, PUT 99, HEAD 1.
+
+- `ops.csv`: `/home/hamr/PycharmProjects/rwxmap/data/exam3-2026-11-04/ops.csv`, sha256 `fff7afa983c7fc85e2073e5662c4c317c69e37a1dd92a04c7e5dc04ecf43d790`, rwxmap commit `93dc59c`.
+- `truth.csv`: held by rwxmap, sha256 `929725d51397098b6f45d86a5a551e7f0c095875557a944c02e08930efdab3c0`; shared only after this prereg is committed.
 
 ## Frozen code (committed with this file, before any prediction)
 
-- `m0/exam3-inputs.mjs <ops.csv> <work-dir>`: lean from rwxmap `classifyRow` / `needsJev` (rwxmap HEAD sha is written to `rwxmap-head.txt`; the pinned sha is TBD with rwxmap), and the model text from the shipped path `src/text.js` `formatText` (QUERY read as GET, `credential-set` read as `cant-undo-verb`). Reads no truth.
+- `m0/exam3-inputs.mjs <ops.csv> <work-dir>`: lean from rwxmap `classifyRow` / `needsJev` (rwxmap HEAD sha is written to `rwxmap-head.txt`; the pinned sha is rwxmap `46235eab7043fe69a4fea18e0ad77678a82123cb`, branch `feat/d133-rwxlite-engines`), and the model text from the shipped path `src/text.js` `formatText` (QUERY read as GET; `ops.csv` has no QUERY rows, `credential-set` read as `cant-undo-verb`). Reads no truth.
 - `train/exam3_predict.py <work-dir>`: refuses to run unless every model file and `vocab.txt` matches the sha256 below; checks the Node text equals Python `fmt_text`; runs onnxruntime CPU, batch 1; never opens truth. Also writes the parity files `p-<model>.jsonl` (see "Parity file").
 - `m0/exam3-parity.mjs <work-dir>`: checks those parity files against `loadAnswerer` (model string equal, max |dp| <= 1e-6) on the same rows.
 - `train/exam3_score.py <work-dir> <truth.csv> <expected-sha256>`: hashes `truth.csv` and refuses to run unless it equals the sha256 rwxmap committed with its prereg (`--smoke` may skip the check); opens truth once; 1:1 join or it stops.
@@ -42,7 +48,7 @@ All configs of `exam_fresh.CONFIGS` for every model above, with the cuts of the 
 Two gates, both reported side by side, neither replacing the other.
 
 - **rwxlite gate**: `GONOGO_lba097` on r10 int8-pc (the candidate default); r10 fp32 reported beside it. Too loose <= 0.5% of answered rows (set by Jev; the fresh exam failed it at 5/875 = 0.57%). The denominator is the answered rows of the gate config, as on the fresh exam. Secondary bars of the fresh exam (exact >= 91% of answered, asked <= 15% of all) are reported with it. v020 is reported beside r10 as the comparison, not a second chance.
-- **rwxmap gate**: the D133 bars, scored by rwxmap's real `secondPass` / CLI loading r10 through `loadAnswerer({dir, threads})` from this branch's 0.3.0 build, on fp32 (rwxmap's default); int8-pc beside it. rwxmap also scores, on the same rows and reported beside ours: mechanical alone; mode a (mechanical then rwxlite r10; fp32 gate, int8-pc beside); mode b at confidence 95; mode c (mechanical then Jev). rwxmap pins its own prereg commit sha: TBD.
+- **rwxmap gate**: the D133 bars, scored by rwxmap's real `secondPass` / CLI loading r10 through `loadAnswerer({dir, threads})` from this branch's 0.3.0 build, on fp32 (rwxmap's default); int8-pc beside it. rwxmap also scores, on the same rows and reported beside ours: mechanical alone; mode a (mechanical then rwxlite r10; fp32 gate, int8-pc beside); mode b at confidence 95; mode c (mechanical then Jev). rwxmap's prereg is committed at `46235eab7043fe69a4fea18e0ad77678a82123cb` (branch `feat/d133-rwxlite-engines`): `docs/wiki/exam-prereg-exam3.md`, scorer `data/exam3-2026-11-04/score/` (in rwxmap).
 - Letter for rwxmap: argmax of x = pIsX, w = pChanges - pIsX, r = 1 - pChanges.
 
 ## Parity file
@@ -62,24 +68,22 @@ Only a crash or a row-join bug, recorded in the findings with the reason. No cha
 
 ## Process
 
-1. This file and the code above are committed together; rwxmap's section filled in; nothing predicted yet.
+1. This file and the code above are committed together (build ref `fe374c0`); rwxmap's section filled in; nothing predicted yet.
 2. rwxmap supplies `ops.csv` (blind: id, provider, method, path, operationId, summary, description) and `truth.csv` (id, label) as agreed below. rwxlite never opens `truth.csv` before step 4.
 3. `node m0/exam3-inputs.mjs ops.csv work/` then `python3 train/exam3_predict.py work/`.
-4. `python3 train/exam3_score.py work/ truth.csv`, once. Findings entry with the numbers and the too-loose rows.
+4. Prediction-file sha256s are committed to this file ("Predictions frozen"). Then rwxmap shares `truth.csv`, and `python3 train/exam3_score.py work/ truth.csv 929725d51397098b6f45d86a5a551e7f0c095875557a944c02e08930efdab3c0`, once. Findings entry with the numbers and the too-loose rows.
 
 ## Truth source and rwxmap side
 
 Ruled by rwxmap's user (2026-11-04):
 - **Truth**: built by rwxmap from each vendor's official OpenAPI spec (not APIs.guru), repeated endpoints deduped. At least two blind labellers per row using BRIEF-v3 verbatim; rwxmap's user rules disagreements (as on the fresh exam).
 - **Custody**: rwxmap holds `truth.csv`. rwxmap commits the ops file and the sha256 of `truth.csv` with its prereg. Truth is not opened for scoring until both preregs are committed; then it is shared with rwxlite, and `exam3_score.py` verifies its sha256 against rwxmap's committed hash before joining.
-- **Vendors**: the seven above are being checked; any without a real official OpenAPI spec, or already seen in any set, is dropped before the freeze. Final list and row counts: TBD, to come to rwxlite before this prereg is final.
+- **Vendors**: the seven above, final (see "Vendors").
 - **Delivery**: see "Delivery to rwxmap".
 - **rwxmap scoring**: same rows, reported beside ours (see "Gates").
 
 Known fact (rwxmap, 2026-11-04): rwxmap's `NEVER_LOWER_RULES` blocks any lowering of a `credential-set` verdict regardless of the model, proved on rwxlite's earlier p's for the 32 credential-set ops (12 argmax w, 3 at p >= 0.97, 0 lowered). rwxlite's text alias (`credential-set` -> `cant-undo-verb`, `src/text.js`) is a second, independent guard that rwxlite needs when used alone, and r10 was trained on the alias text, so it stays.
 
-Still TBD (not filled in on anyone's behalf):
-- Truth freeze date and the committed hash of `truth.csv`.
-- Final vendor list and row counts.
-- rwxmap HEAD sha for the lean (`classifyRow`), to pin in `rwxmap-head.txt`, and rwxmap's own prereg commit sha.
-- Whether the secondary bars (exact, asked) stay bars on the rwxlite gate.
+Labelling (rwxmap, 2026-11-04): two blind labellers per row, BRIEF-v3 verbatim. Labellers A and B agreed on 1370 of 1377 rows (99.5%); rwxmap's user ruled the other 7. A scripted labeller-A pass on mux was rejected and mux was relabelled.
+
+Secondary bars (exact >= 91% of answered, asked <= 15% of all) are reported with the rwxlite gate, as written under "Gates".
