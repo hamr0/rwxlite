@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); next step open. Date: 2026-11-03.
+Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built (0.2.0, not yet on npm); round 10 planned, nothing trained yet. Date: 2026-11-04.
 
 ## Problem & goal
 
@@ -424,7 +424,7 @@ rwxmap ruled QUERY (RFC 10008, safe and idempotent like GET, with a body) as r a
 
 ### Guard: lean rule `credential-set` read as `cant-undo-verb` (rwxmap D131, 2026-11-04, temporary until round 10)
 
-rwxmap's step-2 rule `credential-set` (class x, PUT/PATCH) is a lean rule name the model never saw. Measured (default int8-pc model, the 32 credential-set ops in `data/m0/mechanical.jsonl.gz`): as `credential-set` argmax w on 12, 3 with max p >= 0.97 (britbox /account/pin, whapi /account/plusCard/pin, circuitsandbox /spaces/{topicId}/pin); as `cant-undo-verb` (a trained x rule) all 32 argmax x, isX >= 0.9996. So `formatText` maps the rule through `LEAN_RULE_ALIASES` before the model reads it (the lean class stays as sent; `checkRequest` still accepts any non-empty rule). Re-measured with the guard: 32 of 32 argmax x, 0 lowerings at p >= 0.97. **Removal condition:** round 10 trains on the real name `credential-set`; then delete the alias. rwxmap is asked to never lower a credential-set row. Per rwxmap the risk is in mode b only (mode a never sends credential-set rows, they are settled; mode c, Jev, does not take them). Of the 3 lowerings, only britbox /account/pin is a real credential lowering; whapi PUT /account/plusCard/pin was ruled truth w at gate 3 (credential-set's one wrong fire), and circuitsandbox /spaces/{topicId}/pin has the same pinned-item shape (on rwxmap's ledger). The guard can turn those 2 into too-tight x rows, which is safe ('unsure means x').
+rwxmap's step-2 rule `credential-set` (class x, PUT/PATCH) is a lean rule name the model never saw. Measured (default int8-pc model, the 32 credential-set ops in `data/m0/mechanical.jsonl.gz`): as `credential-set` argmax w on 12, 3 with max p >= 0.97 (britbox /account/pin, whapi /account/plusCard/pin, circuitsandbox /spaces/{topicId}/pin); as `cant-undo-verb` (a trained x rule) all 32 argmax x, isX >= 0.9996. So `formatText` maps the rule through `LEAN_RULE_ALIASES` before the model reads it (the lean class stays as sent; `checkRequest` still accepts any non-empty rule). Re-measured with the guard: 32 of 32 argmax x, 0 lowerings at p >= 0.97. `node m1/credential-set-file.mjs` writes `test/fixtures/credential-set.jsonl`, the 32 ops with the model's answers before the guard and after it, so rwxmap can check its secondPass floor on identical rows (no test reads it; regenerating it reproduces the same numbers). **Removal condition:** round 10 trains on the real name `credential-set`; then delete the alias. rwxmap is asked to never lower a credential-set row. Per rwxmap the risk is in mode b only (mode a never sends credential-set rows, they are settled; mode c, Jev, does not take them). Of the 3 lowerings, only britbox /account/pin is a real credential lowering; whapi PUT /account/plusCard/pin was ruled truth w at gate 3 (credential-set's one wrong fire), and circuitsandbox /spaces/{topicId}/pin has the same pinned-item shape (on rwxmap's ledger). The guard can turn those 2 into too-tight x rows, which is safe ('unsure means x').
 
 ## Modules
 
@@ -462,7 +462,7 @@ Only module 0 is sharp. The rest are sketches.
 ## Publishing (user, 2026-11-04)
 
 - rwxlite is published publicly on npm as `rwxlite`, so rwxmap can `import { loadAnswerer } from 'rwxlite'`. The name was free on 2026-11-04 (registry 404).
-- The tarball holds only src/, types/, README, LICENSE, CHANGELOG (14 files, 33.6 kB with the entity table). Model files are not in it; they come from GitHub releases (`m1/release-assets.mjs`).
+- The tarball holds only src/, types/, README, LICENSE, CHANGELOG (14 files, 34.8 kB packed and 110.1 kB unpacked by `npm pack --dry-run`, with the entity table). Model files are not in it; they come from GitHub releases (`m1/release-assets.mjs`).
 - `publish.yml` is manual (Run workflow), OIDC trusted publishing, no token in CI.
 - Done by the user on 2026-11-04: the name is reserved with a placeholder `rwxlite@0.0.1` (`npm view rwxlite version` shows 0.0.1), and the npm Trusted Publisher is configured for hamr0/rwxlite, workflow `publish.yml`.
 - The real code ships as the next release version through the `publish.yml` "Run workflow" button (no token). The model files go to the GitHub release via `m1/release-assets.mjs`.

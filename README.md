@@ -6,7 +6,7 @@
 
 **A small local classifier that says whether an API operation reads (r), writes (w) or can't be taken back (x). Jev-shaped questions in, JSON out, no answer if it isn't confident.**
 
-> Status: module 0, research repo, **not released**. Parts of this page describe the plan. They are marked *planned*.
+> Status: module 1 (the Node answerer) is built, version 0.2.0; the npm package is not published yet (the name is reserved). The rest of the repo is module 0 research. Parts of this page describe the plan. They are marked *planned*.
 
 Agentic automation is on the rise, and there's no solution in sight for controlling API access with guardrails. It's impossible to account for every possibility. Today's answers don't scale and don't adapt to different shapes: scoped MCPs, policies built on MCP hints that aren't widely adopted or accurate, accountability moved into rigid sandboxes, or pushed back to the consumer through fine-grained IAM or APIs scoped at creation. Meanwhile we're creating new open standards for agents (MCP, WebMCP, headless browsing) faster than we can guardrail them.
 
@@ -68,7 +68,7 @@ Input is OpenAPI operations only: method, path template, operationId, summary, d
 
 ## It tells you the truth
 
-As of 2026-11-03, rwxlite is in module 0 and not released.
+As of 2026-11-04, module 0 (labels, training, exams) is scored and module 1 (the Node answerer) is built; the npm package is not published yet.
 
 - **Labels are measured.** The label recipe passed a fresh blind gate at 96.5% exact and 0.7% too loose, against 79.3% and 1.2% for mechanical alone. Two findings went back into rwxmap (D129 two-step POST, D131 credential rule).
 - **The model failed its go/no-go exam, on one line.** The fine-tuned MiniLM was scored once on 4,279 operations from vendors it never saw (cloudflare, pagerduty, sentry). It answered 95.9% exact, ahead of mechanical + Jev (93.0%) and mechanical alone (82.3%). But 0.84% of its answers were too loose (36 rows), over the 0.5% line set by Jev. Most of those are Cloudflare "create" calls that move money or start jobs, which it confidently called editable. Next step is open.
