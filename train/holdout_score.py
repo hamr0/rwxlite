@@ -1,0 +1,72 @@
+"""Held-out vendor score (the 442 ory.sh + clerk.com rows of exam #3) (pre-registration: docs/wiki/holdout-r11.md). Opens the truth file ONCE.
+  python3 train/holdout_score.py <work-dir> <truth.csv> <expected-sha256> [--smoke]    # truth.csv: id,label (r|w|x)
+<expected-sha256> is the hash of truth.csv that rwxmap committed with its prereg; the file's sha256 is checked BEFORE it is parsed and a
+mismatch stops the run. With --smoke the argument may be omitted or wrong (a pipeline check on burned rows; the mismatch is printed, not fatal).
+Per model file (r10 and 0.2.0, int8-pc and fp32) and per config: exact / too loose / too tight / asked, per vendor and per method, and
+every too-loose row. Gate numbers are the GONOGO_lba097 config until the prereg's rwxmap section fixes the gate config.
+--smoke labels every line SMOKE TEST (a pipeline check on already-burned rows, not a result).
+"""
+import sys, os, json, csv, hashlib
+import numpy as np
+import exam_fresh as F
+from common import ORDER, LABELS
+
+def main():
+    args = [a for a in sys.argv[1:] if a != '--smoke']; smoke = '--smoke' in sys.argv
+    if len(args) < 2 or (len(args) < 3 and not smoke): raise SystemExit('usage: holdout_score.py <work-dir> <truth.csv> <expected-sha256> [--smoke]')
+    wd, truth_path = args[0], args[1]; want = args[2].strip().lower() if len(args) > 2 else None
+    got = hashlib.sha256(open(truth_path, 'rb').read()).hexdigest()   # hash only; the file is not parsed until the check passes
+    if got != want:
+        if not smoke: raise SystemExit(f'TRUTH HASH MISMATCH: {truth_path} is {got}, rwxmap committed {want}. Refusing to score.')
+        print(f'[SMOKE TEST] truth sha256 {got} (expected {want}; ignored in smoke)')
+    tag = '[SMOKE TEST - not a result] ' if smoke else ''
+    inp = {}; order = []
+    for l in open(os.path.join(wd, 'inputs.jsonl')):
+        if l.strip(): r = json.loads(l); inp[r['id']] = r; order.append(r['id'])
+    truth = {}
+    for r in csv.DictReader(open(truth_path, newline='', encoding='utf-8')):   # the ONLY place truth is opened
+        assert r['id'] not in truth, 'duplicate truth id'; truth[r['id']] = r['label']
+    assert set(inp) <= set(truth) and len(inp) == len(order), 'join: every scored row needs truth'; truth = {i: truth[i] for i in order}   # truth.csv has all 1,377 exam #3 rows; only the held-out ids are scored
+    assert set(truth.values()) <= set(LABELS)
+    y = np.array([ORDER[truth[i]] for i in order]); N = len(order)
+    vend = np.array([inp[i]['provider'] for i in order]); meth = np.array([inp[i]['method'] for i in order])
+    res = {'smoke': smoke, 'n': N, 'truth_dist': {l: int((y == ORDER[l]).sum()) for l in LABELS}, 'models': {}}
+    out = [f'{tag}n={N} truth {res["truth_dist"]}']
+    f = lambda d: f"right {d['right']} ({d['rightPct']}%)  loose {d['loose']} ({d['loosePct']}%)  tight {d['tight']} ({d['tightPct']}%)  asked {d['asked']} ({d['askedPct']}%)"
+    for name in json.load(open(os.path.join(wd, 'predict-meta.json')))['models']:
+        P = {r['id']: r for r in csv.DictReader(open(os.path.join(wd, f'predictions-{name}.csv')))}
+        assert set(P) == set(inp)
+        pa = np.array([ORDER[P[i]['a_letter']] for i in order]); mech = np.array([ORDER[P[i]['mech']] for i in order]); conf = np.array([float(P[i]['max_p']) for i in order])
+        m = {'configs': {}, 'by_vendor': {}, 'by_method': {}, 'too_loose_rows': {}}
+        out.append(f'\n{tag}=== {name} ===')
+        for c in F.CONFIGS:
+            col = [P[i][c] for i in order]; asked = np.array([v == 'ask' for v in col]); fin = np.array([0 if v == 'ask' else ORDER[v] for v in col])
+            m['configs'][c] = F.piles(fin, asked, pa, y)
+            m['by_vendor'][c] = {v: F.piles(fin, asked, pa, y, vend == v) for v in sorted(set(vend))}
+            m['by_method'][c] = {v: F.piles(fin, asked, pa, y, meth == v) for v in sorted(set(meth))}
+            rows = []
+            for k in np.where(~asked & (fin < y))[0]:
+                r = inp[order[k]]; typ = 'loweredWrongly' if fin[k] < mech[k] else 'keepMechLoose' if fin[k] == mech[k] else 'raiseStillLoose'
+                rows.append({'id': order[k], 'type': typ, 'vendor': r['provider'], 'method': r['method'], 'path': r['path'], 'operationId': r['operationId'], 'mech': LABELS[mech[k]],
+                             'mech_rule': r['class'] + '/' + r['rule'], 'model': LABELS[fin[k]], 'max_p': round(float(conf[k]), 4), 'p': [float(P[order[k]][q]) for q in ('p_r', 'p_w', 'p_x')], 'truth': LABELS[y[k]]})
+            m['too_loose_rows'][c] = rows
+            out.append(f'{tag}{c:18s} {f(m["configs"][c])}')
+        g = m['configs']['GONOGO_lba097']; ok = {'loose_le_0.5pct': g['loosePct'] <= 0.5, 'exact_ge_91pct': g['rightPct'] >= 91.0, 'asked_le_15pct': g['askedPct'] <= 15.0}
+        m['gonogo_lba097'] = {**ok, 'verdict': 'PASS' if all(ok.values()) else 'NO-GO'}
+        out.append(f'{tag}GONOGO_lba097 {m["gonogo_lba097"]}')
+        for key in ('by_vendor', 'by_method'):
+            for c in ('GONOGO_lba097', 'a_none'):
+                out.append(f'{tag}--- {c} {key}'); [out.append(f'{tag}  {v:14s} {f(d)}') for v, d in m[key][c].items()]
+        for c in ('GONOGO_lba097', 'a_none'):
+            out.append(f'{tag}--- too-loose rows, {c}: {len(m["too_loose_rows"][c])}')
+            for r in m['too_loose_rows'][c]: out.append(f'{tag}  LOOSE {json.dumps(r)}')
+        res['models'][name] = m
+    out.append(f'\n{tag}=== SUMMARY (all 442 rows | ory.sh | clerk.com): right / too-loose / tight / asked ===')
+    for c in ('GONOGO_lba097', 'a_none', 'mechanical'):
+        for name, m in res['models'].items():
+            g = lambda d: f"{d['right']}/{d['loose']}/{d['tight']}/{d['asked']}"
+            out.append(f"{tag}{c:14s} {name:10s} all {g(m['configs'][c])} | " + ' | '.join(f"{v} {g(d)}" for v, d in m['by_vendor'][c].items()))
+    json.dump(res, open(os.path.join(wd, 'results.json'), 'w'), indent=1)
+    open(os.path.join(wd, 'score.log'), 'w').write('\n'.join(out) + '\n'); print('\n'.join(out))
+
+if __name__ == '__main__': main()
