@@ -103,7 +103,8 @@ export class Answerer {
   }
 
   /**
-   * Many requests in one model call. Never throws for one bad request: that slot holds a NoAnswer
+   * Many requests in one call, run through the model one row at a time so each answer is independent of the
+   * others (identical to answer() on the same request, whatever it is batched with). Never throws for one bad request: that slot holds a NoAnswer
    * ({model, error}, plain JSON), so the caller can keep the mechanical letter for it alone.
    * A model failure fails every slot. Every slot is exactly an Answer or a NoAnswer.
    * @param {Request[]} reqs
@@ -123,8 +124,15 @@ export class Answerer {
     if (ok.length) {
       let logits;
       try {
-        logits = await this.runner.run(ok.map((o) => o.ids));
-        if (!Array.isArray(logits) || logits.length !== ok.length) throw new Error('rwxlite: runner returned the wrong number of rows');
+        // One row per runner call: the model's answer for a row must not depend on its batch neighbours
+        // (int8 dynamic quantisation takes its activation scale over the whole padded batch; fp32 padding
+        // differs in the last bits). Throughput is the same or better (see CHANGELOG 0.2.1).
+        logits = [];
+        for (const o of ok) {
+          const row = await this.runner.run([o.ids]);
+          if (!Array.isArray(row) || row.length !== 1) throw new Error('rwxlite: runner returned the wrong number of rows');
+          logits.push(row[0]);
+        }
       } catch (err) {
         for (const o of ok) out[o.i] = this.noAnswer(err);
         return out;
@@ -149,7 +157,8 @@ export function modelString(version, sha256hex) {
 }
 
 /**
- * An onnxruntime-node runner over (n, seq) token ids, padded per batch.
+ * An onnxruntime-node runner over (n, seq) token ids, padded per batch. The Answerer calls it with one row,
+ * because padding to the longest row changes int8 dynamic-quantisation scales.
  * @param {any} ort the onnxruntime-node module
  * @param {any} session an ort.InferenceSession
  * @returns {Runner}

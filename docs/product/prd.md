@@ -484,11 +484,52 @@ User decisions, 2026-11-04 (written before training; round 10 has since been tra
 **Order**
 1. Rebuild leans from current rwxmap (no R1/R2 names). 2. Hand-check the leak shapes (the pattern finds candidates only; every match is hand checked, and only rows judged x change; R1/R2 failed, so no pattern relabel; files.com PATCH /api_key and okta .../pages/sign-out/customized are known false positives). 3. Merge items 3 and 4. 4. Train on the home server sandbox `~/rwxlite-train` with the same recipe as r8soft (soft targets; reasons to change are stated here if any). 5. Refit T on val. 6. Re-export int8-pc + fp32 and repeat the int8 parity. 7. New model sha and model string (the string must change with the weights).
 
+**Step-1 numbers (2026-11-04, `m1/round10-build.py`; outputs in gitignored `data/round10/`)**
+- Lean rebuild: 28 rows change, all `w/method-floor -> x/credential-set` (train 22, val 2, v3eval 4); 0 text-format or path mismatches (old leans reproduce the stored text exactly). Of the 32 `credential-set` ops in the dump, 28 are in the splits.
+- Duplicate operations across specs (same vendor token, method, path, operationId): 0 groups split across train/val/v3eval, so no split leak. Within a split: train 1 group, v3eval 316 groups (1,993 removable extra rows; github 150, spotify 86, microsoft 80 groups). Label disagreement inside a group: 0.
+- Fresh exam rows: 949 new (workos 269, coolify 321, resend 142, getlago 217; labels r 406, w 328, x 215); no vendor or op overlap with the splits, no exam #3 vendor, 0 `credential-set` leans.
+- r9 hand labels: 1,200 rows (train 1,074, val 126); 36 differ from the current label (w->x 32, w->r 4).
+- QUERY sample: 4,258 of 42,581 GET train rows (labels r 4,142, w 116), 411 of 555 GET vendors.
+
+**Decisions (2026-11-04)**
+1. **r9 overrides apply to TRAIN rows only** (1,074 rows). The 126 val rows keep their current labels.
+2. **Hand check has decoys.** `data/round10/handcheck-blind.csv` = the 104 candidates + 30 decoys (134 rows, same columns, shuffled with a fixed seed). Decoys: non-candidate TRAIN rows, 6 each of GET/POST/PUT/PATCH/DELETE, none from a candidate vendor. The private key `handcheck-key.csv` (id, is_decoy, shape, current_label) is never shown to labellers; decoys measure labeller accuracy against current labels. Labellers get only `handcheck-BRIEF.txt` (BRIEF-v3, r/w/x, "Unsure -> x", output `id,label`).
+3. **The `credential-set` guard stays for good.** Round 10 trains with the same rewrite `src/text.js` applies: the lean rule `credential-set` is written as `cant-undo-verb` in the model text (`LEAN_RULE_ALIASES`). The one Python copy is `m1/round10_aliases.py`, imported by the assembly; `test/aliases.test.js` asserts it equals the table parsed from `src/text.js`. `train/common.py` is not edited. QUERY copies keep `QUERY` in the text. **Inconsistency to resolve:** `src/text.js` still maps QUERY to GET at inference, while round 10 trains on QUERY text. After round 10, the QUERY-to-GET mapping is measured (GET vs QUERY on held-out rows) and likely removed.
+4. **v3eval is reported both raw and deduplicated** (one row per op group, the 316 groups / 1,993 extra rows above). Scoring code comes later.
+
+**Step-4 assembly plan** (final assembly, not built yet)
+1. Start from `data/train/train.jsonl`; take leans for every row from `mechanical.jsonl.gz` (joined on id), then apply `round10_aliases.text_rule` to the rule before `fmt_text`; check that the text of unchanged rows is byte-identical.
+2. Apply the hand-check relabels (only rows judged x by BRIEF-v3; train rows only for training, val/v3eval relabels do not count toward a pass).
+3. Apply r9 overrides to the 1,074 train rows only.
+4. Add the 949 fresh rows with their truth and today's leans (aliased).
+5. Add the QUERY copies (4,258 GET train rows, method QUERY, same label, `QUERY` kept in text).
+6. Assert: no exam #3 vendor, no id duplicates, `credential-set` never appears in a text, alias check passes. Keep val and v3eval as rows (not trained on).
+
 **Hard constraint.** Round 10 must finish BEFORE shared exam #3 is pre-registered. Exam #3's prereg must commit the predict and score code with it (fresh-exam lesson, findings "Note on the fresh exam's pre-registration").
 
 **Open questions**
 - The QUERY sample size (10% proposed).
 - Whether to keep the val/v3eval split as-is, given that relabelled and added rows touch it. Proposal: keep the vendor split, relabel inside it, and do not use the relabelled val/v3eval rows to claim a pass.
+
+## Round 11 (planned, 2026-11-04)
+
+Exam #3 (rwxmap shared exam, 7 vendors, 1,377 ops; scored once, now burned; both sides agreed it may be used for training) gave r10 a NO-GO on rwxlite's gate: 15 too-loose of 1,226 answered (1.22%, bar 0.5%), essentially the same as 0.2.0 (14). The 15 leaks are mechanical's own leaks that the model agreed with: credential/identity replace (clerk PUT email_address/phone_number, POST remove_password; ory PUT admin/keys/{set}, self-service recovery/verification), billing/subscription (netbird aws marketplace activate, PUT subscription; supabase PATCH billing/addons; clerk PUT beta_features/domain), mux analyze-structure jobs read as r, mux PUT mp4-support, ory GET logouts x2. Round 10's workos-only shape fixes did not generalise. Round 11 trains on the exam's own labels so the model sees these shapes at several vendors.
+
+**Recipe: round 10's, unchanged.** Soft targets, `--alpha 0.7`, 1 epoch, same base (all-MiniLM-L6-v2), `--ckpt 250`, `--threads 4`, tag `r11`. One change to the data only: add the 1,377 exam #3 rows with their truth label at normal weight. **No upweighting**, so any change versus r10 is attributable to the added rows; a weighting variant (x_weight or row repeats on the leak shapes) can follow as its own round. val and v3eval are unchanged (byte-identical to round 10's).
+
+**Inputs**
+1. **Base** = round 10's assembled splits (`data/round10/{train,val,v3eval}.jsonl`, sha256-checked against `assembly-sha256.txt`; train 92,864 / val 4,180 / v3eval 5,716).
+2. **Added rows**: `ops.csv` (sha256 `fff7afa9...d790`) + `truth.csv` (sha256 `929725d5...b3c0`, header `id,label`) from rwxmap `data/exam3-2026-11-04/`, read in place, 1,377 rows, vendors clerk, neon, supabase, mux, netbird, ory, novu; labels from 2 blind labellers plus user rulings. Ids `ex3-NNNN`.
+3. **Leans: rwxmap at 46235ea** (the commit exam #3 was scored with; `src/` is byte-identical to current rwxmap HEAD c2b60d2, and classifying all 1,377 ops with either gives the same output, sha256 `2016c94f...`). This is what round 10's recipe implies ("leans rebuilt from current rwxmap" via `classifyRow`, `m1/round10-classify.mjs`), and it is also the lean the model saw at exam time. Rules go through the shipped alias (`credential-set` is written `cant-undo-verb` in the text, `m1/round10_aliases.py`); text is `train/common.fmt_text`, equal to the shipped `formatText` (checked: the text of all 1,377 rows equals the `text` the model was given at exam time, `data/exam3/inputs.jsonl`). QUERY-to-GET is moot: exam #3 has 0 QUERY ops.
+4. **Targets: one-hot.** rwxmap committed no Jev p per row for exam #3 (`score/rows-c-jev.csv` holds Jev's letter and evidence, not p), so the rows are `tier none`, `status fresh`, `jev_p None`: one-hot of the truth, as round 10's 949 fresh-exam rows and round 9's hand rows. Nothing was asked of rwxmap.
+
+**Assembly** (`m1/round11-assemble.py`, deterministic; outputs in gitignored `data/round11/`, sha256 in `assembly-sha256.txt`): base rows untouched, then the 1,377 rows appended to train. Asserts (all must pass): no duplicate ids; no op-key group (vendor token, method with QUERY as GET, path, operationId) spanning splits; exam #3 rows only in train, none in val/v3eval; no exam #3 vendor in val, v3eval or round 10's train; `credential-set` in no text; val, v3eval and round 10's train rows unchanged.
+
+**Gate and order.** Exam #3 is burned: it cannot score round 11 (or anything trained on it). The next gate is a **new exam #4**: vendors TBD with rwxmap (never used in training or in exam #3), prereg with the predict and score code committed before scoring (fresh-exam lesson). **Round 11 must finish BEFORE exam #4's prereg.** Then, as in round 10: refit T on val, re-export int8-pc + fp32, repeat the int8 parity, new model sha and model string.
+
+**Training.** Home server `~/rwxlite-train/r11` (new dir; r10 is never touched), command as round 10: `HF_HOME=~/rwxlite-train/hf-cache nohup ~/rwxlite-train/.venv/bin/python train/finetune.py --epochs 1 --soft --alpha 0.7 --tag r11 --threads 4 --ckpt 250 > data/train/finetune-r11.log 2>&1 &`.
+
+**Caveat.** r11 cannot be judged on exam #3 (trained on it); val/v3eval cannot show the effect either (different vendors). Until exam #4 the only evidence is that val/v3eval do not regress.
 
 ## Open questions
 
