@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built (0.2.0, not yet on npm); round 10 planned, nothing trained yet. Date: 2026-11-04.
+Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built (0.2.0, not yet on npm); round 10 trained, exam #3 NO-GO (loose bar), 0.2.0 stays shipped; round 11 in progress. Date: 2026-11-04.
 
 ## Problem & goal
 

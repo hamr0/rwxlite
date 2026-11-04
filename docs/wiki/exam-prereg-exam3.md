@@ -115,3 +115,25 @@ ea1c4a3a5683ad49fcecf6d67564bdae58f3660dbd18b1975d5d38ec243f3fb6  predictions-v0
 ```
 
 Next: rwxmap shares `truth.csv` (sha256 `929725d5...b3c0`); score once.
+
+## Result (scored 2026-11-04)
+
+Scored once, after the predictions above were frozen. Truth sha256 verified `929725d5...b3c0`; n=1377 (truth r 608 / w 437 / x 332). Full detail in `docs/wiki/findings.md`, "Exam #3 result".
+
+rwxlite gate `GONOGO_lba097`, r10 int8-pc: right 1134 (92.50%), too loose 15 (1.22% of 1226 answered), too tight 77, asked 151 (10.97%). **NO-GO**: the too-loose bar fails; exact and asked pass.
+
+| run | right | too loose |
+|---|---|---|
+| r10 int8-pc | 92.50% | 15 (1.22%) |
+| r10 fp32 | 92.35% | 15 (1.22%) |
+| 0.2.0 int8 | 92.82% | 14 (1.13%) |
+| 0.2.0 fp32 | 92.73% | 13 (1.05%) |
+| mechanical | 79.45% | 17 (1.23%) |
+
+The 15 r10 loose rows: 13 `keepMechLoose`, 2 `raiseStillLoose` (ory GET logouts), 0 lowerings. Row level, r10 int8 vs 0.2.0 int8: 47 rows differ, r10 better on 16, worse on 31 (one of them right->loose, clerk PUT /users/{user_id}/phone_number).
+
+rwxmap scorer (% of 1377; exact / loose / tight): mechanical 1094/17/266; mode a r10 fp32 1178/15/184, passes the D133 bars (leaks 15 <= 17, exact +6.10 pts vs 5.0); mode a 0.2.0 fp32 1192/15/170 (+7.12 pts); b95 r10 12 loose vs 0.2.0 14; mode c Jev 1250/16/111 (90.8%).
+
+Ruling D135 (rwxmap): rwxmap ships rwxlite 0.2.0 (fp32 default), pinned to v0.2.0; a newer model replaces it only if mode a on a fresh clean exam has no more too-loose and no fewer exact.
+
+Round 10 is not released; the package version is back to 0.2.0. Exam #3 is burned and used for round 11 training. An int8 `answerMany` batch dependence found during the replay is fixed in 0.2.1 on branch `fix/int8-batch1`.

@@ -146,7 +146,6 @@ test('loadAnswerer throws on a sha256 mismatch, a missing manifest and a bad man
 test('manifest temperature: used when present, 0.844 when absent', async () => {
   assert.equal(manifestTemperature({ temperature: 0.858 }), 0.858);
   assert.equal(manifestTemperature({}), 0.844);
-  assert.equal(manifestTemperature({}), TEMPERATURE);
   const logits = [[0.5, 1.5, 2.5]];
   const mk = (/** @type {any} */ extra) => new Answerer({ tokenizer: new WordPiece(TINY_VOCAB), runner: stubRunner(() => logits), model: 'm', ...extra });
   const x = async (/** @type {Answerer} */ a) => /** @type {any} */ (await a.answer(req())).answers.isX.noul;

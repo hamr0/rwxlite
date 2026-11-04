@@ -10,8 +10,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { modelString } from '../src/answerer.js';
 
-const r10 = process.argv[3] === 'r10' || process.argv[2] === 'r10';
-const outArg = process.argv[2] === 'r10' ? undefined : process.argv[2];
+const r10 = process.argv[3] === 'r10';
+const outArg = process.argv[2];
 const dataDir = r10 ? 'm1-r10' : 'm1';
 const src = fileURLToPath(new URL(`../data/${dataDir}/`, import.meta.url));
 const out = path.resolve(outArg ?? fileURLToPath(new URL(`../data/${dataDir}/release/`, import.meta.url)));
