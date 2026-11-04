@@ -3,6 +3,12 @@
 All notable changes to rwxlite are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+- `answerMany` answers no longer depend on which requests share a call. It used to pad a batch to its longest row and run it in one `session.run`; the int8-pc model quantises activations dynamically with one scale over the whole padded batch, so a row's p moved with its neighbours (measured on 1,377 rows: max |dp| 0.11, 5 rows crossed 0.97 and 6 crossed 0.95; fp32 differed by 2.2e-16; thread count had no effect). `answerMany` now runs one row per `session.run`, for both models, so `answer()` and `answerMany()` give byte-identical p for a request whatever it is batched with. Public API and answer shapes are unchanged. Batch 1 is not slower: ms/row on a loaded 8-core host (load ~30), 4 threads, 160 rows, old batch of 32 vs batch 1: int8-pc 93-130 vs 51-88, fp32 87-88 vs 52-54, because padding to the longest row wastes compute. The parity check only ever called `answer()` one row at a time, which is why it missed this. Tests: stub runner must get one row per call and `answerMany` equals per-row `answer()` in any order; integration tests for int8-pc and fp32 on the real models.
+- Model string: this build with the 0.2.0 weights reports `rwxlite-0.2.1+8ad0a182`; the release assets' `manifest.json` / `manifest-exact.json` carry `version`, so they must be rebuilt for 0.2.1 (`node m1/release-assets.mjs`).
+
 ## [0.2.0] - 2026-11-04
 
 M1: a local, Jev-shaped answerer in Node. Package default model file: int8 per-channel; option "exact": fp32. rwxmap's own default is the exact fp32 model.
