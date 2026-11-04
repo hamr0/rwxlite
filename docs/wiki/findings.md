@@ -819,3 +819,32 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 - rwxmap R1 and R2 FAILED tuning (2026-11-04, D100 bar): every right move was workos; without workos neither closed a leak, and each added wrong moves (R1: files.com PATCH /api_key; R2: okta GET/PUT .../pages/sign-out/customized). No new rule names; `credential-set` is the only one to train on. So the leak shapes above are workos-specific, not cross-vendor: the 59 and 45 candidates are NOT relabelled by pattern, each gets a hand check and only rows judged x by BRIEF-v3 change (expect few); files.com and okta are known false positives. The 949 fresh rows (workos included) are still added as training rows.
 
 - Publish gate (2026-11-04): the "GitHub release has the model files" step now also fails on any zero-size asset and on a release `manifest.json` whose `version` differs from package.json, not just on missing names.
+
+## 2026-11-04: Round 10 trained (no exam scored)
+
+Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same recipe as r8soft; val accuracy 97.32% (r8soft 96.89%). Train/val/v3eval 92,864 / 4,180 / 5,716 rows; leak-shape hand check (assembly summary): 134 rows, 5 ruled, 129 unchanged; no exam #3 vendor in any split. Checkpoint sha256 `28e5830356b84f3fada311811f6f382363a5fc37f5060e117f952575c5767512`. T refit on val: 0.858 (r8soft 0.844).
+
+### Why no exam number
+- The fresh exam (949 rows, workos included) is now r10 TRAINING data; scoring r10 on it measures training. The 09-22 exam is one-shot and already scored. Neither was run for r10. `train/exam_score.py` also hard-codes r8soft and T = 0.844 and writes `data/exam-r8soft/`.
+- So there is no gate number for r10. The only valid gate is shared exam #3 (clerk, neon, supabase, mux, netbird, ory, novu), pre-registered after this round with its predict and score code committed (`docs/wiki/exam-prereg-exam3.md`, draft).
+
+### Practice sets (v3eval, 5,716 rows; tuning set, not a pass claim)
+- r10 is flat against 0.2.0 (r8soft), exact / too loose / too tight %: mechanical 76.4 / 1.3 / 22.3 (r8soft 76.3 / 1.3 / 22.3); mode (a) at the PRD cuts 94.3 / 1.7 / 4.1 (94.0 / 1.8 / 4.2); a_argmax 95.5 / 2.6 / 1.9 (95.7 / 2.5 / 1.8); PUT 93.2 / 5.3 / 1.5 (93.4 / 5.3 / 1.3); PATCH 98.7 / 0.5 / 0.8 (same); POST 87.4 / 1.9 / 10.7 (86.4 / 2.2 / 11.4). Four lean rows changed, so the sets are not identical.
+- Held-out credential-replace PUT/PATCH rows (15: val 4, v3eval 11) are labelled w and both models say w (p(x) 0.01 to 0.12 before, 0.01 to 0.06 now); logout rows: r10 argmax identical to r8soft on all. The real workos leak rows are in the fresh exam, which r10 trained on, so the leak fix cannot be measured now.
+
+### The 32 credential-set ops (31 distinct), lean x, torch fp32 on ckpt-r10/final
+| input | argmax r / w / x | below x | lowerings at p >= 0.97 |
+|---|---|---|---|
+| 0.2.0 unguarded (raw name) | 0 / 12 / 20 | 12 | 3 |
+| 0.2.0 with the alias | 0 / 0 / 32 | 0 | 0 |
+| r10 unguarded (raw name, T = 1) | 0 / 18 / 14 | 18 | 1 (3 at T = 0.844) |
+| r10 with the alias | 0 / 0 / 32 | 0 | 0 |
+- r10 is worse than 0.2.0 on the raw name (18 below x against 12) and still needs the alias. Reason: the r10 training text uses the alias (`round10_aliases.py`: credential-set -> cant-undo-verb; 22 training rows carry the rule in metadata but the text says cant-undo-verb), so the model never reads the literal name. Keep `LEAN_RULE_ALIASES` in `src/text.js`; its "remove when round 10 trains on the real name" comment no longer holds.
+- This is rwxlite's own guard. It is not what protects rwxmap: rwxmap's `NEVER_LOWER_RULES` blocks any lowering of a `credential-set` verdict regardless of the model (proved on our earlier p's for the same 32 ops: 12 argmax w, 3 at >= 0.97, 0 lowered). The alias is a second, independent guard that rwxlite needs when used alone.
+
+### Export and parity (data/m1-r10, nothing in data/m1 touched)
+- fp32 sha256 `8514ddccdafcda28ae468aced91673545c3c1d56201754e89a79dcb10ca61a26`, int8 per-channel `093c908d492d07121159287b5beadd3d4d75c403a4cde4f701ac918475be1173` (23.1 MB), `vocab.txt` unchanged (`07eced37...`).
+- Parity against torch fp32 (T = 0.858, batch 1, `m1/export_r10.py parity`, practice sets only): fp32 ONNX max |dp| 2.4e-6, argmax agrees on all 4,180 val and 5,716 v3eval rows, no row crosses 0.97. int8 per-channel: argmax differs on 10 of 4,180 val and 15 of 5,716 v3eval rows, 67 and 53 rows change side of the 0.97 line, max |dp| 0.41 and 0.22. That is the same kind of int8 drift as 0.2.0 had (findings, "M1").
+- Node answerer against Python onnxruntime on the same file (949 fresh rows, p at T = 0.844 for both, `node m1/manifest-r10.mjs parity`): max |dp| 1.3e-7 for int8-pc and fp32, 0 argmax differences, 0 side flips.
+- Exam #3 code smoke test on the burned fresh exam (not a result; r10 trained on these rows): the 0.2.0 files reproduce the known fresh-exam numbers through the new code (int8-pc 809 right / 5 too loose / 61 too tight / 74 asked, fp32 810 / 5 / 60 / 74).
+- The Node answerer still has T = 0.844 compiled in (`TEMPERATURE`); r10 needs T read from the manifest (`manifest.json` of r10 carries `temperature: 0.858`, ignored today) before it can ship. Open: version number and model string for the release (`modelString(version, sha)` changes with the weights); GET vs QUERY measurement after the retrain (PRD item 4) not done.
