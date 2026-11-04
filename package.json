@@ -2,7 +2,24 @@
   "name": "rwxlite",
   "version": "0.1.0",
   "license": "Apache-2.0",
-  "private": true,
+  "author": "hamr0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hamr0/rwxlite.git"
+  },
+  "homepage": "https://github.com/hamr0/rwxlite#readme",
+  "bugs": {
+    "url": "https://github.com/hamr0/rwxlite/issues"
+  },
+  "keywords": [
+    "openapi",
+    "http",
+    "classifier",
+    "read-write-execute",
+    "onnx",
+    "minilm",
+    "rwx"
+  ],
   "type": "module",
   "description": "rwxlite: a small local r/w/x classifier (int8 MiniLM on onnxruntime-node) that answers Jev's request shape with probabilities only; plus the module 0 research scripts.",
   "types": "./types/index.d.ts",
@@ -12,12 +29,20 @@
       "default": "./src/index.js"
     }
   },
+  "files": [
+    "src/",
+    "types/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build:types": "tsc -p tsconfig.build.json",
     "test": "node --test test/*.test.js",
     "manifest": "node m1/manifest.mjs",
-    "bench": "node m1/bench.mjs"
+    "bench": "node m1/bench.mjs",
+    "prepack": "npm run build:types"
   },
   "engines": {
     "node": ">=22"

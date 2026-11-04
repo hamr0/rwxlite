@@ -5,6 +5,7 @@
 //   --threads=N      threads for the batch-1 latency session (default 1, comparable with existing results). N != 1 writes
 //                    bench-<variant>-t<N>.json (bench-t<N>.json for the shipped model) and does not touch variants.json.
 //   --latency-only   skip the agreement and batch-32 parts (quick run); the fresh-exam latency is still measured. Also leaves variants.json alone.
+//                    Adds a -latency suffix (bench-<variant>[-t<N>]-latency.json) so it never overwrites the full result.
 // Latency depends on what else the machine is doing; the load average at the start is recorded in the result.
 import { createHash } from 'node:crypto';
 import { execSync } from 'node:child_process';
@@ -25,7 +26,7 @@ const stateOf = (/** @type {any} */ r) => ({ method: r.method, path: r.path, ope
 const toReq = (/** @type {any} */ r) => ({ state: stateOf(r), questions: { isX: 1, changes: 1 }, lean: { class: r.class, rule: r.rule } });
 const THREADS = (() => { const a = process.argv.find((x) => x.startsWith('--threads=')); if (!a) return 1; const n = Number(a.slice(10)); if (!Number.isInteger(n) || n < 0) throw new Error(`bad ${a}`); return n; })();
 const LATENCY_ONLY = process.argv.includes('--latency-only');
-const SUFFIX = THREADS === 1 ? '' : `-t${THREADS}`;
+const SUFFIX = (THREADS === 1 ? '' : `-t${THREADS}`) + (LATENCY_ONLY ? '-latency' : '');
 const q = (/** @type {number[]} */ sorted, /** @type {number} */ f) => sorted[Math.min(sorted.length - 1, Math.floor(f * sorted.length))];
 const SETS = { 'exam-2026-11-03-fresh': 'data/exam-fresh-r8soft/inputs.jsonl', 'exam-2026-09-22': 'data/exam-r8soft/inputs.jsonl' };
 

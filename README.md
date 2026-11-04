@@ -10,7 +10,7 @@
 
 Agentic automation is on the rise, and there's no solution in sight for controlling API access with guardrails. It's impossible to account for every possibility. Today's answers don't scale and don't adapt to different shapes: scoped MCPs, policies built on MCP hints that aren't widely adopted or accurate, accountability moved into rigid sandboxes, or pushed back to the consumer through fine-grained IAM or APIs scoped at creation. Meanwhile we're creating new open standards for agents (MCP, WebMCP, headless browsing) faster than we can guardrail them.
 
-rwxlite is meant to solve that on the fly. Jev-shaped three questions in, JSON out, no answer if it isn't confident. Use it on its own, or couple it with [rwxmap](https://github.com/hamr0/rwxmap) to replace Jev. Free, local, responds in milliseconds, quantized to int8 at about 24 MB (*planned*, see below).
+rwxlite is meant to solve that on the fly. Jev-shaped three questions in, JSON out, no answer if it isn't confident. Use it on its own, or couple it with [rwxmap](https://github.com/hamr0/rwxmap) to replace Jev. Free, local, responds in milliseconds, quantized to int8 at about 23 MB (built, see below).
 
 ## The three letters
 
@@ -21,7 +21,7 @@ rwxlite is meant to solve that on the fly. Jev-shaped three questions in, JSON o
 ## Two modes
 
 - **a. With rwxmap.** Mechanical rules lean first. The model only moves the contested rows. It answers in Jev's JSON, so rwxmap only swaps the client. *Planned (M2).*
-- **b. Standalone.** One operation in, `{letter, p}` out. A low top probability is the "ask a human" signal. The threshold is yours. *Planned (M1).*
+- **b. Standalone.** One operation in, `{letter, p}` out. A low top probability is the "ask a human" signal. The threshold is yours. *Built (M1).*
 
 ```json
 // request (same as Jev's)
@@ -42,7 +42,9 @@ The model outputs three probabilities. Every Jev question is arithmetic on them:
 
 ## Start here
 
-This is a research repo for now. There is nothing to install.
+Install the package: `npm i rwxlite` (set `ONNXRUNTIME_NODE_INSTALL=skip` to avoid a 285 MB GPU download; the CPU build is enough). The model files are not in the npm package; get them from the GitHub releases (see "Using the answerer").
+
+The rest of this repo is research (module 0): read on for the scripts.
 
 - Read the [PRD](docs/product/prd.md) first.
 - Mechanical labels: `node m0/mechanical.mjs`
@@ -58,7 +60,7 @@ This is a research repo for now. There is nothing to install.
 | Label recipe | built, measured | rwxmap mechanical + Jev, per-method questions, two-step POST lower, credential rule |
 | Baseline | trained | TF-IDF + logistic regression, 24 MB, about 1.5 ms/op |
 | Fine-tuned MiniLM | trained, exam failed (too loose) | 22.7M params, 90.9 MB fp32, about 22-28 ms/op in fp32 PyTorch; 95.9% exact, 0.84% too loose on the exam |
-| int8 ONNX export + Node answerer | *planned (M1)* | the in-process answerer that speaks Jev's JSON |
+| int8 ONNX export + Node answerer | built (M1) | the in-process answerer that speaks Jev's JSON |
 | Abstain threshold | measured, not built | "no answer when not confident"; the contract rule asks on lowerings under 0.97 and trusts raises and keeps: fresh exam 92.6% right, 5 too loose, 7.8% asked |
 | rwxmap integration | *planned (M2)* | mechanical leans first, model moves contested rows |
 
@@ -85,8 +87,8 @@ At 70% all 36 dangerous mistakes are still answered: the model was sure of them.
 
 - **Training labels aren't the cause.** Two blind labellers re-labelled 1,200 training rows of the failing shapes: the training labels were too loose on only 32 (2.7%). The exam misses are mostly one vendor's pattern (Cloudflare billing and jobs).
 - **Fresh exam: missed by one row.** On 949 operations from four vendors nobody had trained on (Coolify, WorkOS, Lago, Resend), with lowerings flagged and asked under 97% confidence: 92.6% right, 7.8% asked, 5 too-loose answers (0.57%) against a line of 4 (0.5%). The lowering flag caught every wrong lowering; the 5 misses are credential updates and logouts that the mechanical rules already call too safe. Mechanical alone: 77.6% right, 6 too loose. Details in the [PRD](docs/product/prd.md#fresh-exam-result-2026-11-03-no-go-by-one-row).
-- **"No answer if not confident" is measured, not built.** The model returns probabilities today. The "ask" rule exists only in the scoring scripts.
-- **"About 24 MB int8" is an estimate** for the neural model. The baseline is already about 24 MB. The int8 export is not built.
+- **"No answer if not confident" is a rule, not code in the answerer.** The answerer returns probabilities only; the ask rule is measured on the exams and lives in the scoring scripts and the test reference (see "Using the answerer" and the PRD).
+- **int8 size is measured:** the per-channel int8 model is 23 MB (fp32 is 91 MB).
 - **Limits.** OpenAPI operations only. No request bodies, no query values, no hosts without a spec.
 
 ## Using the answerer
@@ -107,7 +109,7 @@ const many = await a.answerMany([req]); // each slot is { model, answers } or { 
 - rwxlite returns only p; turning p into a letter is rwxmap's call. The rule rwxlite measured (which rows move, the cuts, the credential rule, ask on lowerings under 97%), and the comparison with rwxmap's secondPass, are in the [PRD](docs/product/prd.md#decision-rules-rwxlites-measured-rule-and-rwxmaps-secondpass). `test/fixtures/decision.jsonl` and `test/decision.test.js` are a parity and reference file for rwxlite's rule.
 - `dir` holds `manifest.json`, the model file and `vocab.txt`; every sha256 is checked and a mismatch throws.
 - `onnxruntime-node` is an optional dependency. Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install onnxruntime-node` to skip the 285 MB of GPU libraries.
-- Two model options, both on the GitHub releases: the default int8 per-channel (`manifest.json`, `model-int8-pc.onnx`, 23 MB) and "exact" fp32 (`manifest-exact.json`, `model-fp32.onnx`, 91 MB, no quantisation drift). Load the exact one with `loadAnswerer({ dir, manifestFile: 'manifest-exact.json' })`.
+- Two model options, both on the GitHub releases: the package default, int8 per-channel (`manifest.json`, `model-int8-pc.onnx`, 23 MB) and "exact" fp32 (`manifest-exact.json`, `model-fp32.onnx`, 91 MB, no quantisation drift). rwxmap's own default is the exact fp32 model; the package default is int8-pc. Load the exact one with `loadAnswerer({ dir, manifestFile: 'manifest-exact.json' })`.
 
 ## Docs
 

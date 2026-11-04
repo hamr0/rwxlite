@@ -164,10 +164,12 @@ export function ortRunner(ort, session) {
  * onnxruntime-node is an optional dependency, imported only here.
  * threads: intra-op threads for onnxruntime. Default Math.min(4, os.availableParallelism()); measured on a 4-core i3-8100T,
  * batch 1, int8 per-channel: 15.5 ms mean at 1 thread, 9.2 at 2, 6.9 at 4. Pass 1 for the old single-thread behaviour.
+ * Must be an integer >= 0; 0 leaves the choice to onnxruntime. Anything else throws.
  * @param {{dir: string, threads?: number, manifestFile?: string}} opts
  * @returns {Promise<Answerer>}
  */
 export async function loadAnswerer({ dir, threads = Math.min(4, os.availableParallelism()), manifestFile = 'manifest.json' }) {
+  if (!Number.isInteger(threads) || threads < 0) throw new Error(`rwxlite: threads must be an integer >= 0 (0 = onnxruntime's choice), got ${String(threads)}`);
   const manifest = JSON.parse(await readFile(path.join(dir, manifestFile), 'utf8'));
   if (!manifest || typeof manifest.version !== 'string' || typeof manifest.modelFile !== 'string' || !manifest.files) throw new Error('rwxlite: bad manifest.json');
   const modelFile = path.basename(manifest.modelFile);

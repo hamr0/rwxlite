@@ -363,7 +363,7 @@ Reading:
 - Not decided here: which file ships. The numbers are a precision check on burned exams, not a new go/no-go (fresh exam stays NO-GO by one row; every variant has the same 5 too-loose rows).
 
 Decisions (2026-11-04):
-- **Default model file: int8 per-channel** (`model-int8-pc.onnx`, sha256 `8ad0a182...`, model string `rwxlite-0.1.0+8ad0a182` at this version). It has the fp32 too-loose counts on both exams (5 and 36) at 23.1 MB.
+- **Package default model file: int8 per-channel** (rwxmap's own default is the exact fp32 model, per its PRD) (`model-int8-pc.onnx`, sha256 `8ad0a182...`, model string `rwxlite-0.1.0+8ad0a182` at this version). It has the fp32 too-loose counts on both exams (5 and 36) at 23.1 MB.
 - **Option "exact": fp32** (`model-fp32.onnx`, 91 MB) for users who want no quantisation drift and do not mind the size.
 - **Distribution: GitHub releases on hamr0/rwxlite.** Per release: `manifest.json` (default, int8-pc), `manifest-exact.json` (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. `node m1/release-assets.mjs` builds that set into `data/m1/release/` and prints the sizes, sha256s and the `gh release upload` command; it uploads nothing. rwxmap downloads on first use, always the latest, from `https://github.com/hamr0/rwxlite/releases/latest/download/<file>`, and caches each model in `<cache>/rwxlite-<semver>+<sha8>/` holding `manifest.json` (`{version, modelFile, model, files: {name: sha256}}`), the model file and `vocab.txt`; every sha256 is checked.
 - **Threads:** `loadAnswerer` defaults to `Math.min(4, os.availableParallelism())` intra-op threads (was 1); the `threads` option stays. `m1/bench.mjs` keeps its own default of 1 so old results stay comparable.
@@ -450,6 +450,13 @@ Only module 0 is sharp. The rest are sketches.
 - Round 6: items 1-6 above (two-step POST lower, gate-2, credential rule, bar 95%, exam once, mutual-learning stance).
 - Round 5: BRIEF-v3 only; DELETE mechanical; fresh-sample gate used once; model/format decisions recorded above.
 - Licence: Apache-2.0, matching rwxmap (user, 2026-11-03).
+
+## Publishing (user, 2026-11-04)
+
+- rwxlite is published publicly on npm as `rwxlite`, so rwxmap can `import { loadAnswerer } from 'rwxlite'`. The name was free on 2026-11-04 (registry 404).
+- The tarball holds only src/, types/, README, LICENSE, CHANGELOG (12 files, 19.8 kB). Model files are not in it; they come from GitHub releases (`m1/release-assets.mjs`).
+- `publish.yml` is manual (Run workflow), OIDC trusted publishing, no token in CI.
+- One-time human steps: (1) first publish by hand with a token to reserve the name (`npm publish --access public` from a clean checkout after the release bump); (2) on npmjs.com, package settings, Trusted Publisher, GitHub Actions: repo hamr0/rwxlite, workflow `publish.yml`; (3) after that, publish only via the workflow.
 
 ## Open questions
 
