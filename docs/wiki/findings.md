@@ -768,3 +768,40 @@ The lowering flag does what round 9c promised: all 13 wrongly-lowered rows were 
 ## 2026-11-03: Note on the fresh exam's pre-registration
 
 From /self-review (ledger): the fresh-exam pre-registration (0caa381) pinned the model and settings but not the code, which was first committed with the results (402fea0); and the go/no-go rule was switched to LOWER-BAR-ASK 0.97 after the user had seen the frozen answer labels, though before any prediction. Both facts are now stated in an addendum to `docs/wiki/exam-prereg-fresh.md`. The verdict does not depend on the switch: the earlier rule (MECH-THEN-ASK 0.95) would also have failed, with 6 too loose (0.64%). Lesson: a pre-registration commits the predict and score code with it, before any prediction; and a rule change after labels are seen is recorded as such.
+
+
+## 2026-11-04: M1, ONNX export, Node runtime, quantisation variants
+
+Numbers are in the PRD ("M1 result"); this is what was learned.
+
+### Tokenizer and text format parity
+- A Node port of `fmt_text` and the BERT WordPiece tokenizer matches the Python on all 102,781 local texts (both exams' 5,228 rows plus every train, val and v3eval text): 0 text mismatches, 0 token-id mismatches. `node m1/check-corpus.mjs` checks it.
+- Two things the port had to copy exactly: Python's `\s` is `str.isspace` (includes `\x1c` to `\x1f`, excludes the byte-order mark), which differs from JavaScript's `\s`; and `html.unescape` knows 2,200 named entities, of which the port carries the ones seen in the corpora plus invalid numeric references. An entity outside the list would stay undecoded in Node and be decoded in Python. None occurs in the 102k texts.
+- Gotcha: a source file with a raw U+2028 inside a regex literal is a syntax error in JavaScript. Write such characters as `\uXXXX` escapes.
+
+### fp32 ONNX is exact, default int8 is not
+- The fp32 ONNX graph reproduces torch to 1e-6 in p on both exams. fp16 (weights converted, inputs and outputs kept fp32) is within 0.001 and changes no decision.
+- The default `quantize_dynamic` int8 (23 MB) moves answers: on the fresh exam 12 of 949 rows change argmax (937 agree), 17 cross the 0.97 line, the largest p difference is 0.42. On the 09-22 exam 38 of 4,279 rows change argmax, 87 cross 0.97, and the too-loose count goes from 36 to 45.
+- Per-channel weight scales (same size, 23.1 MB) cut that to 6 fresh and 9 older argmax changes and 8 and 33 line crossings, and the too-loose count stays at fp32's (5 and 36). The fresh-exam result under the 0.97 rule: 809 right, 5 too loose, 61 too tight, 74 asked (fp32: 810, 5, 60, 74); 7 rows changed.
+- Quantising only the MatMuls (embeddings stay fp32) is not better than quantising both, and costs 36 MB. With per-channel scales it is the closest int8 to fp32 on the fresh exam (5 rows changed, 2 line crossings) but not on the older exam (16 changed, 32 crossings).
+- Dynamic int8 depends on the batch: one scale per activation tensor over the padded batch. The default int8 file changed 15 fresh rows when run one at a time and 13 when run 32 at a time, so a reproducible number has to say how it was batched.
+- Every variant has the same 5 too-loose rows on the fresh exam, so the NO-GO by one row does not depend on the file.
+
+### Node versus Python
+- Node (onnxruntime-node 1.31.1) and Python (onnxruntime 1.31.1) give the same probabilities for the same file: max difference 1.3e-7 on the 949 fresh rows and 1.4e-7 on the 4,279 older rows, for every variant, at batch 1.
+
+### Latency and size
+- i7-8665U laptop, Node 22, batch 1, 1 thread, end to end per op (format, tokenise, run, calibrate), 949 fresh rows after warm-up: default int8 p50 17.2 ms, p95 36.6, mean 18.8; per-channel int8 18.2, 38.1, 20.2; fp32 23.4, 49.0, 25.9; fp16 24.6, 50.9, 27.0. Latency varies by about 2x with what else runs on the machine (a first pass at load average 10 to 13 gave int8 p50 17 to 40 ms), so the numbers above come from a rerun at load about 2 to 3. The p95 is about twice the p50 because long descriptions make longer inputs (cut at 128 tokens).
+- fp16 gives no speed-up on this CPU. Only int8 meets D133's 20 ms mean, and not at p95.
+- Batched (32 rows per call, default threads) is not much cheaper per op: 21.8 to 23.7 ms for int8.
+- onnxruntime-node install: 566 MB by default on Linux x64 because its install script downloads the CUDA and TensorRT libraries (285 MB). `ONNXRUNTIME_NODE_INSTALL=skip` leaves 294 MB in `node_modules`, which is every platform's CPU binary in the package (Linux 71 MB with arm64, macOS 87 MB, Windows 137 MB). The one library a Linux x64 user needs is 48 MB. rwxmap's CI and docs should set the skip variable.
+
+### Packaging
+- rwxmap was a `file:../rwxmap` dependency used only by two research scripts; it broke `npm ci` on a clean clone and in CI. Removed: `m0/mechanical.mjs` and `m0/exam-inputs.mjs` now import it from `../rwxmap` or `$RWXMAP_DIR`, and `src/` and `test/` never touch it.
+
+### Threads and int8 (added 2026-11-04)
+- More intra-op threads help a lot at batch 1. On a quiet 4-core i3-8100T, int8 per-channel is 15.5 ms mean / 31.0 p95 at 1 thread, 9.2 / 17.8 at 2, 6.9 / 13.1 at 4; fp32 at 4 threads is 7.9 / 14.0. The 20 ms pin is met at p95 with 4 threads. `loadAnswerer` now defaults to `Math.min(4, os.availableParallelism())`; the bench keeps 1 so old results compare.
+- int8 gains little over fp32 on these chips: 1 thread 15.5 against 19.7 ms on the server, and 4 threads 6.9 against 7.9. Inference (not measured): neither CPU (i3-8100T, i7-8665U) has VNNI, so int8 matmuls get no dedicated instruction and the gain is mostly memory traffic. A chip with VNNI may show a bigger gap; untested.
+- Laptop latency swung about 2x with background load (int8 per-channel, 1 thread: mean 19.8 to 23.3 ms, p95 39 to 46), so single runs on a busy machine say little.
+- Decision: default file is int8 per-channel; fp32 is the "exact" option. Published as GitHub release assets (PRD, "M1 result").
+

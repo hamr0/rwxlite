@@ -318,6 +318,75 @@ Silently keeping the mechanical letter instead of asking costs too-tight rows (1
 - An automated retraining pipeline.
 - The gate's ask/deny decision itself. That is bareguard's job.
 
+### M1 result (2026-11-04)
+
+What was built (`src/`, `m1/`, `test/`, `.github/workflows/ci.yml`):
+- `m1/export_onnx.py export` writes the fp32 ONNX graph (inputs `input_ids`, `attention_mask`, `token_type_ids`; output raw `logits` (n,3)) and a plain `vocab.txt`. `m1/variants.py build` writes five more files from it (see the table). Temperature T = 0.844 is applied by the caller, as in `train/exam_score.py`.
+- `src/text.js` and `src/tokenizer.js` are Node ports of `fmt_text` and the BERT WordPiece tokenizer, so Node needs no Python and no `transformers`. They match the Python on all 102,781 local texts: 0 text mismatches (5,228 exam rows), 0 token-id mismatches (`node m1/check-corpus.mjs`, exit 0). A 973-row fixture of the same (`test/fixtures/parity.jsonl`) is committed and runs in CI.
+- `src/answerer.js`: `loadAnswerer({dir})` reads `manifest.json` (`version`, `modelFile`, sha256 of each file), refuses to start on any sha mismatch, and returns an `Answerer` with `answer(req)` and `answerMany(reqs)`. Switching the shipped variant is a manifest change (`node m1/manifest.mjs <model-file>`).
+- Answer shape: `{model, answers: {isX: {noul}, changes: {noul}}}` where `isX = p(x)` and `changes = p(w) + p(x)`; only the asked questions are returned. The model string is `rwxlite-<version>+<first 8 hex of the weights' sha256>`. rwxlite never returns a letter, a cut or an ask: rwxmap derives `x = isX`, `w = changes - isX`, `r = 1 - changes` and keeps all decisions. A bad request throws (a slot of `answerMany` holds the error; a model failure fails every slot), so the caller keeps the mechanical letter.
+
+Proposal for rwxmap's D133: the request needs one field Jev's does not have, `lean: {class, rule}`, the mechanical letter and rule. The model was trained with them as the first words of its input (`lean: x path-verb | POST /v1/...`), so without them the answer is not the one that was scored. rwxmap already has both when it builds the Jev request. Everything else is Jev's shape: `state` (method, path, operationId, summary, description), `model` (ignored, there is one model), `questions` (only the keys are read).
+
+Distribution (superseded by the Decisions below; kept for the install sizes): model files are not bundled in the npm package. The package ships the code, `vocab.txt`'s hash and the manifest format; the weights are downloaded on first use to a cache directory and checked against the manifest's sha256 (fail closed on mismatch). `onnxruntime-node` is an optional dependency. CPU-only, `npm install onnxruntime-node` with `ONNXRUNTIME_NODE_INSTALL=skip` is 294 MB in `node_modules` (all platforms' binaries; the Linux x64 library is 48 MB); with the default install on Linux x64 it also downloads 285 MB of CUDA libraries (566 MB total). rwxmap should install it with the skip variable, or document that.
+
+Quantisation variants, measured on the two burned exams (a precision check, not a new go/no-go). Python side: ONNX Runtime, batch 1, against the saved torch fp32 probabilities. Node side: batch 1, 1 thread, all 949 fresh rows, after 20 warm-up rows, end to end (format, tokenise, run, calibrate). Machine: i7-8665U 1.9 GHz, 8 logical cores, Node 22.22.2, onnxruntime-node 1.31.1, load average about 2 to 3 during the runs. Raw numbers in `data/m1/variants.json` (local).
+
+| Variant | Size | Node p50 / p95 / mean ms | Max / mean abs p vs torch (fresh) | Argmax agree (fresh, 09-22) | Rows across the 0.97 line (fresh, 09-22) |
+|---|---|---|---|---|---|
+| fp32 | 90.97 MB | 23.4 / 49.0 / 25.9 | 0.000001 / 0 | 949, 4279 | 0, 0 |
+| fp16 | 45.59 MB | 24.6 / 50.9 / 27.0 | 0.0008 / 0.00002 | 949, 4279 | 0, 0 |
+| int8 default (per-tensor, MatMul + embeddings) | 23.02 MB | 17.2 / 36.6 / 18.8 | 0.417 / 0.0062 | 937, 4241 | 17, 87 |
+| int8 per-channel | 23.13 MB | 18.2 / 38.1 / 20.2 | 0.118 / 0.0022 | 943, 4270 | 8, 33 |
+| int8 MatMul only | 58.77 MB | 17.2 / 36.9 / 19.0 | 0.458 / 0.0059 | 935, 4238 | 21, 85 |
+| int8 per-channel, MatMul only | 58.88 MB | 17.3 / 37.2 / 19.1 | 0.224 / 0.0022 | 945, 4272 | 2, 32 |
+
+Fresh exam re-scored with each file's probabilities under the pre-registered GO/NO-GO rule (lower-bar-ask 0.97, same code, only the probabilities differ):
+
+| Variant | Right | Too loose | Too tight | Asked | Rows whose final letter or ask changed vs fp32 |
+|---|---|---|---|---|---|
+| fp32 / torch (as registered) | 810 | 5 | 60 | 74 | 0 |
+| fp16 | 810 | 5 | 60 | 74 | 0 |
+| int8 default | 808 | 5 | 55 | 81 | 15 |
+| int8 per-channel | 809 | 5 | 61 | 74 | 7 |
+| int8 MatMul only | 805 | 5 | 56 | 83 | 17 |
+| int8 per-channel, MatMul only | 810 | 5 | 59 | 75 | 5 |
+
+The 09-22 exam, mode (a) with no bar: fp32 4104 right, 36 too loose, 139 too tight. int8 default 4106 / 45 / 128 (35 rows changed; 9 more too loose); per-channel 4105 / 36 / 138 (18 changed); MatMul only 4101 / 45 / 133 (37); per-channel MatMul only 4102 / 36 / 141 (16); fp16 identical to fp32 (0 changed).
+
+Reading:
+- Node and Python agree: for every variant the largest difference between Node's answer and the Python ONNX Runtime's at batch 1 is 1.3e-7 on the fresh rows and 1.4e-7 on the 4,279 older rows. The runtime is not a source of drift; the quantised weights are.
+- Default dynamic int8 moves answers a lot (mean 0.006, up to 0.42 in p) and, on the older exam, adds 9 too-loose rows. Per-channel weight scales cut the drift by about 3x at the same size and keep the too-loose count equal to fp32 on both exams (5 and 36). Keeping embeddings in fp32 (MatMul only) does not help by itself and costs 36 MB.
+- Dynamic int8 scales each activation tensor per call, so a row's answer depends on its batch mates: the default int8 file changed 15 fresh rows at batch 1 and 13 at batch 32. The differences are the same size as the quantisation drift.
+- fp16 reproduces the fp32 decisions exactly (0 rows changed on both exams, max p difference 0.001) at half the size of the fp32 file, but is not faster on this CPU (mean 27.0 ms against 25.9 for fp32).
+- D133 asks for at most 20 ms per op on int8, laptop CPU. Mean per-op latency at batch 1 on 1 thread is 18.8 ms (default int8) and 20.2 ms (per-channel), p95 about 37 to 38 ms, p99 about 39 ms. fp32 and fp16 are 26 to 27 mean, so only int8 meets the pin on average, and no variant meets it at p95. Batched, 32 rows per call on default threads, int8 costs 21.8 to 22.4 ms per op here (the machine was shared with other jobs, so treat all latency numbers as upper bounds). Cold load: 0.23 to 0.28 s for the 23 MB files.
+- Not decided here: which file ships. The numbers are a precision check on burned exams, not a new go/no-go (fresh exam stays NO-GO by one row; every variant has the same 5 too-loose rows).
+
+Decisions (2026-11-04):
+- **Default model file: int8 per-channel** (`model-int8-pc.onnx`, sha256 `8ad0a182...`, model string `rwxlite-0.1.0+8ad0a182` at this version). It has the fp32 too-loose counts on both exams (5 and 36) at 23.1 MB.
+- **Option "exact": fp32** (`model-fp32.onnx`, 91 MB) for users who want no quantisation drift and do not mind the size.
+- **Distribution: GitHub releases on hamr0/rwxlite.** Per release: `manifest.json` (default, int8-pc), `manifest-exact.json` (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. `node m1/release-assets.mjs` builds that set into `data/m1/release/` and prints the sizes, sha256s and the `gh release upload` command; it uploads nothing. rwxmap downloads on first use, always the latest, from `https://github.com/hamr0/rwxlite/releases/latest/download/<file>`, and caches each model in `<cache>/rwxlite-<semver>+<sha8>/` holding `manifest.json` (`{version, modelFile, model, files: {name: sha256}}`), the model file and `vocab.txt`; every sha256 is checked.
+- **Threads:** `loadAnswerer` defaults to `Math.min(4, os.availableParallelism())` intra-op threads (was 1); the `threads` option stays. `m1/bench.mjs` keeps its own default of 1 so old results stay comparable.
+
+Latency by thread count, Node 22, batch 1, end to end per op, ms:
+
+| Machine | File | Threads | Mean | p50 | p95 |
+|---|---|---|---|---|---|
+| Server i3-8100T (4 cores, quiet) | int8 default | 1 | 15.53 | 14.03 | 31.02 |
+| | | 2 | 8.98 | 8.14 | 17.59 |
+| | | 4 | 6.20 | 5.46 | 11.11 |
+| | int8 per-channel | 1 | 15.52 | 14.03 | 31.02 |
+| | | 2 | 9.15 | 8.28 | 17.81 |
+| | | 4 | 6.93 | 5.72 | 13.13 |
+| | fp32 | 1 | 19.69 | 17.71 | 38.59 |
+| | | 2 | 11.50 | 10.40 | 21.95 |
+| | | 4 | 7.85 | 7.13 | 13.97 |
+| Laptop i7-8665U (background load) | int8 per-channel | 1 | 19.8 to 23.3 | 18.0 to 21.0 | 39 to 46 |
+
+Server: Intel i3-8100T @ 3.10GHz, 4 cores, load average 0.2 to 1.8 during the runs. Laptop: i7-8665U @ 1.90GHz, 8 logical cores, under background load.
+
+The 20 ms pin (D133) is met at p95 with 4 threads on both int8 and fp32 on the server. The laptop numbers swung about 2x with machine load across runs (hence ranges), so read them as upper bounds.
+
 ## Modules
 
 Only module 0 is sharp. The rest are sketches.
@@ -329,7 +398,7 @@ Only module 0 is sharp. The rest are sketches.
 - Train the small encoder.
 - Score modes (a) and (b), in fp32 and int8, on the exam (done in fp32 only, on the exam and on the fresh exam; int8 waits for M1).
 
-**M1 — Jev-compatible local answerer.**
+**M1 — Jev-compatible local answerer.** Status 2026-11-04: built and measured; default int8 per-channel, option fp32, GitHub releases (see "M1 result").
 - Export int8 ONNX.
 - Run it in Node.
 - Accept `{state, model, questions}`, return `{p, model}`.
@@ -357,4 +426,4 @@ Only module 0 is sharp. The rest are sketches.
 
 - **Which small encoder.** all-MiniLM-L6-v2 first, bge-small-en-v1.5 second, TF-IDF + LR as baseline; the bars decide.
 - **Model string.** What exact string rwxlite returns in `{p, model}`, and how it is versioned. rwxmap records the model string on every moved verdict (D88), so it must change whenever the weights change.
-- **Distribution form.** npm package with the ONNX file, or a separate download. Decided in M1.
+- **Distribution form.** Resolved 2026-11-04: code in npm, weights from GitHub releases on hamr0/rwxlite, downloaded by rwxmap on first use (latest), cached per `rwxlite-<semver>+<sha8>/`, sha256-checked. See "M1 result", Decisions.

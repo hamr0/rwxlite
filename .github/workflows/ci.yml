@@ -1,0 +1,37 @@
+# Push / PR gate (CI_TEMPLATE core): npm ci -> typecheck -> build:types -> test.
+# No lint step (tsc checkJs + strictNullChecks covers it). Node 22 only (engines >=22).
+# Default shallow checkout: no test reads git history.
+#
+# Choices specific to this repo:
+# - rwxmap is intentionally NOT a dependency. Only the m0/*.mjs research scripts use it, and they load it
+#   from a checkout beside this repo (or $RWXMAP_DIR), so `npm ci` works on a bare clone and CI needs no
+#   sibling checkout. src/ and test/ never import it.
+# - onnxruntime-node is an optional dependency whose install script downloads ~285 MB of CUDA/TensorRT
+#   libraries on Linux x64. ONNXRUNTIME_NODE_INSTALL=skip keeps the CPU build only (the CPU binary ships in the package).
+# - Tests are hermetic and token-free: no network, no model. The model is not in git (data/m1 is ignored), so the one
+#   test that runs the real int8 model reports a skip with the reason; everything else (text, tokenizer vs the
+#   Python fixture, request checks, calibration, stub-runner answers, sha256 check) runs.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      ONNXRUNTIME_NODE_INSTALL: skip
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck     # tsc --noEmit
+      - run: npm run build:types   # prove the .d.ts generate from the JSDoc
+      - run: npm test              # node --test, hermetic, token-free
