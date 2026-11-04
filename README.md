@@ -49,7 +49,7 @@ The model outputs three probabilities. Every Jev question is arithmetic on them:
 
 ## Start here
 
-Install the package: `npm i rwxlite` (set `ONNXRUNTIME_NODE_INSTALL=skip` to avoid a 285 MB GPU download; the CPU build is enough). The model files are not in the npm package; get them from the GitHub releases (see "Using the answerer"). Release order, because the package fetches those files at first load: 1. merge `m1`; 2. create the GitHub release `v<version>` with the assets from `node m1/release-assets.mjs`; 3. then "Run workflow" for `publish.yml` (it fails if the release or its assets are missing).
+Install the package: `npm i rwxlite` (set `ONNXRUNTIME_NODE_INSTALL=skip` to avoid a 285 MB GPU download; the CPU build is enough). The model files are not in the npm package; get them from the GitHub releases (see "Using the answerer"). Release order, because the package fetches those files at first load: 1. merge `m1`; 2. create the GitHub release `v<version>` with the assets from `node m1/release-assets.mjs`; 3. then "Run workflow" for `publish.yml` (it fails if the release or its assets are missing or empty, or if the release's `manifest.json` version is not the package version).
 
 The rest of this repo is research (module 0): read on for the scripts.
 
