@@ -8,6 +8,8 @@
 //   lean       { class: 'r'|'w'|'x', rule } — the mechanical verdict. Jev does not get it, but this
 //              model was trained with it as the first words of its input, so it is required.
 // Answer:   { model, answers: { isX?: { noul }, changes?: { noul } } }
+// No answer: { model, error: '<message>' } (answerMany only; no `answers` key). Plain JSON data, so a failed row
+//           survives JSON.stringify (an Error instance would serialise as {}). answer() throws the same message instead.
 //   isX = p(x), changes = p(w) + p(x), from softmax(logits / T). rwxmap derives
 //   x = isX, w = changes - isX, r = 1 - changes.
 //
@@ -31,6 +33,7 @@ export const QUESTIONS = /** @type {const} */ (['isX', 'changes']);
  * @typedef {import('./text.js').Lean} Lean
  * @typedef {{state: State, model?: string, questions: Record<string, unknown>, lean: Lean}} Request
  * @typedef {{model: string, answers: {isX?: {noul: number}, changes?: {noul: number}}}} Answer
+ * @typedef {{model: string, error: string}} NoAnswer
  * @typedef {{run: (ids: number[][]) => Promise<number[][]>}} Runner  (n,seq) token ids -> (n,3) logits
  */
 
@@ -74,21 +77,25 @@ export class Answerer {
     this.tokenizer = tokenizer; this.runner = runner; this.model = model;
   }
 
-  /** @param {Request} req @returns {Promise<Answer>} */
+  /** @param {unknown} err @returns {NoAnswer} */
+  noAnswer(err) { return { model: this.model, error: err instanceof Error ? err.message : String(err) }; }
+
+  /** Throws (an Error with the NoAnswer's message) when there is no answer. @param {Request} req @returns {Promise<Answer>} */
   async answer(req) {
     const [a] = await this.answerMany([req]);
-    if (a instanceof Error) throw a;
+    if ('error' in a) throw new Error(a.error);
     return a;
   }
 
   /**
-   * Many requests in one model call. Never throws for one bad request: that slot holds an Error,
-   * so the caller can keep the mechanical letter for it alone. A model failure fails every slot.
+   * Many requests in one model call. Never throws for one bad request: that slot holds a NoAnswer
+   * ({model, error}, plain JSON), so the caller can keep the mechanical letter for it alone.
+   * A model failure fails every slot. Every slot is exactly an Answer or a NoAnswer.
    * @param {Request[]} reqs
-   * @returns {Promise<Array<Answer|Error>>}
+   * @returns {Promise<Array<Answer|NoAnswer>>}
    */
   async answerMany(reqs) {
-    /** @type {Array<Answer|Error>} */
+    /** @type {Array<Answer|NoAnswer>} */
     const out = new Array(reqs.length);
     /** @type {{i: number, ids: number[], keys: string[]}[]} */
     const ok = [];
@@ -96,7 +103,7 @@ export class Answerer {
       try {
         const { text, keys } = checkRequest(req);
         ok.push({ i, ids: this.tokenizer.encode(text, MAX_LEN), keys });
-      } catch (err) { out[i] = err instanceof Error ? err : new Error(String(err)); }
+      } catch (err) { out[i] = this.noAnswer(err); }
     });
     if (ok.length) {
       let logits;
@@ -104,13 +111,12 @@ export class Answerer {
         logits = await this.runner.run(ok.map((o) => o.ids));
         if (!Array.isArray(logits) || logits.length !== ok.length) throw new Error('rwxlite: runner returned the wrong number of rows');
       } catch (err) {
-        const e = err instanceof Error ? err : new Error(String(err));
-        for (const o of ok) out[o.i] = e;
+        for (const o of ok) out[o.i] = this.noAnswer(err);
         return out;
       }
       ok.forEach((o, k) => {
         const L = logits[k];
-        if (!Array.isArray(L) || L.length !== 3 || !L.every(Number.isFinite)) { out[o.i] = new Error('rwxlite: bad logits'); return; }
+        if (!Array.isArray(L) || L.length !== 3 || !L.every(Number.isFinite)) { out[o.i] = this.noAnswer(new Error('rwxlite: bad logits')); return; }
         out[o.i] = { model: this.model, answers: answersFrom(calibrated(L), o.keys) };
       });
     }

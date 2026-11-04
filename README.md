@@ -97,12 +97,14 @@ import { loadAnswerer } from 'rwxlite';
 const a = await loadAnswerer({ dir: '/path/to/model-dir' }); // threads: default min(4, cores)
 const state = { method: 'POST', path: '/v1/search', operationId: 'search', summary: 'Search records', description: '' };
 const req = { state, questions: { isX: '', changes: '' }, lean: { class: 'r', rule: 'path-verb' } };
-const one = await a.answer(req);        // { model, answers: { isX: { noul }, changes: { noul } } }
-const many = await a.answerMany([req]); // each slot is an answer or an Error; a bad request does not fail the rest
+const one = await a.answer(req);        // { model, answers: { isX: { noul }, changes: { noul } } }; throws on a no-answer
+const many = await a.answerMany([req]); // each slot is { model, answers } or { model, error }; a bad request does not fail the rest
 ```
 
 - `lean` is required: the mechanical letter and rule (`{class: 'r'|'w'|'x', rule}`). The model was trained with it as the first words of its input.
 - Only the keys of `questions` are read. `isX` is p(x), `changes` is p(w) + p(x). rwxlite returns probabilities only; the caller decides.
+- Two shapes, both plain JSON: success `{model, answers: {...}}` and no answer `{model, error: '<message>'}` (no `answers` key). `answerMany` never returns `Error` objects (they serialise as `{}`); `answer` throws an `Error` with the same message. On a no-answer keep the mechanical letter.
+- The measured decision rule (which rows move, the cuts, the credential rule, ask on lowerings under 97%) is written in the [PRD](docs/product/prd.md#decision-rule-rwxmap-must-apply-the-measured-one); only that exact rule has measured numbers. `test/fixtures/decision.jsonl` and `test/decision.test.js` are the parity fixture and a JS reference of it.
 - `dir` holds `manifest.json`, the model file and `vocab.txt`; every sha256 is checked and a mismatch throws.
 - `onnxruntime-node` is an optional dependency. Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install onnxruntime-node` to skip the 285 MB of GPU libraries.
 - Two model options, both on the GitHub releases: the default int8 per-channel (`manifest.json`, `model-int8-pc.onnx`, 23 MB) and "exact" fp32 (`manifest-exact.json`, `model-fp32.onnx`, 91 MB, no quantisation drift). Load the exact one with `loadAnswerer({ dir, manifestFile: 'manifest-exact.json' })`.

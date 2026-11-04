@@ -60,8 +60,8 @@ test('answerMany: a bad slot is isolated and the good ones still answer, in orde
   const a = make((/** @type {number[][]} */ ids) => { seen = ids.length; return ids.map((_, i) => [i, 0, 0]); });
   const out = await a.answerMany([req(), req({ lean: null }), req()]);
   assert.equal(seen, 2);
-  assert.ok(out[1] instanceof Error);
-  assert.ok(!(out[0] instanceof Error) && !(out[2] instanceof Error));
+  assert.ok('error' in out[1] && !('answers' in out[1]));
+  assert.ok(!('error' in out[0]) && !('error' in out[2]));
   assert.equal(/** @type {any} */ (out[0]).answers.isX.noul, calibrated([0, 0, 0])[2]);
   assert.equal(/** @type {any} */ (out[2]).answers.isX.noul, calibrated([1, 0, 0])[2]);
 });
@@ -69,21 +69,61 @@ test('answerMany: a bad slot is isolated and the good ones still answer, in orde
 test('answerMany: a runner failure fails every good slot, nothing leaks through', async () => {
   const a = make(() => { throw new Error('boom'); });
   const out = await a.answerMany([req(), req(), req({ lean: null })]);
-  assert.ok(out.every((o) => o instanceof Error));
-  assert.match(/** @type {Error} */ (out[0]).message, /boom/);
+  assert.ok(out.every((o) => 'error' in o && !('answers' in o)));
+  assert.match(/** @type {any} */ (out[0]).error, /boom/);
   await assert.rejects(a.answer(req()), /boom/);
 });
 
 test('answerMany: wrong row count, wrong length, NaN and Infinity logits are errors', async () => {
-  assert.ok((await make(() => []).answerMany([req()]))[0] instanceof Error);
+  assert.ok('error' in (await make(() => []).answerMany([req()]))[0]);
   const out = await make(() => [[1, 2], [NaN, 0, 0], [0, Infinity, 0], [0, 0, 0]]).answerMany([req(), req(), req(), req()]);
-  assert.ok(out[0] instanceof Error && out[1] instanceof Error && out[2] instanceof Error);
-  assert.ok(!(out[3] instanceof Error));
+  assert.ok('error' in out[0] && 'error' in out[1] && 'error' in out[2]);
+  assert.ok(!('error' in out[3]));
 });
 
 test('answerMany: empty input is empty output and the runner is not called', async () => {
   const a = make(() => { throw new Error('should not run'); });
   assert.deepEqual(await a.answerMany([]), []);
+});
+
+const rt = (/** @type {any} */ x) => JSON.parse(JSON.stringify(x));
+
+test('both shapes survive JSON, every slot of a mixed batch too', async () => {
+  const a = make(() => [[0, 1, 2], [2, 1, 0]]);
+  const out = await a.answerMany([req(), req({ lean: null }), req({ questions: { isX: 1 } }), req({ questions: {} })]);
+  assert.equal(out.length, 4);
+  for (const o of out) assert.deepEqual(rt(o), o);
+  assert.ok('answers' in out[0] && 'error' in out[1] && 'answers' in out[2] && 'error' in out[3]);
+  assert.match(/** @type {any} */ (out[1]).error, /^rwxlite: lean/);
+  assert.equal(out[1].model, 'rwxlite-0.0.0+deadbeef');
+});
+
+test('a no-answer never carries answers; a success never carries error; answer() throws the same text', async () => {
+  const a = make(() => [[0, 1, 2]]);
+  const [bad] = await a.answerMany([req({ lean: null })]);
+  assert.deepEqual(Object.keys(bad).sort(), ['error', 'model']);
+  const [good] = await a.answerMany([req()]);
+  assert.deepEqual(Object.keys(good).sort(), ['answers', 'model']);
+  await assert.rejects(a.answer(req({ lean: null })), (/** @type {Error} */ e) => e.message === /** @type {any} */ (bad).error);
+});
+
+test('noul is a finite number in [0,1] and changes >= isX, extreme logits included', async () => {
+  const cases = [[1000, -1000, 0], [-1000, -1000, 1000], [0, 0, 0], [-1000, 1000, -1000], [1e6, -1e6, 1e6], [5, -3, 2]];
+  const a = make((/** @type {number[][]} */ ids) => ids.map((_, i) => cases[i]));
+  const out = await a.answerMany(cases.map(() => req()));
+  for (const o of out) {
+    const { isX, changes } = /** @type {any} */ (o).answers;
+    for (const v of [isX.noul, changes.noul]) assert.ok(Number.isFinite(v) && v >= 0 && v <= 1, String(v));
+    assert.ok(changes.noul >= isX.noul);
+  }
+});
+
+test('the three question shapes return exactly those keys', async () => {
+  const a = make(() => [[0, 1, 2]]);
+  for (const q of [{ isX: 'q' }, { changes: 'q' }, { isX: 'q', changes: 'q' }]) {
+    const o = /** @type {any} */ (await a.answer(req({ questions: q })));
+    assert.deepEqual(Object.keys(o.answers).sort(), Object.keys(q).sort());
+  }
 });
 
 test('modelString is rwxlite-<semver>+<sha8>', () => {

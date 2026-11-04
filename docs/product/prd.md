@@ -324,7 +324,7 @@ What was built (`src/`, `m1/`, `test/`, `.github/workflows/ci.yml`):
 - `m1/export_onnx.py export` writes the fp32 ONNX graph (inputs `input_ids`, `attention_mask`, `token_type_ids`; output raw `logits` (n,3)) and a plain `vocab.txt`. `m1/variants.py build` writes five more files from it (see the table). Temperature T = 0.844 is applied by the caller, as in `train/exam_score.py`.
 - `src/text.js` and `src/tokenizer.js` are Node ports of `fmt_text` and the BERT WordPiece tokenizer, so Node needs no Python and no `transformers`. They match the Python on all 102,781 local texts: 0 text mismatches (5,228 exam rows), 0 token-id mismatches (`node m1/check-corpus.mjs`, exit 0). A 973-row fixture of the same (`test/fixtures/parity.jsonl`) is committed and runs in CI.
 - `src/answerer.js`: `loadAnswerer({dir})` reads `manifest.json` (`version`, `modelFile`, sha256 of each file), refuses to start on any sha mismatch, and returns an `Answerer` with `answer(req)` and `answerMany(reqs)`. Switching the shipped variant is a manifest change (`node m1/manifest.mjs <model-file>`).
-- Answer shape: `{model, answers: {isX: {noul}, changes: {noul}}}` where `isX = p(x)` and `changes = p(w) + p(x)`; only the asked questions are returned. The model string is `rwxlite-<version>+<first 8 hex of the weights' sha256>`. rwxlite never returns a letter, a cut or an ask: rwxmap derives `x = isX`, `w = changes - isX`, `r = 1 - changes` and keeps all decisions. A bad request throws (a slot of `answerMany` holds the error; a model failure fails every slot), so the caller keeps the mechanical letter.
+- Answer shape: `{model, answers: {isX: {noul}, changes: {noul}}}` where `isX = p(x)` and `changes = p(w) + p(x)`; only the asked questions are returned. The model string is `rwxlite-<version>+<first 8 hex of the weights' sha256>`. rwxlite never returns a letter, a cut or an ask: rwxmap derives `x = isX`, `w = changes - isX`, `r = 1 - changes` and keeps all decisions. There are two shapes, both plain JSON (an `Error` instance serialises as `{}`, so none is returned): success `{model, answers: {...}}` and no answer `{model, error: '<message>'}` with no `answers` key. `answerMany` returns one of the two in every slot (a bad request fails its own slot; a model failure fails every slot); `answer(req)` returns the success object and throws an `Error` with the same message on a no-answer. On either, the caller keeps the mechanical letter.
 
 Proposal for rwxmap's D133: the request needs one field Jev's does not have, `lean: {class, rule}`, the mechanical letter and rule. The model was trained with them as the first words of its input (`lean: x path-verb | POST /v1/...`), so without them the answer is not the one that was scored. rwxmap already has both when it builds the Jev request. Everything else is Jev's shape: `state` (method, path, operationId, summary, description), `model` (ignored, there is one model), `questions` (only the keys are read).
 
@@ -386,6 +386,25 @@ Latency by thread count, Node 22, batch 1, end to end per op, ms:
 Server: Intel i3-8100T @ 3.10GHz, 4 cores, load average 0.2 to 1.8 during the runs. Laptop: i7-8665U @ 1.90GHz, 8 logical cores, under background load.
 
 The 20 ms pin (D133) is met at p95 with 4 threads on both int8 and fp32 on the server. The laptop numbers swung about 2x with machine load across runs (hence ranges), so read them as upper bounds.
+
+### Decision rule rwxmap must apply (the measured one)
+
+rwxlite returns only p. The fresh-exam result (810 right, 5 too loose, 60 too tight, 74 asked of 949) came from one exact rule: `mode_a` (`train/exam_score.py`) and then lower-bar-ask at 0.97 (`GONOGO_lba097` in `train/exam_fresh.py`). In terms of the answer: p(x) = `isX`, p(w)+p(x) = `changes`, p(w) = `changes - isX`, p(r) = `1 - changes`, max p = max(`1 - changes`, `changes - isX`, `isX`). All p are calibrated (softmax of logits / 0.844), which rwxlite already does.
+
+1. **Which rows move at all.** Only rows with a Jev tier: `jev-lower` (tier lower), `jev-raise-wx` (raise-wx), `jev-raise-get` (raise-get). These are the rows rwxmap's `needsJev` sends to Jev today, mapped by `TIER` in `train/common.py`. A row with no tier (jev_tier empty) is never moved by p; only step 3 can still change it. Rows rwxmap does not send (no tier) are still scored by the model in the fixture, so p exists for all of them.
+2. **Cut per tier** (m = the mechanical letter; x > w > r):
+   - lower: if m = x and `isX < 0.30`, new letter is r when the method is POST and `changes < 0.40`, else w.
+   - raise-wx: if m = w and `isX >= 0.15`, new letter is x.
+   - raise-get: if m = r and `changes >= 0.05`, new letter is w.
+   - Otherwise the letter stays m.
+3. **Credential rule** (`cred_hit`, `train/common.py`): if the method is not GET and any of operationId, summary, path matches the regex below, the letter is x, whatever steps 1 and 2 said. Each field is first normalised: camelCase split (`([a-z0-9])([A-Z])` to `\1 \2`), every run of non-alphanumerics to one space, lowercased. The regex source:
+   `\b(?:change|reset|rotate|regenerate|renew|revoke|invalidate|expire)\b(?: \w+){0,3}? (?:password|passcode|passphrase|pin|pin code|auth key|authkey|api key|apikey|api secret|secret key|client secret)s?\b(?! (?:polic|rule|requirement|complexity|setting|config))`
+4. **DELETE and rows outside the tiers** keep the mechanical letter (the credential rule still applies to non-GET, DELETE included).
+5. **The final step (ask).** A lowering is a final letter below the mechanical one. A lowering with max p < 0.97 is asked: in rwxmap's terms, keep the stricter (mechanical) letter and add a review marker. Raises and keeps are trusted as they are. (The scripts count such a row as asked, not answered; its `expected.letter` in the fixture is the lowered letter the rule produced, so rwxmap can see what was withheld.)
+
+**Any other rule has no measured numbers.** Argmax, other rows, other cuts, other bars, a different model file: none of them is what scored 810 / 5 / 60 / 74. The numbers hold for the int8 per-channel default model (74 asked, 5 too loose on the fresh exam; fp32 gives the same 810 / 5 / 60 / 74 only in the registered torch run, see the variant table).
+
+**Parity fixture.** `test/fixtures/decision.jsonl`, made by `.venv/bin/python m1/decision-fixture.py` from the default model's batch-1 p and the pre-registered scripts (imported unchanged; truth is never read). One row per operation, all 949: `{id, method, state (5 fields), lean {class, rule}, jev_tier (null when none), isX, changes, expected {letter, asked}}`. `test/decision.test.js` holds a JS reference of the rule (test only; not exported from `src`) and reproduces `expected` for all 949 rows from those fields alone, so the rule above is complete. Counts: 165 lowerings, 10 raises, 774 keeps, 74 asked. rwxmap can run the same fixture against its own implementation.
 
 ## Modules
 
