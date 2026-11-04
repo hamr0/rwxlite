@@ -1,11 +1,13 @@
 // Round 10: manifest + Node parity for data/m1-r10 (does not touch data/m1).
 //   node m1/manifest-r10.mjs write <T>             -> data/m1-r10/manifest.json (int8-pc) and manifest-exact.json (fp32)
 //   node m1/manifest-r10.mjs parity <T>            -> Node answerer (loadAnswerer, T=0.844 baked in src) vs Python ORT on 400 val rows
-// loadAnswerer has T=0.844 hard-coded (src/answerer.js TEMPERATURE); r10's refit T is carried in the manifest as `temperature`
-// (ignored by loadAnswerer today) and applied by the exam code. Parity here compares at the SAME T (0.844) so it checks the
-// graph, tokenizer and text path, not the calibration.
+// The version comes from package.json (or argv[4]). r10's refit T is carried in the manifest as `temperature`, which loadAnswerer reads.
+// `parity` compares against parity-rows.jsonl, which holds Python p's at T=0.844, so it runs with a temperature-less copy of the
+// manifest (falls back to 0.844) and checks graph, tokenizer and text path, not the calibration. Exam parity at T=0.858 lives in train/exam3_predict.py.
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, symlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { modelString, loadAnswerer } from '../src/answerer.js';
 
 const dir = new URL('../data/m1-r10/', import.meta.url);
@@ -24,8 +26,14 @@ if (cmd === 'write') {
   // rows from the practice val split, pre-tokenised text from Python: data/m1-r10/parity-rows.jsonl {state, lean, p:[r,w,x] at T=0.844 from Python ORT int8-pc b=1}
   const rows = readFileSync(new URL('parity-rows.jsonl', dir), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
   const res = {};
+  // temperature-less copies in a scratch dir (data/m1-r10 itself is not written): loadAnswerer falls back to 0.844 = the reference rows' T
+  const tmp = mkdtempSync(path.join(tmpdir(), 'r10-parity-'));
+  for (const f of ['model-int8-pc.onnx', 'model-fp32.onnx', 'vocab.txt']) symlinkSync(new URL(f, dir).pathname, path.join(tmp, f));
+  for (const mf of ['manifest.json', 'manifest-exact.json']) {
+    const { temperature, ...m } = JSON.parse(readFileSync(new URL(mf, dir), 'utf8')); writeFileSync(path.join(tmp, mf), JSON.stringify(m));
+  }
   for (const [tag, mf] of [['int8-pc', 'manifest.json'], ['fp32', 'manifest-exact.json']]) {
-    const a = await loadAnswerer({ dir: dir.pathname, threads: 1, manifestFile: mf });
+    const a = await loadAnswerer({ dir: tmp, threads: 1, manifestFile: mf });
     let maxd = 0, argmaxDiff = 0, flips = 0;
     for (const r of rows) {
       const out = await a.answer({ state: r.state, lean: r.lean, questions: { isX: 1, changes: 1 } });

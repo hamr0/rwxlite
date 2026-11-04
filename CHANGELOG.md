@@ -3,6 +3,17 @@
 All notable changes to rwxlite are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+Version 0.3.0 (package.json), unpublished; the round 10 model is pending exam #3.
+
+### Added
+- Round 10 model (`data/m1-r10`, int8-pc `093c908d`, fp32 `8514ddcc`, T 0.858), pending exam #3 (docs/wiki/exam-prereg-exam3.md). Manifests built by `m1/manifest-r10.mjs`, the release set by `m1/release-assets.mjs r10`.
+- `train/exam3_predict.py` writes one JSONL per model (`id`, `model`, `pIsX`, `pChanges`, T applied) for parity checks against `loadAnswerer`.
+
+### Changed
+- `loadAnswerer` reads the calibration `temperature` from the manifest (finite number > 0, else it throws); a manifest without it uses 0.844, so 0.2.0 manifests behave as before. `calibrated(L, T)` and `new Answerer({..., temperature})` take it; `checkTemperature` and `manifestTemperature` are exported.
+
 ## [0.2.0] - 2026-11-04
 
 M1: a local, Jev-shaped answerer in Node. Package default model file: int8 per-channel; option "exact": fp32. rwxmap's own default is the exact fp32 model.
