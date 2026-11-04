@@ -25,6 +25,15 @@ test('QUERY is read as GET; other methods are unchanged', () => {
   assert.ok(formatText({ method: 'delete', ...f }, lean).includes('| DELETE /a'));
 });
 
+test('lean rule credential-set is read as cant-undo-verb; other rules are unchanged', () => {
+  const st = { method: 'PUT', path: '/account/pin', operationId: 'op', summary: 's', description: 'd' };
+  const a = formatText(st, { class: 'x', rule: 'credential-set' });
+  assert.equal(a, formatText(st, { class: 'x', rule: 'cant-undo-verb' }));
+  assert.ok(a.startsWith('lean: x cant-undo-verb | PUT /account/pin'));
+  assert.ok(formatText(st, { class: 'x', rule: 'modify-verb' }).startsWith('lean: x modify-verb |'));
+  assert.ok(formatText(st, { class: 'w', rule: 'method' }).startsWith('lean: w method |'));
+});
+
 test('clean strips tags, unescapes, collapses whitespace and cuts by code points', () => {
   assert.equal(clean('<b>a</b>  &amp;\n b', 99), 'a & b');
   assert.equal(clean(null, 5), '');

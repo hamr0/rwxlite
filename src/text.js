@@ -82,6 +82,18 @@ function textMethod(m) {
   return u === 'QUERY' ? 'GET' : u;
 }
 
+// Lean rule names the model never saw, read as the trained rule they behave like.
+// rwxmap D131 added step-2 rule `credential-set` (class x, PUT/PATCH). Measured with the
+// default int8-pc model on the 32 credential-set ops in data/m0/mechanical.jsonl.gz:
+// as `credential-set` argmax w on 12 (3 at p >= 0.97); as `cant-undo-verb` all 32 argmax x
+// (isX >= 0.9996). The lean class stays as sent. Remove when round 10 trains on the real name.
+const LEAN_RULE_ALIASES = { 'credential-set': 'cant-undo-verb' };
+
+/** @param {string} rule */
+function textRule(rule) {
+  return has(LEAN_RULE_ALIASES, rule) ? LEAN_RULE_ALIASES[/** @type {keyof typeof LEAN_RULE_ALIASES} */ (rule)] : rule;
+}
+
 /**
  * @typedef {{method: string, path: string, operationId?: string|null, summary?: string|null, description?: string|null}} State
  * @typedef {{class: 'r'|'w'|'x', rule: string}} Lean
@@ -94,7 +106,7 @@ function textMethod(m) {
  * @returns {string}
  */
 export function formatText(state, lean) {
-  const parts = [`lean: ${lean.class} ${lean.rule}`, `${textMethod(state.method)} ${state.path}`];
+  const parts = [`lean: ${lean.class} ${textRule(lean.rule)}`, `${textMethod(state.method)} ${state.path}`];
   if (state.operationId) parts.push('op: ' + clean(state.operationId, 120));
   if (clean(state.summary, 1)) parts.push('sum: ' + clean(state.summary, 200));
   if (clean(state.description, 1)) parts.push('desc: ' + clean(state.description, 400));

@@ -422,6 +422,10 @@ The rules differ on 9 rows. 5 are GET rows only rwxlite's raise-get tier sends: 
 
 rwxmap ruled QUERY (RFC 10008, safe and idempotent like GET, with a body) as r and sends `state.method = "QUERY"` as-is. The model never saw QUERY in training, so the text step writes QUERY as GET (case-insensitive) before the model reads it; `checkRequest` still accepts any non-empty method string. Measured before the change, on the 383 fresh-exam GET rows relabelled QUERY: argmax changes on 1 row, 1 row crosses the 0.97 line, max |changes diff| 0.33; otherwise stable. Real QUERY training rows can come in a later labelling round; the labelling brief default is QUERY = r by protocol, same as GET.
 
+### Guard: lean rule `credential-set` read as `cant-undo-verb` (rwxmap D131, 2026-11-04, temporary until round 10)
+
+rwxmap's step-2 rule `credential-set` (class x, PUT/PATCH) is a lean rule name the model never saw. Measured (default int8-pc model, the 32 credential-set ops in `data/m0/mechanical.jsonl.gz`): as `credential-set` argmax w on 12, 3 with max p >= 0.97 (britbox /account/pin, whapi /account/plusCard/pin, circuitsandbox /spaces/{topicId}/pin); as `cant-undo-verb` (a trained x rule) all 32 argmax x, isX >= 0.9996. So `formatText` maps the rule through `LEAN_RULE_ALIASES` before the model reads it (the lean class stays as sent; `checkRequest` still accepts any non-empty rule). Re-measured with the guard: 32 of 32 argmax x, 0 lowerings at p >= 0.97. **Removal condition:** round 10 trains on the real name `credential-set`; then delete the alias. rwxmap is asked to never lower a credential-set row. Per rwxmap the risk is in mode b only (mode a never sends credential-set rows, they are settled; mode c, Jev, does not take them). Of the 3 lowerings, only britbox /account/pin is a real credential lowering; whapi PUT /account/plusCard/pin was ruled truth w at gate 3 (credential-set's one wrong fire), and circuitsandbox /spaces/{topicId}/pin has the same pinned-item shape (on rwxmap's ledger). The guard can turn those 2 into too-tight x rows, which is safe ('unsure means x').
+
 ## Modules
 
 Only module 0 is sharp. The rest are sketches.
@@ -465,15 +469,15 @@ Only module 0 is sharp. The rest are sketches.
 
 ## Round 10 (planned, 2026-11-04)
 
-User decisions, 2026-11-04. Nothing is trained yet. rwxmap's R1/R2 rules have not started and have no names (they start on their user's go), so **round 10 does not wait for them**: leans are rebuilt from current rwxmap as-is, and no guessed rule name goes into training. If R1/R2 later pass with new names, that triggers a later round, not this one.
+User decisions, 2026-11-04. Nothing is trained yet. rwxmap reports R1 and R2 both FAILED tuning (2026-11-04, the D100 bar for rules that only tighten): every right move was workos (the source vendor); with workos left out neither closed a leak, and each added wrong moves elsewhere (R1 on files.com PATCH /api_key; R2 on okta's sign-out page settings, GET/PUT .../pages/sign-out/customized). So there are **no new rule names**: `credential-set` is the only one to train on, R1/R2 are no longer an open question, and leans are rebuilt from current rwxmap as-is.
 
 **Inputs**
 1. **Leans from current rwxmap.** Rebuild the lean class + rule of every training row from today's rwxmap, so the model sees today's rule names. `credential-set` (step 2, PUT/PATCH only, class x, D130/D131, commit 41cdc55, 2026-11-03 17:15) came after the training data was built (`data/train/train.jsonl`, 16:10). `data/m0/mechanical.jsonl.gz` (123,339 ops, regenerated 23:24) already has it on 32 ops; training rows carry 0 (they carry 10 rule names: method, floor-post, method-floor, method-delete, read-verb, cant-undo-verb, modify-verb, read-verb-anywhere, modify-verb-summary, cant-undo-verb-summary). Measured today on those 32 (findings, "Round 10 pre-measure"): the model has never seen the name.
 2. **Relabel the leak shapes (truth label only).** Counted with `m1/round10-shapes.py` over train + val + v3eval (87,657 + 4,180 + 5,716 rows):
    - credential replace on PUT/PATCH, last non-parameter path segment in api-key, client-credentials, token, secret, integration-token (singular or plural): **59 rows** (train 44, val 4, v3eval 11), 57 labelled w, 2 x. 58 carry lean `w method-floor`, 1 carries `x cant-undo-verb`; none carries `credential-set` yet (after the rebuild some will; count then). Exam truth is x (clause b).
    - logout / signout / sign-out / end-session / log-off in the path or operationId, any method: **45 rows** (train 39, val 1, v3eval 5): POST 34, DELETE 6, GET 5. Labels: x 39, w 4, r 2; the 5 GET rows are labelled w or r. Truth is x.
-   Pattern first, then a hand/labeller check of every matched row (as in `data/r9-hand/README.md` and `docs/wiki/classifier-training.md`). Pattern hits are candidates in `data/round10/` (gitignored), not final labels. Rows from val/v3eval that are relabelled leave the tuning role: decide below.
-3. **Add pending labelled rows.** The burned fresh exam (`data/exam-2026-11-03-fresh`: truth.csv + ops.csv + rulings.csv, 949 rows) and round 9 hand labels (`data/r9-hand`, 1,200 rows). Exam #3 vendors stay untouched (rwxmap's spares: clerk, neon, supabase, mux, netbird, ory, novu). Check that no exam #3 vendor is in either set before merging.
+   **The leak shapes are workos-specific, not a cross-vendor pattern** (rwxmap, R1/R2 tuning; logout rows at other vendors are already x). So the pattern must NOT relabel anything by itself: every matched row gets a hand/labeller check, and only rows judged x by BRIEF-v3 change. Expect few changes. Known false positives of the patterns: files.com PATCH /api_key (credential pattern) and okta's sign-out page settings, GET/PUT .../pages/sign-out/customized (logout pattern). Pattern hits are candidates in `data/round10/` (gitignored), not final labels. Rows from val/v3eval that are relabelled leave the tuning role: decide below.
+3. **Add pending labelled rows.** The burned fresh exam (`data/exam-2026-11-03-fresh`: truth.csv + ops.csv + rulings.csv, 949 rows; all added as training rows with their truth, workos included, which is how the workos shape is learned) and round 9 hand labels (`data/r9-hand`, 1,200 rows). Exam #3 vendors stay untouched (rwxmap's spares: clerk, neon, supabase, mux, netbird, ory, novu). Check that no exam #3 vendor is in either set before merging.
 4. **QUERY augmentation.** Copy about 10% of GET rows (train has 42,581; about 4,250 rows), stratified by label and vendor, with method set to QUERY and the same label, so the model learns QUERY behaves like GET. After the retrain, measure GET vs QUERY agreement on held-out rows (argmax changes, rows crossing 0.97) and decide whether to keep the QUERY-to-GET mapping in `src/text.js`. Until then the mapping stays.
 
 **Order**
@@ -482,7 +486,6 @@ User decisions, 2026-11-04. Nothing is trained yet. rwxmap's R1/R2 rules have no
 **Hard constraint.** Round 10 must finish BEFORE shared exam #3 is pre-registered. Exam #3's prereg must commit the predict and score code with it (fresh-exam lesson, findings "Note on the fresh exam's pre-registration").
 
 **Open questions**
-- How R1/R2 land: now a later round (names and D-numbers only if they pass tuning; R1 may instead widen `credential-set`).
 - The QUERY sample size (10% proposed).
 - Whether to keep the val/v3eval split as-is, given that relabelled and added rows touch it. Proposal: keep the vendor split, relabel inside it, and do not use the relabelled val/v3eval rows to claim a pass.
 

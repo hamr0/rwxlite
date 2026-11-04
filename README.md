@@ -104,6 +104,7 @@ const many = await a.answerMany([req]); // each slot is { model, answers } or { 
 ```
 
 The HTTP `QUERY` method (RFC 10008) is read as `GET`: the model never saw `QUERY` in training.
+The lean rule `credential-set` (rwxmap D131) is read as `cant-undo-verb` in the model text, because the model never saw that name; the lean class is unchanged.
 
 - `lean` is required: the mechanical letter and rule (`{class: 'r'|'w'|'x', rule}`). The model was trained with it as the first words of its input.
 - Only the keys of `questions` are read. `isX` is p(x), `changes` is p(w) + p(x). rwxlite returns probabilities only; the caller decides.
