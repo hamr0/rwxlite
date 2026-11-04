@@ -84,9 +84,10 @@ function textMethod(m) {
 
 // Lean rule names the model never saw, read as the trained rule they behave like.
 // rwxmap D131 added step-2 rule `credential-set` (class x, PUT/PATCH). Measured with the
-// default int8-pc model on the 32 credential-set ops in data/m0/mechanical.jsonl.gz:
+// 0.2.0 int8-pc model on the 32 credential-set ops in data/m0/mechanical.jsonl.gz:
 // as `credential-set` argmax w on 12 (3 at p >= 0.97); as `cant-undo-verb` all 32 argmax x
-// (isX >= 0.9996). The lean class stays as sent. Remove when round 10 trains on the real name.
+// (isX >= 0.9996). The lean class stays as sent. Keep: round 10 was trained on the alias text
+// `cant-undo-verb` (it never saw the name `credential-set`), so the alias is part of the model's input contract.
 const LEAN_RULE_ALIASES = { 'credential-set': 'cant-undo-verb' };
 
 /** @param {string} rule */
