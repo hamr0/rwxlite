@@ -810,3 +810,8 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 - Decision: default file is int8 per-channel; fp32 is the "exact" option. Published as GitHub release assets (PRD, "M1 result").
 
 - QUERY read as GET (rwxmap D134): on the 383 fresh-exam GET rows relabelled QUERY, argmax changes on 1 row, 1 row crosses the 0.97 line, max |changes diff| 0.33; otherwise stable.
+
+## 2026-11-04: Round 10 pre-measure (plan, no training)
+
+- Unseen lean rule names: training rows carry 10 rule names and none is `credential-set` (added by rwxmap after the data was built). Current int8-pc on the 32 `credential-set` ops (lean x credential-set): argmax r 0 / w 12 / x 20; 12 below x, 3 of them at max p >= 0.97 (would be ACCEPTED lowerings in rwxmap's mode b: britbox.co.uk PUT /account/pin, circuitsandbox.net PUT /spaces/{topicId}/pin, whapi.com PUT /account/plusCard/pin, all w); isX min 0.0088, median 0.625. Same 32 with trained rule `cant-undo-verb`: all x, 0 below x, isX min 0.9996, median 0.9997. So the unseen name costs a lot; round 10 rebuilds the leans. (Of the three, `circuitsandbox` /pin looks like pinning a topic, not a credential; a rule question for rwxmap, not for the model.)
+- Training labels teach the leak shapes (`m1/round10-shapes.py`): credential replace on PUT/PATCH, 59 rows over train/val/v3eval, 57 labelled w (exam truth x); logout/signout/end-session, 45 rows, 5 GET rows labelled w or r (truth x). Relabelling the truth after a hand check is round 10 item 2 (PRD, "Round 10").

@@ -463,6 +463,29 @@ Only module 0 is sharp. The rest are sketches.
 - Done by the user on 2026-11-04: the name is reserved with a placeholder `rwxlite@0.0.1` (`npm view rwxlite version` shows 0.0.1), and the npm Trusted Publisher is configured for hamr0/rwxlite, workflow `publish.yml`.
 - The real code ships as the next release version through the `publish.yml` "Run workflow" button (no token). The model files go to the GitHub release via `m1/release-assets.mjs`.
 
+## Round 10 (planned, 2026-11-04)
+
+User decisions, 2026-11-04. Nothing is trained yet. rwxmap's R1/R2 rules have not started and have no names (they start on their user's go), so **round 10 does not wait for them**: leans are rebuilt from current rwxmap as-is, and no guessed rule name goes into training. If R1/R2 later pass with new names, that triggers a later round, not this one.
+
+**Inputs**
+1. **Leans from current rwxmap.** Rebuild the lean class + rule of every training row from today's rwxmap, so the model sees today's rule names. `credential-set` (step 2, PUT/PATCH only, class x, D130/D131, commit 41cdc55, 2026-11-03 17:15) came after the training data was built (`data/train/train.jsonl`, 16:10). `data/m0/mechanical.jsonl.gz` (123,339 ops, regenerated 23:24) already has it on 32 ops; training rows carry 0 (they carry 10 rule names: method, floor-post, method-floor, method-delete, read-verb, cant-undo-verb, modify-verb, read-verb-anywhere, modify-verb-summary, cant-undo-verb-summary). Measured today on those 32 (findings, "Round 10 pre-measure"): the model has never seen the name.
+2. **Relabel the leak shapes (truth label only).** Counted with `m1/round10-shapes.py` over train + val + v3eval (87,657 + 4,180 + 5,716 rows):
+   - credential replace on PUT/PATCH, last non-parameter path segment in api-key, client-credentials, token, secret, integration-token (singular or plural): **59 rows** (train 44, val 4, v3eval 11), 57 labelled w, 2 x. 58 carry lean `w method-floor`, 1 carries `x cant-undo-verb`; none carries `credential-set` yet (after the rebuild some will; count then). Exam truth is x (clause b).
+   - logout / signout / sign-out / end-session / log-off in the path or operationId, any method: **45 rows** (train 39, val 1, v3eval 5): POST 34, DELETE 6, GET 5. Labels: x 39, w 4, r 2; the 5 GET rows are labelled w or r. Truth is x.
+   Pattern first, then a hand/labeller check of every matched row (as in `data/r9-hand/README.md` and `docs/wiki/classifier-training.md`). Pattern hits are candidates in `data/round10/` (gitignored), not final labels. Rows from val/v3eval that are relabelled leave the tuning role: decide below.
+3. **Add pending labelled rows.** The burned fresh exam (`data/exam-2026-11-03-fresh`: truth.csv + ops.csv + rulings.csv, 949 rows) and round 9 hand labels (`data/r9-hand`, 1,200 rows). Exam #3 vendors stay untouched (rwxmap's spares: clerk, neon, supabase, mux, netbird, ory, novu). Check that no exam #3 vendor is in either set before merging.
+4. **QUERY augmentation.** Copy about 10% of GET rows (train has 42,581; about 4,250 rows), stratified by label and vendor, with method set to QUERY and the same label, so the model learns QUERY behaves like GET. After the retrain, measure GET vs QUERY agreement on held-out rows (argmax changes, rows crossing 0.97) and decide whether to keep the QUERY-to-GET mapping in `src/text.js`. Until then the mapping stays.
+
+**Order**
+1. Rebuild leans from current rwxmap (no R1/R2 names). 2. Relabel the leak shapes (pattern, then hand check). 3. Merge items 3 and 4. 4. Train on the home server sandbox `~/rwxlite-train` with the same recipe as r8soft (soft targets; reasons to change are stated here if any). 5. Refit T on val. 6. Re-export int8-pc + fp32 and repeat the int8 parity. 7. New model sha and model string (the string must change with the weights).
+
+**Hard constraint.** Round 10 must finish BEFORE shared exam #3 is pre-registered. Exam #3's prereg must commit the predict and score code with it (fresh-exam lesson, findings "Note on the fresh exam's pre-registration").
+
+**Open questions**
+- How R1/R2 land: now a later round (names and D-numbers only if they pass tuning; R1 may instead widen `credential-set`).
+- The QUERY sample size (10% proposed).
+- Whether to keep the val/v3eval split as-is, given that relabelled and added rows touch it. Proposal: keep the vendor split, relabel inside it, and do not use the relabelled val/v3eval rows to claim a pass.
+
 ## Open questions
 
 - **After the M0 NO-GO (2026-11-03).** Options: (1) round 9, a targeted retrain on the two failure shapes (POST creates that move money, start jobs or restore data; credential PUT/PATCH), then a fresh exam; (2) make "ask at p" part of the product and pre-register it as the go/no-go on a fresh exam; (3) accept and move to M1. Any fresh exam needs vendors never used in training; the exam vendors are burned and the remaining locked vendors belong to rwxmap's pre-registered split, so the vendors are agreed with rwxmap first. **Chosen: option 2** (see "Option 2"); the round-9 retrain is skipped. The fresh exam has since been run (coolify, workos, lago, resend; NO-GO by one row, see "Fresh exam result"). Still open: what to do about the confident non-lowering mistakes (credential upserts, logouts), which needs a new fresh exam with new vendors, and whether bareguard prompts on x (decides what too-tight costs).
