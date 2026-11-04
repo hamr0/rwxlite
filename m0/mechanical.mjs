@@ -8,17 +8,20 @@
 // already carries method/path/operationId/summary/description, which is all
 // classifyRow reads, so the specs are not re-parsed.
 //
-// rwxmap is imported via the file: dependency (node_modules/rwxmap -> ../rwxmap)
-// and is never written to.
+// rwxmap is imported from a checkout at ../rwxmap (or $RWXMAP_DIR) and is never written to.
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
-import { fileURLToPath } from 'node:url';
-import { classifyRow, needsJev } from 'rwxmap';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(HERE, '..', 'data', 'm0');
 const RWXMAP = process.env.RWXMAP_DIR || path.resolve(HERE, '..', '..', 'rwxmap');
+// rwxmap is deliberately not an npm dependency of rwxlite (npm ci must work on a clean clone); it is
+// loaded from a checkout beside this repo, or from RWXMAP_DIR.
+const { classifyRow, needsJev } = await import(pathToFileURL(path.join(RWXMAP, 'src', 'index.js')).href).catch((e) => {
+  throw new Error(`rwxmap not found at ${RWXMAP} (clone hamr0/rwxmap beside this repo or set RWXMAP_DIR): ${e.message}`);
+});
 const D = (...p) => path.join(RWXMAP, 'data', ...p);
 
 const EXAM_PROVIDERS = new Set(['cloudflare', 'pagerduty', 'sentry']); // exam-2026-09-22 provider column

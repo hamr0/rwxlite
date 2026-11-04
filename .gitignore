@@ -12,3 +12,6 @@ runs/
 # local session state (stash, settings) and tool cache
 .claude/
 .litectx/
+
+# generated from JSDoc by tsc (build:types); never committed
+/types/

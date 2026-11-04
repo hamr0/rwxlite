@@ -104,12 +104,12 @@ The model itself outputs just three numbers. A small Node wrapper (M1) turns tho
 // request (same as Jev's)
 { "state": { "method": "POST", "path": "/v1/search", "operationId": "search",
              "summary": "Search records", "description": "" },
-  "model": "rwxlite-0.1.0",
+  "model": "rwxlite-0.2.0",
   "questions": { "isX": "<the a7bc855 question text>" } }
 
 // answer (same shape as Jev's)
 { "answers": { "isX": { "noul": 0.04 } },
-  "model": "rwxlite-0.1.0+<weights-hash>" }
+  "model": "rwxlite-0.2.0+<weights-hash>" }
 ```
 
 There's no free text, no explanations and no chat, which also makes it fast and predictable.
@@ -121,7 +121,7 @@ Two differences from Jev:
 
 ### Standalone use (mode b, outside rwxmap)
 ```json
-{ "letter": "r", "p": { "r": 0.91, "w": 0.07, "x": 0.02 }, "model": "rwxlite-0.1.0+<hash>" }
+{ "letter": "r", "p": { "r": 0.91, "w": 0.07, "x": 0.02 }, "model": "rwxlite-0.2.0+<hash>" }
 ```
 That's the form API providers or guardrails like bareguard would use. A low top probability becomes the "ask a human" signal, and the threshold for that is the caller's choice. For lowerings the measured threshold is 0.97 (see above); a plain confidence bar alone only caught about half the dangerous mistakes on the first exam. Exact field names are settled in M1 with rwxmap.
 

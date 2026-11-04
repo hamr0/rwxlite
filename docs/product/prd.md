@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); next step open. Date: 2026-11-03.
+Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built (0.2.0, not yet on npm); round 10 planned, nothing trained yet. Date: 2026-11-04.
 
 ## Problem & goal
 
@@ -318,6 +318,114 @@ Silently keeping the mechanical letter instead of asking costs too-tight rows (1
 - An automated retraining pipeline.
 - The gate's ask/deny decision itself. That is bareguard's job.
 
+### M1 result (2026-11-04)
+
+What was built (`src/`, `m1/`, `test/`, `.github/workflows/ci.yml`):
+- `m1/export_onnx.py export` writes the fp32 ONNX graph (inputs `input_ids`, `attention_mask`, `token_type_ids`; output raw `logits` (n,3)) and a plain `vocab.txt`. `m1/variants.py build` writes five more files from it (see the table). Temperature T = 0.844 is applied by the caller, as in `train/exam_score.py`.
+- `src/text.js` and `src/tokenizer.js` are Node ports of `fmt_text` and the BERT WordPiece tokenizer, so Node needs no Python and no `transformers`. They match the Python on all 102,781 local texts: 0 text mismatches (5,228 exam rows), 0 token-id mismatches (`node m1/check-corpus.mjs`, exit 0). A 973-row fixture of the same (`test/fixtures/parity.jsonl`) is committed and runs in CI.
+- `src/answerer.js`: `loadAnswerer({dir})` reads `manifest.json` (`version`, `modelFile`, sha256 of each file), refuses to start on any sha mismatch, and returns an `Answerer` with `answer(req)` and `answerMany(reqs)`. Switching the shipped variant is a manifest change (`node m1/manifest.mjs <model-file>`).
+- Answer shape: `{model, answers: {isX: {noul}, changes: {noul}}}` where `isX = p(x)` and `changes = p(w) + p(x)`; only the asked questions are returned. The model string is `rwxlite-<version>+<first 8 hex of the weights' sha256>`. rwxlite never returns a letter, a cut or an ask: rwxmap derives `x = isX`, `w = changes - isX`, `r = 1 - changes` and keeps all decisions. There are two shapes, both plain JSON (an `Error` instance serialises as `{}`, so none is returned): success `{model, answers: {...}}` and no answer `{model, error: '<message>'}` with no `answers` key. `answerMany` returns one of the two in every slot (a bad request fails its own slot; a model failure fails every slot); `answer(req)` returns the success object and throws an `Error` with the same message on a no-answer. On either, the caller keeps the mechanical letter.
+
+Proposal for rwxmap's D133: the request needs one field Jev's does not have, `lean: {class, rule}`, the mechanical letter and rule. The model was trained with them as the first words of its input (`lean: x path-verb | POST /v1/...`), so without them the answer is not the one that was scored. rwxmap already has both when it builds the Jev request. Everything else is Jev's shape: `state` (method, path, operationId, summary, description), `model` (ignored, there is one model), `questions` (only the keys are read).
+
+Distribution (superseded by the Decisions below; kept for the install sizes): model files are not bundled in the npm package. The package ships the code, `vocab.txt`'s hash and the manifest format; the weights are downloaded on first use to a cache directory and checked against the manifest's sha256 (fail closed on mismatch). `onnxruntime-node` is an optional dependency. CPU-only, `npm install onnxruntime-node` with `ONNXRUNTIME_NODE_INSTALL=skip` is 294 MB in `node_modules` (all platforms' binaries; the Linux x64 library is 48 MB); with the default install on Linux x64 it also downloads 285 MB of CUDA libraries (566 MB total). rwxmap should install it with the skip variable, or document that.
+
+Quantisation variants, measured on the two burned exams (a precision check, not a new go/no-go). Python side: ONNX Runtime, batch 1, against the saved torch fp32 probabilities. Node side: batch 1, 1 thread, all 949 fresh rows, after 20 warm-up rows, end to end (format, tokenise, run, calibrate). Machine: i7-8665U 1.9 GHz, 8 logical cores, Node 22.22.2, onnxruntime-node 1.31.1, load average about 2 to 3 during the runs. Raw numbers in `data/m1/variants.json` (local).
+
+| Variant | Size | Node p50 / p95 / mean ms | Max / mean abs p vs torch (fresh) | Argmax agree (fresh, 09-22) | Rows across the 0.97 line (fresh, 09-22) |
+|---|---|---|---|---|---|
+| fp32 | 90.97 MB | 23.4 / 49.0 / 25.9 | 0.000001 / 0 | 949, 4279 | 0, 0 |
+| fp16 | 45.59 MB | 24.6 / 50.9 / 27.0 | 0.0008 / 0.00002 | 949, 4279 | 0, 0 |
+| int8 default (per-tensor, MatMul + embeddings) | 23.02 MB | 17.2 / 36.6 / 18.8 | 0.417 / 0.0062 | 937, 4241 | 17, 87 |
+| int8 per-channel | 23.13 MB | 18.2 / 38.1 / 20.2 | 0.118 / 0.0022 | 943, 4270 | 8, 33 |
+| int8 MatMul only | 58.77 MB | 17.2 / 36.9 / 19.0 | 0.458 / 0.0059 | 935, 4238 | 21, 85 |
+| int8 per-channel, MatMul only | 58.88 MB | 17.3 / 37.2 / 19.1 | 0.224 / 0.0022 | 945, 4272 | 2, 32 |
+
+Fresh exam re-scored with each file's probabilities under the pre-registered GO/NO-GO rule (lower-bar-ask 0.97, same code, only the probabilities differ):
+
+| Variant | Right | Too loose | Too tight | Asked | Rows whose final letter or ask changed vs fp32 |
+|---|---|---|---|---|---|
+| fp32 / torch (as registered) | 810 | 5 | 60 | 74 | 0 |
+| fp16 | 810 | 5 | 60 | 74 | 0 |
+| int8 default | 808 | 5 | 55 | 81 | 15 |
+| int8 per-channel | 809 | 5 | 61 | 74 | 7 |
+| int8 MatMul only | 805 | 5 | 56 | 83 | 17 |
+| int8 per-channel, MatMul only | 810 | 5 | 59 | 75 | 5 |
+
+The 09-22 exam, mode (a) with no bar: fp32 4104 right, 36 too loose, 139 too tight. int8 default 4106 / 45 / 128 (35 rows changed; 9 more too loose); per-channel 4105 / 36 / 138 (18 changed); MatMul only 4101 / 45 / 133 (37); per-channel MatMul only 4102 / 36 / 141 (16); fp16 identical to fp32 (0 changed).
+
+Reading:
+- Node and Python agree: for every variant the largest difference between Node's answer and the Python ONNX Runtime's at batch 1 is 1.3e-7 on the fresh rows and 1.4e-7 on the 4,279 older rows. The runtime is not a source of drift; the quantised weights are.
+- Default dynamic int8 moves answers a lot (mean 0.006, up to 0.42 in p) and, on the older exam, adds 9 too-loose rows. Per-channel weight scales cut the drift by about 3x at the same size and keep the too-loose count equal to fp32 on both exams (5 and 36). Keeping embeddings in fp32 (MatMul only) does not help by itself and costs 36 MB.
+- Dynamic int8 scales each activation tensor per call, so a row's answer depends on its batch mates: the default int8 file changed 15 fresh rows at batch 1 and 13 at batch 32. The differences are the same size as the quantisation drift.
+- fp16 reproduces the fp32 decisions exactly (0 rows changed on both exams, max p difference 0.001) at half the size of the fp32 file, but is not faster on this CPU (mean 27.0 ms against 25.9 for fp32).
+- D133 asks for at most 20 ms per op on int8, laptop CPU. Mean per-op latency at batch 1 on 1 thread is 18.8 ms (default int8) and 20.2 ms (per-channel), p95 about 37 to 38 ms, p99 about 39 ms. fp32 and fp16 are 26 to 27 mean, so only int8 meets the pin on average, and no variant meets it at p95. Batched, 32 rows per call on default threads, int8 costs 21.8 to 22.4 ms per op here (the machine was shared with other jobs, so treat all latency numbers as upper bounds). Cold load: 0.23 to 0.28 s for the 23 MB files.
+- Not decided here: which file ships. The numbers are a precision check on burned exams, not a new go/no-go (fresh exam stays NO-GO by one row; every variant has the same 5 too-loose rows).
+
+Decisions (2026-11-04):
+- **Package default model file: int8 per-channel** (rwxmap's own default is the exact fp32 model, per its PRD) (`model-int8-pc.onnx`, sha256 `8ad0a182...`, model string `rwxlite-0.2.0+8ad0a182` at this version). It has the fp32 too-loose counts on both exams (5 and 36) at 23.1 MB.
+- **Option "exact": fp32** (`model-fp32.onnx`, 91 MB) for users who want no quantisation drift and do not mind the size.
+- **Distribution: GitHub releases on hamr0/rwxlite.** Per release: `manifest.json` (default, int8-pc), `manifest-exact.json` (fp32), `model-int8-pc.onnx`, `model-fp32.onnx`, `vocab.txt`. `node m1/release-assets.mjs` builds that set into `data/m1/release/` and prints the sizes, sha256s and the `gh release upload` command; it uploads nothing. rwxmap downloads on first use, always the latest, from `https://github.com/hamr0/rwxlite/releases/latest/download/<file>`, and caches each model in `<cache>/rwxlite-<semver>+<sha8>/` holding `manifest.json` (`{version, modelFile, model, files: {name: sha256}}`), the model file and `vocab.txt`; every sha256 is checked.
+- **Threads:** `loadAnswerer` defaults to `Math.min(4, os.availableParallelism())` intra-op threads (was 1); the `threads` option stays. `m1/bench.mjs` keeps its own default of 1 so old results stay comparable.
+
+Latency by thread count, Node 22, batch 1, end to end per op, ms:
+
+| Machine | File | Threads | Mean | p50 | p95 |
+|---|---|---|---|---|---|
+| Server i3-8100T (4 cores, quiet) | int8 default | 1 | 15.53 | 14.03 | 31.02 |
+| | | 2 | 8.98 | 8.14 | 17.59 |
+| | | 4 | 6.20 | 5.46 | 11.11 |
+| | int8 per-channel | 1 | 15.52 | 14.03 | 31.02 |
+| | | 2 | 9.15 | 8.28 | 17.81 |
+| | | 4 | 6.93 | 5.72 | 13.13 |
+| | fp32 | 1 | 19.69 | 17.71 | 38.59 |
+| | | 2 | 11.50 | 10.40 | 21.95 |
+| | | 4 | 7.85 | 7.13 | 13.97 |
+| Laptop i7-8665U (background load) | int8 per-channel | 1 | 19.8 to 23.3 | 18.0 to 21.0 | 39 to 46 |
+
+Server: Intel i3-8100T @ 3.10GHz, 4 cores, load average 0.2 to 1.8 during the runs. Laptop: i7-8665U @ 1.90GHz, 8 logical cores, under background load.
+
+The 20 ms pin (D133) is met at p95 with 4 threads on both int8 and fp32 on the server. The laptop numbers swung about 2x with machine load across runs (hence ranges), so read them as upper bounds.
+
+### Decision rules: rwxlite's measured rule and rwxmap's secondPass
+
+rwxlite returns only p. Which rule turns p into a letter is rwxmap's call. This section records the rule rwxlite measured (its steps are kept exact, because the fixture and `test/decision.test.js` use them) and the comparison rwxmap ran against its own. The fresh-exam result for rwxlite's rule (810 right, 5 too loose, 60 too tight, 74 asked of 949) came from one exact rule: `mode_a` (`train/exam_score.py`) and then lower-bar-ask at 0.97 (`GONOGO_lba097` in `train/exam_fresh.py`). In terms of the answer: p(x) = `isX`, p(w)+p(x) = `changes`, p(w) = `changes - isX`, p(r) = `1 - changes`, max p = max(`1 - changes`, `changes - isX`, `isX`). All p are calibrated (softmax of logits / 0.844), which rwxlite already does.
+
+1. **Which rows move at all.** Only rows with a Jev tier: `jev-lower` (tier lower), `jev-raise-wx` (raise-wx), `jev-raise-get` (raise-get). These are the rows rwxmap's `needsJev` sends to Jev today, mapped by `TIER` in `train/common.py`. A row with no tier (jev_tier empty) is never moved by p; only step 3 can still change it. Rows rwxmap does not send (no tier) are still scored by the model in the fixture, so p exists for all of them.
+2. **Cut per tier** (m = the mechanical letter; x > w > r):
+   - lower: if m = x and `isX < 0.30`, new letter is r when the method is POST and `changes < 0.40`, else w.
+   - raise-wx: if m = w and `isX >= 0.15`, new letter is x.
+   - raise-get: if m = r and `changes >= 0.05`, new letter is w.
+   - Otherwise the letter stays m.
+3. **Credential rule** (`cred_hit`, `train/common.py`): if the method is not GET and any of operationId, summary, path matches the regex below, the letter is x, whatever steps 1 and 2 said. Each field is first normalised: camelCase split (`([a-z0-9])([A-Z])` to `\1 \2`), every run of non-alphanumerics to one space, lowercased. The regex source:
+   `\b(?:change|reset|rotate|regenerate|renew|revoke|invalidate|expire)\b(?: \w+){0,3}? (?:password|passcode|passphrase|pin|pin code|auth key|authkey|api key|apikey|api secret|secret key|client secret)s?\b(?! (?:polic|rule|requirement|complexity|setting|config))`
+4. **DELETE and rows outside the tiers** keep the mechanical letter (the credential rule still applies to non-GET, DELETE included).
+5. **The final step (ask).** A lowering is a final letter below the mechanical one. A lowering with max p < 0.97 is asked: in rwxmap's terms, keep the stricter (mechanical) letter and add a review marker. Raises and keeps are trusted as they are. (The scripts count such a row as asked, not answered; its `expected.letter` in the fixture is the lowered letter the rule produced, so rwxmap can see what was withheld.)
+
+**Other rules have no rwxlite numbers.** Argmax, other rows, other cuts, other bars, a different model file: none of them is what scored 810 / 5 / 60 / 74 in rwxlite's own scoring. Those numbers are for the rule above on the int8 per-channel default model (809 / 5 / 61 / 74 there); the 810 / 5 / 60 / 74 figure is the registered torch fp32 run (see the variant table).
+
+**Rule comparison by rwxmap (their commit 466cda1, `poc/d133-rule-compare/readout.txt` in rwxmap).** Same 949 fresh-exam rows and the same int8 per-channel p as the fixture. Asked or undecided rows are scored at the stricter letter. Tuning data for rwxmap, not an exam. rwxlite's rule reproduces `expected` on all 949 rows (0 mismatches).
+
+| Rule | Exact | Too loose | Too tight | Rows sent | Asked / undecided |
+|---|---|---|---|---|---|
+| Mechanical alone | 736 | 6 | 207 | | |
+| rwxlite tier rule (mode a + lower-bar-ask 0.97) | 821 | 5 | 123 | 775 | 74 asked |
+| rwxmap secondPass (rows their marker calls loose or tight; argmax over r/w/x; raises always accepted; lowerings need max p >= 0.97; undecided = x + review) | 826 | 6 | 117 | 425 | 99 undecided |
+
+The rules differ on 9 rows. 5 are GET rows only rwxlite's raise-get tier sends: the two workos logouts are truth x (both rules too loose), the other 3 are truth r (rwxlite's rule makes them too tight). The other 4 are PUT/PATCH rows rwxlite's raise-wx tier raises at isX >= 0.15: lago `/invoices/{id}/finalize` is truth x (one fewer leak for rwxlite), the other 3 are truth w.
+
+**rwxmap's ruling (D133).** Keep secondPass. Reasons: a one-row leak difference is noise, and it matches their rulings (settled rows untouched, undecided means x). rwxlite's numbers stay rwxlite's; secondPass will be tested on shared exam #3. Neither rule fixes the 5 real leaks (3 credential PUT/PATCH, 2 logout GETs): the model agrees with mechanical on them (client-credentials w 0.975, `/sso/logout` w 0.969). rwxmap's R1/R2 tuning comes next.
+
+**Parity fixture.** `test/fixtures/decision.jsonl`, made by `.venv/bin/python m1/decision-fixture.py` from the default model's batch-1 p and the pre-registered scripts (imported unchanged; truth is never read). One row per operation, all 949: `{id, method, state (5 fields), lean {class, rule}, jev_tier (null when none), isX, changes, expected {letter, asked}}`. `test/decision.test.js` holds a JS reference of the rule (test only; not exported from `src`) and reproduces `expected` for all 949 rows from those fields alone, so the rule above is complete. Counts: 165 lowerings, 10 raises, 774 keeps, 74 asked. It is a parity and reference file for rwxlite's rule; rwxmap may use it to check its own port of that rule, but it does not have to apply that rule.
+
+### HTTP QUERY read as GET (rwxmap D134, 2026-11-04)
+
+rwxmap ruled QUERY (RFC 10008, safe and idempotent like GET, with a body) as r and sends `state.method = "QUERY"` as-is. The model never saw QUERY in training, so the text step writes QUERY as GET (case-insensitive) before the model reads it; `checkRequest` still accepts any non-empty method string. Measured before the change, on the 383 fresh-exam GET rows relabelled QUERY: argmax changes on 1 row, 1 row crosses the 0.97 line, max |changes diff| 0.33; otherwise stable. Real QUERY training rows can come in a later labelling round; the labelling brief default is QUERY = r by protocol, same as GET.
+
+### Guard: lean rule `credential-set` read as `cant-undo-verb` (rwxmap D131, 2026-11-04, temporary until round 10)
+
+rwxmap's step-2 rule `credential-set` (class x, PUT/PATCH) is a lean rule name the model never saw. Measured (default int8-pc model, the 32 credential-set ops in `data/m0/mechanical.jsonl.gz`): as `credential-set` argmax w on 12, 3 with max p >= 0.97 (britbox /account/pin, whapi /account/plusCard/pin, circuitsandbox /spaces/{topicId}/pin); as `cant-undo-verb` (a trained x rule) all 32 argmax x, isX >= 0.9996. So `formatText` maps the rule through `LEAN_RULE_ALIASES` before the model reads it (the lean class stays as sent; `checkRequest` still accepts any non-empty rule). Re-measured with the guard: 32 of 32 argmax x, 0 lowerings at p >= 0.97. `node m1/credential-set-file.mjs` writes `test/fixtures/credential-set.jsonl`, the 32 ops with the model's answers before the guard and after it, so rwxmap can check its secondPass floor on identical rows (no test reads it; regenerating it reproduces the same numbers). **Removal condition:** round 10 trains on the real name `credential-set`; then delete the alias. rwxmap is asked to never lower a credential-set row. Per rwxmap the risk is in mode b only (mode a never sends credential-set rows, they are settled; mode c, Jev, does not take them). Of the 3 lowerings, only britbox /account/pin is a real credential lowering; whapi PUT /account/plusCard/pin was ruled truth w at gate 3 (credential-set's one wrong fire), and circuitsandbox /spaces/{topicId}/pin has the same pinned-item shape (on rwxmap's ledger). The guard can turn those 2 into too-tight x rows, which is safe ('unsure means x').
+
 ## Modules
 
 Only module 0 is sharp. The rest are sketches.
@@ -329,7 +437,7 @@ Only module 0 is sharp. The rest are sketches.
 - Train the small encoder.
 - Score modes (a) and (b), in fp32 and int8, on the exam (done in fp32 only, on the exam and on the fresh exam; int8 waits for M1).
 
-**M1 — Jev-compatible local answerer.**
+**M1 — Jev-compatible local answerer.** Status 2026-11-04: built and measured; default int8 per-channel, option fp32, GitHub releases (see "M1 result").
 - Export int8 ONNX.
 - Run it in Node.
 - Accept `{state, model, questions}`, return `{p, model}`.
@@ -351,10 +459,41 @@ Only module 0 is sharp. The rest are sketches.
 - Round 5: BRIEF-v3 only; DELETE mechanical; fresh-sample gate used once; model/format decisions recorded above.
 - Licence: Apache-2.0, matching rwxmap (user, 2026-11-03).
 
+## Publishing (user, 2026-11-04)
+
+- rwxlite is published publicly on npm as `rwxlite`, so rwxmap can `import { loadAnswerer } from 'rwxlite'`. The name was free on 2026-11-04 (registry 404).
+- The tarball holds only src/, types/, README, LICENSE, CHANGELOG (14 files, 34.8 kB packed and 110.1 kB unpacked by `npm pack --dry-run`, with the entity table). Model files are not in it; they come from GitHub releases (`m1/release-assets.mjs`).
+- `publish.yml` is manual (Run workflow), OIDC trusted publishing, no token in CI.
+- Done by the user on 2026-11-04: the name is reserved with a placeholder `rwxlite@0.0.1` (`npm view rwxlite version` shows 0.0.1), and the npm Trusted Publisher is configured for hamr0/rwxlite, workflow `publish.yml`.
+- The real code ships as the next release version through the `publish.yml` "Run workflow" button (no token). The model files go to the GitHub release via `m1/release-assets.mjs`.
+- **Release order (the model files must be on the release before npm has the version):** 1. merge `m1` into `main`; 2. create the GitHub release `v<version>` with the assets from `node m1/release-assets.mjs` (manifest.json, manifest-exact.json, vocab.txt, model-int8-pc.onnx, model-fp32.onnx); 3. then "Run workflow" for `publish.yml`. The workflow enforces step 2: it fails before publishing if the release or any of those five assets is missing, if any asset is zero-size, or if the release's `manifest.json` `version` differs from package.json.
+
+## Round 10 (planned, 2026-11-04)
+
+User decisions, 2026-11-04. Nothing is trained yet. rwxmap reports R1 and R2 both FAILED tuning (2026-11-04, the D100 bar for rules that only tighten): every right move was workos (the source vendor); with workos left out neither closed a leak, and each added wrong moves elsewhere (R1 on files.com PATCH /api_key; R2 on okta's sign-out page settings, GET/PUT .../pages/sign-out/customized). So there are **no new rule names**: `credential-set` is the only one to train on, R1/R2 are no longer an open question, and leans are rebuilt from current rwxmap as-is.
+
+**Inputs**
+1. **Leans from current rwxmap.** Rebuild the lean class + rule of every training row from today's rwxmap, so the model sees today's rule names. `credential-set` (step 2, PUT/PATCH only, class x, D130/D131, commit 41cdc55, 2026-11-03 17:15) came after the training data was built (`data/train/train.jsonl`, 16:10). `data/m0/mechanical.jsonl.gz` (123,339 ops, regenerated 23:24) already has it on 32 ops; training rows carry 0 (they carry 10 rule names: method, floor-post, method-floor, method-delete, read-verb, cant-undo-verb, modify-verb, read-verb-anywhere, modify-verb-summary, cant-undo-verb-summary). Measured today on those 32 (findings, "Round 10 pre-measure"): the model has never seen the name.
+2. **Relabel the leak shapes (truth label only).** Counted with `m1/round10-shapes.py` over train + val + v3eval (87,657 + 4,180 + 5,716 rows):
+   - credential replace on PUT/PATCH, last non-parameter path segment in api-key, client-credentials, token, secret, integration-token (singular or plural): **59 rows** (train 44, val 4, v3eval 11), 57 labelled w, 2 x. 58 carry lean `w method-floor`, 1 carries `x cant-undo-verb`; none carries `credential-set` yet (after the rebuild some will; count then). Exam truth is x (clause b).
+   - logout / signout / sign-out / end-session / log-off in the path or operationId, any method: **45 rows** (train 39, val 1, v3eval 5): POST 34, DELETE 6, GET 5. Labels: x 39, w 4, r 2; the 5 GET rows are labelled w or r. Truth is x.
+   **The leak shapes are workos-specific, not a cross-vendor pattern** (rwxmap, R1/R2 tuning; logout rows at other vendors are already x). So the pattern must NOT relabel anything by itself: every matched row gets a hand/labeller check, and only rows judged x by BRIEF-v3 change. Expect few changes. Known false positives of the patterns: files.com PATCH /api_key (credential pattern) and okta's sign-out page settings, GET/PUT .../pages/sign-out/customized (logout pattern). Pattern hits are candidates in `data/round10/` (gitignored), not final labels. Rows from val/v3eval that are relabelled leave the tuning role: decide below.
+3. **Add pending labelled rows.** The burned fresh exam (`data/exam-2026-11-03-fresh`: truth.csv + ops.csv + rulings.csv, 949 rows; all added as training rows with their truth, workos included, which is how the workos shape is learned) and round 9 hand labels (`data/r9-hand`, 1,200 rows). Exam #3 vendors stay untouched (rwxmap's spares: clerk, neon, supabase, mux, netbird, ory, novu). Check that no exam #3 vendor is in either set before merging.
+4. **QUERY augmentation.** Copy about 10% of GET rows (train has 42,581; about 4,250 rows), stratified by label and vendor, with method set to QUERY and the same label, so the model learns QUERY behaves like GET. After the retrain, measure GET vs QUERY agreement on held-out rows (argmax changes, rows crossing 0.97) and decide whether to keep the QUERY-to-GET mapping in `src/text.js`. Until then the mapping stays.
+
+**Order**
+1. Rebuild leans from current rwxmap (no R1/R2 names). 2. Hand-check the leak shapes (the pattern finds candidates only; every match is hand checked, and only rows judged x change; R1/R2 failed, so no pattern relabel; files.com PATCH /api_key and okta .../pages/sign-out/customized are known false positives). 3. Merge items 3 and 4. 4. Train on the home server sandbox `~/rwxlite-train` with the same recipe as r8soft (soft targets; reasons to change are stated here if any). 5. Refit T on val. 6. Re-export int8-pc + fp32 and repeat the int8 parity. 7. New model sha and model string (the string must change with the weights).
+
+**Hard constraint.** Round 10 must finish BEFORE shared exam #3 is pre-registered. Exam #3's prereg must commit the predict and score code with it (fresh-exam lesson, findings "Note on the fresh exam's pre-registration").
+
+**Open questions**
+- The QUERY sample size (10% proposed).
+- Whether to keep the val/v3eval split as-is, given that relabelled and added rows touch it. Proposal: keep the vendor split, relabel inside it, and do not use the relabelled val/v3eval rows to claim a pass.
+
 ## Open questions
 
 - **After the M0 NO-GO (2026-11-03).** Options: (1) round 9, a targeted retrain on the two failure shapes (POST creates that move money, start jobs or restore data; credential PUT/PATCH), then a fresh exam; (2) make "ask at p" part of the product and pre-register it as the go/no-go on a fresh exam; (3) accept and move to M1. Any fresh exam needs vendors never used in training; the exam vendors are burned and the remaining locked vendors belong to rwxmap's pre-registered split, so the vendors are agreed with rwxmap first. **Chosen: option 2** (see "Option 2"); the round-9 retrain is skipped. The fresh exam has since been run (coolify, workos, lago, resend; NO-GO by one row, see "Fresh exam result"). Still open: what to do about the confident non-lowering mistakes (credential upserts, logouts), which needs a new fresh exam with new vendors, and whether bareguard prompts on x (decides what too-tight costs).
 
 - **Which small encoder.** all-MiniLM-L6-v2 first, bge-small-en-v1.5 second, TF-IDF + LR as baseline; the bars decide.
 - **Model string.** What exact string rwxlite returns in `{p, model}`, and how it is versioned. rwxmap records the model string on every moved verdict (D88), so it must change whenever the weights change.
-- **Distribution form.** npm package with the ONNX file, or a separate download. Decided in M1.
+- **Distribution form.** Resolved 2026-11-04: code in npm, weights from GitHub releases on hamr0/rwxlite, downloaded by rwxmap on first use (latest), cached per `rwxlite-<semver>+<sha8>/`, sha256-checked. See "M1 result", Decisions.

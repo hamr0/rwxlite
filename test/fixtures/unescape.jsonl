@@ -1,0 +1,759 @@
+{"kind": "unescape", "in": "Caf&eacute; &copy 2020 &frac12; &check; &lsqb;x&rsqb;", "out": "Caf\u00e9 \u00a9 2020 \u00bd \u2713 [x]"}
+{"kind": "unescape", "in": "&amp b", "out": "& b"}
+{"kind": "unescape", "in": "&lt;x&gt", "out": "<x>"}
+{"kind": "unescape", "in": "&ensp;&emsp;", "out": "\u2002\u2003"}
+{"kind": "unescape", "in": "&nbsp", "out": "\u00a0"}
+{"kind": "unescape", "in": "&#1;", "out": ""}
+{"kind": "unescape", "in": "&#x7f;", "out": ""}
+{"kind": "unescape", "in": "&#xfffe;", "out": ""}
+{"kind": "unescape", "in": "&#0;", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#128;", "out": "\u20ac"}
+{"kind": "unescape", "in": "&#x110000;", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#xd800;", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#65;bc", "out": "Abc"}
+{"kind": "unescape", "in": "&ampx", "out": "&x"}
+{"kind": "unescape", "in": "&notit;", "out": "\u00acit;"}
+{"kind": "unescape", "in": "&notin;", "out": "\u2209"}
+{"kind": "unescape", "in": "&#", "out": "&#"}
+{"kind": "unescape", "in": "&#x;", "out": "&#x;"}
+{"kind": "unescape", "in": "&;", "out": "&;"}
+{"kind": "unescape", "in": "&&amp;", "out": "&&"}
+{"kind": "unescape", "in": "", "out": ""}
+{"kind": "unescape", "in": "plain", "out": "plain"}
+{"kind": "unescape", "in": "a & b", "out": "a & b"}
+{"kind": "unescape", "in": "&amp;amp;", "out": "&amp;"}
+{"kind": "unescape", "in": "&#X41;", "out": "A"}
+{"kind": "unescape", "in": "&#65", "out": "A"}
+{"kind": "unescape", "in": "&#99999999999999999999;", "out": "\ufffd"}
+{"kind": "unescape", "in": "&unknown;", "out": "&unknown;"}
+{"kind": "unescape", "in": "&unknown", "out": "&unknown"}
+{"kind": "unescape", "in": "&AMP", "out": "&"}
+{"kind": "unescape", "in": "&Amp;", "out": "&Amp;"}
+{"kind": "unescape", "in": "&notit", "out": "\u00acit"}
+{"kind": "unescape", "in": "&ltx", "out": "<x"}
+{"kind": "unescape", "in": "&copyx", "out": "\u00a9x"}
+{"kind": "unescape", "in": "&\u00e9;", "out": "&\u00e9;"}
+{"kind": "unescape", "in": "&\ud83d\ude00;", "out": "&\ud83d\ude00;"}
+{"kind": "unescape", "in": "&#x1F600;", "out": "\ud83d\ude00"}
+{"kind": "unescape", "in": "&#8364;", "out": "\u20ac"}
+{"kind": "unescape", "in": "&#xD;", "out": "\r"}
+{"kind": "unescape", "in": "&AElig", "out": "\u00c6"}
+{"kind": "unescape", "in": "&AEligx", "out": "\u00c6x"}
+{"kind": "unescape", "in": "&AElig;", "out": "\u00c6"}
+{"kind": "unescape", "in": "a&AElig b", "out": "a\u00c6 b"}
+{"kind": "unescape", "in": "&AMP", "out": "&"}
+{"kind": "unescape", "in": "&AMPx", "out": "&x"}
+{"kind": "unescape", "in": "&AMP;", "out": "&"}
+{"kind": "unescape", "in": "a&AMP b", "out": "a& b"}
+{"kind": "unescape", "in": "&Aacute", "out": "\u00c1"}
+{"kind": "unescape", "in": "&Aacutex", "out": "\u00c1x"}
+{"kind": "unescape", "in": "&Aacute;", "out": "\u00c1"}
+{"kind": "unescape", "in": "a&Aacute b", "out": "a\u00c1 b"}
+{"kind": "unescape", "in": "&Acirc", "out": "\u00c2"}
+{"kind": "unescape", "in": "&Acircx", "out": "\u00c2x"}
+{"kind": "unescape", "in": "&Acirc;", "out": "\u00c2"}
+{"kind": "unescape", "in": "a&Acirc b", "out": "a\u00c2 b"}
+{"kind": "unescape", "in": "&Agrave", "out": "\u00c0"}
+{"kind": "unescape", "in": "&Agravex", "out": "\u00c0x"}
+{"kind": "unescape", "in": "&Agrave;", "out": "\u00c0"}
+{"kind": "unescape", "in": "a&Agrave b", "out": "a\u00c0 b"}
+{"kind": "unescape", "in": "&Aring", "out": "\u00c5"}
+{"kind": "unescape", "in": "&Aringx", "out": "\u00c5x"}
+{"kind": "unescape", "in": "&Aring;", "out": "\u00c5"}
+{"kind": "unescape", "in": "a&Aring b", "out": "a\u00c5 b"}
+{"kind": "unescape", "in": "&Atilde", "out": "\u00c3"}
+{"kind": "unescape", "in": "&Atildex", "out": "\u00c3x"}
+{"kind": "unescape", "in": "&Atilde;", "out": "\u00c3"}
+{"kind": "unescape", "in": "a&Atilde b", "out": "a\u00c3 b"}
+{"kind": "unescape", "in": "&Auml", "out": "\u00c4"}
+{"kind": "unescape", "in": "&Aumlx", "out": "\u00c4x"}
+{"kind": "unescape", "in": "&Auml;", "out": "\u00c4"}
+{"kind": "unescape", "in": "a&Auml b", "out": "a\u00c4 b"}
+{"kind": "unescape", "in": "&COPY", "out": "\u00a9"}
+{"kind": "unescape", "in": "&COPYx", "out": "\u00a9x"}
+{"kind": "unescape", "in": "&COPY;", "out": "\u00a9"}
+{"kind": "unescape", "in": "a&COPY b", "out": "a\u00a9 b"}
+{"kind": "unescape", "in": "&Ccedil", "out": "\u00c7"}
+{"kind": "unescape", "in": "&Ccedilx", "out": "\u00c7x"}
+{"kind": "unescape", "in": "&Ccedil;", "out": "\u00c7"}
+{"kind": "unescape", "in": "a&Ccedil b", "out": "a\u00c7 b"}
+{"kind": "unescape", "in": "&ETH", "out": "\u00d0"}
+{"kind": "unescape", "in": "&ETHx", "out": "\u00d0x"}
+{"kind": "unescape", "in": "&ETH;", "out": "\u00d0"}
+{"kind": "unescape", "in": "a&ETH b", "out": "a\u00d0 b"}
+{"kind": "unescape", "in": "&Eacute", "out": "\u00c9"}
+{"kind": "unescape", "in": "&Eacutex", "out": "\u00c9x"}
+{"kind": "unescape", "in": "&Eacute;", "out": "\u00c9"}
+{"kind": "unescape", "in": "a&Eacute b", "out": "a\u00c9 b"}
+{"kind": "unescape", "in": "&Ecirc", "out": "\u00ca"}
+{"kind": "unescape", "in": "&Ecircx", "out": "\u00cax"}
+{"kind": "unescape", "in": "&Ecirc;", "out": "\u00ca"}
+{"kind": "unescape", "in": "a&Ecirc b", "out": "a\u00ca b"}
+{"kind": "unescape", "in": "&Egrave", "out": "\u00c8"}
+{"kind": "unescape", "in": "&Egravex", "out": "\u00c8x"}
+{"kind": "unescape", "in": "&Egrave;", "out": "\u00c8"}
+{"kind": "unescape", "in": "a&Egrave b", "out": "a\u00c8 b"}
+{"kind": "unescape", "in": "&Euml", "out": "\u00cb"}
+{"kind": "unescape", "in": "&Eumlx", "out": "\u00cbx"}
+{"kind": "unescape", "in": "&Euml;", "out": "\u00cb"}
+{"kind": "unescape", "in": "a&Euml b", "out": "a\u00cb b"}
+{"kind": "unescape", "in": "&GT", "out": ">"}
+{"kind": "unescape", "in": "&GTx", "out": ">x"}
+{"kind": "unescape", "in": "&GT;", "out": ">"}
+{"kind": "unescape", "in": "a&GT b", "out": "a> b"}
+{"kind": "unescape", "in": "&Iacute", "out": "\u00cd"}
+{"kind": "unescape", "in": "&Iacutex", "out": "\u00cdx"}
+{"kind": "unescape", "in": "&Iacute;", "out": "\u00cd"}
+{"kind": "unescape", "in": "a&Iacute b", "out": "a\u00cd b"}
+{"kind": "unescape", "in": "&Icirc", "out": "\u00ce"}
+{"kind": "unescape", "in": "&Icircx", "out": "\u00cex"}
+{"kind": "unescape", "in": "&Icirc;", "out": "\u00ce"}
+{"kind": "unescape", "in": "a&Icirc b", "out": "a\u00ce b"}
+{"kind": "unescape", "in": "&Igrave", "out": "\u00cc"}
+{"kind": "unescape", "in": "&Igravex", "out": "\u00ccx"}
+{"kind": "unescape", "in": "&Igrave;", "out": "\u00cc"}
+{"kind": "unescape", "in": "a&Igrave b", "out": "a\u00cc b"}
+{"kind": "unescape", "in": "&Iuml", "out": "\u00cf"}
+{"kind": "unescape", "in": "&Iumlx", "out": "\u00cfx"}
+{"kind": "unescape", "in": "&Iuml;", "out": "\u00cf"}
+{"kind": "unescape", "in": "a&Iuml b", "out": "a\u00cf b"}
+{"kind": "unescape", "in": "&LT", "out": "<"}
+{"kind": "unescape", "in": "&LTx", "out": "<x"}
+{"kind": "unescape", "in": "&LT;", "out": "<"}
+{"kind": "unescape", "in": "a&LT b", "out": "a< b"}
+{"kind": "unescape", "in": "&Ntilde", "out": "\u00d1"}
+{"kind": "unescape", "in": "&Ntildex", "out": "\u00d1x"}
+{"kind": "unescape", "in": "&Ntilde;", "out": "\u00d1"}
+{"kind": "unescape", "in": "a&Ntilde b", "out": "a\u00d1 b"}
+{"kind": "unescape", "in": "&Oacute", "out": "\u00d3"}
+{"kind": "unescape", "in": "&Oacutex", "out": "\u00d3x"}
+{"kind": "unescape", "in": "&Oacute;", "out": "\u00d3"}
+{"kind": "unescape", "in": "a&Oacute b", "out": "a\u00d3 b"}
+{"kind": "unescape", "in": "&Ocirc", "out": "\u00d4"}
+{"kind": "unescape", "in": "&Ocircx", "out": "\u00d4x"}
+{"kind": "unescape", "in": "&Ocirc;", "out": "\u00d4"}
+{"kind": "unescape", "in": "a&Ocirc b", "out": "a\u00d4 b"}
+{"kind": "unescape", "in": "&Ograve", "out": "\u00d2"}
+{"kind": "unescape", "in": "&Ogravex", "out": "\u00d2x"}
+{"kind": "unescape", "in": "&Ograve;", "out": "\u00d2"}
+{"kind": "unescape", "in": "a&Ograve b", "out": "a\u00d2 b"}
+{"kind": "unescape", "in": "&Oslash", "out": "\u00d8"}
+{"kind": "unescape", "in": "&Oslashx", "out": "\u00d8x"}
+{"kind": "unescape", "in": "&Oslash;", "out": "\u00d8"}
+{"kind": "unescape", "in": "a&Oslash b", "out": "a\u00d8 b"}
+{"kind": "unescape", "in": "&Otilde", "out": "\u00d5"}
+{"kind": "unescape", "in": "&Otildex", "out": "\u00d5x"}
+{"kind": "unescape", "in": "&Otilde;", "out": "\u00d5"}
+{"kind": "unescape", "in": "a&Otilde b", "out": "a\u00d5 b"}
+{"kind": "unescape", "in": "&Ouml", "out": "\u00d6"}
+{"kind": "unescape", "in": "&Oumlx", "out": "\u00d6x"}
+{"kind": "unescape", "in": "&Ouml;", "out": "\u00d6"}
+{"kind": "unescape", "in": "a&Ouml b", "out": "a\u00d6 b"}
+{"kind": "unescape", "in": "&QUOT", "out": "\""}
+{"kind": "unescape", "in": "&QUOTx", "out": "\"x"}
+{"kind": "unescape", "in": "&QUOT;", "out": "\""}
+{"kind": "unescape", "in": "a&QUOT b", "out": "a\" b"}
+{"kind": "unescape", "in": "&REG", "out": "\u00ae"}
+{"kind": "unescape", "in": "&REGx", "out": "\u00aex"}
+{"kind": "unescape", "in": "&REG;", "out": "\u00ae"}
+{"kind": "unescape", "in": "a&REG b", "out": "a\u00ae b"}
+{"kind": "unescape", "in": "&THORN", "out": "\u00de"}
+{"kind": "unescape", "in": "&THORNx", "out": "\u00dex"}
+{"kind": "unescape", "in": "&THORN;", "out": "\u00de"}
+{"kind": "unescape", "in": "a&THORN b", "out": "a\u00de b"}
+{"kind": "unescape", "in": "&Uacute", "out": "\u00da"}
+{"kind": "unescape", "in": "&Uacutex", "out": "\u00dax"}
+{"kind": "unescape", "in": "&Uacute;", "out": "\u00da"}
+{"kind": "unescape", "in": "a&Uacute b", "out": "a\u00da b"}
+{"kind": "unescape", "in": "&Ucirc", "out": "\u00db"}
+{"kind": "unescape", "in": "&Ucircx", "out": "\u00dbx"}
+{"kind": "unescape", "in": "&Ucirc;", "out": "\u00db"}
+{"kind": "unescape", "in": "a&Ucirc b", "out": "a\u00db b"}
+{"kind": "unescape", "in": "&Ugrave", "out": "\u00d9"}
+{"kind": "unescape", "in": "&Ugravex", "out": "\u00d9x"}
+{"kind": "unescape", "in": "&Ugrave;", "out": "\u00d9"}
+{"kind": "unescape", "in": "a&Ugrave b", "out": "a\u00d9 b"}
+{"kind": "unescape", "in": "&Uuml", "out": "\u00dc"}
+{"kind": "unescape", "in": "&Uumlx", "out": "\u00dcx"}
+{"kind": "unescape", "in": "&Uuml;", "out": "\u00dc"}
+{"kind": "unescape", "in": "a&Uuml b", "out": "a\u00dc b"}
+{"kind": "unescape", "in": "&Yacute", "out": "\u00dd"}
+{"kind": "unescape", "in": "&Yacutex", "out": "\u00ddx"}
+{"kind": "unescape", "in": "&Yacute;", "out": "\u00dd"}
+{"kind": "unescape", "in": "a&Yacute b", "out": "a\u00dd b"}
+{"kind": "unescape", "in": "&aacute", "out": "\u00e1"}
+{"kind": "unescape", "in": "&aacutex", "out": "\u00e1x"}
+{"kind": "unescape", "in": "&aacute;", "out": "\u00e1"}
+{"kind": "unescape", "in": "a&aacute b", "out": "a\u00e1 b"}
+{"kind": "unescape", "in": "&acirc", "out": "\u00e2"}
+{"kind": "unescape", "in": "&acircx", "out": "\u00e2x"}
+{"kind": "unescape", "in": "&acirc;", "out": "\u00e2"}
+{"kind": "unescape", "in": "a&acirc b", "out": "a\u00e2 b"}
+{"kind": "unescape", "in": "&acute", "out": "\u00b4"}
+{"kind": "unescape", "in": "&acutex", "out": "\u00b4x"}
+{"kind": "unescape", "in": "&acute;", "out": "\u00b4"}
+{"kind": "unescape", "in": "a&acute b", "out": "a\u00b4 b"}
+{"kind": "unescape", "in": "&aelig", "out": "\u00e6"}
+{"kind": "unescape", "in": "&aeligx", "out": "\u00e6x"}
+{"kind": "unescape", "in": "&aelig;", "out": "\u00e6"}
+{"kind": "unescape", "in": "a&aelig b", "out": "a\u00e6 b"}
+{"kind": "unescape", "in": "&agrave", "out": "\u00e0"}
+{"kind": "unescape", "in": "&agravex", "out": "\u00e0x"}
+{"kind": "unescape", "in": "&agrave;", "out": "\u00e0"}
+{"kind": "unescape", "in": "a&agrave b", "out": "a\u00e0 b"}
+{"kind": "unescape", "in": "&amp", "out": "&"}
+{"kind": "unescape", "in": "&ampx", "out": "&x"}
+{"kind": "unescape", "in": "&amp;", "out": "&"}
+{"kind": "unescape", "in": "a&amp b", "out": "a& b"}
+{"kind": "unescape", "in": "&aring", "out": "\u00e5"}
+{"kind": "unescape", "in": "&aringx", "out": "\u00e5x"}
+{"kind": "unescape", "in": "&aring;", "out": "\u00e5"}
+{"kind": "unescape", "in": "a&aring b", "out": "a\u00e5 b"}
+{"kind": "unescape", "in": "&atilde", "out": "\u00e3"}
+{"kind": "unescape", "in": "&atildex", "out": "\u00e3x"}
+{"kind": "unescape", "in": "&atilde;", "out": "\u00e3"}
+{"kind": "unescape", "in": "a&atilde b", "out": "a\u00e3 b"}
+{"kind": "unescape", "in": "&auml", "out": "\u00e4"}
+{"kind": "unescape", "in": "&aumlx", "out": "\u00e4x"}
+{"kind": "unescape", "in": "&auml;", "out": "\u00e4"}
+{"kind": "unescape", "in": "a&auml b", "out": "a\u00e4 b"}
+{"kind": "unescape", "in": "&brvbar", "out": "\u00a6"}
+{"kind": "unescape", "in": "&brvbarx", "out": "\u00a6x"}
+{"kind": "unescape", "in": "&brvbar;", "out": "\u00a6"}
+{"kind": "unescape", "in": "a&brvbar b", "out": "a\u00a6 b"}
+{"kind": "unescape", "in": "&ccedil", "out": "\u00e7"}
+{"kind": "unescape", "in": "&ccedilx", "out": "\u00e7x"}
+{"kind": "unescape", "in": "&ccedil;", "out": "\u00e7"}
+{"kind": "unescape", "in": "a&ccedil b", "out": "a\u00e7 b"}
+{"kind": "unescape", "in": "&cedil", "out": "\u00b8"}
+{"kind": "unescape", "in": "&cedilx", "out": "\u00b8x"}
+{"kind": "unescape", "in": "&cedil;", "out": "\u00b8"}
+{"kind": "unescape", "in": "a&cedil b", "out": "a\u00b8 b"}
+{"kind": "unescape", "in": "&cent", "out": "\u00a2"}
+{"kind": "unescape", "in": "&centx", "out": "\u00a2x"}
+{"kind": "unescape", "in": "&cent;", "out": "\u00a2"}
+{"kind": "unescape", "in": "a&cent b", "out": "a\u00a2 b"}
+{"kind": "unescape", "in": "&copy", "out": "\u00a9"}
+{"kind": "unescape", "in": "&copyx", "out": "\u00a9x"}
+{"kind": "unescape", "in": "&copy;", "out": "\u00a9"}
+{"kind": "unescape", "in": "a&copy b", "out": "a\u00a9 b"}
+{"kind": "unescape", "in": "&curren", "out": "\u00a4"}
+{"kind": "unescape", "in": "&currenx", "out": "\u00a4x"}
+{"kind": "unescape", "in": "&curren;", "out": "\u00a4"}
+{"kind": "unescape", "in": "a&curren b", "out": "a\u00a4 b"}
+{"kind": "unescape", "in": "&deg", "out": "\u00b0"}
+{"kind": "unescape", "in": "&degx", "out": "\u00b0x"}
+{"kind": "unescape", "in": "&deg;", "out": "\u00b0"}
+{"kind": "unescape", "in": "a&deg b", "out": "a\u00b0 b"}
+{"kind": "unescape", "in": "&divide", "out": "\u00f7"}
+{"kind": "unescape", "in": "&dividex", "out": "\u00f7x"}
+{"kind": "unescape", "in": "&divide;", "out": "\u00f7"}
+{"kind": "unescape", "in": "a&divide b", "out": "a\u00f7 b"}
+{"kind": "unescape", "in": "&eacute", "out": "\u00e9"}
+{"kind": "unescape", "in": "&eacutex", "out": "\u00e9x"}
+{"kind": "unescape", "in": "&eacute;", "out": "\u00e9"}
+{"kind": "unescape", "in": "a&eacute b", "out": "a\u00e9 b"}
+{"kind": "unescape", "in": "&ecirc", "out": "\u00ea"}
+{"kind": "unescape", "in": "&ecircx", "out": "\u00eax"}
+{"kind": "unescape", "in": "&ecirc;", "out": "\u00ea"}
+{"kind": "unescape", "in": "a&ecirc b", "out": "a\u00ea b"}
+{"kind": "unescape", "in": "&egrave", "out": "\u00e8"}
+{"kind": "unescape", "in": "&egravex", "out": "\u00e8x"}
+{"kind": "unescape", "in": "&egrave;", "out": "\u00e8"}
+{"kind": "unescape", "in": "a&egrave b", "out": "a\u00e8 b"}
+{"kind": "unescape", "in": "&eth", "out": "\u00f0"}
+{"kind": "unescape", "in": "&ethx", "out": "\u00f0x"}
+{"kind": "unescape", "in": "&eth;", "out": "\u00f0"}
+{"kind": "unescape", "in": "a&eth b", "out": "a\u00f0 b"}
+{"kind": "unescape", "in": "&euml", "out": "\u00eb"}
+{"kind": "unescape", "in": "&eumlx", "out": "\u00ebx"}
+{"kind": "unescape", "in": "&euml;", "out": "\u00eb"}
+{"kind": "unescape", "in": "a&euml b", "out": "a\u00eb b"}
+{"kind": "unescape", "in": "&frac12", "out": "\u00bd"}
+{"kind": "unescape", "in": "&frac12x", "out": "\u00bdx"}
+{"kind": "unescape", "in": "&frac12;", "out": "\u00bd"}
+{"kind": "unescape", "in": "a&frac12 b", "out": "a\u00bd b"}
+{"kind": "unescape", "in": "&frac14", "out": "\u00bc"}
+{"kind": "unescape", "in": "&frac14x", "out": "\u00bcx"}
+{"kind": "unescape", "in": "&frac14;", "out": "\u00bc"}
+{"kind": "unescape", "in": "a&frac14 b", "out": "a\u00bc b"}
+{"kind": "unescape", "in": "&frac34", "out": "\u00be"}
+{"kind": "unescape", "in": "&frac34x", "out": "\u00bex"}
+{"kind": "unescape", "in": "&frac34;", "out": "\u00be"}
+{"kind": "unescape", "in": "a&frac34 b", "out": "a\u00be b"}
+{"kind": "unescape", "in": "&gt", "out": ">"}
+{"kind": "unescape", "in": "&gtx", "out": ">x"}
+{"kind": "unescape", "in": "&gt;", "out": ">"}
+{"kind": "unescape", "in": "a&gt b", "out": "a> b"}
+{"kind": "unescape", "in": "&iacute", "out": "\u00ed"}
+{"kind": "unescape", "in": "&iacutex", "out": "\u00edx"}
+{"kind": "unescape", "in": "&iacute;", "out": "\u00ed"}
+{"kind": "unescape", "in": "a&iacute b", "out": "a\u00ed b"}
+{"kind": "unescape", "in": "&icirc", "out": "\u00ee"}
+{"kind": "unescape", "in": "&icircx", "out": "\u00eex"}
+{"kind": "unescape", "in": "&icirc;", "out": "\u00ee"}
+{"kind": "unescape", "in": "a&icirc b", "out": "a\u00ee b"}
+{"kind": "unescape", "in": "&iexcl", "out": "\u00a1"}
+{"kind": "unescape", "in": "&iexclx", "out": "\u00a1x"}
+{"kind": "unescape", "in": "&iexcl;", "out": "\u00a1"}
+{"kind": "unescape", "in": "a&iexcl b", "out": "a\u00a1 b"}
+{"kind": "unescape", "in": "&igrave", "out": "\u00ec"}
+{"kind": "unescape", "in": "&igravex", "out": "\u00ecx"}
+{"kind": "unescape", "in": "&igrave;", "out": "\u00ec"}
+{"kind": "unescape", "in": "a&igrave b", "out": "a\u00ec b"}
+{"kind": "unescape", "in": "&iquest", "out": "\u00bf"}
+{"kind": "unescape", "in": "&iquestx", "out": "\u00bfx"}
+{"kind": "unescape", "in": "&iquest;", "out": "\u00bf"}
+{"kind": "unescape", "in": "a&iquest b", "out": "a\u00bf b"}
+{"kind": "unescape", "in": "&iuml", "out": "\u00ef"}
+{"kind": "unescape", "in": "&iumlx", "out": "\u00efx"}
+{"kind": "unescape", "in": "&iuml;", "out": "\u00ef"}
+{"kind": "unescape", "in": "a&iuml b", "out": "a\u00ef b"}
+{"kind": "unescape", "in": "&laquo", "out": "\u00ab"}
+{"kind": "unescape", "in": "&laquox", "out": "\u00abx"}
+{"kind": "unescape", "in": "&laquo;", "out": "\u00ab"}
+{"kind": "unescape", "in": "a&laquo b", "out": "a\u00ab b"}
+{"kind": "unescape", "in": "&lt", "out": "<"}
+{"kind": "unescape", "in": "&ltx", "out": "<x"}
+{"kind": "unescape", "in": "&lt;", "out": "<"}
+{"kind": "unescape", "in": "a&lt b", "out": "a< b"}
+{"kind": "unescape", "in": "&macr", "out": "\u00af"}
+{"kind": "unescape", "in": "&macrx", "out": "\u00afx"}
+{"kind": "unescape", "in": "&macr;", "out": "\u00af"}
+{"kind": "unescape", "in": "a&macr b", "out": "a\u00af b"}
+{"kind": "unescape", "in": "&micro", "out": "\u00b5"}
+{"kind": "unescape", "in": "&microx", "out": "\u00b5x"}
+{"kind": "unescape", "in": "&micro;", "out": "\u00b5"}
+{"kind": "unescape", "in": "a&micro b", "out": "a\u00b5 b"}
+{"kind": "unescape", "in": "&middot", "out": "\u00b7"}
+{"kind": "unescape", "in": "&middotx", "out": "\u00b7x"}
+{"kind": "unescape", "in": "&middot;", "out": "\u00b7"}
+{"kind": "unescape", "in": "a&middot b", "out": "a\u00b7 b"}
+{"kind": "unescape", "in": "&nbsp", "out": "\u00a0"}
+{"kind": "unescape", "in": "&nbspx", "out": "\u00a0x"}
+{"kind": "unescape", "in": "&nbsp;", "out": "\u00a0"}
+{"kind": "unescape", "in": "a&nbsp b", "out": "a\u00a0 b"}
+{"kind": "unescape", "in": "&not", "out": "\u00ac"}
+{"kind": "unescape", "in": "&notx", "out": "\u00acx"}
+{"kind": "unescape", "in": "&not;", "out": "\u00ac"}
+{"kind": "unescape", "in": "a&not b", "out": "a\u00ac b"}
+{"kind": "unescape", "in": "&ntilde", "out": "\u00f1"}
+{"kind": "unescape", "in": "&ntildex", "out": "\u00f1x"}
+{"kind": "unescape", "in": "&ntilde;", "out": "\u00f1"}
+{"kind": "unescape", "in": "a&ntilde b", "out": "a\u00f1 b"}
+{"kind": "unescape", "in": "&oacute", "out": "\u00f3"}
+{"kind": "unescape", "in": "&oacutex", "out": "\u00f3x"}
+{"kind": "unescape", "in": "&oacute;", "out": "\u00f3"}
+{"kind": "unescape", "in": "a&oacute b", "out": "a\u00f3 b"}
+{"kind": "unescape", "in": "&ocirc", "out": "\u00f4"}
+{"kind": "unescape", "in": "&ocircx", "out": "\u00f4x"}
+{"kind": "unescape", "in": "&ocirc;", "out": "\u00f4"}
+{"kind": "unescape", "in": "a&ocirc b", "out": "a\u00f4 b"}
+{"kind": "unescape", "in": "&ograve", "out": "\u00f2"}
+{"kind": "unescape", "in": "&ogravex", "out": "\u00f2x"}
+{"kind": "unescape", "in": "&ograve;", "out": "\u00f2"}
+{"kind": "unescape", "in": "a&ograve b", "out": "a\u00f2 b"}
+{"kind": "unescape", "in": "&ordf", "out": "\u00aa"}
+{"kind": "unescape", "in": "&ordfx", "out": "\u00aax"}
+{"kind": "unescape", "in": "&ordf;", "out": "\u00aa"}
+{"kind": "unescape", "in": "a&ordf b", "out": "a\u00aa b"}
+{"kind": "unescape", "in": "&ordm", "out": "\u00ba"}
+{"kind": "unescape", "in": "&ordmx", "out": "\u00bax"}
+{"kind": "unescape", "in": "&ordm;", "out": "\u00ba"}
+{"kind": "unescape", "in": "a&ordm b", "out": "a\u00ba b"}
+{"kind": "unescape", "in": "&oslash", "out": "\u00f8"}
+{"kind": "unescape", "in": "&oslashx", "out": "\u00f8x"}
+{"kind": "unescape", "in": "&oslash;", "out": "\u00f8"}
+{"kind": "unescape", "in": "a&oslash b", "out": "a\u00f8 b"}
+{"kind": "unescape", "in": "&otilde", "out": "\u00f5"}
+{"kind": "unescape", "in": "&otildex", "out": "\u00f5x"}
+{"kind": "unescape", "in": "&otilde;", "out": "\u00f5"}
+{"kind": "unescape", "in": "a&otilde b", "out": "a\u00f5 b"}
+{"kind": "unescape", "in": "&ouml", "out": "\u00f6"}
+{"kind": "unescape", "in": "&oumlx", "out": "\u00f6x"}
+{"kind": "unescape", "in": "&ouml;", "out": "\u00f6"}
+{"kind": "unescape", "in": "a&ouml b", "out": "a\u00f6 b"}
+{"kind": "unescape", "in": "&para", "out": "\u00b6"}
+{"kind": "unescape", "in": "&parax", "out": "\u00b6x"}
+{"kind": "unescape", "in": "&para;", "out": "\u00b6"}
+{"kind": "unescape", "in": "a&para b", "out": "a\u00b6 b"}
+{"kind": "unescape", "in": "&plusmn", "out": "\u00b1"}
+{"kind": "unescape", "in": "&plusmnx", "out": "\u00b1x"}
+{"kind": "unescape", "in": "&plusmn;", "out": "\u00b1"}
+{"kind": "unescape", "in": "a&plusmn b", "out": "a\u00b1 b"}
+{"kind": "unescape", "in": "&pound", "out": "\u00a3"}
+{"kind": "unescape", "in": "&poundx", "out": "\u00a3x"}
+{"kind": "unescape", "in": "&pound;", "out": "\u00a3"}
+{"kind": "unescape", "in": "a&pound b", "out": "a\u00a3 b"}
+{"kind": "unescape", "in": "&quot", "out": "\""}
+{"kind": "unescape", "in": "&quotx", "out": "\"x"}
+{"kind": "unescape", "in": "&quot;", "out": "\""}
+{"kind": "unescape", "in": "a&quot b", "out": "a\" b"}
+{"kind": "unescape", "in": "&raquo", "out": "\u00bb"}
+{"kind": "unescape", "in": "&raquox", "out": "\u00bbx"}
+{"kind": "unescape", "in": "&raquo;", "out": "\u00bb"}
+{"kind": "unescape", "in": "a&raquo b", "out": "a\u00bb b"}
+{"kind": "unescape", "in": "&reg", "out": "\u00ae"}
+{"kind": "unescape", "in": "&regx", "out": "\u00aex"}
+{"kind": "unescape", "in": "&reg;", "out": "\u00ae"}
+{"kind": "unescape", "in": "a&reg b", "out": "a\u00ae b"}
+{"kind": "unescape", "in": "&sect", "out": "\u00a7"}
+{"kind": "unescape", "in": "&sectx", "out": "\u00a7x"}
+{"kind": "unescape", "in": "&sect;", "out": "\u00a7"}
+{"kind": "unescape", "in": "a&sect b", "out": "a\u00a7 b"}
+{"kind": "unescape", "in": "&shy", "out": "\u00ad"}
+{"kind": "unescape", "in": "&shyx", "out": "\u00adx"}
+{"kind": "unescape", "in": "&shy;", "out": "\u00ad"}
+{"kind": "unescape", "in": "a&shy b", "out": "a\u00ad b"}
+{"kind": "unescape", "in": "&sup1", "out": "\u00b9"}
+{"kind": "unescape", "in": "&sup1x", "out": "\u00b9x"}
+{"kind": "unescape", "in": "&sup1;", "out": "\u00b9"}
+{"kind": "unescape", "in": "a&sup1 b", "out": "a\u00b9 b"}
+{"kind": "unescape", "in": "&sup2", "out": "\u00b2"}
+{"kind": "unescape", "in": "&sup2x", "out": "\u00b2x"}
+{"kind": "unescape", "in": "&sup2;", "out": "\u00b2"}
+{"kind": "unescape", "in": "a&sup2 b", "out": "a\u00b2 b"}
+{"kind": "unescape", "in": "&sup3", "out": "\u00b3"}
+{"kind": "unescape", "in": "&sup3x", "out": "\u00b3x"}
+{"kind": "unescape", "in": "&sup3;", "out": "\u00b3"}
+{"kind": "unescape", "in": "a&sup3 b", "out": "a\u00b3 b"}
+{"kind": "unescape", "in": "&szlig", "out": "\u00df"}
+{"kind": "unescape", "in": "&szligx", "out": "\u00dfx"}
+{"kind": "unescape", "in": "&szlig;", "out": "\u00df"}
+{"kind": "unescape", "in": "a&szlig b", "out": "a\u00df b"}
+{"kind": "unescape", "in": "&thorn", "out": "\u00fe"}
+{"kind": "unescape", "in": "&thornx", "out": "\u00fex"}
+{"kind": "unescape", "in": "&thorn;", "out": "\u00fe"}
+{"kind": "unescape", "in": "a&thorn b", "out": "a\u00fe b"}
+{"kind": "unescape", "in": "&times", "out": "\u00d7"}
+{"kind": "unescape", "in": "&timesx", "out": "\u00d7x"}
+{"kind": "unescape", "in": "&times;", "out": "\u00d7"}
+{"kind": "unescape", "in": "a&times b", "out": "a\u00d7 b"}
+{"kind": "unescape", "in": "&uacute", "out": "\u00fa"}
+{"kind": "unescape", "in": "&uacutex", "out": "\u00fax"}
+{"kind": "unescape", "in": "&uacute;", "out": "\u00fa"}
+{"kind": "unescape", "in": "a&uacute b", "out": "a\u00fa b"}
+{"kind": "unescape", "in": "&ucirc", "out": "\u00fb"}
+{"kind": "unescape", "in": "&ucircx", "out": "\u00fbx"}
+{"kind": "unescape", "in": "&ucirc;", "out": "\u00fb"}
+{"kind": "unescape", "in": "a&ucirc b", "out": "a\u00fb b"}
+{"kind": "unescape", "in": "&ugrave", "out": "\u00f9"}
+{"kind": "unescape", "in": "&ugravex", "out": "\u00f9x"}
+{"kind": "unescape", "in": "&ugrave;", "out": "\u00f9"}
+{"kind": "unescape", "in": "a&ugrave b", "out": "a\u00f9 b"}
+{"kind": "unescape", "in": "&uml", "out": "\u00a8"}
+{"kind": "unescape", "in": "&umlx", "out": "\u00a8x"}
+{"kind": "unescape", "in": "&uml;", "out": "\u00a8"}
+{"kind": "unescape", "in": "a&uml b", "out": "a\u00a8 b"}
+{"kind": "unescape", "in": "&uuml", "out": "\u00fc"}
+{"kind": "unescape", "in": "&uumlx", "out": "\u00fcx"}
+{"kind": "unescape", "in": "&uuml;", "out": "\u00fc"}
+{"kind": "unescape", "in": "a&uuml b", "out": "a\u00fc b"}
+{"kind": "unescape", "in": "&yacute", "out": "\u00fd"}
+{"kind": "unescape", "in": "&yacutex", "out": "\u00fdx"}
+{"kind": "unescape", "in": "&yacute;", "out": "\u00fd"}
+{"kind": "unescape", "in": "a&yacute b", "out": "a\u00fd b"}
+{"kind": "unescape", "in": "&yen", "out": "\u00a5"}
+{"kind": "unescape", "in": "&yenx", "out": "\u00a5x"}
+{"kind": "unescape", "in": "&yen;", "out": "\u00a5"}
+{"kind": "unescape", "in": "a&yen b", "out": "a\u00a5 b"}
+{"kind": "unescape", "in": "&yuml", "out": "\u00ff"}
+{"kind": "unescape", "in": "&yumlx", "out": "\u00ffx"}
+{"kind": "unescape", "in": "&yuml;", "out": "\u00ff"}
+{"kind": "unescape", "in": "a&yuml b", "out": "a\u00ff b"}
+{"kind": "unescape", "in": "&nsubseteq;", "out": "\u2288"}
+{"kind": "unescape", "in": "&beth;", "out": "\u2136"}
+{"kind": "unescape", "in": "&mldr;", "out": "\u2026"}
+{"kind": "unescape", "in": "&oplus;", "out": "\u2295"}
+{"kind": "unescape", "in": "&npreceq;", "out": "\u2aaf\u0338"}
+{"kind": "unescape", "in": "&lfloor;", "out": "\u230a"}
+{"kind": "unescape", "in": "&pfr;", "out": "\ud835\udd2d"}
+{"kind": "unescape", "in": "&ctdot;", "out": "\u22ef"}
+{"kind": "unescape", "in": "&nsub;", "out": "\u2284"}
+{"kind": "unescape", "in": "&Rightarrow;", "out": "\u21d2"}
+{"kind": "unescape", "in": "&rmoustache;", "out": "\u23b1"}
+{"kind": "unescape", "in": "&prec;", "out": "\u227a"}
+{"kind": "unescape", "in": "&Lfr;", "out": "\ud835\udd0f"}
+{"kind": "unescape", "in": "&weierp;", "out": "\u2118"}
+{"kind": "unescape", "in": "&ngt;", "out": "\u226f"}
+{"kind": "unescape", "in": "&prurel;", "out": "\u22b0"}
+{"kind": "unescape", "in": "&prsim;", "out": "\u227e"}
+{"kind": "unescape", "in": "&lltri;", "out": "\u25fa"}
+{"kind": "unescape", "in": "&Dcaron;", "out": "\u010e"}
+{"kind": "unescape", "in": "&nless;", "out": "\u226e"}
+{"kind": "unescape", "in": "&SucceedsEqual;", "out": "\u2ab0"}
+{"kind": "unescape", "in": "&succnsim;", "out": "\u22e9"}
+{"kind": "unescape", "in": "&forkv;", "out": "\u2ad9"}
+{"kind": "unescape", "in": "&blank;", "out": "\u2423"}
+{"kind": "unescape", "in": "&loarr;", "out": "\u21fd"}
+{"kind": "unescape", "in": "&subrarr;", "out": "\u2979"}
+{"kind": "unescape", "in": "&gtrless;", "out": "\u2277"}
+{"kind": "unescape", "in": "&complement;", "out": "\u2201"}
+{"kind": "unescape", "in": "&Longleftrightarrow;", "out": "\u27fa"}
+{"kind": "unescape", "in": "&Hopf;", "out": "\u210d"}
+{"kind": "unescape", "in": "&Ncaron;", "out": "\u0147"}
+{"kind": "unescape", "in": "&rArr;", "out": "\u21d2"}
+{"kind": "unescape", "in": "&Kcedil;", "out": "\u0136"}
+{"kind": "unescape", "in": "&Dagger;", "out": "\u2021"}
+{"kind": "unescape", "in": "&circledS;", "out": "\u24c8"}
+{"kind": "unescape", "in": "&circledast;", "out": "\u229b"}
+{"kind": "unescape", "in": "&RightArrowLeftArrow;", "out": "\u21c4"}
+{"kind": "unescape", "in": "&jcy;", "out": "\u0439"}
+{"kind": "unescape", "in": "&circledR;", "out": "\u00ae"}
+{"kind": "unescape", "in": "&squf;", "out": "\u25aa"}
+{"kind": "unescape", "in": "&longleftarrow;", "out": "\u27f5"}
+{"kind": "unescape", "in": "&CloseCurlyDoubleQuote;", "out": "\u201d"}
+{"kind": "unescape", "in": "&mopf;", "out": "\ud835\udd5e"}
+{"kind": "unescape", "in": "&sbquo;", "out": "\u201a"}
+{"kind": "unescape", "in": "&ecirc;", "out": "\u00ea"}
+{"kind": "unescape", "in": "&IOcy;", "out": "\u0401"}
+{"kind": "unescape", "in": "&lesssim;", "out": "\u2272"}
+{"kind": "unescape", "in": "&dblac;", "out": "\u02dd"}
+{"kind": "unescape", "in": "&boxhU;", "out": "\u2568"}
+{"kind": "unescape", "in": "&bprime;", "out": "\u2035"}
+{"kind": "unescape", "in": "&Iscr;", "out": "\u2110"}
+{"kind": "unescape", "in": "&vBarv;", "out": "\u2ae9"}
+{"kind": "unescape", "in": "&subE;", "out": "\u2ac5"}
+{"kind": "unescape", "in": "&DoubleUpArrow;", "out": "\u21d1"}
+{"kind": "unescape", "in": "&ultri;", "out": "\u25f8"}
+{"kind": "unescape", "in": "&nleqslant;", "out": "\u2a7d\u0338"}
+{"kind": "unescape", "in": "&ggg;", "out": "\u22d9"}
+{"kind": "unescape", "in": "&gsiml;", "out": "\u2a90"}
+{"kind": "unescape", "in": "&LongRightArrow;", "out": "\u27f6"}
+{"kind": "unescape", "in": "&Uopf;", "out": "\ud835\udd4c"}
+{"kind": "unescape", "in": "&LeftDownTeeVector;", "out": "\u2961"}
+{"kind": "unescape", "in": "&blacksquare;", "out": "\u25aa"}
+{"kind": "unescape", "in": "&lopf;", "out": "\ud835\udd5d"}
+{"kind": "unescape", "in": "&NotGreaterLess;", "out": "\u2279"}
+{"kind": "unescape", "in": "&ccedil;", "out": "\u00e7"}
+{"kind": "unescape", "in": "&sharp;", "out": "\u266f"}
+{"kind": "unescape", "in": "&gcirc;", "out": "\u011d"}
+{"kind": "unescape", "in": "&Kappa;", "out": "\u039a"}
+{"kind": "unescape", "in": "&amalg;", "out": "\u2a3f"}
+{"kind": "unescape", "in": "&roplus;", "out": "\u2a2e"}
+{"kind": "unescape", "in": "&ni;", "out": "\u220b"}
+{"kind": "unescape", "in": "&Hat;", "out": "^"}
+{"kind": "unescape", "in": "&rthree;", "out": "\u22cc"}
+{"kind": "unescape", "in": "&kcy;", "out": "\u043a"}
+{"kind": "unescape", "in": "&angst;", "out": "\u00c5"}
+{"kind": "unescape", "in": "&Lang;", "out": "\u27ea"}
+{"kind": "unescape", "in": "&sum;", "out": "\u2211"}
+{"kind": "unescape", "in": "&ngeqslant;", "out": "\u2a7e\u0338"}
+{"kind": "unescape", "in": "&olarr;", "out": "\u21ba"}
+{"kind": "unescape", "in": "&Lscr;", "out": "\u2112"}
+{"kind": "unescape", "in": "&curarr;", "out": "\u21b7"}
+{"kind": "unescape", "in": "&nleqq;", "out": "\u2266\u0338"}
+{"kind": "unescape", "in": "&gtrapprox;", "out": "\u2a86"}
+{"kind": "unescape", "in": "&ccaron;", "out": "\u010d"}
+{"kind": "unescape", "in": "&Vee;", "out": "\u22c1"}
+{"kind": "unescape", "in": "&ubreve;", "out": "\u016d"}
+{"kind": "unescape", "in": "&phiv;", "out": "\u03d5"}
+{"kind": "unescape", "in": "&rsquo;", "out": "\u2019"}
+{"kind": "unescape", "in": "&gbreve;", "out": "\u011f"}
+{"kind": "unescape", "in": "&atilde;", "out": "\u00e3"}
+{"kind": "unescape", "in": "&doteqdot;", "out": "\u2251"}
+{"kind": "unescape", "in": "&mp;", "out": "\u2213"}
+{"kind": "unescape", "in": "&pitchfork;", "out": "\u22d4"}
+{"kind": "unescape", "in": "&check;", "out": "\u2713"}
+{"kind": "unescape", "in": "&rdquo;", "out": "\u201d"}
+{"kind": "unescape", "in": "&ast;", "out": "*"}
+{"kind": "unescape", "in": "&target;", "out": "\u2316"}
+{"kind": "unescape", "in": "&lsquo;", "out": "\u2018"}
+{"kind": "unescape", "in": "&Gfr;", "out": "\ud835\udd0a"}
+{"kind": "unescape", "in": "&Ecirc;", "out": "\u00ca"}
+{"kind": "unescape", "in": "&ccirc;", "out": "\u0109"}
+{"kind": "unescape", "in": "&searrow;", "out": "\u2198"}
+{"kind": "unescape", "in": "&lessgtr;", "out": "\u2276"}
+{"kind": "unescape", "in": "&longrightarrow;", "out": "\u27f6"}
+{"kind": "unescape", "in": "&profline;", "out": "\u2312"}
+{"kind": "unescape", "in": "&npr;", "out": "\u2280"}
+{"kind": "unescape", "in": "&dsol;", "out": "\u29f6"}
+{"kind": "unescape", "in": "&lesdotor;", "out": "\u2a83"}
+{"kind": "unescape", "in": "&shcy;", "out": "\u0448"}
+{"kind": "unescape", "in": "&ogon;", "out": "\u02db"}
+{"kind": "unescape", "in": "&oint;", "out": "\u222e"}
+{"kind": "unescape", "in": "&Zcaron;", "out": "\u017d"}
+{"kind": "unescape", "in": "&iinfin;", "out": "\u29dc"}
+{"kind": "unescape", "in": "&epsiv;", "out": "\u03f5"}
+{"kind": "unescape", "in": "&ordm;", "out": "\u00ba"}
+{"kind": "unescape", "in": "&NotSucceedsEqual;", "out": "\u2ab0\u0338"}
+{"kind": "unescape", "in": "&Aogon;", "out": "\u0104"}
+{"kind": "unescape", "in": "&ncongdot;", "out": "\u2a6d\u0338"}
+{"kind": "unescape", "in": "&iiint;", "out": "\u222d"}
+{"kind": "unescape", "in": "&uring;", "out": "\u016f"}
+{"kind": "unescape", "in": "&para;", "out": "\u00b6"}
+{"kind": "unescape", "in": "&Wfr;", "out": "\ud835\udd1a"}
+{"kind": "unescape", "in": "&GJcy;", "out": "\u0403"}
+{"kind": "unescape", "in": "&vzigzag;", "out": "\u299a"}
+{"kind": "unescape", "in": "&ofr;", "out": "\ud835\udd2c"}
+{"kind": "unescape", "in": "&cirE;", "out": "\u29c3"}
+{"kind": "unescape", "in": "&simrarr;", "out": "\u2972"}
+{"kind": "unescape", "in": "&ShortLeftArrow;", "out": "\u2190"}
+{"kind": "unescape", "in": "&female;", "out": "\u2640"}
+{"kind": "unescape", "in": "&leftharpoondown;", "out": "\u21bd"}
+{"kind": "unescape", "in": "&Jscr;", "out": "\ud835\udca5"}
+{"kind": "unescape", "in": "&urcrop;", "out": "\u230e"}
+{"kind": "unescape", "in": "&daleth;", "out": "\u2138"}
+{"kind": "unescape", "in": "&notindot;", "out": "\u22f5\u0338"}
+{"kind": "unescape", "in": "&mapstoup;", "out": "\u21a5"}
+{"kind": "unescape", "in": "&imagline;", "out": "\u2110"}
+{"kind": "unescape", "in": "&ReverseEquilibrium;", "out": "\u21cb"}
+{"kind": "unescape", "in": "&angmsd;", "out": "\u2221"}
+{"kind": "unescape", "in": "&wfr;", "out": "\ud835\udd34"}
+{"kind": "unescape", "in": "&Hfr;", "out": "\u210c"}
+{"kind": "unescape", "in": "&varphi;", "out": "\u03d5"}
+{"kind": "unescape", "in": "&lbarr;", "out": "\u290c"}
+{"kind": "unescape", "in": "&CupCap;", "out": "\u224d"}
+{"kind": "unescape", "in": "&agrave;", "out": "\u00e0"}
+{"kind": "unescape", "in": "&aelig;", "out": "\u00e6"}
+{"kind": "unescape", "in": "&supseteq;", "out": "\u2287"}
+{"kind": "unescape", "in": "&NotLess;", "out": "\u226e"}
+{"kind": "unescape", "in": "&uparrow;", "out": "\u2191"}
+{"kind": "unescape", "in": "&subseteq;", "out": "\u2286"}
+{"kind": "unescape", "in": "&Dopf;", "out": "\ud835\udd3b"}
+{"kind": "unescape", "in": "&boxH", "out": "&boxH"}
+{"kind": "unescape", "in": "&cdot", "out": "&cdot"}
+{"kind": "unescape", "in": "&barvee", "out": "&barvee"}
+{"kind": "unescape", "in": "&eqcirc", "out": "&eqcirc"}
+{"kind": "unescape", "in": "&downarrow", "out": "&downarrow"}
+{"kind": "unescape", "in": "&HARDcy", "out": "&HARDcy"}
+{"kind": "unescape", "in": "&shortparallel", "out": "&shortparallel"}
+{"kind": "unescape", "in": "&succsim", "out": "&succsim"}
+{"kind": "unescape", "in": "&quatint", "out": "&quatint"}
+{"kind": "unescape", "in": "&lessgtr", "out": "&lessgtr"}
+{"kind": "unescape", "in": "&lneq", "out": "&lneq"}
+{"kind": "unescape", "in": "&DoubleVerticalBar", "out": "&DoubleVerticalBar"}
+{"kind": "unescape", "in": "&robrk", "out": "&robrk"}
+{"kind": "unescape", "in": "&nless", "out": "&nless"}
+{"kind": "unescape", "in": "&Re", "out": "&Re"}
+{"kind": "unescape", "in": "&blacklozenge", "out": "&blacklozenge"}
+{"kind": "unescape", "in": "&NotLessLess", "out": "&NotLessLess"}
+{"kind": "unescape", "in": "&Cscr", "out": "&Cscr"}
+{"kind": "unescape", "in": "&ldca", "out": "&ldca"}
+{"kind": "unescape", "in": "&centerdot", "out": "\u00a2erdot"}
+{"kind": "unescape", "in": "&apE", "out": "&apE"}
+{"kind": "unescape", "in": "&circledS", "out": "&circledS"}
+{"kind": "unescape", "in": "&RightTeeArrow", "out": "&RightTeeArrow"}
+{"kind": "unescape", "in": "&NotGreaterGreater", "out": "&NotGreaterGreater"}
+{"kind": "unescape", "in": "&asympeq", "out": "&asympeq"}
+{"kind": "unescape", "in": "&qfr", "out": "&qfr"}
+{"kind": "unescape", "in": "&fnof", "out": "&fnof"}
+{"kind": "unescape", "in": "&LeftDownTeeVector", "out": "&LeftDownTeeVector"}
+{"kind": "unescape", "in": "&rtri", "out": "&rtri"}
+{"kind": "unescape", "in": "&eDDot", "out": "&eDDot"}
+{"kind": "unescape", "in": "&rbrkslu", "out": "&rbrkslu"}
+{"kind": "unescape", "in": "&mapstoleft", "out": "&mapstoleft"}
+{"kind": "unescape", "in": "&sung", "out": "&sung"}
+{"kind": "unescape", "in": "&thinsp", "out": "&thinsp"}
+{"kind": "unescape", "in": "&chcy", "out": "&chcy"}
+{"kind": "unescape", "in": "&NestedGreaterGreater", "out": "&NestedGreaterGreater"}
+{"kind": "unescape", "in": "&Lopf", "out": "&Lopf"}
+{"kind": "unescape", "in": "&Vee", "out": "&Vee"}
+{"kind": "unescape", "in": "&nrightarrow", "out": "&nrightarrow"}
+{"kind": "unescape", "in": "&icirc", "out": "\u00ee"}
+{"kind": "unescape", "in": "z&#xdbd9;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "&#xdc64;", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#x6c4800f0;", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#x9;", "out": "\t"}
+{"kind": "unescape", "in": "&#X6F", "out": "o"}
+{"kind": "unescape", "in": "z&#xdaf6;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "&#55609", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#xfdc6;", "out": "\ufdc6"}
+{"kind": "unescape", "in": "z&#x10b2d2;z", "out": "z\udbec\uded2z"}
+{"kind": "unescape", "in": "&#X97", "out": "\u2014"}
+{"kind": "unescape", "in": "&#64960;", "out": "\ufdc0"}
+{"kind": "unescape", "in": "z&#xee38f;z", "out": "z\udb78\udf8fz"}
+{"kind": "unescape", "in": "z&#x47f083b4;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "&#92", "out": "\\"}
+{"kind": "unescape", "in": "&#X63DE3", "out": "\ud94f\udde3"}
+{"kind": "unescape", "in": "&#XDB64", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#245423", "out": "\ud8af\udeaf"}
+{"kind": "unescape", "in": "&#65005", "out": ""}
+{"kind": "unescape", "in": "&#x26;", "out": "&"}
+{"kind": "unescape", "in": "z&#xdeb1;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "&#xfdcb;", "out": "\ufdcb"}
+{"kind": "unescape", "in": "z&#x2d13a;z", "out": "z\ud874\udd3az"}
+{"kind": "unescape", "in": "&#XB5FF8", "out": "\uda97\udff8"}
+{"kind": "unescape", "in": "&#251949;", "out": "\ud8b6\udc2d"}
+{"kind": "unescape", "in": "&#X77BD180E", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#64993;", "out": ""}
+{"kind": "unescape", "in": "&#463153", "out": "\ud984\udd31"}
+{"kind": "unescape", "in": "&#57135", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#879513", "out": "\udb1a\udf99"}
+{"kind": "unescape", "in": "z&#x40;z", "out": "z@z"}
+{"kind": "unescape", "in": "&#56971;", "out": "\ufffd"}
+{"kind": "unescape", "in": "z&#x5986489e;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "z&#xc00c0b6;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "&#30161", "out": "\u75d1"}
+{"kind": "unescape", "in": "z&#x3b;z", "out": "z;z"}
+{"kind": "unescape", "in": "&#xdd04;", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#XDD6E", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#X41F8622", "out": "\ufffd"}
+{"kind": "unescape", "in": "z&#x66;z", "out": "zfz"}
+{"kind": "unescape", "in": "&#1613505685", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#xfdc1;", "out": "\ufdc1"}
+{"kind": "unescape", "in": "&#145;", "out": "\u2018"}
+{"kind": "unescape", "in": "&#1247492047", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#X78CE5CD1", "out": "\ufffd"}
+{"kind": "unescape", "in": "z&#x6b175b63;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "&#xda8d;", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#101", "out": "e"}
+{"kind": "unescape", "in": "z&#x57;z", "out": "zWz"}
+{"kind": "unescape", "in": "&#570507474", "out": "\ufffd"}
+{"kind": "unescape", "in": "z&#x54;z", "out": "zTz"}
+{"kind": "unescape", "in": "&#XE007", "out": "\ue007"}
+{"kind": "unescape", "in": "&#64968", "out": "\ufdc8"}
+{"kind": "unescape", "in": "&#57280;", "out": "\ufffd"}
+{"kind": "unescape", "in": "z&#xb66e7;z", "out": "z\uda99\udee7z"}
+{"kind": "unescape", "in": "&#X89", "out": "\u2030"}
+{"kind": "unescape", "in": "&#xfdf0;", "out": "\ufdf0"}
+{"kind": "unescape", "in": "&#5718;", "out": "\u1656"}
+{"kind": "unescape", "in": "&#135", "out": "\u2021"}
+{"kind": "unescape", "in": "&#540673191", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#1477593476;", "out": "\ufffd"}
+{"kind": "unescape", "in": "z&#xdada;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "&#x6d0aef74;", "out": "\ufffd"}
+{"kind": "unescape", "in": "z&#x70;z", "out": "zpz"}
+{"kind": "unescape", "in": "z&#xd92c;z", "out": "z\ufffdz"}
+{"kind": "unescape", "in": "&#XAEBA1", "out": "\uda7a\udfa1"}
+{"kind": "unescape", "in": "&#x6ea66;", "out": "\ud97a\ude66"}
+{"kind": "unescape", "in": "z&#x9c40;z", "out": "z\u9c40z"}
+{"kind": "unescape", "in": "&#61073", "out": "\uee91"}
+{"kind": "unescape", "in": "&#XDCBA", "out": "\ufffd"}
+{"kind": "unescape", "in": "&#168567;", "out": "\ud864\ude77"}
+{"kind": "unescape", "in": "&#64980;", "out": ""}
+{"kind": "unescape", "in": "z&#xfdcc;z", "out": "z\ufdccz"}
+{"kind": "unescape", "in": "z&#x5f;z", "out": "z_z"}
+{"kind": "unescape", "in": "&#x88;", "out": "\u02c6"}
+{"kind": "unescape", "in": "&#XA3B97", "out": "\uda4e\udf97"}
+{"kind": "unescape", "in": "&#X51E0", "out": "\u51e0"}
+{"kind": "unescape", "in": "&#XEA82F", "out": "\udb6a\udc2f"}
+{"kind": "unescape", "in": "&#xfddf;", "out": ""}
+{"kind": "unescape", "in": "&#X7A8D", "out": "\u7a8d"}
+{"kind": "unescape", "in": "z&#x6a;z", "out": "zjz"}
+{"kind": "unescape", "in": "&#xfffe;", "out": ""}
+{"kind": "unescape", "in": "&#65534", "out": ""}
+{"kind": "unescape", "in": "&#xffff;", "out": ""}
+{"kind": "unescape", "in": "&#65535", "out": ""}
+{"kind": "unescape", "in": "&#x1fffe;", "out": ""}
+{"kind": "unescape", "in": "&#131070", "out": ""}
+{"kind": "unescape", "in": "&#x10ffff;", "out": ""}
+{"kind": "unescape", "in": "&#1114111", "out": ""}
+{"kind": "unescape", "in": "&#x10fffe;", "out": ""}
+{"kind": "unescape", "in": "&#1114110", "out": ""}
+{"kind": "unescape", "in": "&#xfdd0;", "out": ""}
+{"kind": "unescape", "in": "&#64976", "out": ""}
+{"kind": "unescape", "in": "&#xfdef;", "out": ""}
+{"kind": "unescape", "in": "&#65007", "out": ""}
+{"kind": "clean", "in": "<p>Caf&eacute;&nbsp;&copy 2020</p>\n  <b>bold</b>&amp;co", "n": 5, "out": "Caf\u00e9 "}
+{"kind": "clean", "in": "<p>Caf&eacute;&nbsp;&copy 2020</p>\n  <b>bold</b>&amp;co", "n": 400, "out": "Caf\u00e9 \u00a9 2020 bold &co"}
+{"kind": "clean", "in": "  a\t&lt;b&gt;\u00a0\u2003 c\u001c d&#1;e ", "n": 5, "out": "a <b>"}
+{"kind": "clean", "in": "  a\t&lt;b&gt;\u00a0\u2003 c\u001c d&#1;e ", "n": 400, "out": "a <b> c de"}
+{"kind": "clean", "in": "<a href=\"x\">&#65;&notin;&notit;</a>", "n": 5, "out": "A\u2209\u00acit"}
+{"kind": "clean", "in": "<a href=\"x\">&#65;&notin;&notit;</a>", "n": 400, "out": "A\u2209\u00acit;"}
+{"kind": "clean", "in": "Line1<br/>Line2 &frac12; &check; &lsqb;x&rsqb;", "n": 5, "out": "Line1"}
+{"kind": "clean", "in": "Line1<br/>Line2 &frac12; &check; &lsqb;x&rsqb;", "n": 400, "out": "Line1 Line2 \u00bd \u2713 [x]"}
+{"kind": "clean", "in": "&#xfffe;&#0;&#128;ok", "n": 5, "out": "\ufffd\u20acok"}
+{"kind": "clean", "in": "&#xfffe;&#0;&#128;ok", "n": 400, "out": "\ufffd\u20acok"}
+{"kind": "clean", "in": "<![CDATA[x]]> &amp b", "n": 5, "out": "& b"}
+{"kind": "clean", "in": "<![CDATA[x]]> &amp b", "n": 400, "out": "& b"}

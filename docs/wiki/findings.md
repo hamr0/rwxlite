@@ -768,3 +768,54 @@ The lowering flag does what round 9c promised: all 13 wrongly-lowered rows were 
 ## 2026-11-03: Note on the fresh exam's pre-registration
 
 From /self-review (ledger): the fresh-exam pre-registration (0caa381) pinned the model and settings but not the code, which was first committed with the results (402fea0); and the go/no-go rule was switched to LOWER-BAR-ASK 0.97 after the user had seen the frozen answer labels, though before any prediction. Both facts are now stated in an addendum to `docs/wiki/exam-prereg-fresh.md`. The verdict does not depend on the switch: the earlier rule (MECH-THEN-ASK 0.95) would also have failed, with 6 too loose (0.64%). Lesson: a pre-registration commits the predict and score code with it, before any prediction; and a rule change after labels are seen is recorded as such.
+
+
+## 2026-11-04: M1, ONNX export, Node runtime, quantisation variants
+
+Numbers are in the PRD ("M1 result"); this is what was learned.
+
+### Tokenizer and text format parity
+- A Node port of `fmt_text` and the BERT WordPiece tokenizer matches the Python on all 102,781 local texts (both exams' 5,228 rows plus every train, val and v3eval text): 0 text mismatches, 0 token-id mismatches. `node m1/check-corpus.mjs` checks it.
+- Two things the port had to copy exactly: Python's `\s` is `str.isspace` (includes `\x1c` to `\x1f`, excludes the byte-order mark), which differs from JavaScript's `\s`; and `html.unescape`: the port carries the full `html.entities.html5` table (2,231 names, `src/entities.js`) and CPython's `_replace_charref` ported to `src/text.js`, so every named and numeric reference decodes as in Python. 759 Python-written rows (`test/fixtures/unescape.jsonl`) come out equal.
+- Gotcha: a source file with a raw U+2028 inside a regex literal is a syntax error in JavaScript. Write such characters as `\uXXXX` escapes.
+
+### fp32 ONNX is exact, default int8 is not
+- The fp32 ONNX graph reproduces torch to 1e-6 in p on both exams. fp16 (weights converted, inputs and outputs kept fp32) is within 0.001 and changes no decision.
+- The default `quantize_dynamic` int8 (23 MB) moves answers: on the fresh exam 12 of 949 rows change argmax (937 agree), 17 cross the 0.97 line, the largest p difference is 0.42. On the 09-22 exam 38 of 4,279 rows change argmax, 87 cross 0.97, and the too-loose count goes from 36 to 45.
+- Per-channel weight scales (same size, 23.1 MB) cut that to 6 fresh and 9 older argmax changes and 8 and 33 line crossings, and the too-loose count stays at fp32's (5 and 36). The fresh-exam result under the 0.97 rule: 809 right, 5 too loose, 61 too tight, 74 asked (fp32: 810, 5, 60, 74); 7 rows changed.
+- Quantising only the MatMuls (embeddings stay fp32) is not better than quantising both, and costs 36 MB. With per-channel scales it is the closest int8 to fp32 on the fresh exam (5 rows changed, 2 line crossings) but not on the older exam (16 changed, 32 crossings).
+- Dynamic int8 depends on the batch: one scale per activation tensor over the padded batch. The default int8 file changed 15 fresh rows when run one at a time and 13 when run 32 at a time, so a reproducible number has to say how it was batched.
+- Every variant has the same 5 too-loose rows on the fresh exam, so the NO-GO by one row does not depend on the file.
+
+### Decision rule choice moves a few rows; the leaks are not rule-fixable
+- rwxmap compared two rules on the 949 fresh-exam rows (their 466cda1): rwxlite's tier rule gives exact 821 / too loose 5 / too tight 123, their secondPass 826 / 6 / 117, mechanical alone 736 / 6 / 207. The rules differ on 9 rows. Rule choice moves results by a few rows.
+- The 5 real leaks (3 credential PUT/PATCH, 2 logout GETs) are confident model agreements with mechanical (client-credentials w 0.975, `/sso/logout` w 0.969). No decision rule over p can catch them; they need new rules or training rows. rwxmap kept secondPass (D133); it is tested on shared exam #3.
+
+### Node versus Python
+- Node (onnxruntime-node 1.31.1) and Python (onnxruntime 1.31.1) give the same probabilities for the same file: max difference 1.3e-7 on the 949 fresh rows and 1.4e-7 on the 4,279 older rows, for every variant, at batch 1.
+
+### Latency and size
+- i7-8665U laptop, Node 22, batch 1, 1 thread, end to end per op (format, tokenise, run, calibrate), 949 fresh rows after warm-up: default int8 p50 17.2 ms, p95 36.6, mean 18.8; per-channel int8 18.2, 38.1, 20.2; fp32 23.4, 49.0, 25.9; fp16 24.6, 50.9, 27.0. Latency varies by about 2x with what else runs on the machine (a first pass at load average 10 to 13 gave int8 p50 17 to 40 ms), so the numbers above come from a rerun at load about 2 to 3. The p95 is about twice the p50 because long descriptions make longer inputs (cut at 128 tokens).
+- fp16 gives no speed-up on this CPU. Only int8 meets D133's 20 ms mean, and not at p95.
+- Batched (32 rows per call, default threads) is not much cheaper per op: 21.8 to 23.7 ms for int8.
+- onnxruntime-node install: 566 MB by default on Linux x64 because its install script downloads the CUDA and TensorRT libraries (285 MB). `ONNXRUNTIME_NODE_INSTALL=skip` leaves 294 MB in `node_modules`, which is every platform's CPU binary in the package (Linux 71 MB with arm64, macOS 87 MB, Windows 137 MB). The one library a Linux x64 user needs is 48 MB. rwxmap's CI and docs should set the skip variable.
+
+### Packaging
+- rwxmap was a `file:../rwxmap` dependency used only by two research scripts; it broke `npm ci` on a clean clone and in CI. Removed: `m0/mechanical.mjs` and `m0/exam-inputs.mjs` now import it from `../rwxmap` or `$RWXMAP_DIR`, and `src/` and `test/` never touch it.
+
+### Threads and int8 (added 2026-11-04)
+- More intra-op threads help a lot at batch 1. On a quiet 4-core i3-8100T, int8 per-channel is 15.5 ms mean / 31.0 p95 at 1 thread, 9.2 / 17.8 at 2, 6.9 / 13.1 at 4; fp32 at 4 threads is 7.9 / 14.0. The 20 ms pin is met at p95 with 4 threads. `loadAnswerer` now defaults to `Math.min(4, os.availableParallelism())`; the bench keeps 1 so old results compare.
+- int8 gains little over fp32 on these chips: 1 thread 15.5 against 19.7 ms on the server, and 4 threads 6.9 against 7.9. Inference (not measured): neither CPU (i3-8100T, i7-8665U) has VNNI, so int8 matmuls get no dedicated instruction and the gain is mostly memory traffic. A chip with VNNI may show a bigger gap; untested.
+- Laptop latency swung about 2x with background load (int8 per-channel, 1 thread: mean 19.8 to 23.3 ms, p95 39 to 46), so single runs on a busy machine say little.
+- Decision: default file is int8 per-channel; fp32 is the "exact" option. Published as GitHub release assets (PRD, "M1 result").
+
+- QUERY read as GET (rwxmap D134): on the 383 fresh-exam GET rows relabelled QUERY, argmax changes on 1 row, 1 row crosses the 0.97 line, max |changes diff| 0.33; otherwise stable.
+- credential-set read as cant-undo-verb (guard until round 10, rwxmap D131): on the 32 credential-set ops, argmax x on 32 of 32 and 0 lowerings at p >= 0.97 (was w on 12, 3 at >= 0.97). Of those 3, only britbox /account/pin is a real credential lowering; the other 2 are truth w (whapi) and the same shape (circuitsandbox), so the guard may make them too-tight x rows, which is safe.
+
+## 2026-11-04: Round 10 pre-measure (plan, no training)
+
+- Unseen lean rule names: training rows carry 10 rule names and none is `credential-set` (added by rwxmap after the data was built). Current int8-pc on the 32 `credential-set` ops (lean x credential-set): argmax r 0 / w 12 / x 20; 12 below x, 3 of them at max p >= 0.97 (would be ACCEPTED lowerings in rwxmap's mode b: britbox.co.uk PUT /account/pin, circuitsandbox.net PUT /spaces/{topicId}/pin, whapi.com PUT /account/plusCard/pin, all w); isX min 0.0088, median 0.625. Same 32 with trained rule `cant-undo-verb`: all x, 0 below x, isX min 0.9996, median 0.9997. So the unseen name costs a lot; round 10 rebuilds the leans. (Of the three, `circuitsandbox` /pin looks like pinning a topic, not a credential; a rule question for rwxmap, not for the model.)
+- Training labels teach the leak shapes (`m1/round10-shapes.py`): credential replace on PUT/PATCH, 59 rows over train/val/v3eval, 57 labelled w (exam truth x); logout/signout/end-session, 45 rows, 5 GET rows labelled w or r (truth x). Relabelling the truth after a hand check is round 10 item 2 (PRD, "Round 10").
+- rwxmap R1 and R2 FAILED tuning (2026-11-04, D100 bar): every right move was workos; without workos neither closed a leak, and each added wrong moves (R1: files.com PATCH /api_key; R2: okta GET/PUT .../pages/sign-out/customized). No new rule names; `credential-set` is the only one to train on. So the leak shapes above are workos-specific, not cross-vendor: the 59 and 45 candidates are NOT relabelled by pattern, each gets a hand check and only rows judged x by BRIEF-v3 change (expect few); files.com and okta are known false positives. The 949 fresh rows (workos included) are still added as training rows.
+
+- Publish gate (2026-11-04): the "GitHub release has the model files" step now also fails on any zero-size asset and on a release `manifest.json` whose `version` differs from package.json, not just on missing names.

@@ -1,14 +1,19 @@
 // One-time exam (pre-registered: docs/wiki/exam-prereg-r8soft.md). Builds the model inputs for the exam rows.
 // Reads ONLY these columns of rwxmap's exam file: row_id, provider, method, path, operationId, summary, description.
 // Every other column (truth_class, confidence, reason, ruled, ...) is dropped at parse time and never referenced.
+// Needs a rwxmap checkout at ../rwxmap or $RWXMAP_DIR (not an npm dependency).
 //   node m0/exam-inputs.mjs  -> data/exam-r8soft/inputs.jsonl
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { classifyRow, needsJev } from 'rwxmap';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const RWXMAP = process.env.RWXMAP_DIR || path.resolve(HERE, '..', '..', 'rwxmap');
+// rwxmap is deliberately not an npm dependency of rwxlite (npm ci must work on a clean clone); it is
+// loaded from a checkout beside this repo, or from RWXMAP_DIR.
+const { classifyRow, needsJev } = await import(pathToFileURL(path.join(RWXMAP, 'src', 'index.js')).href).catch((e) => {
+  throw new Error(`rwxmap not found at ${RWXMAP} (clone hamr0/rwxmap beside this repo or set RWXMAP_DIR): ${e.message}`);
+});
 const FRESH = process.argv[2] === 'fresh'; // fresh exam 2026-11-03: ops.csv is blind (id column), output data/exam-fresh-r8soft/
 const IDCOL = FRESH ? 'id' : 'row_id';
 const KEEP = [IDCOL, 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
