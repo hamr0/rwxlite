@@ -848,3 +848,12 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 - Node answerer against Python onnxruntime on the same file (949 fresh rows, p at T = 0.844 for both, `node m1/manifest-r10.mjs parity`): max |dp| 1.3e-7 for int8-pc and fp32, 0 argmax differences, 0 side flips.
 - Exam #3 code smoke test on the burned fresh exam (not a result; r10 trained on these rows): the 0.2.0 files reproduce the known fresh-exam numbers through the new code (int8-pc 809 right / 5 too loose / 61 too tight / 74 asked, fp32 810 / 5 / 60 / 74).
 - The Node answerer still has T = 0.844 compiled in (`TEMPERATURE`); r10 needs T read from the manifest (`manifest.json` of r10 carries `temperature: 0.858`, ignored today) before it can ship. Open: version number and model string for the release (`modelString(version, sha)` changes with the weights); GET vs QUERY measurement after the retrain (PRD item 4) not done.
+
+## 2026-11-04: GET vs QUERY after round 10 (PRD Round 10 item 4)
+- Setup: frozen r10 int8 `093c908d` / fp32 `8514ddcc` at T = 0.858; 0.2.0 at T = 0.844. Same text with `| GET ` replaced by `| QUERY `, bypassing the `src/text.js` mapping. Held-out GET rows: val (2,404) and v3eval (959), which contain 0 QUERY copies. Script: scratchpad `query/q.py` (not in the repo).
+- r10 int8: val 2 argmax changes, 19 rows cross 0.97, max |d changes| 0.195, max |d isX| 0.0004, read-as-r 2395 / 2393, acc .9875 / .9875; v3eval 0 changes, 1 crossing, acc 1.0 / 1.0.
+- r10 fp32: val 4 changes, 18 crossings, max |d changes| 0.353, acc .9875 / .9884; v3eval 0 changes, 1 crossing.
+- 0.2.0 (never saw QUERY): val 5 (int8) / 6 (fp32) changes, 32 / 26 crossings, max |d changes| 0.459 / 0.508; v3eval 0 changes, 1 crossing.
+- Training copies (4,258 `-q` rows vs GET originals, r10): 0 argmax changes, 6 (int8) / 5 (fp32) crossings, acc .9995 both.
+- Reading: r10 reads QUERY like GET on argmax and accuracy. The augmentation shrank the drift but did not remove it; residual movement is on the changes axis near 0.97. Not covered: real QUERY ops (request body, non-read summaries); only GET rows relabelled QUERY were tested.
+- Decision (user ruling 2026-11-04): the QUERY-to-GET mapping in `src/text.js` stays. A QUERY op gets exactly the GET answer, deterministic; dropping it gains no accuracy and adds small p shifts near 0.97. Revisit when real QUERY ops appear in a labelling round. Exam #3 `ops.csv` has 0 QUERY rows, so the choice cannot affect it.
