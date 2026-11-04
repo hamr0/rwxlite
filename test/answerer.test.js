@@ -10,6 +10,8 @@ import { stubRunner, TINY_VOCAB } from './helpers.js';
 const state = { method: 'GET', path: '/a', operationId: 'getA', summary: 's', description: 'd' };
 const lean = { class: 'r', rule: 'method' };
 const req = (/** @type {any} */ over = {}) => ({ state, model: 'jev-x', questions: { isX: 'q', changes: 'q' }, lean, ...over });
+/** A runner that must get one row per call and hands out `rows` in call order. @param {number[][]} rows */
+const seq = (rows) => { let k = 0; return (/** @type {number[][]} */ ids) => { assert.equal(ids.length, 1); return [rows[k++ % rows.length]]; }; };
 const make = (/** @type {any} */ fn, model = 'rwxlite-0.0.0+deadbeef') => new Answerer({ tokenizer: new WordPiece(TINY_VOCAB), runner: stubRunner(fn), model });
 
 test('calibrated: softmax(logits / T), sums to 1, order kept', () => {
@@ -57,7 +59,7 @@ test('only the asked questions come back', async () => {
 
 test('answerMany: a bad slot is isolated and the good ones still answer, in order', async () => {
   let seen = 0;
-  const a = make((/** @type {number[][]} */ ids) => { seen = ids.length; return ids.map((_, i) => [i, 0, 0]); });
+  const a = make((/** @type {number[][]} */ ids) => { seen++; assert.equal(ids.length, 1); return [[seen - 1, 0, 0]]; });
   const out = await a.answerMany([req(), req({ lean: null }), req()]);
   assert.equal(seen, 2);
   assert.ok('error' in out[1] && !('answers' in out[1]));
@@ -76,9 +78,25 @@ test('answerMany: a runner failure fails every good slot, nothing leaks through'
 
 test('answerMany: wrong row count, wrong length, NaN and Infinity logits are errors', async () => {
   assert.ok('error' in (await make(() => []).answerMany([req()]))[0]);
-  const out = await make(() => [[1, 2], [NaN, 0, 0], [0, Infinity, 0], [0, 0, 0]]).answerMany([req(), req(), req(), req()]);
+  const out = await make(seq([[1, 2], [NaN, 0, 0], [0, Infinity, 0], [0, 0, 0]])).answerMany([req(), req(), req(), req()]);
   assert.ok('error' in out[0] && 'error' in out[1] && 'error' in out[2]);
   assert.ok(!('error' in out[3]));
+});
+
+test('answerMany: one runner call per row, each answer is the same as answer() on that request, in any order', async () => {
+  // a runner whose output for a row depends on the whole batch (like int8 dynamic quantisation): batch max length scales it
+  const calls = [];
+  const a = make((/** @type {number[][]} */ ids) => {
+    calls.push(ids.length);
+    const L = Math.max(...ids.map((r) => r.length));
+    return ids.map((r) => [r.length * L * 0.001, 0, r[1] * 0.01]);
+  });
+  const reqs = ['/a', '/a/b/c/d/e', '/a/b', '/a/b/c/d/e/f/g/h'].map((path) => req({ state: { method: 'GET', path } }));
+  const many = await a.answerMany(reqs);
+  assert.ok(calls.every((n) => n === 1) && calls.length === reqs.length);
+  for (let i = 0; i < reqs.length; i++) assert.deepEqual(many[i], await a.answer(reqs[i]));
+  const rev = await a.answerMany([...reqs].reverse());
+  assert.deepEqual(rev.reverse(), many);
 });
 
 test('answerMany: empty input is empty output and the runner is not called', async () => {
@@ -89,7 +107,7 @@ test('answerMany: empty input is empty output and the runner is not called', asy
 const rt = (/** @type {any} */ x) => JSON.parse(JSON.stringify(x));
 
 test('both shapes survive JSON, every slot of a mixed batch too', async () => {
-  const a = make(() => [[0, 1, 2], [2, 1, 0]]);
+  const a = make(seq([[0, 1, 2], [2, 1, 0]]));
   const out = await a.answerMany([req(), req({ lean: null }), req({ questions: { isX: 1 } }), req({ questions: {} })]);
   assert.equal(out.length, 4);
   for (const o of out) assert.deepEqual(rt(o), o);
@@ -109,7 +127,7 @@ test('a no-answer never carries answers; a success never carries error; answer()
 
 test('noul is a finite number in [0,1] and changes >= isX, extreme logits included', async () => {
   const cases = [[1000, -1000, 0], [-1000, -1000, 1000], [0, 0, 0], [-1000, 1000, -1000], [1e6, -1e6, 1e6], [5, -3, 2]];
-  const a = make((/** @type {number[][]} */ ids) => ids.map((_, i) => cases[i]));
+  const a = make(seq(cases));
   const out = await a.answerMany(cases.map(() => req()));
   for (const o of out) {
     const { isX, changes } = /** @type {any} */ (o).answers;

@@ -36,3 +36,32 @@ test('the shipped model in Node matches the Python probabilities (batch 1) withi
     assert.ok(Math.abs(ans.changes.noul - (pw + px)) < 1e-4, `changes row ${i}`);
   }
 });
+
+// Answers must not depend on batch composition, for both shipped models (int8 per-channel: dynamic activation scale over the padded batch).
+for (const [name, manifestFile] of [['int8-pc', 'manifest.json'], ['fp32', 'manifest-exact.json']]) {
+  test(`${name}: answerMany of a mixed-length set equals per-row answer() exactly, in any order and with any neighbours`, async (t) => {
+    const rel = new URL('release/', dir);
+    const d = existsSync(new URL(manifestFile, rel)) ? rel : dir;
+    const mf = d === rel ? manifestFile : 'manifest.json';
+    const modelFile = existsSync(new URL(mf, d)) ? JSON.parse(readFileSync(new URL(mf, d), 'utf8')).modelFile : '';
+    const want = name === 'fp32' ? 'model-fp32.onnx' : 'model-int8-pc.onnx';
+    if (modelFile !== want || !existsSync(new URL(want, d)) || !existsSync(new URL('vocab.txt', d))) { t.skip(`${want} + manifest not present under data/m1 (or data/m1/release)`); return; }
+    /** @type {import('../src/answerer.js').Answerer} */
+    let a;
+    try { a = await loadAnswerer({ dir: new URL(d).pathname, manifestFile: mf }); } catch (e) {
+      if (/onnxruntime-node/.test(String(/** @type {Error} */ (e).message))) { t.skip('onnxruntime-node is not installed'); return; }
+      throw e;
+    }
+    const all = fixtureRows().filter((r) => r.state).slice(0, 949);
+    // longest and shortest texts first so the batch padding differs a lot between neighbours
+    const idx = all.map((_, i) => i).sort((x, y) => all[x].text.length - all[y].text.length);
+    const pick = [...idx.slice(0, 6), ...idx.slice(-6), ...idx.slice(400, 406)];
+    const reqs = pick.map((i) => ({ state: /** @type {any} */ (all[i].state), questions: { isX: 1, changes: 1 }, lean: /** @type {any} */ (all[i].lean) }));
+    const single = [];
+    for (const r of reqs) single.push(await a.answer(r));
+    assert.deepEqual(await a.answerMany(reqs), single);
+    const order = reqs.map((_, i) => (i * 7) % reqs.length);
+    assert.deepEqual(await a.answerMany(order.map((i) => reqs[i])), order.map((i) => single[i]));
+    assert.deepEqual(await a.answerMany(reqs.slice(3, 9)), single.slice(3, 9));
+  });
+}
