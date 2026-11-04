@@ -787,6 +787,10 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 - Dynamic int8 depends on the batch: one scale per activation tensor over the padded batch. The default int8 file changed 15 fresh rows when run one at a time and 13 when run 32 at a time, so a reproducible number has to say how it was batched.
 - Every variant has the same 5 too-loose rows on the fresh exam, so the NO-GO by one row does not depend on the file.
 
+### Decision rule choice moves a few rows; the leaks are not rule-fixable
+- rwxmap compared two rules on the 949 fresh-exam rows (their 466cda1): rwxlite's tier rule gives exact 821 / too loose 5 / too tight 123, their secondPass 826 / 6 / 117, mechanical alone 736 / 6 / 207. The rules differ on 9 rows. Rule choice moves results by a few rows.
+- The 5 real leaks (3 credential PUT/PATCH, 2 logout GETs) are confident model agreements with mechanical (client-credentials w 0.975, `/sso/logout` w 0.969). No decision rule over p can catch them; they need new rules or training rows. rwxmap kept secondPass (D133); it is tested on shared exam #3.
+
 ### Node versus Python
 - Node (onnxruntime-node 1.31.1) and Python (onnxruntime 1.31.1) give the same probabilities for the same file: max difference 1.3e-7 on the 949 fresh rows and 1.4e-7 on the 4,279 older rows, for every variant, at batch 1.
 

@@ -387,9 +387,9 @@ Server: Intel i3-8100T @ 3.10GHz, 4 cores, load average 0.2 to 1.8 during the ru
 
 The 20 ms pin (D133) is met at p95 with 4 threads on both int8 and fp32 on the server. The laptop numbers swung about 2x with machine load across runs (hence ranges), so read them as upper bounds.
 
-### Decision rule rwxmap must apply (the measured one)
+### Decision rules: rwxlite's measured rule and rwxmap's secondPass
 
-rwxlite returns only p. The fresh-exam result (810 right, 5 too loose, 60 too tight, 74 asked of 949) came from one exact rule: `mode_a` (`train/exam_score.py`) and then lower-bar-ask at 0.97 (`GONOGO_lba097` in `train/exam_fresh.py`). In terms of the answer: p(x) = `isX`, p(w)+p(x) = `changes`, p(w) = `changes - isX`, p(r) = `1 - changes`, max p = max(`1 - changes`, `changes - isX`, `isX`). All p are calibrated (softmax of logits / 0.844), which rwxlite already does.
+rwxlite returns only p. Which rule turns p into a letter is rwxmap's call. This section records the rule rwxlite measured (its steps are kept exact, because the fixture and `test/decision.test.js` use them) and the comparison rwxmap ran against its own. The fresh-exam result for rwxlite's rule (810 right, 5 too loose, 60 too tight, 74 asked of 949) came from one exact rule: `mode_a` (`train/exam_score.py`) and then lower-bar-ask at 0.97 (`GONOGO_lba097` in `train/exam_fresh.py`). In terms of the answer: p(x) = `isX`, p(w)+p(x) = `changes`, p(w) = `changes - isX`, p(r) = `1 - changes`, max p = max(`1 - changes`, `changes - isX`, `isX`). All p are calibrated (softmax of logits / 0.844), which rwxlite already does.
 
 1. **Which rows move at all.** Only rows with a Jev tier: `jev-lower` (tier lower), `jev-raise-wx` (raise-wx), `jev-raise-get` (raise-get). These are the rows rwxmap's `needsJev` sends to Jev today, mapped by `TIER` in `train/common.py`. A row with no tier (jev_tier empty) is never moved by p; only step 3 can still change it. Rows rwxmap does not send (no tier) are still scored by the model in the fixture, so p exists for all of them.
 2. **Cut per tier** (m = the mechanical letter; x > w > r):
@@ -402,9 +402,21 @@ rwxlite returns only p. The fresh-exam result (810 right, 5 too loose, 60 too ti
 4. **DELETE and rows outside the tiers** keep the mechanical letter (the credential rule still applies to non-GET, DELETE included).
 5. **The final step (ask).** A lowering is a final letter below the mechanical one. A lowering with max p < 0.97 is asked: in rwxmap's terms, keep the stricter (mechanical) letter and add a review marker. Raises and keeps are trusted as they are. (The scripts count such a row as asked, not answered; its `expected.letter` in the fixture is the lowered letter the rule produced, so rwxmap can see what was withheld.)
 
-**Any other rule has no measured numbers.** Argmax, other rows, other cuts, other bars, a different model file: none of them is what scored 810 / 5 / 60 / 74. The numbers hold for the int8 per-channel default model (74 asked, 5 too loose on the fresh exam; fp32 gives the same 810 / 5 / 60 / 74 only in the registered torch run, see the variant table).
+**Other rules have no rwxlite numbers.** Argmax, other rows, other cuts, other bars, a different model file: none of them is what scored 810 / 5 / 60 / 74 in rwxlite's own scoring. Those numbers are for the rule above on the int8 per-channel default model (809 / 5 / 61 / 74 there); the 810 / 5 / 60 / 74 figure is the registered torch fp32 run (see the variant table).
 
-**Parity fixture.** `test/fixtures/decision.jsonl`, made by `.venv/bin/python m1/decision-fixture.py` from the default model's batch-1 p and the pre-registered scripts (imported unchanged; truth is never read). One row per operation, all 949: `{id, method, state (5 fields), lean {class, rule}, jev_tier (null when none), isX, changes, expected {letter, asked}}`. `test/decision.test.js` holds a JS reference of the rule (test only; not exported from `src`) and reproduces `expected` for all 949 rows from those fields alone, so the rule above is complete. Counts: 165 lowerings, 10 raises, 774 keeps, 74 asked. rwxmap can run the same fixture against its own implementation.
+**Rule comparison by rwxmap (their commit 466cda1, `poc/d133-rule-compare/readout.txt` in rwxmap).** Same 949 fresh-exam rows and the same int8 per-channel p as the fixture. Asked or undecided rows are scored at the stricter letter. Tuning data for rwxmap, not an exam. rwxlite's rule reproduces `expected` on all 949 rows (0 mismatches).
+
+| Rule | Exact | Too loose | Too tight | Rows sent | Asked / undecided |
+|---|---|---|---|---|---|
+| Mechanical alone | 736 | 6 | 207 | | |
+| rwxlite tier rule (mode a + lower-bar-ask 0.97) | 821 | 5 | 123 | 775 | 74 asked |
+| rwxmap secondPass (rows their marker calls loose or tight; argmax over r/w/x; raises always accepted; lowerings need max p >= 0.97; undecided = x + review) | 826 | 6 | 117 | 425 | 99 undecided |
+
+The rules differ on 9 rows. 5 are GET rows only rwxlite's raise-get tier sends: the two workos logouts are truth x (both rules too loose), the other 3 are truth r (rwxlite's rule makes them too tight). The other 4 are PUT/PATCH rows rwxlite's raise-wx tier raises at isX >= 0.15: lago `/invoices/{id}/finalize` is truth x (one fewer leak for rwxlite), the other 3 are truth w.
+
+**rwxmap's ruling (D133).** Keep secondPass. Reasons: a one-row leak difference is noise, and it matches their rulings (settled rows untouched, undecided means x). rwxlite's numbers stay rwxlite's; secondPass will be tested on shared exam #3. Neither rule fixes the 5 real leaks (3 credential PUT/PATCH, 2 logout GETs): the model agrees with mechanical on them (client-credentials w 0.975, `/sso/logout` w 0.969). rwxmap's R1/R2 tuning comes next.
+
+**Parity fixture.** `test/fixtures/decision.jsonl`, made by `.venv/bin/python m1/decision-fixture.py` from the default model's batch-1 p and the pre-registered scripts (imported unchanged; truth is never read). One row per operation, all 949: `{id, method, state (5 fields), lean {class, rule}, jev_tier (null when none), isX, changes, expected {letter, asked}}`. `test/decision.test.js` holds a JS reference of the rule (test only; not exported from `src`) and reproduces `expected` for all 949 rows from those fields alone, so the rule above is complete. Counts: 165 lowerings, 10 raises, 774 keeps, 74 asked. It is a parity and reference file for rwxlite's rule; rwxmap may use it to check its own port of that rule, but it does not have to apply that rule.
 
 ## Modules
 

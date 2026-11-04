@@ -22,6 +22,7 @@ M1: a local, Jev-shaped answerer in Node. Default model file: int8 per-channel; 
 
 ### Measured
 - fp32 ONNX matches torch to 1e-6; default int8 (23.0 MB) changes 12 of 949 fresh-exam decisions' argmax and moves up to 0.42 in p; per-channel int8 (23.1 MB) cuts that about 3x; fp16 (45.6 MB) changes nothing. Node mean latency at batch 1, 1 thread: 18.8 ms int8, 25.9 ms fp32. Threads on a quiet 4-core i3-8100T, batch 1: int8 per-channel 15.5 / 9.2 / 6.9 ms mean at 1 / 2 / 4 threads (p95 31.0 / 17.8 / 13.1); fp32 at 4 threads 7.9. Details in the PRD ("M1 result") and `docs/wiki/findings.md`.
+- Docs: PRD decision-rule section now records rwxmap's rule comparison (466cda1, secondPass kept, D133) next to rwxlite's measured rule; README no longer says rwxmap must apply it.
 
 ## [0.1.0] - 2026-11-03
 
