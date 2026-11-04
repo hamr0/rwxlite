@@ -5,7 +5,7 @@ All notable changes to rwxlite are recorded here. Format follows
 
 ## [Unreleased]
 
-Version stays 0.2.0 (package.json). The round 10 model was not released: exam #3 was NO-GO (docs/wiki/exam-prereg-exam3.md, "Result").
+The round 10 model was not released: exam #3 was NO-GO (docs/wiki/exam-prereg-exam3.md, "Result").
 
 ### Added
 - Round 10 model build (`data/m1-r10`, int8-pc `093c908d`, fp32 `8514ddcc`, T 0.858), not released (exam #3 NO-GO; 0.2.0 stays the published model). Manifests built by `m1/manifest-r10.mjs`, the release set by `m1/release-assets.mjs data/m1-r10/release r10`.
@@ -13,6 +13,12 @@ Version stays 0.2.0 (package.json). The round 10 model was not released: exam #3
 
 ### Changed
 - `loadAnswerer` reads the calibration `temperature` from the manifest (finite number > 0, else it throws); a manifest without it uses 0.844, so 0.2.0 manifests behave as before. `calibrated(L, T)` and `new Answerer({..., temperature})` take it; `checkTemperature` and `manifestTemperature` are exported.
+
+## [0.2.1] - 2026-11-04
+
+### Fixed
+- `answerMany` answers no longer depend on which requests share a call. It used to pad a batch to its longest row and run it in one `session.run`; the int8-pc model quantises activations dynamically with one scale over the whole padded batch, so a row's p moved with its neighbours (measured on 1,377 rows: max |dp| 0.11, 5 rows crossed 0.97 and 6 crossed 0.95; fp32 differed by 2.2e-16; thread count had no effect). `answerMany` now runs one row per `session.run`, for both models, so `answer()` and `answerMany()` give byte-identical p for a request whatever it is batched with. Public API and answer shapes are unchanged. Batch 1 is not slower: ms/row on a loaded 8-core host (load ~30), 4 threads, 160 rows, old batch of 32 vs batch 1: int8-pc 93-130 vs 51-88, fp32 87-88 vs 52-54, because padding to the longest row wastes compute. The parity check only ever called `answer()` one row at a time, which is why it missed this. Tests: stub runner must get one row per call and `answerMany` equals per-row `answer()` in any order; integration tests for int8-pc and fp32 on the real models.
+- Model string: `loadAnswerer` builds it from `manifest.version` (`modelString(manifest.version, ...)` in src/answerer.js), not from package.json. Release requirement: the release assets' manifests (`manifest.json` / `manifest-exact.json`) carry `version` and must be rebuilt for 0.2.1 with `node m1/release-assets.mjs` before the 0.2.1 release; until then, the 0.2.0 manifests report `rwxlite-0.2.0+8ad0a182`.
 
 ## [0.2.0] - 2026-11-04
 
