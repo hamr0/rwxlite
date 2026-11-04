@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { Answerer, calibrated, checkRequest, loadAnswerer, modelString, TEMPERATURE } from '../src/answerer.js';
+import { Answerer, calibrated, checkRequest, checkTemperature, manifestTemperature, loadAnswerer, modelString, TEMPERATURE } from '../src/answerer.js';
 import { WordPiece } from '../src/tokenizer.js';
 import { stubRunner, TINY_VOCAB } from './helpers.js';
 
@@ -141,4 +141,38 @@ test('loadAnswerer throws on a sha256 mismatch, a missing manifest and a bad man
     await writeFile(path.join(dir, 'manifest.json'), JSON.stringify({ version: '0.0.0', modelFile: 'model-x.onnx', files: { 'model-x.onnx': '0'.repeat(64), 'vocab.txt': '0'.repeat(64) } }));
     await assert.rejects(loadAnswerer({ dir }), /sha256 does not match/);
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('manifest temperature: used when present, 0.844 when absent', async () => {
+  assert.equal(manifestTemperature({ temperature: 0.858 }), 0.858);
+  assert.equal(manifestTemperature({}), 0.844);
+  const logits = [[0.5, 1.5, 2.5]];
+  const mk = (/** @type {any} */ extra) => new Answerer({ tokenizer: new WordPiece(TINY_VOCAB), runner: stubRunner(() => logits), model: 'm', ...extra });
+  const x = async (/** @type {Answerer} */ a) => /** @type {any} */ (await a.answer(req())).answers.isX.noul;
+  assert.equal(await x(mk({})), calibrated(logits[0], 0.844)[2]);
+  assert.equal(await x(mk({ temperature: 0.858 })), calibrated(logits[0], 0.858)[2]);
+  assert.notEqual(await x(mk({ temperature: 0.858 })), await x(mk({})));
+  assert.equal(calibrated(logits[0]).join(), calibrated(logits[0], 0.844).join());
+});
+
+test('bad temperature throws: 0, negative, NaN, Infinity, string, null, boolean', async () => {
+  for (const t of [0, -1, NaN, Infinity, '0.858', null, true]) {
+    assert.throws(() => manifestTemperature({ temperature: t }), /temperature must be a finite number > 0/);
+    assert.throws(() => checkTemperature(t), /temperature/);
+    assert.throws(() => new Answerer({ tokenizer: new WordPiece(TINY_VOCAB), runner: stubRunner(() => []), model: 'm', temperature: /** @type {any} */ (t) }), /temperature/);
+  }
+  const dir = await mkdtemp(path.join(tmpdir(), 'rwxlite-'));
+  try {
+    await writeFile(path.join(dir, 'manifest.json'), JSON.stringify({ version: '0.0.0', modelFile: 'model-x.onnx', temperature: 0, files: {} }));
+    await assert.rejects(loadAnswerer({ dir }), /temperature must be a finite number > 0/);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('loadAnswerer validates threads before touching the disk: -1, 1.5, "2", NaN throw; 0 and 4 pass the check', async () => {
+  const dir = path.join(tmpdir(), 'rwxlite-no-such-dir');
+  for (const threads of [-1, 1.5, '2', NaN]) {
+    await assert.rejects(loadAnswerer({ dir, threads: /** @type {any} */ (threads) }), /rwxlite: threads must be an integer >= 0/, String(threads));
+  }
+  // valid values get past the check and fail later, on the missing manifest
+  for (const threads of [0, 4]) await assert.rejects(loadAnswerer({ dir, threads }), /ENOENT/, String(threads));
 });

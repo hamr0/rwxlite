@@ -23,7 +23,7 @@ import path from 'node:path';
 import { formatText } from './text.js';
 import { WordPiece } from './tokenizer.js';
 
-/** Calibration temperature fit on the val split (docs/wiki/classifier-training.md). */
+/** Default calibration temperature (the 0.2.0 model's, fit on its val split; docs/wiki/classifier-training.md). A manifest's `temperature` overrides it. */
 export const TEMPERATURE = 0.844;
 export const MAX_LEN = 128;
 export const QUESTIONS = /** @type {const} */ (['isX', 'changes']);
@@ -37,11 +37,25 @@ export const QUESTIONS = /** @type {const} */ (['isX', 'changes']);
  * @typedef {{run: (ids: number[][]) => Promise<number[][]>}} Runner  (n,seq) token ids -> (n,3) logits
  */
 
-/** @param {number[]} L logits for (r, w, x) @returns {[number, number, number]} */
-export function calibrated(L) {
-  const z = L.map((v) => v / TEMPERATURE); const m = Math.max(...z);
+/** @param {number[]} L logits for (r, w, x) @param {number} [T] calibration temperature, default TEMPERATURE @returns {[number, number, number]} */
+export function calibrated(L, T = TEMPERATURE) {
+  const z = L.map((v) => v / T); const m = Math.max(...z);
   const e = z.map((v) => Math.exp(v - m)); const s = e[0] + e[1] + e[2];
   return [e[0] / s, e[1] / s, e[2] / s];
+}
+
+/**
+ * A calibration temperature must be a finite number > 0; anything else throws.
+ * @param {unknown} t @returns {number}
+ */
+export function checkTemperature(t) {
+  if (typeof t !== 'number' || !Number.isFinite(t) || t <= 0) throw new Error(`rwxlite: temperature must be a finite number > 0, got ${String(t)}`);
+  return t;
+}
+
+/** The manifest's `temperature`, validated; TEMPERATURE (0.844) when the manifest has none (0.2.0 manifests). @param {{temperature?: unknown}} manifest @returns {number} */
+export function manifestTemperature(manifest) {
+  return manifest.temperature === undefined ? TEMPERATURE : checkTemperature(manifest.temperature);
 }
 
 /** @param {unknown} req @returns {{text: string, keys: string[]}} */
@@ -72,9 +86,10 @@ function answersFrom(P, keys) {
 }
 
 export class Answerer {
-  /** @param {{tokenizer: WordPiece, runner: Runner, model: string}} parts */
-  constructor({ tokenizer, runner, model }) {
+  /** @param {{tokenizer: WordPiece, runner: Runner, model: string, temperature?: number}} parts */
+  constructor({ tokenizer, runner, model, temperature = TEMPERATURE }) {
     this.tokenizer = tokenizer; this.runner = runner; this.model = model;
+    this.temperature = checkTemperature(temperature);
   }
 
   /** @param {unknown} err @returns {NoAnswer} */
@@ -117,7 +132,7 @@ export class Answerer {
       ok.forEach((o, k) => {
         const L = logits[k];
         if (!Array.isArray(L) || L.length !== 3 || !L.every(Number.isFinite)) { out[o.i] = this.noAnswer(new Error('rwxlite: bad logits')); return; }
-        out[o.i] = { model: this.model, answers: answersFrom(calibrated(L), o.keys) };
+        out[o.i] = { model: this.model, answers: answersFrom(calibrated(L, this.temperature), o.keys) };
       });
     }
     return out;
@@ -159,7 +174,8 @@ export function ortRunner(ort, session) {
 
 /**
  * Load the answerer from a model directory holding the model file, vocab.txt and manifest.json
- * ({version, modelFile, files: {name: sha256}}). manifest.modelFile names the weights (e.g. model-int8.onnx), so
+ * ({version, modelFile, files: {name: sha256}, temperature?}). manifest.temperature is the calibration temperature
+ * (finite number > 0; absent = 0.844, the 0.2.0 value; anything else throws before any file is read). manifest.modelFile names the weights (e.g. model-int8.onnx), so
  * switching the shipped variant is a manifest change. Every file's sha256 is checked before use; a mismatch throws.
  * onnxruntime-node is an optional dependency, imported only here.
  * threads: intra-op threads for onnxruntime. Default Math.min(4, os.availableParallelism()); measured on a 4-core i3-8100T,
@@ -172,6 +188,7 @@ export async function loadAnswerer({ dir, threads = Math.min(4, os.availablePara
   if (!Number.isInteger(threads) || threads < 0) throw new Error(`rwxlite: threads must be an integer >= 0 (0 = onnxruntime's choice), got ${String(threads)}`);
   const manifest = JSON.parse(await readFile(path.join(dir, manifestFile), 'utf8'));
   if (!manifest || typeof manifest.version !== 'string' || typeof manifest.modelFile !== 'string' || !manifest.files) throw new Error('rwxlite: bad manifest.json');
+  const temperature = manifestTemperature(manifest);
   const modelFile = path.basename(manifest.modelFile);
   /** @type {Record<string, Buffer>} */
   const bytes = {};
@@ -193,5 +210,6 @@ export async function loadAnswerer({ dir, threads = Math.min(4, os.availablePara
     tokenizer: new WordPiece(bytes['vocab.txt'].toString('utf8')),
     runner: ortRunner(ort, session),
     model: modelString(manifest.version, manifest.files[modelFile]),
+    temperature,
   });
 }

@@ -819,3 +819,52 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 - rwxmap R1 and R2 FAILED tuning (2026-11-04, D100 bar): every right move was workos; without workos neither closed a leak, and each added wrong moves (R1: files.com PATCH /api_key; R2: okta GET/PUT .../pages/sign-out/customized). No new rule names; `credential-set` is the only one to train on. So the leak shapes above are workos-specific, not cross-vendor: the 59 and 45 candidates are NOT relabelled by pattern, each gets a hand check and only rows judged x by BRIEF-v3 change (expect few); files.com and okta are known false positives. The 949 fresh rows (workos included) are still added as training rows.
 
 - Publish gate (2026-11-04): the "GitHub release has the model files" step now also fails on any zero-size asset and on a release `manifest.json` whose `version` differs from package.json, not just on missing names.
+
+## 2026-11-04: Round 10 trained (no exam scored)
+
+Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same recipe as r8soft; val accuracy 97.32% (r8soft 96.89%). Train/val/v3eval 92,864 / 4,180 / 5,716 rows; leak-shape hand check (assembly summary): 134 rows, 5 ruled, 129 unchanged; no exam #3 vendor in any split. Checkpoint sha256 `28e5830356b84f3fada311811f6f382363a5fc37f5060e117f952575c5767512`. T refit on val: 0.858 (r8soft 0.844).
+
+### Why no exam number
+- The fresh exam (949 rows, workos included) is now r10 TRAINING data; scoring r10 on it measures training. The 09-22 exam is one-shot and already scored. Neither was run for r10. `train/exam_score.py` also hard-codes r8soft and T = 0.844 and writes `data/exam-r8soft/`.
+- So there is no gate number for r10. The only valid gate is shared exam #3 (clerk, neon, supabase, mux, netbird, ory, novu), pre-registered after this round with its predict and score code committed (`docs/wiki/exam-prereg-exam3.md`, draft).
+
+### Practice sets (v3eval, 5,716 rows; tuning set, not a pass claim)
+- r10 is flat against 0.2.0 (r8soft), exact / too loose / too tight %: mechanical 76.4 / 1.3 / 22.3 (r8soft 76.3 / 1.3 / 22.3); mode (a) at the PRD cuts 94.3 / 1.7 / 4.1 (94.0 / 1.8 / 4.2); a_argmax 95.5 / 2.6 / 1.9 (95.7 / 2.5 / 1.8); PUT 93.2 / 5.3 / 1.5 (93.4 / 5.3 / 1.3); PATCH 98.7 / 0.5 / 0.8 (same); POST 87.4 / 1.9 / 10.7 (86.4 / 2.2 / 11.4). Four lean rows changed, so the sets are not identical.
+- Held-out credential-replace PUT/PATCH rows (15: val 4, v3eval 11) are labelled w and both models say w (p(x) 0.01 to 0.12 before, 0.01 to 0.06 now); logout rows: r10 argmax identical to r8soft on all. The real workos leak rows are in the fresh exam, which r10 trained on, so the leak fix cannot be measured now.
+
+### The 32 credential-set ops (31 distinct), lean x, torch fp32 on ckpt-r10/final
+| input | argmax r / w / x | below x | lowerings at p >= 0.97 |
+|---|---|---|---|
+| 0.2.0 unguarded (raw name) | 0 / 12 / 20 | 12 | 3 |
+| 0.2.0 with the alias | 0 / 0 / 32 | 0 | 0 |
+| r10 unguarded (raw name, T = 1) | 0 / 18 / 14 | 18 | 1 (3 at T = 0.844) |
+| r10 with the alias | 0 / 0 / 32 | 0 | 0 |
+- r10 is worse than 0.2.0 on the raw name (18 below x against 12) and still needs the alias. Reason: the r10 training text uses the alias (`round10_aliases.py`: credential-set -> cant-undo-verb; 22 training rows carry the rule in metadata but the text says cant-undo-verb), so the model never reads the literal name. Keep `LEAN_RULE_ALIASES` in `src/text.js`; its "remove when round 10 trains on the real name" comment no longer holds.
+- This is rwxlite's own guard. It is not what protects rwxmap: rwxmap's `NEVER_LOWER_RULES` blocks any lowering of a `credential-set` verdict regardless of the model (proved on our earlier p's for the same 32 ops: 12 argmax w, 3 at >= 0.97, 0 lowered). The alias is a second, independent guard that rwxlite needs when used alone.
+
+### Export and parity (data/m1-r10, nothing in data/m1 touched)
+- fp32 sha256 `8514ddccdafcda28ae468aced91673545c3c1d56201754e89a79dcb10ca61a26`, int8 per-channel `093c908d492d07121159287b5beadd3d4d75c403a4cde4f701ac918475be1173` (23.1 MB), `vocab.txt` unchanged (`07eced37...`).
+- Parity against torch fp32 (T = 0.858, batch 1, `m1/export_r10.py parity`, practice sets only): fp32 ONNX max |dp| 2.4e-6, argmax agrees on all 4,180 val and 5,716 v3eval rows, no row crosses 0.97. int8 per-channel: argmax differs on 10 of 4,180 val and 15 of 5,716 v3eval rows, 67 and 53 rows change side of the 0.97 line, max |dp| 0.41 and 0.22. That is the same kind of int8 drift as 0.2.0 had (findings, "M1").
+- Node answerer against Python onnxruntime on the same file (949 fresh rows, p at T = 0.844 for both, `node m1/manifest-r10.mjs parity`): max |dp| 1.3e-7 for int8-pc and fp32, 0 argmax differences, 0 side flips.
+- Exam #3 code smoke test on the burned fresh exam (not a result; r10 trained on these rows): the 0.2.0 files reproduce the known fresh-exam numbers through the new code (int8-pc 809 right / 5 too loose / 61 too tight / 74 asked, fp32 810 / 5 / 60 / 74).
+- T is now read from the manifest (`manifest.json` of r10 carries `temperature: 0.858`; 0.844 when absent, so 0.2.0 manifests are unchanged). GET vs QUERY after the retrain (PRD item 4) is done, see the entry below. Round 10 was not released: exam #3 was NO-GO (see "Exam #3 result" below), so the version number and model string for a release are moot.
+
+## 2026-11-04: GET vs QUERY after round 10 (PRD Round 10 item 4)
+- Setup: frozen r10 int8 `093c908d` / fp32 `8514ddcc` at T = 0.858; 0.2.0 at T = 0.844. Same text with `| GET ` replaced by `| QUERY `, bypassing the `src/text.js` mapping. Held-out GET rows: val (2,404) and v3eval (959), which contain 0 QUERY copies. Script: scratchpad `query/q.py` (not in the repo).
+- r10 int8: val 2 argmax changes, 19 rows cross 0.97, max |d changes| 0.195, max |d isX| 0.0004, read-as-r 2395 / 2393, acc .9875 / .9875; v3eval 0 changes, 1 crossing, acc 1.0 / 1.0.
+- r10 fp32: val 4 changes, 18 crossings, max |d changes| 0.353, acc .9875 / .9884; v3eval 0 changes, 1 crossing.
+- 0.2.0 (never saw QUERY): val 5 (int8) / 6 (fp32) changes, 32 / 26 crossings, max |d changes| 0.459 / 0.508; v3eval 0 changes, 1 crossing.
+- Training copies (4,258 `-q` rows vs GET originals, r10): 0 argmax changes, 6 (int8) / 5 (fp32) crossings, acc .9995 both.
+- Reading: r10 reads QUERY like GET on argmax and accuracy. The augmentation shrank the drift but did not remove it; residual movement is on the changes axis near 0.97. Not covered: real QUERY ops (request body, non-read summaries); only GET rows relabelled QUERY were tested.
+- Decision (user ruling 2026-11-04): the QUERY-to-GET mapping in `src/text.js` stays. A QUERY op gets exactly the GET answer, deterministic; dropping it gains no accuracy and adds small p shifts near 0.97. Revisit when real QUERY ops appear in a labelling round. Exam #3 `ops.csv` has 0 QUERY rows, so the choice cannot affect it.
+
+## 2026-11-04: Exam #3 result (round 10 NO-GO)
+- Scored once, 2026-11-04, by `train/exam3_score.py` against rwxmap's `truth.csv` (sha256 `929725d5...b3c0`, verified). n = 1,377 (truth r 608 / w 437 / x 332). Gate `GONOGO_lba097`. Prereg and frozen predictions: `docs/wiki/exam-prereg-exam3.md`.
+- r10 int8-pc: right 1,134 (92.50%), too loose 15 (1.22% of 1,226 answered), too tight 77, asked 151 (10.97%). Verdict NO-GO: the loose bar fails; exact and asked pass.
+- Other runs, same gate: r10 fp32 92.35% right, 15 loose (1.22%); 0.2.0 int8 92.82%, 14 loose (1.13%); 0.2.0 fp32 92.73%, 13 loose (1.05%); mechanical 79.45%, 17 loose (1.23%).
+- The 15 r10 loose rows: 13 `keepMechLoose` (the model agrees with mechanical's own leak), 2 `raiseStillLoose` (ory GET logouts), 0 lowerings. Shapes: credential/identity replace, billing/subscription, mux analyze-structure jobs read r, ory logouts. By vendor: ory 5, clerk 4, mux 3, netbird 2, supabase 1.
+- Row level, r10 int8 vs 0.2.0 int8 under the gate: 47 rows differ. r10 is better on 16 (9 ask->right, 2 tight->right, 5 tight->ask) and worse on 31 (21 right->ask, 5 right->tight, 4 ask->tight, 1 right->loose: clerk PUT /users/{user_id}/phone_number). Net, r10 is not better than 0.2.0 on this exam.
+- rwxmap's scorer (% of 1,377; exact / loose / tight): mechanical 1,094 / 17 / 266. Mode a r10 fp32 1,178 / 15 / 184 passes the D133 bars (leaks 15 <= 17; exact +6.10 pts against the 5.0 needed). Mode a 0.2.0 fp32 1,192 / 15 / 170 (+7.12 pts); 22 rows differ, 0.2.0 is right on 18 of them, mostly plain POST creates that r10 raised to x. b95: r10 12 loose, 0.2.0 14. Mode c Jev 1,250 / 16 / 111 (90.8%).
+- Ruling D135 (rwxmap): rwxmap ships rwxlite 0.2.0 (fp32 default), pinned to v0.2.0. A newer model replaces it only if mode a on a fresh clean exam has no more too-loose and no fewer exact.
+- Found during the replay: int8 `answerMany` depends on the batch (rows pad to the longest, dynamic quantisation makes each p depend on its batch mates). Fixed in 0.2.1 on branch `fix/int8-batch1`.
+- Exam #3 is burned (round 11 trains on it). Round 10 stays unreleased; `data/m1-r10` manifests keep version 0.3.0 as the record.
