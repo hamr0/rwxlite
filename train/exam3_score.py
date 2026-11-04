@@ -1,16 +1,24 @@
 """Exam #3 score (pre-registration: docs/wiki/exam-prereg-exam3.md). Opens the truth file ONCE.
-  python3 train/exam3_score.py <work-dir> <truth.csv> [--smoke]    # truth.csv: id,label (r|w|x)
+  python3 train/exam3_score.py <work-dir> <truth.csv> <expected-sha256> [--smoke]    # truth.csv: id,label (r|w|x)
+<expected-sha256> is the hash of truth.csv that rwxmap committed with its prereg; the file's sha256 is checked BEFORE it is parsed and a
+mismatch stops the run. With --smoke the argument may be omitted or wrong (a pipeline check on burned rows; the mismatch is printed, not fatal).
 Per model file (r10 and 0.2.0, int8-pc and fp32) and per config: exact / too loose / too tight / asked, per vendor and per method, and
 every too-loose row. Gate numbers are the GONOGO_lba097 config until the prereg's rwxmap section fixes the gate config.
 --smoke labels every line SMOKE TEST (a pipeline check on already-burned rows, not a result).
 """
-import sys, os, json, csv
+import sys, os, json, csv, hashlib
 import numpy as np
 import exam_fresh as F
 from common import ORDER, LABELS
 
 def main():
-    wd, truth_path = sys.argv[1], sys.argv[2]; smoke = '--smoke' in sys.argv
+    args = [a for a in sys.argv[1:] if a != '--smoke']; smoke = '--smoke' in sys.argv
+    if len(args) < 2 or (len(args) < 3 and not smoke): raise SystemExit('usage: exam3_score.py <work-dir> <truth.csv> <expected-sha256> [--smoke]')
+    wd, truth_path = args[0], args[1]; want = args[2].strip().lower() if len(args) > 2 else None
+    got = hashlib.sha256(open(truth_path, 'rb').read()).hexdigest()   # hash only; the file is not parsed until the check passes
+    if got != want:
+        if not smoke: raise SystemExit(f'TRUTH HASH MISMATCH: {truth_path} is {got}, rwxmap committed {want}. Refusing to score.')
+        print(f'[SMOKE TEST] truth sha256 {got} (expected {want}; ignored in smoke)')
     tag = '[SMOKE TEST - not a result] ' if smoke else ''
     inp = {}; order = []
     for l in open(os.path.join(wd, 'inputs.jsonl')):

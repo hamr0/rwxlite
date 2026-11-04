@@ -1,6 +1,8 @@
 """Exam #3 predict (pre-registration: docs/wiki/exam-prereg-exam3.md). NEVER opens a truth file.
   node m0/exam3-inputs.mjs <ops.csv> <work-dir>
-  python3 train/exam3_predict.py <work-dir> [--smoke]   # -> <work-dir>/predictions-<model>.csv for the four model files in exam3_common.MODELS
+  python3 train/exam3_predict.py <work-dir> [--smoke]   # -> <work-dir>/predictions-<model>.csv and p-<model>.jsonl for the four model files in exam3_common.MODELS
+p-<model>.jsonl: one line per row, {"id", "model", "pIsX", "pChanges"}; T applied (final probabilities); model = the string loadAnswerer reports
+for that model dir (read from its manifest: rwxlite-<version>+<sha8>). pIsX = p(x), pChanges = p(w)+p(x). Parity file for rwxmap (compare at 1e-6).
 Refuses to run if any model file or vocab.txt differs from the frozen sha256 in exam3_common.py.
 """
 import sys, os, json, csv, time
@@ -10,6 +12,14 @@ import exam_fresh as F
 from common import ORDER, LABELS, TIER, fmt_text
 from tune_cuts import guarded
 import exam3_common as C
+
+def model_string(name, path, sha):
+    """rwxlite-<version>+<sha8>, version from the manifest next to the model, as loadAnswerer builds it; the manifest must agree on the sha."""
+    d = os.path.dirname(path)
+    mf = {'int8pc': 'manifest.json', 'fp32': 'manifest-fp32.json' if d == C.M1 else 'manifest-exact.json'}[name.split('-', 1)[1]]
+    m = json.load(open(os.path.join(d, mf)))
+    assert m['modelFile'] == os.path.basename(path) and m['files'][m['modelFile']] == sha, f'{name}: manifest {mf} does not match the model file'
+    return f"rwxlite-{m['version']}+{sha[:8]}"
 
 def main():
     wd = sys.argv[1]; hashes = C.check_hashes()
@@ -31,6 +41,10 @@ def main():
                 mv = 'lowering' if pa[i] < mech[i] else 'raise' if pa[i] > mech[i] else 'keep'
                 w.writerow([r['id'], r['provider'], r['method'], r['path'], r['class'], r['rule'], TIER.get(r['jev_tier'], 'none'), LABELS[pa[i]], LABELS[pb[i]], mv,
                             *[f'{P[i, k]:.6f}' for k in range(3)], f'{conf[i]:.6f}', *[('ask' if Cf[k][1][i] else LABELS[Cf[k][0][i]]) for k in F.CONFIGS]])
+        ms = model_string(name, path, hashes[name]); pis, pch = P[:, 2], P[:, 1] + P[:, 2]
+        assert ((0 <= pis) & (pis <= pch) & (pch <= 1)).all(), f'{name}: need 0 <= pIsX <= pChanges <= 1'
+        with open(os.path.join(wd, f'p-{name}.jsonl'), 'w') as f:
+            for i, r in enumerate(rows): f.write(json.dumps({'id': r['id'], 'model': ms, 'pIsX': float(pis[i]), 'pChanges': float(pch[i])}) + '\n')
         print(f'{name}: predicted {len(rows)} rows in {meta["time_s"][name]}s, T={T}')
     json.dump(meta, open(os.path.join(wd, 'predict-meta.json'), 'w'), indent=1)
     print('truth never opened')
