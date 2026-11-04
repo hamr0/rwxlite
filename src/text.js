@@ -6,44 +6,55 @@
 // Format: 'lean: <letter> <rule> | <METHOD> <path> | op: <operationId> | sum: <summary> | desc: <description>'
 // The lean (mechanical letter and rule) goes first so truncation never cuts it.
 
-/** Named HTML entities the Python html.unescape would decode that occur in API
- * specs. Python knows about 2,200; this list covers the ones seen in the
- * training and exam corpora (test/text.test.js checks the corpus fixture). */
-const NAMED = {
-  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', copy: '©', reg: '®',
-  trade: '™', hellip: '…', mdash: '—', ndash: '–', lsquo: '‘', rsquo: '’',
-  ldquo: '“', rdquo: '”', bull: '•', middot: '·', times: '×', rarr: '→',
-  larr: '←', deg: '°', euro: '€', pound: '£', sect: '§', para: '¶',
-  laquo: '«', raquo: '»', ge: '≥', le: '≤', ne: '≠', plusmn: '±',
-  lbrace: '{', rbrace: '}', lbrack: '[', rbrack: ']', colon: ':', comma: ',', period: '.', sol: '/',
-  bsol: '\\', num: '#', excl: '!', quest: '?', lowbar: '_', grave: '`', Hat: '^', verbar: '|',
-  vert: '|', ast: '*', midast: '*', equals: '=', plus: '+', dollar: '$', percnt: '%', commat: '@',
-  semi: ';', lpar: '(', rpar: ')', newline: '\n', Tab: '\t', zwj: '‍', zwnj: '‌',
+import { HTML5 } from './entities.js';
+
+// Python html.unescape (CPython Lib/html/__init__.py), ported exactly: the
+// regex, the longest-prefix rule for names without ';', and the invalid
+// numeric references. The name table is generated into entities.js.
+
+// Numeric references Python maps instead of decoding (HTML5 spec).
+const INVALID_CHARREFS = {
+  0x00: '\ufffd', 0x0d: '\r', 0x80: '\u20ac', 0x81: '\x81', 0x82: '\u201a', 0x83: '\u0192', 0x84: '\u201e',
+  0x85: '\u2026', 0x86: '\u2020', 0x87: '\u2021', 0x88: '\u02c6', 0x89: '\u2030', 0x8a: '\u0160', 0x8b: '\u2039',
+  0x8c: '\u0152', 0x8d: '\x8d', 0x8e: '\u017d', 0x8f: '\x8f', 0x90: '\x90', 0x91: '\u2018', 0x92: '\u2019',
+  0x93: '\u201c', 0x94: '\u201d', 0x95: '\u2022', 0x96: '\u2013', 0x97: '\u2014', 0x98: '\u02dc', 0x99: '\u2122',
+  0x9a: '\u0161', 0x9b: '\u203a', 0x9c: '\u0153', 0x9d: '\x9d', 0x9e: '\u017e', 0x9f: '\u0178',
 };
 
-// Python html.unescape maps these invalid numeric references (HTML5 spec).
-const INVALID_CHARREFS = {
-  0x00: '�', 0x0d: '\r', 0x80: '€', 0x81: '\x81', 0x82: '‚', 0x83: 'ƒ', 0x84: '„',
-  0x85: '…', 0x86: '†', 0x87: '‡', 0x88: 'ˆ', 0x89: '‰', 0x8a: 'Š', 0x8b: '‹',
-  0x8c: 'Œ', 0x8d: '\x8d', 0x8e: 'Ž', 0x8f: '\x8f', 0x90: '\x90', 0x91: '‘', 0x92: '’',
-  0x93: '“', 0x94: '”', 0x95: '•', 0x96: '–', 0x97: '—', 0x98: '˜', 0x99: '™',
-  0x9a: 'š', 0x9b: '›', 0x9c: 'œ', 0x9d: '\x9d', 0x9e: 'ž', 0x9f: 'Ÿ',
-};
+// Numeric references Python decodes to '' (controls, noncharacters).
+function isInvalidCodepoint(n) {
+  return (n >= 0x1 && n <= 0x8) || n === 0xb || (n >= 0xe && n <= 0x1f) || (n >= 0x7f && n <= 0x9f) ||
+    (n >= 0xfdd0 && n <= 0xfdef) || ((n & 0xfffe) === 0xfffe && n <= 0x10ffff);
+}
+
+const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+
+// Python's _charref; the u flag makes {1,32} count code points like Python.
+const CHARREF = /&(#[0-9]+;?|#[xX][0-9a-fA-F]+;?|[^\t\n\f <&#;]{1,32};?)/gu;
+
+/** @param {string} body the text after '&' */
+function replaceCharref(body) {
+  if (body[0] === '#') {
+    const hex = body[1] === 'x' || body[1] === 'X';
+    const n = parseInt(body.slice(hex ? 2 : 1).replace(/;+$/, ''), hex ? 16 : 10);
+    if (has(INVALID_CHARREFS, n)) return INVALID_CHARREFS[/** @type {keyof typeof INVALID_CHARREFS} */ (n)];
+    if ((n >= 0xd800 && n <= 0xdfff) || n > 0x10ffff) return '\ufffd';
+    if (isInvalidCodepoint(n)) return '';
+    return String.fromCodePoint(n);
+  }
+  if (has(HTML5, body)) return HTML5[body];
+  // longest matching name (as defined by the standard), by code points
+  const cps = Array.from(body);
+  for (let x = cps.length - 1; x > 1; x--) {
+    const head = cps.slice(0, x).join('');
+    if (has(HTML5, head)) return HTML5[head] + cps.slice(x).join('');
+  }
+  return '&' + body;
+}
 
 /** @param {string} s */
-function unescapeHtml(s) {
-  if (!s.includes('&')) return s;
-  return s.replace(/&(#[0-9]+;?|#[xX][0-9a-fA-F]+;?|[A-Za-z][A-Za-z0-9]*;)/g, (m, body) => {
-    if (body[0] === '#') {
-      const hex = body[1] === 'x' || body[1] === 'X';
-      const n = parseInt(body.slice(hex ? 2 : 1).replace(/;$/, ''), hex ? 16 : 10);
-      if (n in INVALID_CHARREFS) return INVALID_CHARREFS[n];
-      if ((n >= 0xd800 && n <= 0xdfff) || n > 0x10ffff) return '�';
-      return String.fromCodePoint(n);
-    }
-    const name = body.slice(0, -1);
-    return Object.prototype.hasOwnProperty.call(NAMED, name) ? NAMED[name] : m;
-  });
+export function unescapeHtml(s) {
+  return s.includes('&') ? s.replace(CHARREF, (_, body) => replaceCharref(body)) : s;
 }
 
 // Python's \s (str patterns) is Unicode whitespace per str.isspace, which

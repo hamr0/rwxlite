@@ -21,7 +21,7 @@
     "rwx"
   ],
   "type": "module",
-  "description": "rwxlite: a small local r/w/x classifier (int8 MiniLM on onnxruntime-node) that answers Jev's request shape with probabilities only; plus the module 0 research scripts.",
+  "description": "rwxlite: a small local r/w/x classifier (int8 MiniLM on onnxruntime-node) that answers Jev's request shape with probabilities only.",
   "types": "./types/index.d.ts",
   "exports": {
     ".": {

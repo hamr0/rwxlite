@@ -454,9 +454,10 @@ Only module 0 is sharp. The rest are sketches.
 ## Publishing (user, 2026-11-04)
 
 - rwxlite is published publicly on npm as `rwxlite`, so rwxmap can `import { loadAnswerer } from 'rwxlite'`. The name was free on 2026-11-04 (registry 404).
-- The tarball holds only src/, types/, README, LICENSE, CHANGELOG (12 files, 19.8 kB). Model files are not in it; they come from GitHub releases (`m1/release-assets.mjs`).
+- The tarball holds only src/, types/, README, LICENSE, CHANGELOG (14 files, 33.6 kB with the entity table). Model files are not in it; they come from GitHub releases (`m1/release-assets.mjs`).
 - `publish.yml` is manual (Run workflow), OIDC trusted publishing, no token in CI.
-- One-time human steps: (1) first publish by hand with a token to reserve the name (`npm publish --access public` from a clean checkout after the release bump); (2) on npmjs.com, package settings, Trusted Publisher, GitHub Actions: repo hamr0/rwxlite, workflow `publish.yml`; (3) after that, publish only via the workflow.
+- Done by the user on 2026-11-04: the name is reserved with a placeholder `rwxlite@0.0.1` (`npm view rwxlite version` shows 0.0.1), and the npm Trusted Publisher is configured for hamr0/rwxlite, workflow `publish.yml`.
+- The real code ships as the next release version through the `publish.yml` "Run workflow" button (no token). The model files go to the GitHub release via `m1/release-assets.mjs`.
 
 ## Open questions
 

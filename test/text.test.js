@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatText, clean } from '../src/text.js';
+import { readFileSync } from 'node:fs';
+import { formatText, clean, unescapeHtml } from '../src/text.js';
 import { fixtureRows } from './helpers.js';
 
 test('formatText matches the Python fmt_text on every fresh-exam fixture row', () => {
@@ -19,4 +20,13 @@ test('clean strips tags, unescapes, collapses whitespace and cuts by code points
   assert.equal(clean(null, 5), '');
   assert.equal(clean('😀😀😀', 2), '😀😀');
   assert.equal(clean('a b c', 3), 'a b');
+});
+
+test('unescapeHtml and clean match Python html.unescape on every probe (test/fixtures/unescape.jsonl)', () => {
+  const rows = readFileSync(new URL('./fixtures/unescape.jsonl', import.meta.url), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  assert.ok(rows.length >= 300);
+  for (const r of rows) {
+    const got = r.kind === 'clean' ? clean(r.in, r.n) : unescapeHtml(r.in);
+    assert.equal(got, r.out, JSON.stringify(r.in));
+  }
 });
