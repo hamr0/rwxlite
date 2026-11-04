@@ -809,3 +809,4 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 - Laptop latency swung about 2x with background load (int8 per-channel, 1 thread: mean 19.8 to 23.3 ms, p95 39 to 46), so single runs on a busy machine say little.
 - Decision: default file is int8 per-channel; fp32 is the "exact" option. Published as GitHub release assets (PRD, "M1 result").
 
+- QUERY read as GET (rwxmap D134): on the 383 fresh-exam GET rows relabelled QUERY, argmax changes on 1 row, 1 row crosses the 0.97 line, max |changes diff| 0.33; otherwise stable.

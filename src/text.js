@@ -74,6 +74,14 @@ export function clean(s, n) {
   return cps.length > n ? cps.slice(0, n).join('') : out;
 }
 
+// HTTP QUERY (RFC 10008; rwxmap D134) is safe and idempotent like GET, and the
+// model never saw it in training, so it is read as GET (measured: PRD, "QUERY").
+/** @param {unknown} m */
+function textMethod(m) {
+  const u = String(m).toUpperCase();
+  return u === 'QUERY' ? 'GET' : u;
+}
+
 /**
  * @typedef {{method: string, path: string, operationId?: string|null, summary?: string|null, description?: string|null}} State
  * @typedef {{class: 'r'|'w'|'x', rule: string}} Lean
@@ -86,7 +94,7 @@ export function clean(s, n) {
  * @returns {string}
  */
 export function formatText(state, lean) {
-  const parts = [`lean: ${lean.class} ${lean.rule}`, `${String(state.method).toUpperCase()} ${state.path}`];
+  const parts = [`lean: ${lean.class} ${lean.rule}`, `${textMethod(state.method)} ${state.path}`];
   if (state.operationId) parts.push('op: ' + clean(state.operationId, 120));
   if (clean(state.summary, 1)) parts.push('sum: ' + clean(state.summary, 200));
   if (clean(state.description, 1)) parts.push('desc: ' + clean(state.description, 400));

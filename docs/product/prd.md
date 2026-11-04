@@ -418,6 +418,10 @@ The rules differ on 9 rows. 5 are GET rows only rwxlite's raise-get tier sends: 
 
 **Parity fixture.** `test/fixtures/decision.jsonl`, made by `.venv/bin/python m1/decision-fixture.py` from the default model's batch-1 p and the pre-registered scripts (imported unchanged; truth is never read). One row per operation, all 949: `{id, method, state (5 fields), lean {class, rule}, jev_tier (null when none), isX, changes, expected {letter, asked}}`. `test/decision.test.js` holds a JS reference of the rule (test only; not exported from `src`) and reproduces `expected` for all 949 rows from those fields alone, so the rule above is complete. Counts: 165 lowerings, 10 raises, 774 keeps, 74 asked. It is a parity and reference file for rwxlite's rule; rwxmap may use it to check its own port of that rule, but it does not have to apply that rule.
 
+### HTTP QUERY read as GET (rwxmap D134, 2026-11-04)
+
+rwxmap ruled QUERY (RFC 10008, safe and idempotent like GET, with a body) as r and sends `state.method = "QUERY"` as-is. The model never saw QUERY in training, so the text step writes QUERY as GET (case-insensitive) before the model reads it; `checkRequest` still accepts any non-empty method string. Measured before the change, on the 383 fresh-exam GET rows relabelled QUERY: argmax changes on 1 row, 1 row crosses the 0.97 line, max |changes diff| 0.33; otherwise stable. Real QUERY training rows can come in a later labelling round; the labelling brief default is QUERY = r by protocol, same as GET.
+
 ## Modules
 
 Only module 0 is sharp. The rest are sketches.

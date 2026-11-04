@@ -103,6 +103,8 @@ const one = await a.answer(req);        // { model, answers: { isX: { noul }, ch
 const many = await a.answerMany([req]); // each slot is { model, answers } or { model, error }; a bad request does not fail the rest
 ```
 
+The HTTP `QUERY` method (RFC 10008) is read as `GET`: the model never saw `QUERY` in training.
+
 - `lean` is required: the mechanical letter and rule (`{class: 'r'|'w'|'x', rule}`). The model was trained with it as the first words of its input.
 - Only the keys of `questions` are read. `isX` is p(x), `changes` is p(w) + p(x). rwxlite returns probabilities only; the caller decides.
 - Two shapes, both plain JSON: success `{model, answers: {...}}` and no answer `{model, error: '<message>'}` (no `answers` key). `answerMany` never returns `Error` objects (they serialise as `{}`); `answer` throws an `Error` with the same message. On a no-answer keep the mechanical letter.

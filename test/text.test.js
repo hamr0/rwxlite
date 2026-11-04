@@ -15,6 +15,16 @@ test('formatText puts the lean first and skips empty fields', () => {
   assert.equal(formatText({ method: 'POST', path: '/a', operationId: 'op', summary: '  ', description: null }, { class: 'w', rule: 'x' }), 'lean: w x | POST /a | op: op');
 });
 
+test('QUERY is read as GET; other methods are unchanged', () => {
+  const lean = { class: /** @type {'r'} */ ('r'), rule: 'method' };
+  const f = { path: '/a', operationId: 'op', summary: 's', description: 'd' };
+  const get = formatText({ method: 'GET', ...f }, lean);
+  assert.equal(formatText({ method: 'QUERY', ...f }, lean), get);
+  assert.equal(formatText({ method: 'query', ...f }, lean), get);
+  assert.ok(formatText({ method: 'POST', ...f }, lean).includes('| POST /a'));
+  assert.ok(formatText({ method: 'delete', ...f }, lean).includes('| DELETE /a'));
+});
+
 test('clean strips tags, unescapes, collapses whitespace and cuts by code points', () => {
   assert.equal(clean('<b>a</b>  &amp;\n b', 99), 'a & b');
   assert.equal(clean(null, 5), '');
