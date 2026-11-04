@@ -8,7 +8,7 @@ All notable changes to rwxlite are recorded here. Format follows
 Version stays 0.2.0 (package.json). The round 10 model was not released: exam #3 was NO-GO (docs/wiki/exam-prereg-exam3.md, "Result").
 
 ### Added
-- Round 10 model build (`data/m1-r10`, int8-pc `093c908d`, fp32 `8514ddcc`, T 0.858), not released (exam #3 NO-GO; 0.2.0 stays the published model). Manifests built by `m1/manifest-r10.mjs`, the release set by `m1/release-assets.mjs r10`.
+- Round 10 model build (`data/m1-r10`, int8-pc `093c908d`, fp32 `8514ddcc`, T 0.858), not released (exam #3 NO-GO; 0.2.0 stays the published model). Manifests built by `m1/manifest-r10.mjs`, the release set by `m1/release-assets.mjs data/m1-r10/release r10`.
 - `train/exam3_predict.py` writes one JSONL per model (`id`, `model`, `pIsX`, `pChanges`, T applied) for parity checks against `loadAnswerer`.
 
 ### Changed
