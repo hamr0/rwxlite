@@ -126,7 +126,21 @@ jobs:
             echo "::error::GitHub release v${VERSION} is missing:${MISSING}. Upload them (node m1/release-assets.mjs) before publishing to npm."
             exit 1
           fi
-          echo "Release v${VERSION} has all five model assets."
+          # Names alone are not enough: an empty upload or a manifest from another version
+          # would still pass. Sizes come from the release listing; only manifest.json is downloaded.
+          EMPTY=$(echo "$JSON" | node -e 'const a=JSON.parse(require("fs").readFileSync(0,"utf8")).assets;console.log(a.filter((x)=>!(x.size>0)).map((x)=>x.name).join(" "))')
+          if [ -n "$EMPTY" ]; then
+            echo "::error::GitHub release v${VERSION} has zero-size assets: ${EMPTY}. Re-upload them (node m1/release-assets.mjs) before publishing to npm."
+            exit 1
+          fi
+          TMP=$(mktemp -d)
+          gh release download "v${VERSION}" --repo "${{ github.repository }}" -p manifest.json -D "$TMP"
+          MV=$(node -p 'require(process.argv[1]).version' "$TMP/manifest.json")
+          if [ "$MV" != "$VERSION" ]; then
+            echo "::error::GitHub release v${VERSION} manifest.json says version '${MV}', not '${VERSION}'. Rebuild the assets (node m1/release-assets.mjs) and re-upload with --clobber before publishing to npm."
+            exit 1
+          fi
+          echo "Release v${VERSION} has all five model assets, none empty, manifest version ${MV}."
       - name: Build types
         # `npm pack` does not run `prepublishOnly`, so without this the adopter
         # check below would pack a tarball with no `.d.ts`; repos that use

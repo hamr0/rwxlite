@@ -4,6 +4,13 @@
    a small, local gut check for what an API call can do
 ```
 
+<p align="center">
+  <a href="https://github.com/hamr0/rwxlite/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamr0/rwxlite/ci.yml?label=CI" alt="CI"></a>
+  <img src="https://img.shields.io/github/package-json/v/hamr0/rwxlite?label=version&color=2a4f8c" alt="version (auto from package.json)">
+  <img src="https://img.shields.io/badge/classifier-rwxlite--0.2.0%2B8ad0a182-2a4f8c" alt="classifier: rwxlite-0.2.0+8ad0a182">
+  <img src="https://img.shields.io/badge/license-Apache%202.0-2a4f8c" alt="license: Apache 2.0">
+</p>
+
 **A small local classifier that says whether an API operation reads (r), writes (w) or can't be taken back (x). Jev-shaped questions in, JSON out, no answer if it isn't confident.**
 
 > Status: module 1 (the Node answerer) is built, version 0.2.0; the npm package is not published yet (the name is reserved). The rest of the repo is module 0 research. Parts of this page describe the plan. They are marked *planned*.
