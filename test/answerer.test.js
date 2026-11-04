@@ -167,3 +167,12 @@ test('bad temperature throws: 0, negative, NaN, Infinity, string, null, boolean'
     await assert.rejects(loadAnswerer({ dir }), /temperature must be a finite number > 0/);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
+
+test('loadAnswerer validates threads before touching the disk: -1, 1.5, "2", NaN throw; 0 and 4 pass the check', async () => {
+  const dir = path.join(tmpdir(), 'rwxlite-no-such-dir');
+  for (const threads of [-1, 1.5, '2', NaN]) {
+    await assert.rejects(loadAnswerer({ dir, threads: /** @type {any} */ (threads) }), /rwxlite: threads must be an integer >= 0/, String(threads));
+  }
+  // valid values get past the check and fail later, on the missing manifest
+  for (const threads of [0, 4]) await assert.rejects(loadAnswerer({ dir, threads }), /ENOENT/, String(threads));
+});
