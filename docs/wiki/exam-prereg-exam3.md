@@ -87,3 +87,31 @@ Known fact (rwxmap, 2026-11-04): rwxmap's `NEVER_LOWER_RULES` blocks any lowerin
 Labelling (rwxmap, 2026-11-04): two blind labellers per row, BRIEF-v3 verbatim. Labellers A and B agreed on 1370 of 1377 rows (99.5%); rwxmap's user ruled the other 7. A scripted labeller-A pass on mux was rejected and mux was relabelled.
 
 Secondary bars (exact >= 91% of answered, asked <= 15% of all) are reported with the rwxlite gate, as written under "Gates".
+
+## Predictions frozen (2026-11-04)
+
+Produced after the prereg commit `1cef41cbb9c1c529a0c14980b4e3a7b12f043955`, from rwxmap clone at `46235eab7043fe69a4fea18e0ad77678a82123cb` (`ops.csv` sha256 verified `fff7afa9...d790`), rwxlite build ref `fe374c0`, without truth. `data/exam3/`, 1377 rows, real run (not `--smoke`). `rwxmap-head.txt` = `46235eab7043fe69a4fea18e0ad77678a82123cb`.
+
+Parity (`node m0/exam3-parity.mjs data/exam3`, exit 0): model strings equal, n=1377, max |dp| <= 1e-6 required:
+- r10-int8pc `rwxlite-0.3.0+093c908d`: max |dp| 2.220e-16 OK
+- r10-fp32 `rwxlite-0.3.0+8514ddcc`: max |dp| 2.220e-16 OK
+- v020-int8pc `rwxlite-0.2.0+8ad0a182`: max |dp| 2.220e-16 OK
+- v020-fp32 `rwxlite-0.1.0+8503b655`: max |dp| 2.220e-16 OK
+
+sha256 of every file in `data/exam3/`:
+
+```
+25ac102d2493e9a8342ac0c82e8492a91d06a425d6d9865b5ebfac9545d1f50e  inputs.jsonl
+1790edb8fce4e8ecd792fe99a1336394d2a4aa21e18d37d976c996cfaa9e4882  rwxmap-head.txt
+fb374d424c7011570d39a6b124e30ac3f3ba746fa90895bbd24b15776bb2d2ab  p-r10-fp32.jsonl
+bfb3cd9141d4d3191f5ac72291f900319014f6d38cf035da83bc7ea12479102e  p-r10-int8pc.jsonl
+cc16eede63676c71f8ae0e40a1286b735493d2fd62199a7dd75d23a0aa32f95e  p-v020-fp32.jsonl
+2521154d7822e23f3ff34e1ddc9d38e7d27c7dcec0a64716c9dbe4f2b55d5c8b  p-v020-int8pc.jsonl
+09f369887ed71c7bddc8cc0b27a605154c349b66a1cf78cfa4e9a2719e712520  predictions-r10-fp32.csv
+f5b6c46864edeedc1c7e465849531b71c5575a6dd917b846151943a3ba2af063  predictions-r10-int8pc.csv
+a116a572132c0c29b88192e5afa8078474da512c69102cded5283978df08313d  predictions-v020-fp32.csv
+ea1c4a3a5683ad49fcecf6d67564bdae58f3660dbd18b1975d5d38ec243f3fb6  predictions-v020-int8pc.csv
+493a47d664e91c7bce6d87f4f1d78b826b492960cc5c7ca6d5b9b2eb4dd600fc  predict-meta.json
+```
+
+Next: rwxmap shares `truth.csv` (sha256 `929725d5...b3c0`); score once.
