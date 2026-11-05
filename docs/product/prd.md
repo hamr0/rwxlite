@@ -426,6 +426,30 @@ rwxmap ruled QUERY (RFC 10008, safe and idempotent like GET, with a body) as r a
 
 rwxmap's step-2 rule `credential-set` (class x, PUT/PATCH) is a lean rule name the model never saw. Measured (default int8-pc model, the 32 credential-set ops in `data/m0/mechanical.jsonl.gz`): as `credential-set` argmax w on 12, 3 with max p >= 0.97 (britbox /account/pin, whapi /account/plusCard/pin, circuitsandbox /spaces/{topicId}/pin); as `cant-undo-verb` (a trained x rule) all 32 argmax x, isX >= 0.9996. So `formatText` maps the rule through `LEAN_RULE_ALIASES` before the model reads it (the lean class stays as sent; `checkRequest` still accepts any non-empty rule). Re-measured with the guard: 32 of 32 argmax x, 0 lowerings at p >= 0.97. `node m1/credential-set-file.mjs` writes `test/fixtures/credential-set.jsonl`, the 32 ops with the model's answers before the guard and after it, so rwxmap can check its secondPass floor on identical rows (no test reads it; regenerating it reproduces the same numbers). **Removal condition (updated after round 10):** none for now. Round 10 was trained on the alias text `cant-undo-verb` and never read the name `credential-set` (findings, "The 32 credential-set ops"), so the alias is part of the model's input contract and stays. It would go only if a later round trains on the real name. rwxmap is asked to never lower a credential-set row. Per rwxmap the risk is in mode b only (mode a never sends credential-set rows, they are settled; mode c, Jev, does not take them). Of the 3 lowerings, only britbox /account/pin is a real credential lowering; whapi PUT /account/plusCard/pin was ruled truth w at gate 3 (credential-set's one wrong fire), and circuitsandbox /spaces/{topicId}/pin has the same pinned-item shape (on rwxmap's ledger). The guard can turn those 2 into too-tight x rows, which is safe ('unsure means x').
 
+## Vendor labels: an independent check of our teacher (planned 2026-11-05)
+
+**Goal.** Some API vendors publish their own read/write/permission labels. AWS lists every IAM action with an access level (List, Read, Write, Tagging, Permissions management); GitHub lists, per REST endpoint, the permission area and read or write level a fine-grained token needs. These labels were made by the vendors, not by Jev or by us, so they are an independent opinion on the same operations. Use them to find rows where our teacher (mechanical + Jev) or the model sits below what the vendor implies, which is the dangerous error (too loose).
+
+**Mapping (hints, not labels).**
+
+| Vendor says | Hint |
+|---|---|
+| AWS List / Read; GitHub read | r |
+| AWS Tagging | w |
+| AWS Write | not r (w or x) |
+| AWS Permissions management | x |
+| GitHub write in Administration (and any other clearly admin/secret/credential area found, listed in the findings) | x |
+
+**Steps.**
+- A (no spend): join vendor labels to corpus rows; compare with mechanical, Jev, the training label 0.2.0 learned, and 0.2.0's own answer and rwxmap final letter (secondPass replica). Report agreement, and the candidate dangerous mistakes (vendor says x or "not r", we say lower). Scripts in `vendor/`, outputs in `data/vendor/` (gitignored). No training, no Jev or other paid calls.
+- B (only if A shows value, needs user approval first): Jev only on the gaps (vendor-labelled rows with no Jev answer), about $1-2.
+- C: BRIEF-v3 review of the disagreements, feeding round 13 data. Optional: a ModernBERT-base (149M) size test, judged once on a fresh exam under the D135 bar.
+
+**Safeguards.**
+- Exam isolation: rows with an exam flag, `exam_opkey_overlap`, or in any exam/gate/holdout/r9-hand set stay out of training and tuning, and are counted separately in every table.
+- Licence: AWS data is MIT (`@fluggo/aws-service-auth-reference`). GitHub docs content licence is reported, not decided. Vendor data is not redistributed in the repo (data/ is gitignored). Azure needs a login and is not done.
+- **BRIEF-v3 stays the only label standard.** Vendor labels are evidence that selects rows to review, never truth and never a training label by themselves.
+
 ## Modules
 
 Only module 0 is sharp. The rest are sketches.
