@@ -333,3 +333,67 @@ Reading the numbers:
 4. **Same brief, same model family.** All labelling in section 2 except Jev was done by Claude workers under one brief; their agreement figures (98 to 98.8%) show consistency, not independence.
 5. **Duplicate snapshots.** v3eval repeats operations (5,716 rows, 3,723 distinct); the training sets are de-duplicated by provider+method+path+operationId. Count distinct operations when sizing v4 work.
 6. **Noticed and not changed.** `data/round12/train.jsonl` and `final/S0/train.jsonl` have the same 95,291 ids but differ in the D136/user relabels (about 56 rows by `status`); findings says the S0 file's sha256 is not recorded in the repo. The narrow and broad patterns above are heuristics: false positives are visible in the example tables (for example Kubernetes admission and network policies, Azure Data Share list calls, Microsoft Graph `Update the navigation property` PATCH rows).
+
+## 9. BRIEF-v4 w-row sizing (2026-11-05, read-only; no label changed)
+
+Answers rwxmap's four sizing questions. Counts come from `data/` (gitignored), recomputed from the files; nothing was written except `data/v4/`. "Labelled w" means: the `label` field of the file (for training files that is the hard label used in training, i.e. the argmax of the one-hot or the letter the soft target is mixed with; for v3eval, gates, exams and r9-hand it is the human truth). v3eval's recipe label (1,644 w) is not counted; its truth (2,761 w) is.
+
+**Merge key** = provider (lower-case) + method (QUERY folded into GET) + path + operationId + summary text (whitespace-collapsed, lower-case). Description is not in the key. Model-input-text merging would give about the same number (provider+method+path alone: 29,003).
+
+### 9.1 Rows labelled w, before and after merging
+
+Counted files (copies skipped: `round12/train.jsonl` pre-D136 copy, `round12/holdout.jsonl` pre-D136 copy, `round12/eval` which is the goharbor+render slice of exam #4, v3eval recipe labels, `r12/replay/*` and parquet copies, all checked identical to the originals). Training rounds nest (0.2.0 within r10 within r11 within S0 within S1 within S2), so the raw sum is inflated.
+
+| set | rows | w rows | Jev soft | mechanical | hand/ruled | generated | unique w ops |
+|---|---|---|---|---|---|---|---|
+| train 0.2.0 (r8soft) | 87,657 | 24,161 | 22,267 | 1,894 | 0 | 0 | 24,161 |
+| train r10 | 92,864 | 24,574 | 21,498 | 1,894 | 1,182 | 0 | 24,458 |
+| train r11 | 94,241 | 25,011 | 21,498 | 1,894 | 1,619 | 0 | 24,895 |
+| train r12 S0 | 95,291 | 25,449 | 21,477 | 1,891 | 2,081 | 0 | 25,333 |
+| train r12 S1 | 97,613 | 26,669 | 21,477 | 1,891 | 2,081 | 1,220 | 25,948 |
+| train r12 S2 | 101,058 | 28,494 | 21,477 | 1,891 | 2,081 | 3,045 | 25,948 |
+| val r10/r11 (identical) | 4,180 | 1,153 | 1,086 | 67 | 0 | 0 | 1,153 |
+| val r12 | 4,180 | 1,145 | 1,075 | 67 | 3 | 0 | 1,145 |
+| v3eval (human truth) | 5,716 | 2,761 | 0 | 0 | 2,761 | 0 | 1,719 |
+| holdout goharbor+render (final) | 455 | 115 | 0 | 0 | 115 | 0 | 115 |
+| gate-1 / gate-2 | 600 / 600 | 194 / 204 | 0 | 0 | 398 | 0 | 194 / 204 |
+| gate-3 / gate-4 | 800 / 800 | 352 / 347 | 0 | 0 | 699 | 0 | 352 / 347 |
+| fresh exam 2026-11-03 | 949 | 328 | 0 | 0 | 328 | 0 | 328 |
+| r9-hand | 1,200 | 966 | 0 | 0 | 966 | 0 | 966 |
+| exam #3 (labels from S0) | 1,377 | 439 | 0 | 0 | 439 | 0 | 439 |
+| exam #4 (truth.csv, pre-D136) | 1,505 | 467 | 0 | 0 | 467 | 0 | 467 |
+| r10 hand check (A/B stricter) | 134 | 71 | 0 | 0 | 71 | 0 | 62 |
+| generated variants (unique) | 1,199 | 615 | 0 | 0 | 0 | 615 | 615 |
+
+- **Before merging:** 163,515 w rows summed over 20 counted files (592,419 rows). That sum counts the same row many times (every round contains the one before; exams, gates and r9-hand are also inside S0 as hand rows).
+- **After merging (merge key above):** **29,396 unique operations have at least one w label.** Using one authoritative label per operation (S0 final, then holdout, val r12, hand/truth sets, exam #4, hand check, generated, older rounds last): **29,327 unique w operations** (of 101,806 unique operations in all counted sets). The 69 ever-w ops that are not w today: 66 were w only in 0.2.0/r10/r11/val and relabelled later (fixes, D136, rulings), 9 current-file conflicts (w versus x, mostly exam #4 truth.csv before D136 and a gate row against a generated variant); none w against r.
+- **By label source of the 29,327 (best-trust occurrence):** Jev soft 21,673 (73.9%), hand/ruled 5,121 (17.5%), mechanical 1,920 (6.5%), generated variants 613 (2.1%). 29,327 minus 613 = 28,714 are real APIs.guru/vendor operations.
+- **Jev soft detail in S0 (25,449 w rows):** POST lowered x to w by Jev 10,826; PUT/PATCH kept w by the mechanical floor 9,275; GET raised r to w 1,260; QUERY copies of raised GETs 116 (folded into their GET by the merge key); mechanical word rules 1,891; hand/ruled 2,081 (r9-hand 853, exam #3 439, exam #4 354, fresh exam 330, D136 55, gate label fixes 50).
+- Details per set also in `data/v4/w-sizing-per-set.json`. Mechanical letters over all 123,339 APIs.guru operations in `data/m0/mechanical.jsonl.gz` carry 17,312 w, of which 3,304 never appear in any counted set (not labelled sets, so not counted).
+
+### 9.2 Generated variants
+
+- w rows that are generated variants: **615 unique** (`generated-unique.jsonl`: 570 surface, 45 contrast; 76 from the D136 batch, 539 from the main batch). In the training files they are repeated: **S1 has 1,220 w variant rows, S2 has 3,045** (S1/S2 duplicate each variant by weight; 615 distinct texts). Of the 1,199 unique variants, 615 w / 374 x / 210 r.
+- They derive from **160 distinct source rows** (seeds), out of the 182 seeds in `data/round12/seeds.csv`. Seed rows come from burned sets: fresh exam 51, r9-hand 31, exam #4 26, gate-1 19, gate-2 13, gate-3 12, gate-4 8. Seed truth: 116 w, 29 r, 15 x (so some w variants are contrast variants of an r or x seed, or the other way). By seed category: 145 unsure_right, 14 raise_miss, 1 leak. 2 of the 615 w variants also match a gate row with a different label (counted in the 9 conflicts above), leaving 613 authoritative.
+
+### 9.3 Labels older than BRIEF-v3
+
+**None as w, and no v1 label is used as a training or evaluation label anywhere.** The only v1 material: (a) `labelled.csv` / calibration-2026-09-14 flags (`hand_set` 1,152, `calib_set` 549) on the mechanical dump, flags only, no v1 letters stored; 815 of the flagged ids sit in the training files but carry recipe labels. (b) `v3eval` (the combined-2026-09-21 slice): rwxmap kept the **v1 label where it was r** and relabelled every non-r row under v3, so **1,013 r rows in `data/round12/v3eval.jsonl` (also in `round10/` and `round11/`) are v1-origin r labels** (724 provider-corpus-2026-09-16, 289 exam-2026-09-17); 0 w and 0 x are v1. The buildset slice (3,726 rows) is fully v3. These 1,013 rows are r and stand under v4.
+
+### 9.4 Pilot candidates and widened narrow-pattern count
+
+Narrow pattern, widened (regexes in the worker scratch `v4pat.py`, keyword heuristics, expect false positives): the old access-grant pattern (section 7) plus five new x categories: API key/token create; toggles that widen access (public access, visibility, external or guest access, MFA or auth off, serial console); webhooks/subscriptions to an outside URL; creating a user who can log in; adding a member to a team/org/project/group. Applied to w-labelled unique operations only (29,327).
+
+| category | unique w ops hit | by source Jev / hand / mech / generated |
+|---|---|---|
+| access grants/widening (section 7 narrow) | 1,037 | 829 / 145 / 52 / 11 |
+| webhook/subscription to outside URL | 235 | 132 / 78 / 24 / 1 |
+| add member to team/org/project/group | 170 | 101 / 48 / 21 / 0 |
+| create login-capable user | 134 | 80 / 45 / 9 / 0 |
+| API key/token create | 134 | 69 / 58 / 4 / 3 |
+| widening toggle | 27 | 16 / 5 / 6 / 0 |
+| **any category (deduplicated, 27 ops hit two)** | **1,710** | 1,217 / 369 / 109 / 15 |
+
+The section 7 narrow count was 1,027 w (1,033 incl. 6 r) on a slightly different population; on today's 29,327 w ops it is 1,037. **Widened: 1,710 w ops (5.8% of w), of which 673 are new beyond the old pattern.** Unmerged, 9,476 w rows across all files hit a pattern.
+
+Pilot export: **`data/v4/pilot-candidates.jsonl`**, 60 Microsoft Graph + 60 AWS w rows. Fields: id, provider, service_family, method, path, operationId, summary, description (89 of 120 have one), current_label (w), label_source, sets, in_exam_gate_holdout, in_v3eval_or_r9hand, matched_categories, same_op_ids. All 120 are rows in no exam, gate, holdout, v3eval or r9-hand set (checked by provider+method+path against all of those and the 2026-09-22 exam inputs); max 3 per service family (Graph: first path segment, 30 families; AWS: APIs.guru service, 41 families). Candidate pool before sampling: Graph 630 w hits (618 clean), AWS 225 (220 clean). Selection is seeded (20261105), round-robin over categories so the rarer new categories are represented: Graph 23 access / 24 member / 6 key / 3 webhook / 3 user / 1 toggle; AWS 14 access / 12 webhook / 11 user / 9 member / 9 toggle / 8 key (a row can match two).
