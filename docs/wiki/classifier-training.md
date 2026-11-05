@@ -235,6 +235,31 @@ How much is enough? 3-5% for all hard cases together is a rule of thumb, not a l
 
 Find it by testing. Train 2-3 settings (hard cases about 2%, 5%, 10%) with some vendors hidden. Pick the one where the target mistakes drop, too tight doesn't rise, and right answers elsewhere hold.
 
+### 9b. How a nudge actually happens (loss, gradient, ×5)
+Section 9 says an example "nudges" the model. Here is what that means, step by step.
+
+**1. The model is a list of numbers.** About 22.7 million of them (BERT-style, 6 layers, hidden size 384; `model.safetensors` is 90.9 MB at fp32). Text is turned into numbers, multiplied and added through those weights, and three probabilities come out, for example r 0.02, w 0.95, x 0.03. "Knowing" something just means the weights are set so the right letter comes out high. Training means adjusting those numbers.
+
+**2. The loss: how wrong was it?** `loss = -log(probability given to the correct letter)`.
+
+| Probability on the right letter | Loss | Meaning |
+|---|---|---|
+| 0.03 | 3.5 | confidently wrong, big penalty |
+| 0.50 | 0.7 | unsure |
+| 0.97 | 0.03 | nearly perfect, tiny penalty |
+
+**3. The gradient: which way to turn each knob.** Think of every weight as a knob. Calculus tells us, for each knob, which direction and how much turning it changes the loss. It is computed for all 22.7 million knobs at once. In `train/finetune.py` that is the line `loss.backward()`.
+
+**4. The nudge.** `new weight = old weight - learning rate x gradient`. The learning rate is tiny (`--lr`, default 5e-5), so each step turns the knobs only a little. In the script that is `opt.step()`. (The script also clips the gradient with `clip_grad_norm_` so one wild example can't yank the knobs too far.) This repeats for about 95,000 examples, passing over the data once or twice (`--epochs`; the default is 1, the full runs use 2). Where many examples agree, their nudges add up. That is learning.
+
+**5. What "x5" does.** Multiply that example's loss by 5 (3.5 becomes 17.5). The gradient becomes 5 times bigger, so every knob turns 5 times as far for that example. The model is never "told" anything. It is just pushed harder. Repeating the row 5 times gives about the same result (5 normal pushes), which is how variant B worked.
+
+**6. Penalise leaks more (not built yet).** In the loss code: if the truth is x and the model leaned toward w or r, multiply the loss by, say, 5; otherwise by 1. Today only the crude `--x_weight` exists. It multiplies the loss of every x row (it is a class weight on x in both loss terms), whether the model got it wrong or not. A per-row leak penalty is a small addition to `train/finetune.py`.
+
+**7. "More confident" falls out of the same maths.** At 0.93 on the right letter the loss is 0.07. That is small but not zero, so there is still a push toward 0.97 and beyond. More clear examples of "this POST is w" means more pushes over the 97% line. The leak penalty pushes the other way on dangerous look-alikes. Together they pull safe and dangerous apart.
+
+**In one line:** show an example, measure how wrong it was, turn millions of knobs a tiny bit to make it less wrong. ×5 just makes that example's push five times stronger.
+
 ### 10. Where we stand (exam #4, real product rule, 1,505 new operations)
 
 | Model | Right | Too loose | Too tight |
