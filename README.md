@@ -13,7 +13,7 @@
 
 **A small local classifier that says whether an API operation reads (r), writes (w) or can't be taken back (x). Jev-shaped questions in, JSON out, no answer if it isn't confident.**
 
-> Status: module 1 (the Node answerer) is built, version 0.2.0; the npm package is not published yet (the name is reserved). The rest of the repo is module 0 research. Parts of this page describe the plan. They are marked *planned*.
+> Status: module 1 (the Node answerer) is built, package version 0.2.1 (tagged v0.2.1, not yet published). 0.2.0 is published (npm and GitHub release v0.2.0) and is the model rwxmap pins; 0.2.1 has the same weights and fixes `answerMany` batch-dependence. The rest of the repo is module 0 research. Parts of this page describe the plan. They are marked *planned*.
 
 Agentic automation is on the rise, and there's no solution in sight for controlling API access with guardrails. It's impossible to account for every possibility. Today's answers don't scale and don't adapt to different shapes: scoped MCPs, policies built on MCP hints that aren't widely adopted or accurate, accountability moved into rigid sandboxes, or pushed back to the consumer through fine-grained IAM or APIs scoped at creation. Meanwhile we're creating new open standards for agents (MCP, WebMCP, headless browsing) faster than we can guardrail them.
 

@@ -866,7 +866,7 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 - Row level, r10 int8 vs 0.2.0 int8 under the gate: 47 rows differ. r10 is better on 16 (9 ask->right, 2 tight->right, 5 tight->ask) and worse on 31 (21 right->ask, 5 right->tight, 4 ask->tight, 1 right->loose: clerk PUT /users/{user_id}/phone_number). Net, r10 is not better than 0.2.0 on this exam.
 - rwxmap's scorer (% of 1,377; exact / loose / tight): mechanical 1,094 / 17 / 266. Mode a r10 fp32 1,178 / 15 / 184 passes the D133 bars (leaks 15 <= 17; exact +6.10 pts against the 5.0 needed). Mode a 0.2.0 fp32 1,192 / 15 / 170 (+7.12 pts); 22 rows differ, 0.2.0 is right on 18 of them, mostly plain POST creates that r10 raised to x. b95: r10 12 loose, 0.2.0 14. Mode c Jev 1,250 / 16 / 111 (90.8%).
 - Ruling D135 (rwxmap): rwxmap ships rwxlite 0.2.0 (fp32 default), pinned to v0.2.0. A newer model replaces it only if mode a on a fresh clean exam has no more too-loose and no fewer exact.
-- Found during the replay: int8 `answerMany` depends on the batch (rows pad to the longest, dynamic quantisation makes each p depend on its batch mates). Fixed in 0.2.1 on branch `fix/int8-batch1`.
+- Found during the replay: int8 `answerMany` depends on the batch (rows pad to the longest, dynamic quantisation makes each p depend on its batch mates). Fixed in 0.2.1 (tag `v0.2.1`; the fix is merged into `dev`).
 - Exam #3 is burned (round 11 trains on it). Round 10 stays unreleased; `data/m1-r10` manifests keep version 0.3.0 as the record.
 
 ## 2026-11-05: Exam #4 result (r11 NO-GO on both scorers)

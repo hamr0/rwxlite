@@ -1,6 +1,6 @@
 # rwxlite — PRD
 
-Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built and published (0.2.0, npm and GitHub release v0.2.0); round 10 trained, exam #3 NO-GO (loose bar), 0.2.0 stays shipped; round 11 in progress. Date: 2026-11-04.
+Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built and published (0.2.0, npm and GitHub release v0.2.0); round 10 trained, exam #3 NO-GO (loose bar), 0.2.0 stays shipped; round 11 trained, exam #4 NO-GO on both scorers; round 12 (S0/S1/S2) showed no gain over 0.2.0, so 0.2.0 stays shipped; 0.2.1 (answerMany batch-independence fix, same weights) is tagged v0.2.1 and not yet published. Date: 2026-11-05.
 
 ## Problem & goal
 
@@ -530,6 +530,8 @@ Exam #3 (rwxmap shared exam, 7 vendors, 1,377 ops; scored once, now burned; both
 **Training.** Home server `~/rwxlite-train/r11` (new dir; r10 is never touched), command as round 10: `HF_HOME=~/rwxlite-train/hf-cache nohup ~/rwxlite-train/.venv/bin/python train/finetune.py --epochs 1 --soft --alpha 0.7 --tag r11 --threads 4 --ckpt 250 > data/train/finetune-r11.log 2>&1 &`.
 
 **Caveat.** r11 cannot be judged on exam #3 (trained on it); val/v3eval cannot show the effect either (different vendors). Until exam #4 the only evidence is that val/v3eval do not regress.
+
+**Outcome (2026-11-05).** Exam #4 (the shared exam, scored once) was NO-GO for r11 under both scorers: rwxlite's `a_none` 1447 right against 0.2.0's 1448, and the rwxmap CLI `secondPass` 18 too loose against 16. The prereg named the wrong gate config (`a_none` is not the shipped rule), so the gate number is rwxmap's CLI. Round 12 (S0/S1/S2: label fixes, D136 relabels, exam #4 rows, generated variants) gave no gain over shipped 0.2.0 on the held-out goharbor+render rows (0.2.0 425/9/21 right/loose/tight). 0.2.0 stays shipped. Detail: `docs/wiki/findings.md` (Exam #4 result, Round 12), `docs/wiki/exam-prereg-exam4.md`, `docs/wiki/prereg-r12.md`.
 
 ## Open questions
 
