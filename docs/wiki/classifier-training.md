@@ -198,6 +198,53 @@ So rwxlite gets more right than the mechanical rule, but makes more dangerous mi
 
 If the model is allowed to ask (GONOGO_lba097), it makes only 7 too-loose mistakes, but it hands 51 operations back.
 
+### 8. Learning from our own mistakes (round 12 idea)
+Exam rows can be used for training once the exam is scored. That is how r11 was made: r10 plus the exam #3 rows.
+
+The cost: an operation that is in training can't measure the model any more. So every round needs a fresh exam from new vendors.
+
+The idea for round 12 is hard-example mining plus augmentation:
+- Collect the operations the model got wrong, both too loose and too tight.
+- Make varied copies: different vendor names, path styles, wording. Change a verb only if the meaning stays the same.
+- Add them to training with more weight.
+
+Three traps:
+1. Changing a word can change the correct letter ("logout" to "login", "export" to "delete"). Every variant needs a checked label.
+2. Training only on "looked safe but was dangerous" makes the model paranoid. Add near-miss rows that really are safe, for example `GET /logout-message`.
+3. Never build variants from the exam that will judge that round.
+
+QUERY rewrites add nothing here. The code maps QUERY to GET before the model sees the text, so a QUERY copy is the same text as the GET row.
+
+One more source of wrong labels: Jev. rwxlite learned by copying Jev. Where human label checks (gates) overruled Jev, the training row probably still carries Jev's wrong label. Fixing those rows fixes the source.
+
+### 9. What "weight" means and why the share matters
+In training, the model looks at an example, measures how wrong it was, and nudges itself. Weight is how hard an example is allowed to nudge.
+
+There are two ways to give an example more weight:
+- **Repeat the row.** Seen 5 times, it nudges 5 times. This is what variant B did: `m1/holdout-assemble.py` adds 4 extra copies of each new row, and the ids repeat on purpose.
+- **Multiply its error in the loss.** Seen once, but the nudge counts 5 times.
+
+The effect is roughly the same. Our trainer (`train/finetune.py`) has no per-row weight today. It only has `--x_weight`, which weights every x row at once. So repetition is how we do it. Per-row weights would be a small code change.
+
+Why it matters is a tug of war. About 20,000 GET rows teach "GET = r". A handful of logout GETs pull the other way and lose, because the model can't tell them from noise. To win you need enough copies, and variety, so the model learns the shared idea (logging out) and not one path.
+
+How much is enough? 3-5% for all hard cases together is a rule of thumb, not a law.
+- Under about 1% barely moves anything. B's x5 of 935 rows gave +7 right and fixed no leak.
+- 20% or more risks a paranoid or memorising model.
+- The right amount depends on how clear the clue is (a word like "logout" versus the meaning of "secret"), how many rows pull the other way, and whether the model is confidently wrong or just unsure. Most of rwxlite's too-tight answers on exam #4 are "not sure, so x", which needs only a small push.
+
+Find it by testing. Train 2-3 settings (hard cases about 2%, 5%, 10%) with some vendors hidden. Pick the one where the target mistakes drop, too tight doesn't rise, and right answers elsewhere hold.
+
+### 10. Where we stand (exam #4, real product rule, 1,505 new operations)
+
+| Model | Right | Too loose | Too tight |
+|---|---|---|---|
+| Mechanical | 1262 | 21 | 222 |
+| rwxlite 0.2.0 | 1391 | 16 | 98 |
+| Jev | 1428 | 17 | 60 |
+
+rwxlite already matches Jev on dangerous mistakes. The gap is too tight (98 vs 60), mostly unsure rows left at x.
+
 ## Training on the home server
 
 Sandbox: `ahassan@192.168.178.180:~/rwxlite-train/` (Fedora, 4-core i3-8100T, CPU only, venv at `.venv`, torch CPU, transformers 5.0.0). Nothing outside that dir is touched. Only `train/*.py` and `data/train/{train,val,v3eval}.parquet` are copied there (no exam, gate labels, keys or .env).
