@@ -5,11 +5,9 @@ All notable changes to rwxlite are recorded here. Format follows
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-11-05
+Note: the entries below were the candidate package ref for shared exam #4 (docs/wiki/exam-prereg-exam4.md; tag v0.3.0, 77e6bb4). Exam #4 was NO-GO under the D135 gate, so this was not released; 0.2.0 stays the published model (0.2.1 is the published package, below). The round 10 items are not released.
 
-Candidate package ref for shared exam #4 (docs/wiki/exam-prereg-exam4.md). NOT released unless exam #4 passes the D135 gate; 0.2.0 stays the published model. 0.2.1 and the round 10 items were never released and are folded in here.
-
-Candidate model: round 11 (`data/m1-r11`, int8-pc `adc6e6c1`, fp32 `252f3181`, T 0.843). Model strings `rwxlite-0.3.0+adc6e6c1` and `rwxlite-0.3.0+252f3181`. The r11 manifests carry `version` 0.3.0, which equals `package.json`.
+Candidate model: round 11 (`data/m1-r11`, int8-pc `adc6e6c1`, fp32 `252f3181`, T 0.843). Model strings `rwxlite-0.3.0+adc6e6c1` and `rwxlite-0.3.0+252f3181`. The r11 manifests carry `version` 0.3.0, which equalled `package.json` at tag v0.3.0.
 
 ### Added
 - Round 10 model build (`data/m1-r10`, int8-pc `093c908d`, fp32 `8514ddcc`, T 0.858), not released (exam #3 NO-GO; 0.2.0 stays the published model). Manifests built by `m1/manifest-r10.mjs`, the release set by `m1/release-assets.mjs data/m1-r10/release r10`.
@@ -21,6 +19,13 @@ Candidate model: round 11 (`data/m1-r11`, int8-pc `adc6e6c1`, fp32 `252f3181`, T
 ### Fixed
 - `answerMany` answers no longer depend on which requests share a call. It used to pad a batch to its longest row and run it in one `session.run`; the int8-pc model quantises activations dynamically with one scale over the whole padded batch, so a row's p moved with its neighbours (measured on 1,377 rows: max |dp| 0.11, 5 rows crossed 0.97 and 6 crossed 0.95; fp32 differed by 2.2e-16; thread count had no effect). `answerMany` now runs one row per `session.run`, for both models, so `answer()` and `answerMany()` give byte-identical p for a request whatever it is batched with. Public API and answer shapes are unchanged. Batch 1 is not slower: ms/row on a loaded 8-core host (load ~30), 4 threads, 160 rows, old batch of 32 vs batch 1: int8-pc 93-130 vs 51-88, fp32 87-88 vs 52-54, because padding to the longest row wastes compute. The parity check only ever called `answer()` one row at a time, which is why it missed this. Tests: stub runner must get one row per call and `answerMany` equals per-row `answer()` in any order; integration tests for int8-pc and fp32 on the real models.
 - Model string: `loadAnswerer` builds it from `manifest.version` (`modelString(manifest.version, ...)` in src/answerer.js), not from package.json. Release requirement: the release assets' manifests (`manifest.json` / `manifest-exact.json`) carry `version` and must be rebuilt for 0.2.1 with `node m1/release-assets.mjs` before the 0.2.1 release; until then, the 0.2.0 manifests report `rwxlite-0.2.0+8ad0a182`.
+
+## [0.2.1] - 2026-11-05
+
+Fixes `answerMany` batch-dependence. The model files, model strings and the v0.2.0 release assets are unchanged: the model string is still `rwxlite-0.2.0+<sha8>` (int8 `+8ad0a182`, fp32 `+8503b655`) because it comes from `manifest.version`.
+
+### Fixed
+- `answerMany` runs one row per `session.run`, so an answer no longer depends on its batch neighbours: fp32 is identical, and int8 (dynamic quantisation takes its activation scale over the whole padded batch) gives the same answer for a row whatever it is batched with. Measured by rwxmap on exam #3: fp32 identical on every row; int8 mode a 1192/15/170 -> 1189/16/172.
 
 ## [0.2.0] - 2026-11-04
 

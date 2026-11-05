@@ -13,7 +13,7 @@ MODELS = [('v020', 'data/train/ckpt-r8soft/final', 'rwxlite-v020-fp32'), ('r11',
           ('S0', 'data/round12/models/S0', None), ('S1', 'data/round12/models/S1', None), ('S2', 'data/round12/models/S2', None)]
 TOKDIR = os.path.join(R, 'data/train/ckpt-r11/final')
 KEEP = ('id', 'text', 'provider', 'method', 'path', 'operationId', 'summary')   # whitelist: no label, y, mech, rule, tier
-def read_safe(p): return [{k: r[k] for k in KEEP} for r in map(json.loads, open(p)) if True]
+def read_safe(p): return [{k: r[k] for k in KEEP} for r in map(json.loads, open(p))]
 def sha(p): return hashlib.sha256(open(p, 'rb').read()).hexdigest()
 @torch.no_grad()
 def logits(model, tok, texts):

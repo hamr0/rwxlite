@@ -109,3 +109,28 @@ It includes, beyond round 11's: exam #3 vendors clerk, ory, neon, supabase, mux,
 ## Run order
 
 1. This file committed (data sha256 above). 2. Build `S0/train.jsonl` (filter only), record its sha256 in the findings. 3. Queue S0, S1, S2 on the home server, sequential, from the base model. 4. Copy each `final` back; refit T; run predict (never opens truth); commit the p-jsonl sha256s. 5. rwxmap replays and scores once; we add argmax / a_none, the 6 leak rows and the curve.
+
+## Result
+
+Scored by the rwxmap CLI (rwxmap commit 15bf477), mode a, lowering only at p >= 0.97, on the 455 held-out goharbor+render rows. Right / too loose / too tight:
+
+| Model | Right | Too loose | Too tight |
+|---|---|---|---|
+| mechanical | 387 | 14 | 54 |
+| shipped 0.2.0 (T 0.844) | 425 | 9 | 21 |
+| 0.2.0 prereg baseline (refit T 0.9211) | 418 | 9 | 28 |
+| S0 | 424 | 9 | 22 |
+| S1 | 421 | 9 | 25 |
+| S2 | 423 | 9 | 23 |
+| r11 | 422 | 10 | 23 |
+
+Prereg error: §4 step 2 refit T for every model, including the 0.2.0 baseline, instead of comparing at the shipped T 0.844 (the project rule: compare candidates at the shipped baseline T). The refit cost 0.2.0 7 exact (425 to 418). By the frozen §5 rule some runs "win" against 418; against the shipped 425 none does.
+
+Verdict: no gain over shipped 0.2.0; 0.2.0 stays. No win is claimed.
+
+Lessons:
+- The temperature alone moved 0.2.0 by 7 exact, more than any round 12 training did (1 to 6).
+- The variants fixed the seen cases (the harbor leaks they trained on) but opened render's PUT secret-files (2 rows, the same rows r11 got wrong).
+- 5 harbor job stops are missed by every model.
+
+Next: calibration (temperature / the 97% line) tuned on existing labelled sets, confirmed once on a fresh exam.
