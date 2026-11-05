@@ -129,8 +129,8 @@ Prereg error: §4 step 2 refit T for every model, including the 0.2.0 baseline, 
 Verdict: no gain over shipped 0.2.0; 0.2.0 stays. No win is claimed.
 
 Lessons:
-- The temperature alone moved 0.2.0 by 7 exact, more than any round 12 training did (1 to 6).
+- The temperature alone moved 0.2.0 by 7 exact, more than any round 12 training did (against the refit 418 baseline the runs moved +3 to +6; against the shipped 425 all lost 1 to 4).
 - The variants fixed the seen cases (the harbor leaks they trained on) but opened render's PUT secret-files (2 rows, the same rows r11 got wrong).
 - 5 harbor job stops are missed by every model.
 
-Next: calibration (temperature / the 97% line) tuned on existing labelled sets, confirmed once on a fresh exam.
+Calibration was tried afterwards (2026-11-05, on saved 0.2.0 outputs; the replica matched rwxmap's secondPass row-for-row on 9 sets) and found no safe gain. Temperature and the 0.97 line move essentially the same rows. Every setting that gained right rows added too-loose ones (T 0.80: +140 right, +6 loose; line 0.96: +200 right, +7 loose). The best zero-new-loose setting (T 0.84) gained +2 of 455 and +9 on 5,031 clean rows, which is boundary noise. Raising the line to 0.975 fixed 3 loose but lost 187 right. The remaining leaks are confident wrong lowerings (p about 0.96 to 0.975: chatwoot inbox contacts, clerk billing price, workos waitlist, permit.io env copy), so the next step needs real human-labelled examples of dangerous POST/PUT, not settings. 0.2.0 at T 0.844 / 0.97 stays.
