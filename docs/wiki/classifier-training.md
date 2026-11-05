@@ -270,6 +270,51 @@ Section 9 says an example "nudges" the model. Here is what that means, step by s
 
 rwxlite already matches Jev on dangerous mistakes. The gap is too tight (98 vs 60), mostly unsure rows left at x.
 
+### 11. Confidence, the 97% rule, and labelling generated examples
+
+**The 97% rule.** The model gives three probabilities: p(x) = pIsX, p(w) = pChanges − pIsX, p(r) = 1 − pChanges. The letter is the highest one.
+
+rwxmap (`src/secondpass.js`, `readAnswer`) lets the model lower a row (x to w, or w to r) only if that letter's probability is at least 0.97. Otherwise the row stays x and goes to review. It is counted "undecided", which is a too-tight row. Raising a row (the safer direction) needs no threshold.
+
+Why: lowering is the dangerous direction. If 97% is honest, about 3 in 100 lowers will be wrong. That is the risk level rwxmap chose. Dropping the bar to 90% would let through the right-but-unsure rows, and also whatever the model is wrongly 90% sure of. More leaks. That is a product-safety call, not a training detail.
+
+**The finding.** rwxmap replayed 0.2.0 (fp32) on six human-labelled sets, 4,949 operations, with the real product rule:
+
+| Model | Right | Too loose | Too tight |
+|---|---|---|---|
+| Mechanical | 3,265 | 66 | 1,618 |
+| rwxlite | 3,995 | 62 | 892 |
+
+Of the 878 too-tight rows sent to the model, its top letter was already right on 747 (85%). 516 sat at p 0.90 to 0.97, and 116 at 0.80 to 0.90. Only 115 were the model believing x when the truth was w or r. Only 6 rows were real model leaks (confidently lowered x to w at 0.97 or more).
+
+So the problem is confidence, not knowledge. The model mostly knows the answer. It just is not sure enough to say it.
+
+**"More confident" must mean confident in the right places.** The cheap way is to turn confidence up everywhere, for example with a lower temperature. Then it says 99% on its mistakes too, and the leaks go up.
+
+The real way is to train it to be sure where it is right and unsure where it would be wrong:
+
+- clear examples of the right-but-unsure kinds
+- contrast pairs, and extra weight around the 6 leaks
+- wrong labels fixed
+
+Success looks like this: the 90 to 97% right rows climb over 97%, the 6 leaks drop below it, and a held-out-vendor curve shows 97% is still honest. That curve reports exact and too-loose at the cut-offs 0.90, 0.95, 0.97 and 0.99.
+
+**The cap on each push.** `train/finetune.py` clips the gradient (`clip_grad_norm_`, 1.0). A x5 loss on a badly wrong example can hit the cap and get scaled back, so x5-by-loss is not exactly x5. Five repeated rows each stay under the cap. That is one reason round 12 weights by repetition and variants.
+
+**Labelling generated variants.** Haiku writes 5 surface variants per seed: same meaning, made-up vendor, different path, operationId and wording. These keep the seed's human label. It also writes up to 2 contrast variants: one small change, a different letter.
+
+Haiku must follow the human labellers' brief (rwxmap `data/relabel-2026-09-22/BRIEF-v3.md`) word for word, not its own sense of danger. In the first sample it called a "restart" x, while our human truth says w for coolify restarts.
+
+Jev cross-checks the labels, but only one way. Jev's x is precise (93%) but it misses half the real x (47.8% recall). So:
+
+- drop a w or r variant that Jev calls x
+- keep x variants even if Jev says w or r (spot-check the contrast ones)
+- report drop rates per letter
+
+The x share must not fall after filtering. Otherwise the model sees fewer dangerous examples and lowers more.
+
+**Labels that can't be learned.** Where the answer keys disagree, there is nothing to learn. "Restart" is truth w 6 times (coolify: "restart = stop + start, ends as before") and x 4 times (neon endpoint, supabase project, render postgres and service: "drops live connections"). rwxmap's user will rule. Until then restart, start, stop, pause and resume are kept out of generated variants.
+
 ## Training on the home server
 
 Sandbox: `ahassan@192.168.178.180:~/rwxlite-train/` (Fedora, 4-core i3-8100T, CPU only, venv at `.venv`, torch CPU, transformers 5.0.0). Nothing outside that dir is touched. Only `train/*.py` and `data/train/{train,val,v3eval}.parquet` are copied there (no exam, gate labels, keys or .env).
