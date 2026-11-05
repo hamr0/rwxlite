@@ -43,13 +43,13 @@ def pat(r):
 def example(r): return f"`{r['set']} {r['id']}` {r['vendor']} {r['method']} {r['path'][:70]} | {r['summary'][:50] or '(no summary)'} | truth {r['truth']}, model {r['model_letter']}, mech {r['mech_letter']}"
 
 def pick(rows, n=3):
-    rows = sorted(rows, key=lambda r: (r['set'], r['id']));
-    if len(rows) <= n: return rows
-    step = len(rows) / n; out = []; seen = set()
-    for i in range(n):
-        r = rows[int(i * step)]
-        if r['set'] in seen: r = next((x for x in rows[int(i * step):] if x['set'] not in seen), r)
-        seen.add(r['set']); out.append(r)
+    """Up to n rows, spread over different sets where possible, no repeats."""
+    rows = sorted(rows, key=lambda r: (r['set'], r['id'])); out = []; used = set()
+    for r in rows:   # first row of each distinct set
+        if r['set'] not in used and len(out) < n: out.append(r); used.add(r['set'])
+    for r in rows:
+        if len(out) >= n: break
+        if r not in out: out.append(r)
     return out
 
 def write(out, model):
@@ -150,7 +150,7 @@ def write(out, model):
     w('In-training-wrong by set and kind: ' + ', '.join(f'{s}/{k} {n}' for (s, k), n in sorted(bykind.items())) + '.')
     w('\nExamples of overruled Jev rows that are in training with the wrong label:\n')
     for r in pick(jt, 6): w(f"- `{r['set']} {r['id']}` {r['vendor']} {r['method']} {r['path'][:60]} | {r['summary'][:40]} | truth {r['truth']}, Jev {r['jev_letter']} | train: {r['train_labels'][:90]}")
-    w('\nFindings on training overlap: (1) **gate-3 and gate-4 operations are in the r8 and r11 training data** (checked by exact vendor+method+path+operationId; 51 of gate-3's and 45 of gate-4's overruled rows, and more generally their ops, are present), with the Jev-recipe label, so those two gates are not clean held-out sets for the models trained on that data; gate-1/gate-2 are not in training. (2) `data/round11/train.jsonl` contains all 1377 exam #3 rows (ids ex3-*) and all 949 fresh-exam rows (fx-*) with human labels, so exam #3 and the fresh exam are not held-out for the r11 model (they are for 0.2.0); r11 also carries the human label for 28 r9-hand train rows, but the r9-hand rows in val (8) and every gate-3/gate-4 row stay with the Jev-recipe label in round11 too. (3) For the exams the Jev letter is the real Jev product answer (rows-c-jev.csv), which is not necessarily what the recipe put into training; where the training label already equals the truth it is not counted as wrong.')
+    w('\nFindings on training overlap: (1) **gate-3 and gate-4 operations are in the r8 and r11 training data** (checked by exact vendor+method+path+operationId; 51 of gate-3 and 45 of gate-4 overruled rows, and more generally their ops, are present), with the Jev-recipe label, so those two gates are not clean held-out sets for the models trained on that data; gate-1/gate-2 are not in training. (2) `data/round11/train.jsonl` contains all 1377 exam #3 rows (ids ex3-*) and all 949 fresh-exam rows (fx-*) with human labels, so exam #3 and the fresh exam are not held-out for the r11 model (they are for 0.2.0); r11 also carries the human label for 28 r9-hand train rows, but the r9-hand rows in val (8) and every gate-3/gate-4 row stay with the Jev-recipe label in round11 too. (3) For the exams the Jev letter is the real Jev product answer (rows-c-jev.csv), which is not necessarily what the recipe put into training; where the training label already equals the truth it is not counted as wrong.')
     open(os.path.join(out, 'summary.md'), 'w').write('\n'.join(L) + '\n')
     return 'summary.md'
 
