@@ -74,7 +74,7 @@ def teacher(r):
     return l, ('moved' if l != r['class'] else 'kept')
 split = {}
 for nm in ('train', 'val', 'v3eval'):
-    for x in readj(D('train', nm + '.jsonl')): split[x['id']] = (nm, x['label'], x['status'])
+    for x in readj(D('train', nm + '.jsonl')): split[x['id']] = (nm, x['truth'] if nm == 'v3eval' else x['label'], x['status'])  # v3eval: truth = BRIEF-v3-era hand label (label there is mech)
 # protected = rows that overlap any exam / gate / holdout / r9-hand set (by provider|method|path; labels never read)
 PROT = {}
 def addp(src, prov, m, p):
