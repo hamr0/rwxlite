@@ -5,7 +5,7 @@ All notable changes to rwxlite are recorded here. Format follows
 
 ## [0.2.1] - 2026-11-05
 
-Fixes `answerMany` batch-dependence. The model files, model strings and the v0.2.0 release assets are unchanged: the model string is still `rwxlite-0.2.0+<sha8>` (int8 `+8ad0a182`, fp32 `+8503b655`) because it comes from `manifest.version`.
+Fixes `answerMany` batch-dependence. The model weights are unchanged byte for byte, but release v0.2.1 carries them with manifests that say version 0.2.1, so the model string is `rwxlite-0.2.1+<sha8>` (int8 `+8ad0a182`, fp32 `+8503b655`) because it comes from `manifest.version`; consumers pinned to release v0.2.0 (for example rwxmap) keep `rwxlite-0.2.0+<sha8>`.
 
 ### Fixed
 - `answerMany` runs one row per `session.run`, so an answer no longer depends on its batch neighbours: fp32 is identical, and int8 (dynamic quantisation takes its activation scale over the whole padded batch) gives the same answer for a row whatever it is batched with. Measured by rwxmap on exam #3: fp32 identical on every row; int8 mode a 1192/15/170 -> 1189/16/172.
