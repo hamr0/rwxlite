@@ -13,12 +13,13 @@ ap.add_argument('--bs', type=int, default=32); ap.add_argument('--lr', type=floa
 ap.add_argument('--max_len', type=int, default=128); ap.add_argument('--tag', default='run'); ap.add_argument('--ckpt', type=int, default=500); ap.add_argument('--threads', type=int, default=8)
 ap.add_argument('--soft', action='store_true', help='round 8: soft targets from Jev p (see common.soft_targets)')
 ap.add_argument('--alpha', type=float, default=0.7, help='weight of soft CE; loss = alpha*soft + (1-alpha)*hard')
+ap.add_argument('--init', default=None, help='holdout experiment: start from this saved model dir (e.g. ckpt-r8soft/final) instead of the base model; default None = r10/r11 recipe unchanged')
 ap.add_argument('--x_weight', type=float, default=1.0, help='class weight on x in both CE terms')
 a = ap.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(1); random.seed(1)
 BASE = 'sentence-transformers/all-MiniLM-L6-v2'
 tok = AutoTokenizer.from_pretrained(BASE)
-model = AutoModelForSequenceClassification.from_pretrained(BASE, num_labels=3)
+model = AutoModelForSequenceClassification.from_pretrained(a.init or BASE, num_labels=3)
 tr, va, ev = load_split('train'), load_split('val'), load_split('v3eval')
 if a.n: tr = tr.sample(a.n, random_state=1)
 texts, ys = list(tr.text), tr.y.values
