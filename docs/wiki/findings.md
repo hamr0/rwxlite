@@ -868,3 +868,11 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 - Ruling D135 (rwxmap): rwxmap ships rwxlite 0.2.0 (fp32 default), pinned to v0.2.0. A newer model replaces it only if mode a on a fresh clean exam has no more too-loose and no fewer exact.
 - Found during the replay: int8 `answerMany` depends on the batch (rows pad to the longest, dynamic quantisation makes each p depend on its batch mates). Fixed in 0.2.1 on branch `fix/int8-batch1`.
 - Exam #3 is burned (round 11 trains on it). Round 10 stays unreleased; `data/m1-r10` manifests keep version 0.3.0 as the record.
+
+## 2026-11-05: Exam #4 result (r11 NO-GO on both scorers)
+- Scored once by `train/exam4_score.py` against rwxmap's truth (sha256 `b76c55fb...3c45`); rwxmap scored with the real CLI `secondPass` at `9f58894`. Prereg and frozen predictions: `docs/wiki/exam-prereg-exam4.md`.
+- Our `a_none` (fp32, right/loose/tight): 0.2.0 1448/24/33, r11 1447/22/36, mechanical 1262/21/222. Exact 1447 < 1448, so NO-GO.
+- rwxmap CLI: 0.2.0 1391/16/98, r11 1393/18/94, mechanical 1262/21/222. Loose 18 > 16, so NO-GO (opposite reason). Their new leaks: ex4-0813, ex4-1115, ex4-1318.
+- Lesson: `a_none` is not the shipped second pass (every row goes to the model, tier cuts, never asks or reviews), so its numbers are not the product's. A model's score belongs to the rule it ships with; the gate number is rwxmap's CLI. The prereg named the wrong gate config. Next exam: gate on the CLI `secondPass`.
+- In the shipped path (rwxmap CLI), 0.2.0 beats mechanical on exam #4: 1391 vs 1262 right, 16 vs 21 too loose, 98 vs 222 too tight.
+- 0.2.0 stays; the v0.3.0 tag (`77e6bb4`) is an unreleased candidate. Exam #4 is burned for both sides.

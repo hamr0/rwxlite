@@ -104,3 +104,41 @@ Reported, not gating: D133 mode a bar vs mechanical for all four models (too loo
 ## Frozen code (committed with this file)
 
 `m0/exam4-inputs.mjs` (wraps unchanged `m0/exam3-inputs.mjs`), `train/exam4_common.py`, `train/exam4_predict.py`, `train/exam4_score.py`, `m0/exam4-parity.mjs`. Imported unchanged: `train/exam_score.py`, `train/exam_fresh.py`, `train/common.py`, `train/tune_cuts.py`. Hardening vs exam #3 (ledger items): the truth sha256 is a constant in code, not an argument; `--smoke` cannot touch real outputs (separate work-dir rule, separate file names, refuses the real truth/ops); predict and score never overwrite; model strings come from the published v0.2.0 manifests (the stale 0.1.0 string is gone). Tested only on exam #3 data in `data/exam4-smoke/` (gitignored): inputs equal `data/exam3/inputs.jsonl` byte for byte, four models predicted (model strings as in section 2), the score pipeline ran under `--smoke`, and the real-mode refusals (wrong truth sha, wrong work-dir, existing outputs, wrong ops sha) fired.
+
+## Predictions frozen
+
+Commit `3ce3332`, file `docs/wiki/exam-prereg-exam4-predictions.sha256`:
+
+```
+048a666591d910194d6fc67350d025bbdef6eb86638285c7ca5ced672f35903a  inputs.jsonl
+4de119d114375bce135a31943907e0063595a38c23532379799333bf89b65d95  predictions-r11-fp32.csv
+d5ef9d607ef3927cbb269e87e240bc148aab2227b879e89a6a3bfed63ed84d1c  predictions-r11-int8pc.csv
+ad0a78330292e1dc04a0ee8a561c1bbb9ffdc12e9bb13e336ff8c7910b79885e  predictions-v020-fp32.csv
+bb2f8741400f42ef1540a02a8e6aaf2892262df29b16e92ab1d866e54ef791e2  predictions-v020-int8pc.csv
+c4e0a0a3328ef3a3be76efd8795c432864222d7b8b406967244e59d145ce6074  p-r11-fp32.jsonl
+1de7bb7872fcb4d9216e19f0cd04605a33cfd4c2342de1b27d3ad6e5b87d7a15  p-r11-int8pc.jsonl
+bb205199c04791a31f30183b6146cbe85a9a375afc4282eb2cff961eaeed2d07  p-v020-fp32.jsonl
+56cc74f7d00c4711317e1533425f55f6a2cfc46ec036fcce694bca7d782466cc  p-v020-int8pc.jsonl
+```
+
+## Result (2026-11-05)
+
+Scored once, `train/exam4_score.py` exit 0. Truth sha256 verified `b76c55fb...3c45`; rwxmap ref `9f58894`. Truth and our score output are kept in gitignored `data/exam4/` (`truth.csv`, `score.out`).
+
+Our scorer, `a_none` (offline mode a, never asks), fp32, right / too loose / too tight:
+
+| run | right | too loose | too tight |
+|---|---|---|---|
+| 0.2.0 fp32 | 1448 | 24 | 33 |
+| r11 fp32 | 1447 | 22 | 36 |
+| mechanical | 1262 | 21 | 222 |
+
+int8 (info): 0.2.0 1450/24/31, r11 1447/23/35. `GONOGO_lba097` (info): v020-fp32 1378/9/33, asked 85; r11-fp32 1384/10/36, asked 75.
+
+Our D135 on `a_none`: loose ok, exact 1447 < 1448, **NO-GO**. 17 fp32 rows differ: the candidate is right on 8 the base missed and wrong on 9 the base had; loose: base 3 (ex4-0183, ex4-1303, ex4-1505), candidate 1 (ex4-0365).
+
+rwxmap's scorer (real CLI `secondPass` at `9f58894`, exit 0): mechanical 1262/21/222 (identical to ours). Base 0.2.0 fp32 1391 right / 16 too loose / 98 too tight (sent 602, raised 6, lowered 125, kept 369, undecided 102 scored x). Candidate r11 1393/18/94 (raised 5, lowered 130, kept 376, undecided 91). D135: loose 18 > 16 FAIL, exact 1393 >= 1391 OK, **NO-GO**. D133 vs mechanical passes for all four in rwxmap's run. 12 fp32 rows differ in their run; the candidate's new leaks are ex4-0813 (permit POST .../envs/{env_id}/copy), ex4-1115 and ex4-1318 (render PUT .../secret-files, truth x); it fixes ex4-0335 (harbor PUT /system/purgeaudit).
+
+Verdict: both scorers NO-GO, for opposite reasons. Agreed with rwxmap: a model's score belongs to the rule it ships with, so the D135 gate number is rwxmap's CLI. 0.2.0 stays; the v0.3.0 tag (`77e6bb4`) is a candidate that was not released. Exam #4 is burned for both sides (may now be used for training).
+
+Prereg error, stated plainly: this prereg named `a_none` as the gate config. `a_none` is not the shipped second pass (it sends every row to the model, uses tier cuts, never asks or reviews), so its numbers are not the product's. Next exam: the gate config is rwxmap's CLI `secondPass` (or replay the p-jsonl through rwxmap's CLI).
