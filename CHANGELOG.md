@@ -3,6 +3,13 @@
 All notable changes to rwxlite are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.1] - 2026-11-05
+
+Fixes `answerMany` batch-dependence. The model files, model strings and the v0.2.0 release assets are unchanged: the model string is still `rwxlite-0.2.0+<sha8>` (int8 `+8ad0a182`, fp32 `+8503b655`) because it comes from `manifest.version`.
+
+### Fixed
+- `answerMany` runs one row per `session.run`, so an answer no longer depends on its batch neighbours: fp32 is identical, and int8 (dynamic quantisation takes its activation scale over the whole padded batch) gives the same answer for a row whatever it is batched with. Measured by rwxmap on exam #3: fp32 identical on every row; int8 mode a 1192/15/170 -> 1189/16/172.
+
 ## [0.2.0] - 2026-11-04
 
 M1: a local, Jev-shaped answerer in Node. Package default model file: int8 per-channel; option "exact": fp32. rwxmap's own default is the exact fp32 model.
