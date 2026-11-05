@@ -125,6 +125,79 @@ Two differences from Jev:
 ```
 That's the form API providers or guardrails like bareguard would use. A low top probability becomes the "ask a human" signal, and the threshold for that is the caller's choice. For lowerings the measured threshold is 0.97 (see above); a plain confidence bar alone only caught about half the dangerous mistakes on the first exam. Exact field names are settled in M1 with rwxmap.
 
+## Part 3: Rounds, exams and preregs — what we've been doing
+
+### 1. What rwxlite answers
+For every API operation (say `GET /users` or `DELETE /users/{id}`) we want one letter:
+- **r**: only reads, safe.
+- **w**: changes something, but you can undo it.
+- **x**: dangerous or irreversible.
+
+There are three ways to get that letter:
+1. **The mechanical rule.** Look at the HTTP method: GET gives r, DELETE gives x, and so on. It is free, but it misses things, for example `GET /logout` is a GET yet it changes something.
+2. **Jev.** The big model. It is good, but not free.
+3. **rwxlite.** Small, free, runs locally, and learned by copying Jev's answers.
+
+The goal: rwxlite beats the mechanical rule, for free, so Jev isn't needed.
+
+### 2. Rounds
+A **round** is one training attempt with a new set of examples.
+- **0.2.0** is the published model.
+- **r10** is round 10: more examples, and cleaner ones.
+- **r11** is r10's examples plus the 1,377 exam #3 operations with their correct answers.
+
+### 3. Exams
+A training score proves little, because the model has already seen those rows. It is like memorising the homework and then being graded on the homework.
+
+An **exam** uses vendors the model never saw. Two labellers answer each operation blind, and the answers they agree on are the answer key.
+
+Each answer lands in one of three outcomes:
+- **Right.**
+- **Too loose:** the model said safe, but it was dangerous. This is the bad one.
+- **Too tight:** the model said dangerous, but it was safe. Annoying, not harmful.
+
+A model may also "ask" (abstain) instead of answering.
+
+### 4. Prereg (pre-registration)
+Before anyone sees the answer key, we commit in writing which models are tested, how they are scored, and what counts as passing. It is like writing "I'll be happy with 8/10" before the test.
+
+The predictions are frozen too: we commit their sha256 (a fingerprint of the file) before the answer key is opened. Think of it as answers in a sealed envelope. Nobody can tweak them after seeing the key.
+
+### 5. The held-out experiment (A/B/C)
+Details are in docs/wiki/holdout-r11.md. The question: does adding exam rows to training help on unseen vendors, or does the model just memorise them?
+
+1. We hid two vendors, ory and clerk (442 operations).
+2. We trained three versions: **A** (new rows, used normally), **B** (new rows counted 5 times), **C** (continue from 0.2.0 on the new rows plus a sample of old ones).
+3. We tested all of them on the 442 hidden operations, using exam #3's answer key.
+
+Result (GONOGO_lba097):
+
+| Model | Right | Too loose |
+|---|---|---|
+| 0.2.0 | 340 | 7 |
+| A | 338 | 7 |
+| B | 347 | 7 |
+| C | 343 | 7 |
+| r10 | 337 | 9 |
+
+All five were NO-GO. The same 7 too-loose rows showed up for 0.2.0, A, B and C, for example ory `GET /self-service/logout` and `GET /oauth2/sessions/logout`.
+
+Lesson: more of the same data nudges accuracy up, but it doesn't fix the dangerous mistakes.
+
+### 6. Exam #4
+Seven new vendors, 1,505 operations, one question: is r11 better than 0.2.0?
+
+The gate (rwxmap's D135): r11 replaces 0.2.0 only if it has no more too-loose answers and no fewer exact ones (mode a, fp32). Ties pass. The prereg is docs/wiki/exam-prereg-exam4.md.
+
+### 7. Where we stand against the goal
+On the 442 held-out operations, when the model must always answer (a_none):
+- **Mechanical:** 336 right, 9 too loose.
+- **0.2.0:** 383 right, 15 too loose.
+
+So rwxlite gets more right than the mechanical rule, but makes more dangerous mistakes. That is the gap.
+
+If the model is allowed to ask (GONOGO_lba097), it makes only 7 too-loose mistakes, but it hands 51 operations back.
+
 ## Training on the home server
 
 Sandbox: `ahassan@192.168.178.180:~/rwxlite-train/` (Fedora, 4-core i3-8100T, CPU only, venv at `.venv`, torch CPU, transformers 5.0.0). Nothing outside that dir is touched. Only `train/*.py` and `data/train/{train,val,v3eval}.parquet` are copied there (no exam, gate labels, keys or .env).
