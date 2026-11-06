@@ -934,4 +934,4 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 - **Learnings.**
   - The label fix did the work: R13 (plain) won, so changing 6,245 labels under BRIEF-v4 mattered more than any training change.
   - The too-loose penalty (L3) and the access hint (t2) added nothing on the product path: on val, too loose 74 (R13) vs 78 (L3) vs 85 (L3-t2), and L3 and t2 have more too-tight (390, 402 vs 330).
-  - R13 has more too-tight than 0.2.0 under v4 (product 330 vs 202 at their own T on the same val); the val is v4 and fully trained-vendor-disjoint only in the val split, so this is context, not a test. Exam #5 decides.
+  - R13 has more too-tight than 0.2.0 under v4 (product 330 vs 202 at their own T on the same val). The 0.2.0 figure is a smoke run on v4 val, so this is context, not a test. Exam #5 decides.
