@@ -86,7 +86,7 @@ python3 -I m1/exam5-score.py --ops <ops.csv> --truth <truth.csv> --truth-sha256 
 
 ## 5. Candidate package (scratch, nothing published)
 
-Built from `dev` `src/` in a scratch copy with `version` set to `0.3.1` (the repo's `package.json` stays `0.2.1`): `npm pack --ignore-scripts` after `tsc -p tsconfig.build.json`; 14 files. Tarball `rwxlite-0.3.1.tgz`, sha256 **TBD at hand-off** (see the report; npm pack is deterministic for the same inputs). A fresh `npm install` of it plus `loadAnswerer({dir, manifestFile})` gave CSVs byte-identical to `exam5-predict.mjs` for both models on the smoke rows. The package carries no model files; the R13 files are handed over as the directory `data/m1-r13/` (hashes in section 2).
+Built from `dev` `src/` in a scratch copy with `version` set to `0.3.1` (the repo's `package.json` stays `0.2.1`): `npm pack --ignore-scripts` after `tsc -p tsconfig.build.json`; 14 files. Tarball `rwxlite-0.3.1.tgz`, sha256 `698c0191a772879ff424875f062fd54810dbd0eb7310b2bd8bb077c67476f7c0` (a second `npm pack` of the same scratch copy gave the same hash; it lives in the worker scratch dir, not in the repo). A fresh `npm install` of it plus `loadAnswerer({dir, manifestFile})` gave CSVs byte-identical to `exam5-predict.mjs` for both models on the smoke rows. The package carries no model files; the R13 files are handed over as the directory `data/m1-r13/` (hashes in section 2).
 
 ## 6. Hashes and placeholders
 
