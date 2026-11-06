@@ -7,6 +7,7 @@ import argparse, time, json, os, random, math
 import numpy as np, torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, get_linear_schedule_with_warmup
 from common import *
+from losscost import expected_cost
 ap = argparse.ArgumentParser()
 ap.add_argument('--n', type=int, default=0); ap.add_argument('--epochs', type=float, default=1)
 ap.add_argument('--bs', type=int, default=32); ap.add_argument('--lr', type=float, default=5e-5)
@@ -15,6 +16,7 @@ ap.add_argument('--soft', action='store_true', help='round 8: soft targets from 
 ap.add_argument('--alpha', type=float, default=0.7, help='weight of soft CE; loss = alpha*soft + (1-alpha)*hard')
 ap.add_argument('--init', default=None, help='holdout experiment: start from this saved model dir (e.g. ckpt-r8soft/final) instead of the base model; default None = r10/r11 recipe unchanged')
 ap.add_argument('--x_weight', type=float, default=1.0, help='class weight on x in both CE terms')
+ap.add_argument('--loose_cost', type=float, default=0.0, help='round 13 R13-L3: add train/losscost.py expected-cost term (below-truth cost = this, above-truth cost 1); 0 = off, recipe unchanged')
 a = ap.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(1); random.seed(1)
 BASE = 'sentence-transformers/all-MiniLM-L6-v2'
@@ -74,6 +76,7 @@ while not done:
             sce = -(soft[b] * cw * torch.log_softmax(logits, -1)).sum(1).mean()
             loss = a.alpha * sce + (1 - a.alpha) * hard
         else: loss = hard
+        if a.loose_cost > 0: loss = loss + expected_cost(logits, y, a.loose_cost)
         loss.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step(); sch.step(); opt.zero_grad(); step += 1
         ema = loss.item() if ema is None else 0.98 * ema + 0.02 * loss.item()
         if step % 25 == 0:
