@@ -931,3 +931,7 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 
 - Context only, decides nothing: 0.2.0 smoke-run on the same val: product 3,774 / 204 / 202 at T 0.844, standalone 3,827 / 335 / 18; mechanical alone 3,646 / 172 / 362.
 - **Pick (frozen rule):** fewest too-loose on the product path: R13 74 < R13-L3 78 < R13-L3-t2 85. No tie, so exact and the R13 tie-break are not needed. **Pick: R13, T = 0.991463.** Only R13 sits exam #5.
+- **Learnings.**
+  - The label fix did the work: R13 (plain) won, so changing 6,245 labels under BRIEF-v4 mattered more than any training change.
+  - The too-loose penalty (L3) and the access hint (t2) added nothing on the product path: on val, too loose 74 (R13) vs 78 (L3) vs 85 (L3-t2), and L3 and t2 have more too-tight (390, 402 vs 330).
+  - R13 has more too-tight than 0.2.0 under v4 (product 330 vs 202 at their own T on the same val); the val is v4 and fully trained-vendor-disjoint only in the val split, so this is context, not a test. Exam #5 decides.

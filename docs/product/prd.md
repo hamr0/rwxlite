@@ -557,9 +557,25 @@ Exam #3 (rwxmap shared exam, 7 vendors, 1,377 ops; scored once, now burned; both
 
 **Outcome (2026-11-05).** Exam #4 (the shared exam, scored once) was NO-GO for r11 under both scorers: rwxlite's `a_none` 1447 right against 0.2.0's 1448, and the rwxmap CLI `secondPass` 18 too loose against 16. The prereg named the wrong gate config (`a_none` is not the shipped rule), so the gate number is rwxmap's CLI. Round 12 (S0/S1/S2: label fixes, D136 relabels, exam #4 rows, generated variants) gave no gain over shipped 0.2.0 on the held-out goharbor+render rows (0.2.0 425/9/21 right/loose/tight). 0.2.0 stays shipped. Detail: `docs/wiki/findings.md` (Exam #4 result, Round 12), `docs/wiki/exam-prereg-exam4.md`, `docs/wiki/prereg-r12.md`.
 
-## Round 13 (planned 2026-11-06)
+## Round 13 (2026-11-06; trained, val pick done, exam #5 pending, nothing released)
 
-Train on all labelled data (no vendor held out) with the shared **BRIEF-v4** labels from rwxmap (`95104e3`, D137: access grants are x). Three candidates on the same data and recipe: R13 (plain), R13-L3 (too-loose mistakes cost 3x, `train/losscost.py`) and R13-L3-t2 (plus a new input format 2, not yet defined). One is picked on val by a frozen rule and only that one sits a fresh exam #5 (vendors unseen by every training and held set), same-or-better than shipped 0.2.0 at T 0.844 on both the rwxmap CLI path and the standalone path, or 0.2.0 stays. Every earlier exam, gate and holdout is now training data, so there is no internal held-out check. Contract and numbers: `docs/wiki/prereg-r13.md`.
+**Status (2026-11-06).** Three candidates were trained on all labelled data under the shared BRIEF-v4 labels; the frozen val pick chose **R13 (plain), T 0.991463**. Only R13 sits exam #5. Exam #5's pool count and draw are pending. No release, push or PR yet; branch `dev` is unpushed. 0.2.0 stays the shipped model. Contract and numbers: `docs/wiki/prereg-r13.md` (frozen); learnings: `docs/wiki/findings.md` ("Round 13 data built and pre-registered", "Round 13 val pick").
+
+**Decision trail.**
+1. **D137 (both users, 2026-11-05/06; BRIEF-v4 lives in rwxmap).** Access grants or widening = x; narrowing stays w; an ambiguous access set/replace is x by doubt; non-access policies stay w. Five seams are x: API key/token create, access-widening toggles, webhooks to outside URLs, creating a login user, adding a member.
+2. **Labelling scope.** Only rows labelled w were relabelled (the 29,327 unique w operations), by rwxmap's pipeline: Jev's five factual questions plus a code rule, a blind Sonnet check of every row (including the gap close), user rulings, and a vendor cross-check. Final export: rwxmap `95104e3` (`export-v4-gap`). Our 29,327 w ids came out w 22,727 / x 6,029 / r 1, plus 570 inherited variants.
+3. **All-data training.** 102,668 train rows; 6,245 labels changed from S0 (6,244 w to x, 1 w to r). Everything is used for training, including the old exams, gates, holdout and v3eval; no vendor is held out, so there is no internal held-out check. Generated variants are not trained on.
+4. **Three candidates, same data and recipe (soft targets, alpha 0.7, 1 epoch).** R13 plain; R13-L3 (too-loose mistakes cost 3x, `train/losscost.py`); R13-L3-t2 (plus text format 2, a versioned access hint in `src/text.js`, manifest `textFormat`; 0.2.0 output is unaffected).
+5. **Val pick (frozen rule: fewest too-loose on the product path).** R13 74, R13-L3 78, R13-L3-t2 85 too loose on val (4,180 rows): **R13 picked**. The run had a documented two-run procedural deviation (format-2 val for t2); the prereg was not changed. The label fix did the work; the too-loose penalty and the hint added nothing on the product path.
+
+**Next steps.**
+1. **Exam #5.** rwxmap's user adopted our condition: vendors unseen in rwxlite's 902-provider list (`data/v4/rwxlite-providers.csv`). The pool count and the draw are pending (rwxmap side).
+2. Score R13 once. Bar: R13 vs shipped 0.2.0 at T 0.844, via the rwxmap CLI `secondPass` AND standalone; no more too-loose and no fewer exact on both. If not met, 0.2.0 stays.
+3. Ship decision (user and rwxmap), then release order per Publishing.
+
+**Open decisions.**
+- Whether text format 2 ships in the next release. The code is merged on `dev` but unused unless a manifest sets `textFormat: 2`; R13 (format 1) is the picked candidate.
+- The release version number (not chosen; no version has been cut).
 
 ## Open questions
 

@@ -1,5 +1,7 @@
 # Label inventory (for the shared BRIEF-v4 relabel plan with rwxmap)
 
+> Update 2026-11-06: this page is the pre-relabel snapshot (BRIEF-v3 state). The BRIEF-v4 relabel is done (D137; rwxmap `95104e3`, `export-v4-gap`): of our 29,327 w ids, w 22,727 / x 6,029 / r 1, plus 570 inherited variants. Round 13 trained on 102,668 rows with 6,245 labels changed, all data used for training. Where the text below says "no BRIEF-v4 data yet" or lists relabel steps as future, read it as the state before that. See PRD "Round 13" and findings "Round 13".
+
 Written 2026-11-05 on branch `dev`. Read-only inventory: no label, data file or model was changed, no paid call, no home-server access. Every count below was computed from the files under `data/` (gitignored, so numbers can only be re-derived on this machine) and checked against `docs/product/prd.md` ("PRD") and `docs/wiki/findings.md` ("findings"). Where a fact comes from a document, the source is in brackets. Where two sources disagree, both are given.
 
 ## 1. Plain-English summary

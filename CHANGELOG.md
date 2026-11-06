@@ -10,6 +10,7 @@ Note: the entries below were the candidate package ref for shared exam #4 (docs/
 Candidate model: round 11 (`data/m1-r11`, int8-pc `adc6e6c1`, fp32 `252f3181`, T 0.843). Model strings `rwxlite-0.3.0+adc6e6c1` and `rwxlite-0.3.0+252f3181`. The r11 manifests carry `version` 0.3.0, which equalled `package.json` at tag v0.3.0.
 
 ### Added
+- Manifest `textFormat` (1 or 2, default 1; anything else throws). `loadAnswerer` reads it via the new `manifestTextFormat`, validated by `checkTextFormat`. Format 2 is format 1 plus one `hint: access` segment right after the lean, on operations that `accessHint(state)` flags (grants or widens access, creates a key or token, webhook to an outside URL, creates a login user, adds a member). `formatText(state, lean, format)` takes the format (default 1); `accessHint`, `checkTextFormat` and `manifestTextFormat` are exported. Output for 0.2.0 manifests (no `textFormat`) is unchanged byte for byte. No shipped model uses format 2; whether it ships is undecided (PRD, Round 13).
 - Round 10 model build (`data/m1-r10`, int8-pc `093c908d`, fp32 `8514ddcc`, T 0.858), not released (exam #3 NO-GO; 0.2.0 stays the published model). Manifests built by `m1/manifest-r10.mjs`, the release set by `m1/release-assets.mjs data/m1-r10/release r10`.
 - `train/exam3_predict.py` writes one JSONL per model (`id`, `model`, `pIsX`, `pChanges`, T applied) for parity checks against `loadAnswerer`.
 
