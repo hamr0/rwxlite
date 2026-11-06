@@ -118,9 +118,41 @@ loss = recipe_loss + mean over the batch rows of  sum_j softmax(logits)_j * cost
 
 `y` is the row's **hard label** (the v4 label), also for rows trained with a soft target. So a too-loose error costs exactly 3 times an equal too-tight one. Weight of the term is 1. The unit check `python3 -I train/test_losscost.py` asserts a too-loose prediction scores higher than an equal too-tight one (exactly 3.0 against 1.0). With `--loose_cost 0` (default) the code path is the S0 one.
 
-### 4b. R13-L3-t2: text format 2 (PLACEHOLDER, not defined yet)
+### 4b. R13-L3-t2: text format 2 (defined; code commit `f7456a2acc66ce84fd8c87d7426c9001bab8ceb7`)
 
-> TO BE FILLED IN BEFORE R13-L3-t2 TRAINS: the exact definition of text format 2 (an input format with a built-in access hint), the commit that implements it in `src/text.js` and `train/common.py`, its parity results (JS against Python on the training and val rows), and the sha256 of the re-rendered train/val files. Until then R13-L3-t2 does not train, and this section is the only thing allowed to change. Everything else (data rows, labels, targets, recipe, `--loose_cost 3`) is as R13-L3.
+Everything else (data rows, labels, targets, recipe, `--loose_cost 3`) is as R13-L3. Only the `text` column differs.
+
+**Definition.** Format 1 is today's text, unchanged byte for byte. Format 2 is format 1 with one extra segment, `hint: access`, placed **directly after the lean segment** and only on hinted operations: `lean: w floor-put | hint: access | PUT /... | op: ... | sum: ... | desc: ...`. It is second, so the 128-token cut cannot reach it (the long summary and description come after it). Unhinted rows are byte-identical to format 1.
+
+**The hint** is computed inside `src/text.js` (`accessHint`) and `train/common.py` (`access_hint`) from the operation's own method, path, operationId and summary. It is never supplied by the caller and never read from the lean. The description is not read (the round 13 data files do not carry it). DELETE is never hinted. It fires when any of six families matches (text first normalised: tags stripped, camelCase split, lower-case, non-alphanumerics to one space):
+
+1. grants or widens access: IAM, ACL, permissions, role bindings and assignments, share, invite, collaborators, deploy keys, ssh keys, and resource/bucket/key/queue/topic/repository/vault/registry/secret/security/trust/network/access policies, with a write-type verb (a GET only if its name starts with a write verb);
+2. creates an API key or token (api key, access key, personal access or bearer token, client secret, application password);
+3. flips an access-widening toggle (public access, anonymous or guest access, external sharing, open registration, disable MFA or authentication and the like);
+4. registers a webhook or subscription to an outside URL (webhook, callback URL, event subscription, notification endpoint);
+5. creates a login user (create or invite a user, admin or service account);
+6. adds a member to a team, org, project, group or workspace.
+
+Non-access "policies" (autoscaling, lifecycle, retention, routing, backup, cache, alert, schedule and similar) do not count, and neither do read, delete, revoke, disable, verify, reset or refresh verbs. The pattern started from the widened pattern of the BRIEF-v4 inventory work and was changed in three obvious places only after a look at the false positives: `shared`/`shares` no longer match (shared cache, shared drive item, file shares are not grants; `share` and `sharing` still do), Kubernetes `pod binding` is not a role binding, and `pre-receive hooks` are not webhooks. It was not tuned to the labels beyond that.
+
+**Version.** The manifest gets an optional `textFormat` (integer 1 or 2). Absent means 1, so 0.2.0 and every existing manifest give byte-identical text; any other value throws before any file is read. `formatText(state, lean, format = 1)` and `new Answerer({..., textFormat})` keep the old API working. Test: `test/text.test.js` proves format 1 (default and explicit) equals the Python fixture on every one of its 900+ rows, and format 2 equals Python on `test/fixtures/text2.jsonl` (800 rows, 400 hinted).
+
+**Parity (`m1/t2-parity.py`, Python `fmt_text` against Node `formatText`, byte for byte).** round13 train+val 106,848 rows: format 1 mismatches 0, format 2 mismatches 0 (1,959 hinted); whole corpus `data/m0/mechanical.jsonl.gz` 123,339 rows: 0 and 0 (2,595 hinted); 5 hand probes (unicode, html, CR/LF, QUERY, dotted operationId): 0 and 0. The stored round13 text equals `fmt_text` format 1 on every row (everything before the `desc:` segment; the data files carry no description). Note: Node prints HTTP QUERY as GET (D134) while Python prints the stored method, so the method token is folded before comparing; the hint itself folds QUERY to GET on both sides.
+
+**Hint coverage on data/round13 (train+val, 106,848 rows).** Hinted 1,959 rows (1.8%): x 1,813, w 131, r 15. Precision (hinted rows labelled x) 92.5% (train 93.1%, val 75.4% on 65 rows). Of all x rows 7.1% are hinted. Recall on the 6,467 rows that v4 changed from w to x: 1,647 hinted, **25.5%** (train 1,605 of 6,244 = 25.7%; val 42 of 223 = 18.8%). So the hint is a precise but narrow marker: three quarters of the v4 w-to-x changes carry no hint. Row counts, not unique operations.
+
+**Re-rendered data (`m1/r13-t2-render.py`, output `data/round13-t2/`, gitignored, deterministic: two runs give identical hashes).** Inserts `hint: access` as second segment on hinted rows; asserted: removing the segment gives the old text, every other field is equal. Hinted rows: train 1,894 (r 8, w 122, x 1,764), val 65 (r 7, w 9, x 49), v3eval 394. `train/common.py` is no longer the S0 file: its sha256 is `061da692d8781a10...` at the code commit (`git show f7456a2:train/common.py | sha256sum` for the full value); `src/text.js` is changed too. Neither affects R13 or R13-L3, which use the stored format 1 text.
+
+```
+55c2d80c1595e0b3c5037482f7fd4120854e266dd0d6b0a85e8b4fbcd02437dc  train.jsonl
+32d329c7e370b64b94ee0399193eae48cdd71c513ff13acb16a74dd3ea3cd9a4  train.parquet
+b082e4611c712d9648fdb2db83ec003cb7d492c8a4e76170df0d002951f37f86  val.jsonl
+fbd89c101591cbc26af320a580f566f0f14e6f01eec2c8af039e707ac83287e0  val.parquet
+ab60c2842b809c4d3708c6d4b388cc4bdf12509ff67998346583198ab53ab6a9  v3eval.jsonl
+32af1c204c6bebe58a9bd1e533013fe3d08a22372513d5d3bdd7c8d126241051  v3eval.parquet
+```
+
+Copy for R13-L3-t2 (own dir `~/rwxlite-train/r13-R13-L3-t2/`, same layout as section 4): `data/round13-t2/{train,val,v3eval}.{jsonl,parquet}` into `data/train/`, and `train/common.py` as committed; start with `r13-train.sh R13-L3-t2` (adds `--loose_cost 3`, tag `r13-L3-t2`). A released model trained on format 2 needs `textFormat: 2` in its manifest.
 
 Expected duration per candidate: S0 took 53 min (95,291 rows); these have 7.7% more rows, so about 57 to 60 min each, run one after the other. Start times and first log lines go into the findings.
 
