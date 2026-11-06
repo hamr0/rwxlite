@@ -5,6 +5,11 @@
 //
 // Format: 'lean: <letter> <rule> | <METHOD> <path> | op: <operationId> | sum: <summary> | desc: <description>'
 // The lean (mechanical letter and rule) goes first so truncation never cuts it.
+//
+// Text format 2 (manifest `textFormat: 2`) is format 1 plus one segment, 'hint: access', placed directly after the lean
+// segment and only on operations accessHint() flags (grants or widens access, creates a key/token, webhook, login user,
+// team member; see accessHint). Because it sits second, right behind the lean, truncation at 128 tokens never cuts it.
+// Unhinted rows are byte-identical to format 1, and format 1 is today's text unchanged.
 
 import { HTML5 } from './entities.js';
 
@@ -95,19 +100,153 @@ function textRule(rule) {
   return has(LEAN_RULE_ALIASES, rule) ? LEAN_RULE_ALIASES[/** @type {keyof typeof LEAN_RULE_ALIASES} */ (rule)] : rule;
 }
 
+// ---- access hint (text format 2). Mirrors train/common.py access_hint; the patterns are shared in spirit and
+// parity is tested row by row. Text is normalised first (hnorm), so every pattern is plain ASCII lower-case.
+const HVERB_READ = String.raw`(?:get|list|describe|read|retrieve|fetch|check|validate|test|search|count|export|view|show|find|query|lookup|download|batch get|is|has)`;
+const HVERB_OUT = String.raw`(?:remove|delete|revoke|detach|unassign|unshare|disable|deny|block|leave|decline|reject|cancel|withdraw|disassociate|deregister|unlink|clear|expire|list|get|describe|read|retrieve|fetch|check|validate|test|search|count|export|view|show|find|query|lookup|download|batch get|is|has|verify|reset|resend|rotate|refresh|login|log in|sign in|logout|log out|sign out|authenticate)`;
+const HVERB_MUT = String.raw`(?:attach|add|set|put|grant|assign|invite|share|bind|update|modify|change|create|enable|replace|authorize|authorise|allow|upsert|patch|edit|register|link|transfer|promote|accept|apply|configure|reset|import|copy)`;
+const HHTTP = String.raw`^(?:(?:get|post|put|patch) )?`;
+const H_READ = new RegExp(String.raw`^` + HVERB_READ + String.raw`\b`);
+const H_OUT = new RegExp(HHTTP + HVERB_OUT + String.raw`\b`);
+const H_MUT = new RegExp(String.raw`^` + HVERB_MUT + String.raw`\b`);
+const H_NARROWV = new RegExp(String.raw`^(remove|delete|revoke|detach|unassign|unshare|disable|deny|block|leave|decline|reject|cancel|withdraw|disassociate|deregister|unlink|clear|expire)\b`);
+// non-access "policies" and settings that must never count as access
+const H_NONACC = new RegExp(String.raw`\b(autoscal\w*|scaling|lifecycle|life cycle|retention|routing|routes?|backup|maintenance|cach\w*|refund|returns?|cancell?ation|escalation|sla|sampling|retry|rate limit\w*|throttl\w*|dunning|pricing|billing|tax|shipping|ttl|expir\w*|compliance|alert\w*|notification|schedul\w*)\b`);
+const H_CORE = new RegExp(String.raw`\b(iam|acls?|permissions?|grants?|principals?|access control|shar\w+|invit\w+|collaborators?|deploy keys?|ssh keys?|roles?)\b`);
+// 1. grants / widens access
+const H_GRANT = new RegExp(String.raw`\b(iam|acls?|access control|permissions?|role bindings?|role assign\w*|assign\w* roles?|bind\w* roles?|(?<!pod )bindings?|grants?|share|sharing|invit\w+|collaborators?|deploy keys?|ssh keys?|authori[sz]ed keys?|(iam|resource|bucket|key|trust|queue|topic|repository|vault|registry|secret|security|sharing|authorization|access|network) polic(?:y|ies)|principals?|entitlements?|privileges?|access (?:levels?|rights?|lists?|rules?|grants?)|member (?:roles?|permissions?|access)|team (?:permissions?|access))\b`);
+// 2. API key / token create
+const H_CREATE = new RegExp(HHTTP + String.raw`(create|generate|issue|new|add|mint|provision|make|request|regenerate|rotate)\b`);
+const H_KEYOBJ = new RegExp(String.raw`\b(api ?keys?|apikeys?|access ?keys?|secret (?:access )?keys?|(?:personal )?access tokens?|api tokens?|auth(?:entication)? tokens?|bearer tokens?|service tokens?|app(?:lication)? passwords?|passwords? credentials?|client secrets?|service account keys?|service specific credentials?|tokens?|add password|application passwords?)\b`);
+const H_KEYNOT = new RegExp(String.raw`\b(login|log in|sign ?in|authenticate|refresh|oauth|exchange|introspect|verify|validate|revoke|csrf|one time|otp|presigned|pre signed|session token|id token|reset|forgot|recover|encryption keys?|kms|customer managed|two factor|2fa|qr|audit copy|verification|polic(?:y|ies)|invoices?|experiments?|snippets?|quer(?:y|ies)|sub ?accounts?|issuance|key pair|key pairs|keypair|public keys?|license keys?|sort keys?|partition keys?|key vault|keystore|key store|primary keys?|foreign keys?|cache keys?|feature flags?|object keys?|tag keys?|key values?|master keys?|data keys?|grant tokens?)\b`);
+const H_SETVERB = new RegExp(HHTTP + String.raw`(enable|set|put|update|replace|import)\b`);
+const H_KEYWORD = new RegExp(String.raw`\b(api ?keys?|access ?keys?|tokens?)\b`);
+const H_PASSWORD = new RegExp(String.raw`\b(add|create) password\b`);
+// 3. access-widening toggle
+const H_WID = new RegExp(String.raw`\b(public access|publicly (?:accessible|readable|writable|visible)|make public|set public|public (?:links?|urls?|sharing|visibility|read|write|network access|endpoint)|anonymous (?:access|users?|sign ?ins?|login)|guest (?:access|users?|sharing)|external (?:sharing|access|users?|collaborat\w+)|allow (?:external|public|guest|anonymous|all|any)\w*|open (?:registration|signups?|to)|self ?(?:registration|signup|service sign ?up)|signups?|sign ups?|enable (?:public|remote|external|guest|ssh|sftp|ftp|telnet|rdp|console|serial console|link sharing|sharing|sso bypass|access|cross account|cross region access|direct access)|disable (?:mfa|2fa|two ?factor|multi ?factor|authentication|password|ssl|tls|login protection|ip restrictions?|require\w*|verification)|public access blocks?|(?<!message )visibility(?! timeout)|is public|link sharing|share link|remote access)\b`);
+const H_WIDMUT = new RegExp(HHTTP + String.raw`(enable|disable|allow|set|put|update|modify|change|make|open|turn|toggle|configure|replace|edit|share|publish|expose|switch)\b`);
+const H_LISTGET = new RegExp(HHTTP + String.raw`(list|get|describe)\b`);
+const H_WIDNOT = new RegExp(String.raw`expir|message visibility|visibility timeout`);
+// 4. webhook / subscription to an outside URL
+const H_HOOK = new RegExp(String.raw`\b(web ?hooks?|(?<!lifecycle )(?<!life cycle )(?<!pre receive )hooks?|event subscriptions?|callbacks?(?: urls?)?|notification (?:urls?|endpoints?|channels?|subscriptions?|destinations?|hooks?|targets?)|event (?:destinations?|endpoints?|targets?|hooks?)|api destinations?|push (?:notifications?|channels?)|http endpoints?|endpoint urls?)\b`);
+const H_HOOKMUT = new RegExp(HHTTP + String.raw`(create|add|register|set|update|configure|enable|subscribe|put|replace|edit|modify|change|insert|new|install|connect|watch|test)\b`);
+const H_HOOKNOT = new RegExp(String.raw`verification|lifecycle|life cycle|signing|alerts?\b`);
+const H_TEST = new RegExp(HHTTP + String.raw`test\b`);
+// 5. create a login-capable user
+const H_MOD = String.raw`(?:(?:a|an|the|new|another|one|more|auth|app|admin|sub|api|team|org|organization|workspace|tenant|local|portal|system|bulk|multiple|single|batch|additional|full|normal|login) ){0,3}`;
+const H_USERNOUN = new RegExp(String.raw`^` + H_MOD + String.raw`(users?|login profiles?|administrators?|admins?|service accounts?|employees?|user accounts?|sub ?users?)(?= *$| (?:account|with|and|using|via|by)\b)(?! (to|for|in|on|from|as|into|of|groups?|pools?|profiles?|preferences?|attributes?|settings?|roles?|sessions?|tokens?|keys?|policy|policies|permissions?|mappings?|import|export|id|ids|name|names)\b)( |$)`);
+const H_USERMUT = new RegExp(HHTTP + String.raw`(create|add|new|register|provision|invite|import|signup|sign up|admin create|bulk create|batch create|insert)\b`);
+const H_USERPATH = new RegExp(String.raw`/(users|admins|administrators)/?(?![\s\S])`);
+const H_USERNOT = new RegExp(String.raw`\b(import|export|search|query|lookup|list|find|verify|check|reset|sessions?|tokens?)\b`);
+// 6. add a member to a team / org / project / group
+const H_MEMBOBJ = new RegExp(String.raw`\b(members?|users?|collaborators?|participants?|memberships?|admins?|owners?|people|persons?|principals?)\b`);
+const H_CONT = new RegExp(String.raw`\b(teams?|orgs?|organi[sz]ations?|projects?|groups?|workspaces?|spaces?|channels?|tenants?|companies|company|repos?|repositor\w+|boards?|rooms?|clusters?|domains?)\b`);
+const H_MEMBMUT = new RegExp(HHTTP + String.raw`(add|create|invite|assign|join|enroll|insert|attach|batch add|bulk add)\b`);
+const H_MEMBNOT = new RegExp(String.raw`\b(role|roles|permissions?|settings?|count|stats|tag|tags|mentions?|notes?|comments?|attachments?)\b`);
+const H_MEMBGRP = new RegExp(String.raw`\b(users?|members?) groups?\b|\bgroups?\b.*\bgroups?\b`);
+const H_MEMBER = new RegExp(String.raw`\bmembers?\b`);
+const H_MEMBNOT2 = new RegExp(String.raw`\b(tags?|attachments?|comments?)\b`);
+const H_MEMBPATH = new RegExp(String.raw`/(teams?|orgs?|organi[sz]ations?|projects?|groups?|workspaces?|spaces?|channels?|tenants?|companies|boards?|rooms?|repos?)/[^/]+/(members?|team_members|users?|collaborators?|memberships?|participants?|admins?|people)(/\{[^/]*\}|/\$ref)?/?(?![\s\S])|/members/\$ref(?![\s\S])|/(members|memberships|collaborators)/?(?![\s\S])`);
+const H_MEMBREAD = new RegExp(String.raw`^(?:get )?(list|get|describe|read|search|query|check|count|export|update|set|replace)\b`);
+const H_PATHPARAM = new RegExp(String.raw`\{[^}]*\}`);
+const H_PATH_FRAGMENT = /#[^\n]*/g;
+const H_PATH_PARAM = /\{[^}]*\}/g;
+
+/** The hint's text normalisation (train/common.py _hnorm): tags out, camelCase split, lower-case, runs of non-alphanumerics to one space. @param {unknown} t */
+function hnorm(t) {
+  const s = (t === null || t === undefined || t === '' ? '' : String(t)).replace(/<[^>]+>/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2');
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/^ +| +$/g, '');
+}
+
+/**
+ * train/common.py access_hint: true when the operation's own method, path, operationId and summary say it grants or
+ * widens access (BRIEF-v4 / rwxmap D137: x, not w). Six families, any one is enough: (1) grants or widens access (IAM, ACL,
+ * resource/bucket/key policies, role bindings, permission assignments, share, invite, deploy keys); (2) creates an API key
+ * or token; (3) flips an access-widening toggle; (4) registers a webhook or subscription to an outside URL; (5) creates a
+ * login user; (6) adds a member to a team, org, project or group. Non-access "policies" (autoscaling, lifecycle, retention,
+ * routing) and read or revoke verbs never count. DELETE is never hinted. The description is not read.
+ * @param {{method: string, path: string, operationId?: string|null, summary?: string|null}} st
+ */
+export function accessHint(st) {
+  let m = String(st.method).toUpperCase();
+  if (m === 'DELETE') return false;
+  if (m === 'QUERY') m = 'GET';
+  const path = String(st.path);
+  const opid = (st.operationId ? String(st.operationId) : '').replace(/^(GET|POST|PUT|PATCH|DELETE)_/, '');
+  const summ = st.summary ? String(st.summary) : '';
+  const leads = [hnorm(opid), hnorm(summ)];                           // whole operationId, summary
+  const leads2 = [hnorm(opid.split('.').pop()), hnorm(summ)];         // operationId after its last '.', summary
+  const t = hnorm(opid + ' ' + summ + ' ' + path);                    // what the grant test reads
+  const t2 = hnorm(opid + ' ' + summ + ' ' + path.replace(H_PATH_FRAGMENT, '').replace(H_PATH_PARAM, ''));  // path without #fragments and {params}
+  const any2 = (/** @type {RegExp} */ rx) => leads2.some((x) => rx.test(x));
+  const out2 = any2(H_OUT);
+  const segs = path.split('/').filter((s) => s && !s.startsWith('{') && !s.startsWith('#'));
+  const lastseg = segs.length ? hnorm(segs[segs.length - 1]) : '';
+  const hasMut = leads.some((x) => H_MUT.test(x));
+  const hasRead = leads.some((x) => H_READ.test(x)) && !hasMut;
+  // 1. grants / widens access
+  if (['POST', 'PUT', 'PATCH', 'GET'].includes(m) && H_GRANT.test(t) && !(H_NONACC.test(t) && !H_CORE.test(t)) && !leads.some((x) => H_NARROWV.test(x))) {
+    if (m === 'GET') { if (hasMut) return true; }
+    else if (!hasRead) { if (hasMut || ((m === 'PUT' || m === 'PATCH') && H_GRANT.test(lastseg))) return true; }
+  }
+  // 2. API key / token create
+  if (any2(H_CREATE) && !out2 && !H_KEYNOT.test(t2) && !(H_SETVERB.test(leads2[0]) && !H_KEYWORD.test(t2))) {
+    if (H_KEYOBJ.test(t2) || (/\bpasswords?\b/.test(t2) && H_PASSWORD.test(t2))) return true;
+  }
+  // 3. access-widening toggle
+  if (any2(H_WIDMUT) && !H_LISTGET.test(leads2[0]) && !H_WIDNOT.test(t2) && H_WID.test(t2)) return true;
+  // 4. webhook / subscription to an outside URL
+  if (any2(H_HOOKMUT) && !out2 && !H_TEST.test(leads2[0]) && !H_HOOKNOT.test(t2) && H_HOOK.test(t2)) return true;
+  // 5. creating a login user
+  if (!out2) {
+    for (const x of leads2) {
+      const mm = H_USERMUT.exec(x);
+      if (mm && H_USERNOUN.test(x.slice(mm[0].length).trim())) return true;
+    }
+    if (m === 'POST' && H_USERPATH.test(path.split('?')[0]) && !H_OUT.test(leads2[0]) && !H_USERNOT.test(t2)) return true;
+  }
+  // 6. adding a member to a team / org / project / group
+  if (!out2) {
+    for (const x of leads2) {
+      const mm = H_MEMBMUT.exec(x);
+      if (mm) {
+        const rest = x.slice(mm[0].length).trim();
+        const head = rest.split(/ +/).filter(Boolean).slice(0, 5).join(' ');
+        if (H_MEMBOBJ.test(head) && !H_MEMBGRP.test(head) && (H_CONT.test(rest) || H_CONT.test(hnorm(path))) && !H_MEMBNOT.test(head)) return true;
+        if (H_MEMBER.test(head) && !H_MEMBNOT2.test(head) && H_CONT.test(hnorm(path))) return true;
+      }
+    }
+    if ((m === 'POST' || m === 'PUT') && H_MEMBPATH.test(path.split('?')[0]) && !H_MEMBREAD.test(leads2[0])) return true;
+  }
+  return false;
+}
+
 /**
  * @typedef {{method: string, path: string, operationId?: string|null, summary?: string|null, description?: string|null}} State
  * @typedef {{class: 'r'|'w'|'x', rule: string}} Lean
  */
 
+/** The text formats the model has: 1 (today's) and 2 (plus the access hint). @param {unknown} f @returns {1|2} */
+export function checkTextFormat(f) {
+  if (f !== 1 && f !== 2) throw new Error(`rwxlite: textFormat must be 1 or 2, got ${String(f)}`);
+  return f;
+}
+
 /**
- * train/common.py fmt_text: the one string the model reads.
+ * train/common.py fmt_text: the one string the model reads. format 1 (default) is the original text; format 2 adds
+ * the 'hint: access' segment right after the lean when accessHint(state) is true. The hint comes from the operation's
+ * own fields, never from the caller.
  * @param {State} state
  * @param {Lean} lean
+ * @param {number} [format] 1 or 2, default 1
  * @returns {string}
  */
-export function formatText(state, lean) {
-  const parts = [`lean: ${lean.class} ${textRule(lean.rule)}`, `${textMethod(state.method)} ${state.path}`];
+export function formatText(state, lean, format = 1) {
+  checkTextFormat(format);
+  const parts = [`lean: ${lean.class} ${textRule(lean.rule)}`];
+  if (format === 2 && accessHint(state)) parts.push('hint: access');
+  parts.push(`${textMethod(state.method)} ${state.path}`);
   if (state.operationId) parts.push('op: ' + clean(state.operationId, 120));
   if (clean(state.summary, 1)) parts.push('sum: ' + clean(state.summary, 200));
   if (clean(state.description, 1)) parts.push('desc: ' + clean(state.description, 400));

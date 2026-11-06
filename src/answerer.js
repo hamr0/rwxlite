@@ -20,7 +20,7 @@ import { createHash } from 'node:crypto';
 import os from 'node:os';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { formatText } from './text.js';
+import { formatText, checkTextFormat } from './text.js';
 import { WordPiece } from './tokenizer.js';
 
 /** Default calibration temperature (the 0.2.0 model's, fit on its val split; docs/wiki/classifier-training.md). A manifest's `temperature` overrides it. */
@@ -58,8 +58,13 @@ export function manifestTemperature(manifest) {
   return manifest.temperature === undefined ? TEMPERATURE : checkTemperature(manifest.temperature);
 }
 
-/** @param {unknown} req @returns {{text: string, keys: string[]}} */
-export function checkRequest(req) {
+/** The manifest's `textFormat`, validated: 1 or 2; 1 (the original text) when the manifest has none (0.2.0 manifests). @param {{textFormat?: unknown}} manifest @returns {1|2} */
+export function manifestTextFormat(manifest) {
+  return manifest.textFormat === undefined ? 1 : checkTextFormat(manifest.textFormat);
+}
+
+/** @param {unknown} req @param {number} [textFormat] the model's text format, 1 or 2, default 1 @returns {{text: string, keys: string[]}} */
+export function checkRequest(req, textFormat = 1) {
   const r = /** @type {any} */ (req);
   if (!r || typeof r !== 'object') throw new Error('rwxlite: request must be an object');
   const st = r.state;
@@ -74,7 +79,7 @@ export function checkRequest(req) {
   const keys = Object.keys(r.questions);
   if (keys.length === 0) throw new Error('rwxlite: no questions');
   for (const k of keys) if (!QUESTIONS.includes(/** @type {any} */ (k))) throw new Error(`rwxlite: unknown question ${k}`);
-  return { text: formatText(st, lean), keys };
+  return { text: formatText(st, lean, textFormat), keys };
 }
 
 /** @param {[number, number, number]} P @param {string[]} keys @returns {Answer['answers']} */
@@ -86,10 +91,11 @@ function answersFrom(P, keys) {
 }
 
 export class Answerer {
-  /** @param {{tokenizer: WordPiece, runner: Runner, model: string, temperature?: number}} parts */
-  constructor({ tokenizer, runner, model, temperature = TEMPERATURE }) {
+  /** @param {{tokenizer: WordPiece, runner: Runner, model: string, temperature?: number, textFormat?: number}} parts */
+  constructor({ tokenizer, runner, model, temperature = TEMPERATURE, textFormat = 1 }) {
     this.tokenizer = tokenizer; this.runner = runner; this.model = model;
     this.temperature = checkTemperature(temperature);
+    this.textFormat = checkTextFormat(textFormat);
   }
 
   /** @param {unknown} err @returns {NoAnswer} */
@@ -117,7 +123,7 @@ export class Answerer {
     const ok = [];
     reqs.forEach((req, i) => {
       try {
-        const { text, keys } = checkRequest(req);
+        const { text, keys } = checkRequest(req, this.textFormat);
         ok.push({ i, ids: this.tokenizer.encode(text, MAX_LEN), keys });
       } catch (err) { out[i] = this.noAnswer(err); }
     });
@@ -183,8 +189,9 @@ export function ortRunner(ort, session) {
 
 /**
  * Load the answerer from a model directory holding the model file, vocab.txt and manifest.json
- * ({version, modelFile, files: {name: sha256}, temperature?}). manifest.temperature is the calibration temperature
- * (finite number > 0; absent = 0.844, the 0.2.0 value; anything else throws before any file is read). manifest.modelFile names the weights (e.g. model-int8.onnx), so
+ * ({version, modelFile, files: {name: sha256}, temperature?, textFormat?}). manifest.temperature is the calibration temperature
+ * (finite number > 0; absent = 0.844, the 0.2.0 value; anything else throws before any file is read). manifest.textFormat is the model's input text format (integer 1 or 2;
+ * absent = 1, today's text, so 0.2.0 answers are unchanged; anything else throws before any file is read). manifest.modelFile names the weights (e.g. model-int8.onnx), so
  * switching the shipped variant is a manifest change. Every file's sha256 is checked before use; a mismatch throws.
  * onnxruntime-node is an optional dependency, imported only here.
  * threads: intra-op threads for onnxruntime. Default Math.min(4, os.availableParallelism()); measured on a 4-core i3-8100T,
@@ -198,6 +205,7 @@ export async function loadAnswerer({ dir, threads = Math.min(4, os.availablePara
   const manifest = JSON.parse(await readFile(path.join(dir, manifestFile), 'utf8'));
   if (!manifest || typeof manifest.version !== 'string' || typeof manifest.modelFile !== 'string' || !manifest.files) throw new Error('rwxlite: bad manifest.json');
   const temperature = manifestTemperature(manifest);
+  const textFormat = manifestTextFormat(manifest);
   const modelFile = path.basename(manifest.modelFile);
   /** @type {Record<string, Buffer>} */
   const bytes = {};
@@ -220,5 +228,6 @@ export async function loadAnswerer({ dir, threads = Math.min(4, os.availablePara
     runner: ortRunner(ort, session),
     model: modelString(manifest.version, manifest.files[modelFile]),
     temperature,
+    textFormat,
   });
 }
