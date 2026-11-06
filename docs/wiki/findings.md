@@ -918,3 +918,16 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 - Copied from git HEAD (7b70197) to the t2 dir, local HEAD = remote: `r13-train.sh` `3037d20e182018e2401c02ec64a8892f671aaa35c26f9a7c954fcf3c39e1f22a`; `train/finetune.py` `bc680dc36472f5119e7e70e91806f3eb7f308a433d934996344ac92f54f03019`; `train/losscost.py` `15361a92385e443223464affdcf30fa21c092b205daaa137e0ed4fce64a0d6b9`; `train/common.py` (new, text format 2) `061da692d8781a104ca7e47a605983b4cad9d8ddb10ca45f2b55ca2249b3e8d8`.
 - Data `data/round13-t2/{train,val,v3eval}.{jsonl,parquet}` copied into `r13-R13-L3-t2/data/train/`; `sha256sum -c SHA256SUMS` OK on both ends (local and server; summary.json not copied). train.jsonl `55c2d80c...`, val.jsonl `b082e461...`.
 - Status at queueing: R13 at step 675/3209, 0.96 step/s. Expected times (+01:00): R13 done about 11:30, R13-L3 about 12:30, R13-L3-t2 starts about 12:30 and finishes about 13:25 (about 55 min per candidate).
+
+### Round 13 val pick (2026-11-06)
+- **Procedural deviation (documented):** `m1/r13-valpick.py` (sha256 `82ec34bd...`, unchanged) takes one `--val` file for all candidates, so the pick was run twice with the same code: R13 and R13-L3 on `data/round13/val.jsonl` (sha `8c0fdcfb...`, format 1), R13-L3-t2 on `data/round13-t2/val.jsonl` (sha `b082e461...`, format 2, the text it was trained on). Checked before running: the two val files have 4,180 rows, identical in every field except `text`; text differs on exactly 65 rows, each equal to the format-1 text plus the `hint: access` segment. The pick rule was applied by hand, unchanged; the prereg was not changed. Outputs: `data/round13/valpick-f1/`, `data/round13/valpick-t2/` (gitignored). Checkpoint sha256 of model.safetensors matched on server and local (R13 `d16276d8...`, R13-L3 `536e76cb...`, R13-L3-t2 `acf028a9...`).
+- Results (val 4,180 rows, each candidate at its own val-fitted T, mode a, 0.97):
+
+| candidate | T | product right / loose / tight | standalone right / loose / tight |
+|---|---|---|---|
+| R13 | 0.9915 | 3,776 / 74 / 330 | 3,967 / 162 / 51 |
+| R13-L3 | 1.2559 | 3,712 / 78 / 390 | 3,947 / 149 / 84 |
+| R13-L3-t2 | 1.2933 | 3,693 / 85 / 402 | 3,938 / 145 / 97 |
+
+- Context only, decides nothing: 0.2.0 smoke-run on the same val: product 3,774 / 204 / 202 at T 0.844, standalone 3,827 / 335 / 18; mechanical alone 3,646 / 172 / 362.
+- **Pick (frozen rule):** fewest too-loose on the product path: R13 74 < R13-L3 78 < R13-L3-t2 85. No tie, so exact and the R13 tie-break are not needed. **Pick: R13, T = 0.991463.** Only R13 sits exam #5.
