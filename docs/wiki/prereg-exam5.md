@@ -135,4 +135,21 @@ The script stops if a v4 row carries a different letter than the target was trai
 | `m1/r13-v4lean-check.mjs` | `2134e346d2bff042106d192c65f43f8737cc2269392d18f47c64034a26fa30fe` |
 | `m1/r13-v4lean-score.py` | `7f2f3b83a3d9a8dc25aea46e2a649d30e2973d1e36405a3cdacb54c1c7169095` |
 
-**Results: TBD** (asis `TBD`, alias `TBD`, pick `TBD`).
+**Results (run once on val, scripts and mapping unchanged from `ee9765e`).** Leans: rwxmap `poc/mech-v4/lean.mjs` at commit `94f6cc4` (mech-v4 core unchanged since `40fe161`), `data/round13/v4-lean-val.csv`, sha256 `96e15be2048842205f5b619a3e2a684ad6977e173838a5a2f023a1bb403193f6` (checked against rwxmap's `lean.csv.sha256`; ids and order equal the val ops file; classes r 2426 / w 728 / x 1026; markers settled 2790 / tight 639 / loose 751; new names path-x-word 95, content-noun 58, get-action 1). Right / too loose / too tight:
+
+| R13, val | product (mode a, 0.97) | standalone |
+|---|---|---|
+| v3 leans (context) | 3,776 / 74 / 330 | 3,967 / 162 / 51 |
+| v4 leans, asis | 3,815 / 76 / 289 | 3,969 / 161 / 50 |
+| v4 leans, alias | 3,814 / 78 / 288 | 3,968 / 158 / 54 |
+
+**Pick: asis** (fewest too loose on the product path: 76 vs 78). The two variants differ by 2 too loose and 1 right on the product path, i.e. within noise; asis wins on the frozen rule and the tie preference. No unseen rule names other than the three were found.
+
+The 154 rows with new rule names (product / standalone, right / too loose / too tight; the 0.97 rule lowered none of them in either variant, all 154 were sent):
+
+| | asis product | asis standalone | alias product | alias standalone |
+|---|---|---|---|---|
+| path-x-word (95) | 86 / 0 / 9 | 87 / 4 / 4 | 86 / 0 / 9 | 86 / 0 / 9 |
+| content-noun (58) | 52 / 5 / 1 | 51 / 6 / 1 | 51 / 7 / 0 | 51 / 7 / 0 |
+| get-action (1) | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
+| all 154 | 139 / 5 / 10 | 139 / 10 / 5 | 138 / 7 / 9 | 138 / 7 / 9 |
