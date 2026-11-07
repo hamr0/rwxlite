@@ -57,7 +57,7 @@ Tested once, on 1,443 operations from 7 vendors that no model had seen (Front, P
 - The fp32 model on its own scores 1,283 / 64 / 96.
 - The 0.90 cut belongs to rwxmap. It was tuned on this same test and on validation data, so it is not yet proven on vendors nobody has tested.
 - The "With rwxmap" row was measured with the fp32 model, which rwxmap ships by default. The int8 model at rwxmap's 0.90 cut was not measured.
-- Until rwxmap updates its pin, the released rwxmap still runs rwxlite 0.2.0 at a 0.97 cut.
+- rwxmap 0.11.0 runs rwxlite 0.3.1 at the 0.90 cut. rwxmap checked this from a fresh npm install, and exam #5 through that install scored 1,269 / 40 / 134, the same as the "With rwxmap" row.
 
 It was trained on about 102,700 labelled API operations from about 690 public API providers (691 distinct providers, 682 vendors, in the round-13 training and validation data), labelled under the wider x rule above. Speed is about 17-20 ms per operation on a laptop CPU.
 
