@@ -3,7 +3,7 @@
 All notable changes to rwxlite are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.3.1] - 2026-11-07
 
 Round 13 (R13) is the new default model.
 
@@ -11,9 +11,11 @@ Round 13 (R13) is the new default model.
 - Calibration temperature is 0.991463 (it was 0.844). The probabilities change, so a decision cut that was tuned on 0.2.x values does not carry over. Callers should re-check their cut.
 - Model strings: `rwxlite-0.3.1+984714f0` (int8, the default `manifest.json`) and `rwxlite-0.3.1+bbe1997d` (fp32, `manifest-exact.json`).
 - Measured on exam #5 (1,443 operations from 7 vendors no model had seen), right / too loose / too tight: on its own, int8 1,280 / 64 / 99 and fp32 1,283 / 64 / 96; with rwxmap at its 0.90 cut, 1,269 / 40 / 134 (fp32, the model rwxmap runs; int8 at that cut was not measured).
-- The API is unchanged. The manifest keys `temperature` and `textFormat` are additive. Text format 2 is shipped switched off: no published model uses it.
+- The API is unchanged. The manifest keys `temperature` and `textFormat` are additive. Text format 2 is shipped switched off: no published model uses it. rwxmap adopts this release by its own decision; nothing here changes what rwxmap runs until it does.
 
 ### Added
+- `docs/wiki/guide.md`: a guide for calling rwxlite directly (the request shape, why every request needs a lean, loading the model, reading the answer). The README is shorter and links to it with absolute links so they work on npm, and its example uses a lean rule the model was trained on.
+- Exam #5 tooling and records (pre-registration, frozen inputs and prediction sha256s, leakage check, recorded result: R13 did not clear the standalone pass bar on exact; the numbers are in the note above, and whether to run R13 is rwxmap's call), and round 13 training and val-pick scripts. Vendor-label scripts (github parser, join, mechanical and predict) for an independent check of the teacher labels. None of this ships in the npm package.
 - Manifest `textFormat` (1 or 2, default 1; anything else throws). `loadAnswerer` reads it via the new `manifestTextFormat`, validated by `checkTextFormat`. Format 2 is format 1 plus one `hint: access` segment right after the lean, on operations that `accessHint(state)` flags (grants or widens access, creates a key or token, webhook to an outside URL, creates a login user, adds a member). `formatText(state, lean, format)` takes the format (default 1); `accessHint`, `checkTextFormat` and `manifestTextFormat` are exported. Output for 0.2.0 manifests (no `textFormat`) is unchanged byte for byte. No shipped model uses format 2; whether it ships is undecided (PRD, Round 13).
 - Round 10 model build (`data/m1-r10`, int8-pc `093c908d`, fp32 `8514ddcc`, T 0.858), not released (exam #3 NO-GO; 0.2.0 stays the published model). Manifests built by `m1/manifest-r10.mjs`, the release set by `m1/release-assets.mjs data/m1-r10/release r10`.
 - `m1/release-assets.mjs` has an `r13` mode (`node m1/release-assets.mjs [out-dir] r13 [--skip-version-check]`): copies the five R13 files byte for byte, checks each sha256 against the exam #5 values, and checks package.json's version equals the manifests' version.
@@ -21,6 +23,7 @@ Round 13 (R13) is the new default model.
 
 ### Changed
 - `loadAnswerer` reads the calibration `temperature` from the manifest (finite number > 0, else it throws); a manifest without it uses 0.844, so 0.2.0 manifests behave as before. `calibrated(L, T)` and `new Answerer({..., temperature})` take it; `checkTemperature` and `manifestTemperature` are exported.
+- `package.json`: the `author` field is removed and the `description` is rewritten in plain words (a small local classifier that says whether an API operation reads, writes or can't be taken back).
 
 ## [0.2.1] - 2026-11-05
 
