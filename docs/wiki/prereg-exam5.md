@@ -105,3 +105,34 @@ To fill before truth: ops.csv sha256 `TBD`; rwxmap ref `TBD`; `predictions-r13.c
 ## 7. Not allowed once predictions exist
 
 No change of model file, manifest, T, 0.97 line, text format, tokenizer, batch size, code, bar. No re-running predict to see if it changes (the script refuses to overwrite; deleting outputs to get around that is a breach). No opening `truth.csv` before the prediction sha256s are committed. No scoring more than once; a rerun only for a crash or a row-join bug, recorded with the reason, same predictions. No choosing a model, T, config or bar after seeing a number; no adding a model (R13-L3 and R13-L3-t2 are not tried). Anything a result suggests needs a new exam with new vendors.
+
+## 8. v4 lean names (decided on val before draw)
+
+Question: rwxmap's mechanical v4 emits three rule names R13 never saw in training. Does R13 do better with them fed as is, or aliased to v3-era names? Decided on the 4,180 val rows only (not exam #5 data), before the exam draw. Whichever variant wins is then used for R13's exam #5 predictions (the lean text the model reads); 0.2.0 is untouched.
+
+**Trained rule names (R13 train.jsonl, lean letter / method counts):** `cant-undo-verb` x: POST 1984, PUT 150, PATCH 29 · `cant-undo-verb-summary` x: POST 41, PUT 7, PATCH 6 · `floor-post` x: POST 22907 · `method` r: GET 45832, QUERY 4258, HEAD 2 · `method-delete` x: DELETE 10454 · `method-floor` w: PUT 6135, PATCH 5851 · `modify-verb` w: POST 2081 · `modify-verb-summary` w: POST 78 · `read-verb` r: POST 2655 · `read-verb-anywhere` r: POST 198. (`credential-set` is already aliased to `cant-undo-verb` inside `src/text.js`; unchanged.)
+
+**Alias mapping (frozen, `ALIAS` in `m1/r13-v4lean-check.mjs`; `src/text.js` not edited):**
+
+| v4 name (meaning, letter) | alias target | reason |
+|---|---|---|
+| `path-x-word` (PUT/PATCH/POST raised or kept at x, tight; x) | `cant-undo-verb` | the only trained x rule on PUT/PATCH, and x on POST; same stand-in already used for `credential-set` |
+| `content-noun` (POST lowered to w, loose; w) | `modify-verb` | the only trained w rule on POST |
+| `get-action` (GET raised to x; x) | `cant-undo-verb` | x for a verb-named action; x on GET was never trained under any name, so this is the closest x-by-verb rule |
+
+The script stops if a v4 row carries a different letter than the target was trained with (x for `cant-undo-verb`, w for `modify-verb`). Other unseen names are passed as is and listed.
+
+**Procedure.** rwxmap's producer: `poc/mech-v4` at rwxmap commit `40fe161`; it classifies the val ops file below and returns `lean.csv` (`id,class,rule,marker`, marker = settled|tight|loose, ops order). Val ops file (rwxmap's exam format, description empty because the raw description is not kept and rwxmap's mechanical never reads it, QUERY written as GET): `data/round13/val-ops-for-rwxmap.csv` (gitignored with the rest of `data/`), 4,180 rows, sha256 `efa3c5d9009757cd24f8ab75c440f7787adab3eea57bf1b8dae80c99b3339413`; copy handed to rwxmap as `.claude/scratchpad/rwxlite-val/ops.csv` with the same hash.
+1. `node m1/r13-v4lean-check.mjs --val data/round13/val.jsonl --lean lean.csv --variant asis --out p-asis.csv`, then `--variant alias --out p-alias.csv` (published engine, fp32 `data/m1-r13`, batch 1; each row's lean replaced by the v4 class and rule).
+2. `python3 -I m1/r13-v4lean-score.py --val data/round13/val.jsonl --lean lean.csv --asis p-asis.csv --alias p-alias.csv`. It needs the marker column and stops without it. Reports right / too loose / too tight standalone and on the product path (mode a replica, lower only at p >= 0.97 on rows with marker tight or loose, `credential-set` never lowered), with R13 on the v3 leans as context (product 3,776 / 74 / 330, standalone 3,967 / 162 / 51).
+
+**Pick rule (frozen):** fewest too loose on the product path, then most right, ties to `asis`. Run once on val; no other mapping is tried.
+
+**Script sha256 (smoke-tested on fake leans in scratch: asis and alias on v3 leans give bit-identical p to the engine on the parity-rows state/lean path, 50 of 50; renamed leans through alias reproduce the v3 p bit for bit, 20 of 20):**
+
+| file | sha256 |
+|---|---|
+| `m1/r13-v4lean-check.mjs` | `2134e346d2bff042106d192c65f43f8737cc2269392d18f47c64034a26fa30fe` |
+| `m1/r13-v4lean-score.py` | `7f2f3b83a3d9a8dc25aea46e2a649d30e2973d1e36405a3cdacb54c1c7169095` |
+
+**Results: TBD** (asis `TBD`, alias `TBD`, pick `TBD`).
