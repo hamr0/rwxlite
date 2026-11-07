@@ -36,8 +36,10 @@ Restarting, or stopping, starting or pausing a server, is w. Stopping a job in a
 
 ## Two ways to use it
 
-- **With [rwxmap](https://github.com/hamr0/rwxmap).** rwxmap's mechanical rules give the first letter. rwxlite is asked about the contested rows only, and answers in Jev's JSON, so rwxmap only swaps the client.
-- **On its own.** One operation in, probabilities out. A low top probability is your "ask a human" signal. The threshold is yours.
+Every request needs a `lean`: a first-guess letter (r, w or x) and the rule behind it. rwxmap's mechanical rules produce it.
+
+- **With [rwxmap](https://github.com/hamr0/rwxmap).** rwxmap's full flow: the mechanical rules give the first letter, and rwxlite only moves the contested rows, at rwxmap's 0.90 cut. rwxlite answers in Jev's JSON, so rwxmap only swaps the client.
+- **On its own.** rwxlite gives its own letter, with rwxmap's mechanical first guess as input. One operation plus that guess in, probabilities out. A low top probability is your "ask a human" signal. The threshold is yours.
 
 ```json
 // request (same as Jev's, plus the mechanical letter as "lean")
@@ -59,8 +61,8 @@ Tested once, on 1,443 operations from 7 vendors that no model had seen (Front, P
 
 | | right | too loose | too tight |
 |---|---|---|---|
-| **On its own** (rwxlite 0.3.1, int8 default) | 1,280 (88.7%) | 64 (4.4%) | 99 (6.9%) |
-| **With rwxmap** (rwxmap's 0.90 cut) | 1,269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
+| **On its own** (rwxlite 0.3.1, int8 default, given rwxmap's mechanical first guess) | 1,280 (88.7%) | 64 (4.4%) | 99 (6.9%) |
+| **With rwxmap** (full flow, rwxlite moves contested rows at the 0.90 cut) | 1,269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
 
 - **Too loose** means it called an operation safer than it is. This is the costly mistake.
 - **Too tight** means it called an operation riskier than it is. This is annoying but safe.
