@@ -1,6 +1,6 @@
 # Pre-registration: shared clean exam #5, rwxlite side, candidate R13
 
-**Status: DRAFT until the placeholders marked `TBD` are filled; FROZEN when this file is committed with the predictions' sha256s, before truth is opened.**
+**Status: FROZEN (2026-11-07) when committed with the predictions' sha256s (section 10), before truth is opened. Only the truth sha256 stays TBD.**
 Written before the exam exists. Nothing here was run on exam #5 data: no ops.csv, no truth. The code was tested only on a synthetic ops.csv of 105 val rows (scratch, not committed) and on val/practice rows, which are R13's training data and decide nothing.
 Update 2026-11-07: exam inputs are frozen (section 3); the lean now comes from rwxmap's lean.csv (section 3 and section 9); the predict script and score script changed accordingly. Still nothing predicted on exam #5.
 Parent rule: `docs/wiki/prereg-r13.md` section 6 (pick, T, decision rule). This file adds the mechanics. Code commit: `c1d26e6`.
@@ -68,7 +68,7 @@ Node `formatText` equals the stored val text on 598 of 598 rows (trailing whites
 - **No-alias decision** (section 8, decided on val before the draw): rule names fed as is; `src/text.js` still applies its own `credential-set` to `cant-undo-verb` alias, nothing else.
 - **Text from ops fields.** The engine builds the text with `src/text.js` `formatText` from the ops.csv fields as they are (method, path, operationId, summary, description; QUERY printed as GET inside `formatText`). Nothing else is done to them. On val, the ops file for rwxmap had an empty description, so the parity run below filled it with the stored text's `desc:` segment, the way `m1/r13-v4lean-check.mjs` does; exam ops have real descriptions and use them directly.
 - **Val parity of the new predict path (2026-11-07).** `exam5-predict.mjs` on the val ops (description filled as above, 4,180 rows) with `data/round13/v4-lean-val.csv` (sha256 `96e15be2048842205f5b619a3e2a684ad6977e173838a5a2f023a1bb403193f6`) gave a CSV **byte-identical** to the section 8 `asis` output `p-asis.csv` (4,180 rows, every p bit for bit).
-- `truth.csv` (id,label) comes last; its sha256 is agreed with rwxmap before scoring: **TBD**. Exam `lean.csv` sha256: **TBD** (arrives with the exam; the predict script refuses a file that does not match its `.sha256`).
+- `truth.csv` (id,label) comes last; its sha256 is agreed with rwxmap before scoring: **TBD**. Exam `lean.csv` sha256: `93a76c5fad8f5baceecef4c087a95e03f070addeabbab1e356253221a09eb39d` (1,443 rows, markers settled 796 / tight 372 / loose 275; rwxmap commit `bbd9ab4` records the hash; the predict script refuses a file that does not match its `.sha256`).
 
 ## 4. Procedure
 
@@ -107,7 +107,7 @@ Code (this commit; `exam5-predict.mjs` and `exam5-score.py` were changed from `c
 | `m1/r13-v4lean-score.py` | `7f2f3b83a3d9a8dc25aea46e2a649d30e2973d1e36405a3cdacb54c1c7169095` |
 | `m1/r13-valpick.py` (the replica `exam5-score.py` copies) | `82ec34bde2ce6e1a132b7084e6b69e92a4d1828e2b7dd744585b42e8881575ed` |
 
-To fill before truth: exam lean.csv sha256 `TBD`; `predictions-r13.csv` `TBD`; `predictions-v020.csv` `TBD`; `predictions-r13.csv.lean.csv` `TBD`; `predictions-v020.csv.lean.csv` `TBD`; truth sha256 `TBD`.
+Predictions and lean hashes: section 10. Truth sha256 `TBD` (agreed with rwxmap before scoring).
 
 ## 7. Not allowed once predictions exist
 
@@ -181,3 +181,13 @@ Equivalent of `exam-prereg-exam4.md` section 3 for R13. Nothing is created or pu
 - **The command, same shape as exam #4 (rwxmap's flag names):** `--cand-ref f7456a2acc66ce84fd8c87d7426c9001bab8ceb7 --cand-tag v0.3.1 --cand-models /home/hamr/PycharmProjects/rwxlite/data/m1-r13` with the five `--cand-file` hashes above, `--cand-model-fp32 rwxlite-0.3.1+bbe1997d --cand-model-int8 rwxlite-0.3.1+984714f0`. Because `package.json` at that ref says 0.2.1, rwxmap should install the tarball above for the candidate instead of resolving the ref.
 - **Version is a placeholder** (see section 2): a different version changes both model strings and both manifest hashes; all of this is then re-agreed before any prediction.
 
+## 10. Predictions frozen (2026-11-07)
+
+Run per section 4 step 3, code unchanged since `bf4afab` (`m1/exam5-predict.mjs` sha256 `fe1172df...2d86` verified before the run), fp32, batch 1, `--lean` = rwxmap's lean.csv above, outside `data/` nothing written. Files are in `data/exam5-2026-11-07/` (gitignored, **not committed**, and not shown to the labellers: they hold model p and mechanical letters). Both CSVs: header `id,model,p_is_x,p_changes`, 1,443 rows in ops.csv order, every p finite with 0 <= p_is_x <= p_changes <= 1. Each `.lean.csv` equals rwxmap's lean.csv on (id,class,rule) for all 1,443 rows. Run time about 70 s for both models together. Hashes are also in `docs/wiki/exam5-predictions.sha256`, which `exam5-score.py --sha-list` checks.
+
+| file | sha256 |
+|---|---|
+| `predictions-r13.csv` (`rwxlite-0.3.1+bbe1997d`, T 0.991463) | `1633417853a141cab079513dc78e8b538714bd6f46b729adb95876b34d3a73de` |
+| `predictions-v020.csv` (`rwxlite-0.2.0+8503b655`, T 0.844) | `906c0edd1a237172b3e08884f87faa538be7aacee64a633399f55905aa14f162` |
+| `predictions-r13.csv.lean.csv` | `e17922ad3b0c1cb90604af2d9c03dd60bcf2fde73fab8434cbaf8d1bcc370d80` |
+| `predictions-v020.csv.lean.csv` | `e17922ad3b0c1cb90604af2d9c03dd60bcf2fde73fab8434cbaf8d1bcc370d80` |
