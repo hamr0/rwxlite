@@ -50,15 +50,16 @@ Tested once, on 1,443 operations from 7 vendors that no model had seen (Front, P
 | | right | too loose | too tight |
 |---|---|---|---|
 | **On its own** (rwxlite 0.3.1, int8 default, given rwxmap's mechanical first guess) | 1,280 (88.7%) | 64 (4.4%) | 99 (6.9%) |
-| **With rwxmap** (full flow, rwxlite moves contested rows at the 0.90 cut) | 1,269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
+| **With rwxmap** (full flow, rwxlite moves contested rows at the 0.90 cut; fp32 model, the one rwxmap runs) | 1,269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
 
 - **Too loose** means it called an operation safer than it is. This is the costly mistake.
 - **Too tight** means it called an operation riskier than it is. This is annoying but safe.
 - The fp32 model on its own scores 1,283 / 64 / 96.
 - The 0.90 cut belongs to rwxmap. It was tuned on this same test and on validation data, so it is not yet proven on vendors nobody has tested.
+- The "With rwxmap" row was measured with the fp32 model, which rwxmap ships by default. The int8 model at rwxmap's 0.90 cut was not measured.
 - Until rwxmap updates its pin, the released rwxmap still runs rwxlite 0.2.0 at a 0.97 cut.
 
-It was trained on about 102,700 labelled API operations from about 900 public API providers, labelled under the wider x rule above. Speed is about 17-20 ms per operation on a laptop CPU.
+It was trained on about 102,700 labelled API operations from about 690 public API providers (691 distinct providers, 682 vendors, in the round-13 training and validation data), labelled under the wider x rule above. Speed is about 17-20 ms per operation on a laptop CPU.
 
 ## Install
 
@@ -71,6 +72,8 @@ Setting `ONNXRUNTIME_NODE_INSTALL=skip` avoids a 285 MB GPU download; the CPU bu
 The model files are not in the npm package. Download them from the [GitHub release](https://github.com/hamr0/rwxlite/releases) `v0.3.1` into one folder and point `dir` at it: `manifest.json`, `model-int8-pc.onnx` (23 MB) and `vocab.txt` for the default, or `manifest-exact.json`, `model-fp32.onnx` (91 MB) and `vocab.txt` for the fp32 "exact" option. Details and the sha256 values are in the guide.
 
 ## Using rwxlite on its own
+
+First download the five model files into one folder, as described in [Get the model files](https://github.com/hamr0/rwxlite/blob/main/docs/wiki/guide.md#2-get-the-model-files); without them the snippet below throws `ENOENT` on `manifest.json`.
 
 ```js
 import { loadAnswerer } from 'rwxlite';

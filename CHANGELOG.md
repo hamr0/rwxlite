@@ -10,7 +10,7 @@ Round 13 (R13) is the new default model.
 - New default weights, trained on about 102,700 labelled operations (round 13 data). Labels follow the widened x: giving or widening access is x, narrowing is w, an unclear access change is x by doubt. Creating keys or tokens, access-widening toggles, webhooks to outside URLs, creating a login user and adding a member are x.
 - Calibration temperature is 0.991463 (it was 0.844). The probabilities change, so a decision cut that was tuned on 0.2.x values does not carry over. Callers should re-check their cut.
 - Model strings: `rwxlite-0.3.1+984714f0` (int8, the default `manifest.json`) and `rwxlite-0.3.1+bbe1997d` (fp32, `manifest-exact.json`).
-- Measured on exam #5 (1,443 operations from 7 vendors no model had seen), right / too loose / too tight: on its own, int8 1,280 / 64 / 99 and fp32 1,283 / 64 / 96; with rwxmap at its 0.90 cut, 1,269 / 40 / 134.
+- Measured on exam #5 (1,443 operations from 7 vendors no model had seen), right / too loose / too tight: on its own, int8 1,280 / 64 / 99 and fp32 1,283 / 64 / 96; with rwxmap at its 0.90 cut, 1,269 / 40 / 134 (fp32, the model rwxmap runs; int8 at that cut was not measured).
 - The API is unchanged. The manifest keys `temperature` and `textFormat` are additive. Text format 2 is shipped switched off: no published model uses it.
 
 ### Added
