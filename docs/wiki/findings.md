@@ -983,3 +983,22 @@ Exam #5 is burned; this is a check, not a gate. Same lean.csv, `m1/exam5-predict
 - R13 int8 vs fp32: the letter differs on 7 rows standalone (2 more loose, 5 more tight) and 6 rows on the product path (1 more loose, 5 more tight). Max |dp| over r, w, x between int8 and fp32: 0.214 for R13, 0.144 for 0.2.0.
 - Standalone, R13 int8 vs 0.2.0 int8: too loose 64 <= 143 and right 1,280 >= 1,280, so the standalone half of the bar would still pass in int8. On the product path R13 int8 has 1,214 right vs 1,265 (51 fewer), the same direction as fp32 (52 fewer).
 - Speed: the script does not print latency. Wall time for 1,443 ops including model load, 4 threads: R13 int8 25.2 s (about 17 ms per op), 0.2.0 int8 24.0 s (about 17 ms per op).
+
+
+## 2026-11-07: R13 lowering cut-off: 0.90 picked (joint with rwxmap)
+
+rwxmap replayed R13 and 0.2.0 through its real secondPass (src at v4, D138), swapping only `LOWER_MIN_P` in a temp copy (script: rwxmap `poc/cutoff-r13/curve.mjs`). Parity at 0.97 was exact on exam #5 and on our val (0 differing rows). R13 right / too loose / too tight:
+
+| cut | exam #5 | val |
+|---|---|---|
+| 0.97 (today) | 1220/37/186 | 3815/76/289 |
+| 0.95 | 1239/38/166 | 3865/79/236 |
+| 0.93 | 1250/40/153 | 3898/83/199 |
+| 0.90 (pick) | 1269/40/134 | 3938/87/155 |
+| 0.85 | 1280/46/117 | 3949/103/128 |
+| 0.80 | 1279/50/114 | 3964/111/105 |
+| 0.2.0 at 0.97 | 1272/94/77 | 3821/192/167 |
+
+- Too-tight rows fixed per leak added vs 0.97. Exam #5: 0.95 20, 0.93 11, 0.90 17, 0.85 8, 0.80 6. Val: 18, 13, 12, 6, 5. R13 clears a 10:1 bar down to 0.90 on both sets and fails it at 0.85. For 0.2.0 lowering never pays (1.1-1.7 per leak on exam #5, 1.4-2.1 on val).
+- The 3 leaks added at 0.90 on exam #5 are all fusionauth POST x->w: ex5-0293 `/api/connector` p 0.9422, ex5-0297 `/api/connector/{id}` p 0.9457, ex5-0341 `/api/entity/{id}` p 0.9695.
+- Decision: our user picked 0.90 (2026-11-07) as the joint R13+cut value and shared it with rwxmap. The cut was read off exam #5 (burned) and val, so it is a tuned value, not proven on unseen vendors; exam #6 would be the clean test. The cut lives in rwxmap's code (`LOWER_MIN_P`), so shipping it is rwxmap's user's call. Our 0.3.1 release of R13 does not depend on it.

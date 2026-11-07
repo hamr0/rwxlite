@@ -561,6 +561,8 @@ Exam #3 (rwxmap shared exam, 7 vendors, 1,377 ops; scored once, now burned; both
 
 **Status (2026-11-07).** R13 did not pass exam #5 (frozen bar, `docs/wiki/prereg-exam5.md` section 11): it passes the standalone half but fails the product path on exact (1,220 vs 1,272). 0.2.0 stays the shipped model, nothing is released, and exam #5 is burned (training data only). The paragraph below is the status before the exam.
 
+**Cut-off (2026-11-07).** Jointly with rwxmap, lowering cut 0.90 was picked for R13 (tuned on burned exam #5 and val; exam #6 would be the clean test). It lives in rwxmap's `LOWER_MIN_P`, so shipping it is rwxmap's call; our R13 release does not depend on it. See `docs/wiki/findings.md` ("R13 lowering cut-off").
+
 **Status (2026-11-06).** Three candidates were trained on all labelled data under the shared BRIEF-v4 labels; the frozen val pick chose **R13 (plain), T 0.991463**. Only R13 sits exam #5. Exam #5 now waits for rwxmap's mechanical v4 (see Next steps); there is no pool count or vendor list yet. No release, push or PR yet; branch `dev` is unpushed. 0.2.0 stays the shipped model. Contract and numbers: `docs/wiki/prereg-r13.md` (frozen); learnings: `docs/wiki/findings.md` ("Round 13 data built and pre-registered", "Round 13 val pick").
 
 **Decision trail.**
