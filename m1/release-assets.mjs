@@ -21,7 +21,7 @@ const r13 = pos[1] === 'r13';
 const outArg = pos[0];
 const dataDir = r13 ? 'm1-r13' : r10 ? 'm1-r10' : 'm1';
 const src = fileURLToPath(new URL(`../data/${dataDir}/`, import.meta.url));
-const out = path.resolve(outArg ?? fileURLToPath(new URL(`../data/${dataDir}/release/`, import.meta.url)));
+const out = path.resolve(outArg ?? fileURLToPath(new URL('../data/m1/release/', import.meta.url)));
 const temperature = r10 ? JSON.parse(readFileSync(path.join(src, 'manifest.json'), 'utf8')).temperature : undefined;
 const version = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const sha = (/** @type {string} */ f) => createHash('sha256').update(readFileSync(f)).digest('hex');

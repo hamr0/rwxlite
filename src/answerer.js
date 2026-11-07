@@ -110,8 +110,9 @@ export class Answerer {
 
   /**
    * Many requests in one call, run through the model one row at a time so each answer is independent of the
-   * others (identical to answer() on the same request, whatever it is batched with). Never throws for one bad request: that slot holds a NoAnswer
-   * ({model, error}, plain JSON), so the caller can keep the mechanical letter for it alone.
+   * others (identical to answer() on the same request, whatever it is batched with).
+   * Never throws for one bad request: that slot holds a NoAnswer ({model, error}, plain JSON),
+   * so the caller can keep the mechanical letter for it alone.
    * A model failure fails every slot. Every slot is exactly an Answer or a NoAnswer.
    * @param {Request[]} reqs
    * @returns {Promise<Array<Answer|NoAnswer>>}
@@ -132,7 +133,7 @@ export class Answerer {
       try {
         // One row per runner call: the model's answer for a row must not depend on its batch neighbours
         // (int8 dynamic quantisation takes its activation scale over the whole padded batch; fp32 padding
-        // differs in the last bits). Throughput is the same or better (see CHANGELOG 0.2.1).
+        // differs in the last bits).
         logits = [];
         for (const o of ok) {
           const row = await this.runner.run([o.ids]);
