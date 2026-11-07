@@ -1,6 +1,6 @@
 // Build the set of files a GitHub release carries, into a folder. Does NOT upload.
 //   node m1/release-assets.mjs [out-dir] [r10 | r13] [--skip-version-check]
-// The mode is the 2nd positional argument, so r10/r13 need an out-dir given first. Without an out-dir the default is data/m1/release/.
+// The mode is the 2nd positional argument, so r10/r13 need an out-dir given first. Without an out-dir (possible only in plain m1 mode, since r10/r13 need one) the default is data/m1/release/.
 // Note: `node m1/release-assets.mjs r13` alone treats "r13" as the out-dir and runs the default m1 build.
 // `r10` builds from data/m1-r10/ and carries each manifest's `temperature`.
 // `r13` builds from data/m1-r13/ and COPIES all five files verbatim, manifests included (never rewrites them):
