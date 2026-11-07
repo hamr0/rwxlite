@@ -557,7 +557,9 @@ Exam #3 (rwxmap shared exam, 7 vendors, 1,377 ops; scored once, now burned; both
 
 **Outcome (2026-11-05).** Exam #4 (the shared exam, scored once) was NO-GO for r11 under both scorers: rwxlite's `a_none` 1447 right against 0.2.0's 1448, and the rwxmap CLI `secondPass` 18 too loose against 16. The prereg named the wrong gate config (`a_none` is not the shipped rule), so the gate number is rwxmap's CLI. Round 12 (S0/S1/S2: label fixes, D136 relabels, exam #4 rows, generated variants) gave no gain over shipped 0.2.0 on the held-out goharbor+render rows (0.2.0 425/9/21 right/loose/tight). 0.2.0 stays shipped. Detail: `docs/wiki/findings.md` (Exam #4 result, Round 12), `docs/wiki/exam-prereg-exam4.md`, `docs/wiki/prereg-r12.md`.
 
-## Round 13 (2026-11-06; trained, val pick done, exam #5 waits for rwxmap mechanical v4, nothing released)
+## Round 13 (2026-11-07; R13 did not pass exam #5, 0.2.0 stays, nothing released)
+
+**Status (2026-11-07).** R13 did not pass exam #5 (frozen bar, `docs/wiki/prereg-exam5.md` section 11): it passes the standalone half but fails the product path on exact (1,220 vs 1,272). 0.2.0 stays the shipped model, nothing is released, and exam #5 is burned (training data only). The paragraph below is the status before the exam.
 
 **Status (2026-11-06).** Three candidates were trained on all labelled data under the shared BRIEF-v4 labels; the frozen val pick chose **R13 (plain), T 0.991463**. Only R13 sits exam #5. Exam #5 now waits for rwxmap's mechanical v4 (see Next steps); there is no pool count or vendor list yet. No release, push or PR yet; branch `dev` is unpushed. 0.2.0 stays the shipped model. Contract and numbers: `docs/wiki/prereg-r13.md` (frozen); learnings: `docs/wiki/findings.md` ("Round 13 data built and pre-registered", "Round 13 val pick").
 

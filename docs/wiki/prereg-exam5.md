@@ -191,3 +191,26 @@ Run per section 4 step 3, code unchanged since `bf4afab` (`m1/exam5-predict.mjs`
 | `predictions-v020.csv` (`rwxlite-0.2.0+8503b655`, T 0.844) | `906c0edd1a237172b3e08884f87faa538be7aacee64a633399f55905aa14f162` |
 | `predictions-r13.csv.lean.csv` | `e17922ad3b0c1cb90604af2d9c03dd60bcf2fde73fab8434cbaf8d1bcc370d80` |
 | `predictions-v020.csv.lean.csv` | `e17922ad3b0c1cb90604af2d9c03dd60bcf2fde73fab8434cbaf8d1bcc370d80` |
+
+## 11. Results (2026-11-07)
+
+**Inputs.** Truth: rwxmap `data/exam5-2026-11-07/truth.csv`, rwxmap commit `bfc05c1`, sha256 `772ca84edf1e537f5e9b162229f59e3b0c439e55ba8f6f21f3070e058c70005a` (verified before it was read; 1,443 rows; r 671 / w 354 / x 418). rwxmap's secondPass letters (CLI, mode a, mechanical v4 lean as sent, 0.97): `letters-a-r13-v4.csv` sha256 `bbe8ab2b63085ba3b40e034cc04d2ad46445dad57a90dd1c2355639f8b4f522e`, `letters-a-020-v4.csv` sha256 `d681b24ebf65ab57a25eb5a87696556ab22cbec97f51463977044606e2094b15`. Parity PASSED on rwxmap's side (rwxmap `36fb827`): the replay of our `predictions-r13.csv` equals the CLI run on all 1,443 rows. Prediction hashes as in section 10 (verified again before scoring); `m1/exam5-score.py` sha256 `41cde546...031c`, unchanged.
+
+**Deviation (recorded).** `exam5-score.py` was run twice with the same script, predictions and truth. The first run (standalone, `--mech` only, `--out results.json`) was made before rwxmap's letters existed and printed INCOMPLETE. It refuses an existing `--out` by design, so the final run used a new name, `--out results-final.json`. That is the only difference; the standalone numbers are identical in both runs.
+
+**Numbers** (right / too loose / too tight, 1,443 rows):
+
+| model | standalone | product (rwxmap CLI secondPass, mode a, mech v4) |
+|---|---|---|
+| R13 | 1,283 / 64 / 96 | 1,220 / 37 / 186 |
+| 0.2.0 | 1,281 / 141 / 21 | 1,272 / 94 / 77 |
+
+Our product numbers equal rwxmap's reported ones (a-r13-v4 1220/37/186, a-020-v4 1272/94/77): no difference. The secondPass replica of `m1/r13-valpick.py` (script `--mech` check) agrees with rwxmap's CLI letters on all 1,443 rows for both models (0 differing rows). Second pass at p >= 0.97 lowered 23 rows for R13 and 148 for 0.2.0 (raised 49 and 8).
+
+**Frozen bar.**
+- Standalone: R13 too loose 64 <= 141, right 1,283 >= 1,281: **pass**.
+- Product: too loose 37 <= 94 passes, right 1,220 >= 1,272 fails (52 fewer): **fail**.
+- Script verdict line: `VERDICT: NO-GO`.
+
+**Verdict: NO-GO.** R13 does not replace 0.2.0; 0.2.0 stays, nothing is released, nothing is claimed beyond the numbers above. Exam #5 is burned for both sides and may be used as training data only. Details and per-vendor table: `docs/wiki/findings.md`, entry 2026-11-07.
+

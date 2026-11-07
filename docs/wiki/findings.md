@@ -937,3 +937,34 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
   - R13 has more too-tight than 0.2.0 under v4 (product 330 vs 202 at their own T on the same val). The 0.2.0 figure is a smoke run on v4 val, so this is context, not a test. Exam #5 decides.
 
 - **Update 2026-11-06 (from rwxmap): exam #5 waits for mechanical v4.** rwxmap's user ruled that exam #5 waits until rwxmap's mechanical v4 is delivered (rwxmap plan steps 2-5: rebuilding the mechanical rules against BRIEF-v4 truth for PUT/PATCH x-extraction, POST, GET, DELETE). Reasons: the exam is scored once for both projects, scoring now would burn it on the v3 mechanical about to be replaced, and the unseen-vendor pool is too thin for an exam #6. No pool count or vendor list yet. When ready, rwxmap draws and pre-registers the exam, and mode a runs R13 on top of mechanical v4. The frozen bar is unchanged: R13 vs shipped 0.2.0 at T 0.844, both on the same mechanical v4 for the rwxmap path, plus standalone (model-only, unaffected by mechanical); no more too-loose and no fewer exact on both. R13 was picked on val using the v3 mechanical replica; the pick stands, and the exam decides.
+
+## 2026-11-07: Exam #5 result (R13 NO-GO, 0.2.0 stays)
+
+Scored once per the frozen prereg (`docs/wiki/prereg-exam5.md` section 11): 1,443 rows, 7 unseen vendors, rwxmap mech-v4 leans fed as is, truth rwxmap `bfc05c1`. Parity PASSED (rwxmap `36fb827`). Right / too loose / too tight:
+
+| | R13 | 0.2.0 |
+|---|---|---|
+| standalone | 1,283 / 64 / 96 | 1,281 / 141 / 21 |
+| product (rwxmap CLI secondPass, mode a) | 1,220 / 37 / 186 | 1,272 / 94 / 77 |
+
+- R13 more than halves too-loose on both paths (standalone 64 vs 141; product 37 vs 94). On the product path it has 52 fewer exact: the product bar's exact half fails, so the verdict is NO-GO (standalone half passes).
+- The lost exact is too-tight on rows the second pass sends to the model (186 vs 77 too tight). The second pass lowered only 23 rows for R13 at p >= 0.97 (0.2.0: 148); it raised 49 (0.2.0: 8).
+- Our secondPass replica equals the CLI letters on all 1,443 rows for both models. Our product numbers equal rwxmap's.
+- Per vendor, standalone right / loose / tight, R13 | 0.2.0 (product in brackets, R13 | 0.2.0):
+
+| vendor | rows | R13 | 0.2.0 | product R13 | product 0.2.0 |
+|---|---|---|---|---|---|
+| frontapp.com | 246 | 232/6/8 | 232/11/3 | 209/6/31 | 227/11/8 |
+| fusionauth.io | 364 | 310/29/25 | 308/53/3 | 298/21/45 | 311/40/13 |
+| hookdeck.com | 135 | 124/7/4 | 123/11/1 | 120/2/13 | 121/9/5 |
+| paddle.com | 126 | 115/7/4 | 110/14/2 | 109/3/14 | 112/6/8 |
+| planetscale.com | 291 | 249/0/42 | 268/19/4 | 241/0/50 | 254/5/32 |
+| semaphoreui.com | 155 | 141/9/5 | 132/22/1 | 137/2/16 | 140/15/0 |
+| weaviate.io | 126 | 112/6/8 | 108/11/7 | 106/3/17 | 107/8/11 |
+
+  planetscale shows the biggest too-tight for R13 (standalone 42 vs 4; product 50 vs 32).
+- R13's 64 standalone too-loose rows are concentrated on fusionauth (29): x-truth identity-provider, connector, messenger, entity, group and user endpoints that R13 answers w. 0.2.0 makes the same mistake on most of them (53 on fusionauth). By lean marker, R13 too-loose is 30 on tight, 32 on loose, 2 on settled.
+- rwxmap's own gate on mech-v4 itself: mech-v4 1,201 / 59 / 183 vs v3 1,188 / 77 / 178 on this exam; NO-GO on too tight, so v3 stays in rwxmap.
+- One scoring deviation: the final run used a new `--out` name (`results-final.json`) because the script refuses an existing `--out`; the first run was standalone only, before rwxmap's letters arrived. Same script, predictions and truth.
+- Exam #5 is burned for both sides and may be used as training data only. 0.2.0 stays shipped; nothing was released.
+
