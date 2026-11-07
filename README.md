@@ -38,20 +38,8 @@ Restarting, or stopping, starting or pausing a server, is w. Stopping a job in a
 
 Every request needs a `lean`: a first-guess letter (r, w or x) and the rule behind it. rwxmap's mechanical rules produce it.
 
-- **With [rwxmap](https://github.com/hamr0/rwxmap).** rwxmap's full flow: the mechanical rules give the first letter, and rwxlite only moves the contested rows, at rwxmap's 0.90 cut. rwxlite answers in Jev's JSON, so rwxmap only swaps the client.
-- **On its own.** rwxlite gives its own letter, with rwxmap's mechanical first guess as input. The lean is part of the input: one operation plus its lean in, probabilities out. A low top probability is your "ask a human" signal. The threshold is yours.
-
-```json
-// request (same as Jev's, plus the mechanical letter as "lean")
-{ "state": { "method": "GET", "path": "/v1/search", "operationId": "search",
-             "summary": "Search records", "description": "" },
-  "lean": { "class": "r", "rule": "method" },
-  "questions": { "isX": "", "changes": "" } }
-
-// answer (same shape as Jev's)
-{ "answers": { "isX": { "noul": 0.04 }, "changes": { "noul": 0.09 } },
-  "model": "rwxlite-0.3.1+984714f0" }
-```
+- **With [rwxmap](https://github.com/hamr0/rwxmap).** rwxmap's full flow: the mechanical rules give the first letter, and rwxlite only moves the contested rows, at rwxmap's 0.90 cut. rwxlite answers in Jev's JSON, so rwxmap only swaps the client. To read OpenAPI files, get finished verdicts, or gate the API calls an agent makes, use rwxmap.
+- **On its own.** See [Using rwxlite on its own](#using-rwxlite-on-its-own) below.
 
 The model outputs three probabilities, p(r), p(w) and p(x). Every Jev question is arithmetic on them: `isX` is p(x), `changes` is p(w) + p(x).
 
@@ -75,41 +63,28 @@ It was trained on about 102,700 labelled API operations from about 900 public AP
 ## Install
 
 ```
-npm i rwxlite
+ONNXRUNTIME_NODE_INSTALL=skip npm i rwxlite
 ```
 
-Set `ONNXRUNTIME_NODE_INSTALL=skip` first to avoid a 285 MB GPU download; the CPU build is enough. `onnxruntime-node` is an optional dependency.
+Setting `ONNXRUNTIME_NODE_INSTALL=skip` avoids a 285 MB GPU download; the CPU build is enough. `onnxruntime-node` is an optional dependency.
 
-The model files are not in the npm package. Download them from the [GitHub release](https://github.com/hamr0/rwxlite/releases) `v0.3.1` into one folder and point `dir` at it:
+The model files are not in the npm package. Download them from the [GitHub release](https://github.com/hamr0/rwxlite/releases) `v0.3.1` into one folder and point `dir` at it: `manifest.json`, `model-int8-pc.onnx` (23 MB) and `vocab.txt` for the default, or `manifest-exact.json`, `model-fp32.onnx` (91 MB) and `vocab.txt` for the fp32 "exact" option. Details and the sha256 values are in the guide.
 
-- `manifest.json`, `model-int8-pc.onnx` (23 MB) and `vocab.txt`: the default.
-- `manifest-exact.json`, `model-fp32.onnx` (91 MB) and `vocab.txt`: the "exact" option, no int8 rounding drift.
-
-## Using the answerer
+## Using rwxlite on its own
 
 ```js
 import { loadAnswerer } from 'rwxlite';
 
-const a = await loadAnswerer({ dir: '/path/to/model-dir' }); // threads: default min(4, cores)
-const state = { method: 'GET', path: '/v1/search', operationId: 'search', summary: 'Search records', description: '' };
-const req = { state, questions: { isX: '', changes: '' }, lean: { class: 'r', rule: 'method' } };
-const one = await a.answer(req);        // { model, answers: { isX: { noul }, changes: { noul } } }; throws on a no-answer
-const many = await a.answerMany([req]); // each slot is { model, answers } or { model, error }; a bad request does not fail the rest
+const a = await loadAnswerer({ dir: '/path/to/model-dir' });
+const req = {
+  state: { method: 'GET', path: '/v1/search', operationId: 'search', summary: 'Search records', description: '' },
+  lean: { class: 'r', rule: 'method' },
+  questions: { isX: '', changes: '' },
+};
+const out = await a.answer(req); // { model, answers: { isX: { noul }, changes: { noul } } }; throws on a no-answer
 ```
 
-For the fp32 model: `loadAnswerer({ dir, manifestFile: 'manifest-exact.json' })`.
-
-- `lean` is required: the mechanical letter and rule (`{class: 'r'|'w'|'x', rule}`). The model was trained with it as the first words of its input.
-- Only the keys of `questions` are read. `isX` is p(x), `changes` is p(w) + p(x).
-- The probabilities are calibrated: a 0.9 should be right about nine times in ten. The calibration temperature lives in the manifest (`temperature`, a finite number > 0; anything else throws). The 0.3.1 manifests carry 0.991463. A manifest without one uses 0.844.
-- rwxlite returns probabilities only. Turning them into a letter, or into "ask a human", is the caller's decision, and the cut is yours. These probabilities are not the same numbers as those of 0.2.x, so a cut tuned on 0.2.0 does not carry over. Re-check your cut when you move to 0.3.1. rwxmap's cut is rwxmap's own.
-- Two shapes, both plain JSON: success `{model, answers: {...}}` and no answer `{model, error: '<message>'}` (no `answers` key). `answerMany` never returns `Error` objects (they serialise as `{}`); `answer` throws an `Error` with the same message. On a no-answer keep the mechanical letter.
-- Answers do not depend on batching: `answerMany` runs the model one row at a time, so a request gets byte-identical probabilities from `answer`, from `answerMany` in any order, and next to any other requests, for both models.
-- The manifest may also carry `textFormat` (1 or 2, default 1). Format 2 exists but is switched off: the shipped 0.3.1 models use format 1.
-- Every file's sha256 is checked against the manifest, and a mismatch throws. The `model` string is `rwxlite-<manifest version>+<first 8 hex of the weights hash>`.
-- The HTTP `QUERY` method is read as `GET`, because the model never saw `QUERY` in training. The lean rule `credential-set` is read as `cant-undo-verb`, for the same reason; the lean class is unchanged.
-
-Limits: OpenAPI operations only, with method, path template, operationId, summary and description. No request bodies, no query values, no hosts without a spec.
+rwxlite returns probabilities only. Turning them into a letter, or into "ask a human", is your decision, and the cut is yours. The full guide is **[docs/guide.md](docs/guide.md)**: loading the int8 or fp32 model, the request and the lean, the answer shape, worked examples, choosing your cut, and the other details (batching, `QUERY`, `credential-set`, limits).
 
 ## For contributors
 
