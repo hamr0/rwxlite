@@ -498,7 +498,7 @@ Only module 0 is sharp. The rest are sketches.
 - `publish.yml` is manual (Run workflow), OIDC trusted publishing, no token in CI.
 - Done by the user on 2026-11-04: the name is reserved with a placeholder `rwxlite@0.0.1` (`npm view rwxlite version` shows 0.0.1), and the npm Trusted Publisher is configured for hamr0/rwxlite, workflow `publish.yml`.
 - The real code ships as the next release version through the `publish.yml` "Run workflow" button (no token). The model files go to the GitHub release via `m1/release-assets.mjs`.
-- **Release order (the model files must be on the release before npm has the version):** 1. merge `m1` into `main`; 2. create the GitHub release `v<version>` with the assets from `node m1/release-assets.mjs` (manifest.json, manifest-exact.json, vocab.txt, model-int8-pc.onnx, model-fp32.onnx); 3. then "Run workflow" for `publish.yml`. The workflow enforces step 2: it fails before publishing if the release or any of those five assets is missing, if any asset is zero-size, or if the release's `manifest.json` `version` differs from package.json.
+- **Release order (the model files must be on the release before npm has the version):** 1. merge `m1` into `main`; 2. create the GitHub release `v<version>` with the assets from `node m1/release-assets.mjs` (for 0.3.1 use `node m1/release-assets.mjs <out-dir> r13`, which copies the five R13 files verbatim and checks their sha256; the plain mode builds the 0.2.x set from `data/m1`) (manifest.json, manifest-exact.json, vocab.txt, model-int8-pc.onnx, model-fp32.onnx); 3. then "Run workflow" for `publish.yml`. The workflow enforces step 2: it fails before publishing if the release or any of those five assets is missing, if any asset is zero-size, or if the release's `manifest.json` `version` differs from package.json.
 
 ## Round 10 (planned 2026-11-04; trained, exam #3 NO-GO, not released)
 
@@ -595,7 +595,7 @@ Exam #3 (rwxmap shared exam, 7 vendors, 1,377 ops; scored once, now burned; both
 
 **Open decisions.**
 - Whether text format 2 ships in the next release. The code is merged on `dev` but unused unless a manifest sets `textFormat: 2`; R13 (format 1) is the picked candidate.
-- The release version number (not chosen; no version has been cut).
+- The release version number: decided, 0.3.1 (package.json still says 0.2.1; `/release` bumps it).
 
 ## Open questions
 
