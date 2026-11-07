@@ -5,9 +5,13 @@ All notable changes to rwxlite are recorded here. Format follows
 
 ## [Unreleased]
 
-Note: the entries below were the candidate package ref for shared exam #4 (docs/wiki/exam-prereg-exam4.md; tag v0.3.0, 77e6bb4). Exam #4 was NO-GO under the D135 gate, so this was not released; 0.2.0 stays the published model (0.2.1 is tagged, v0.2.1, but not yet published to npm; see below). The round 10 items are not released.
+Round 13 (R13) is the new default model.
 
-Candidate model: round 11 (`data/m1-r11`, int8-pc `adc6e6c1`, fp32 `252f3181`, T 0.843). Model strings `rwxlite-0.3.0+adc6e6c1` and `rwxlite-0.3.0+252f3181`. The r11 manifests carry `version` 0.3.0, which equalled `package.json` at tag v0.3.0.
+- New default weights, trained on about 102,700 labelled operations (round 13 data). Labels follow the widened x: giving or widening access is x, narrowing is w, an unclear access change is x by doubt. Creating keys or tokens, access-widening toggles, webhooks to outside URLs, creating a login user and adding a member are x.
+- Calibration temperature is 0.991463 (it was 0.844). The probabilities change, so a decision cut that was tuned on 0.2.x values does not carry over. Callers should re-check their cut.
+- Model strings: `rwxlite-0.3.1+984714f0` (int8, the default `manifest.json`) and `rwxlite-0.3.1+bbe1997d` (fp32, `manifest-exact.json`).
+- Measured on exam #5 (1,443 operations from 7 vendors no model had seen), right / too loose / too tight: on its own, int8 1,280 / 64 / 99 and fp32 1,283 / 64 / 96; with rwxmap at its 0.90 cut, 1,269 / 40 / 134.
+- The API is unchanged. The manifest keys `temperature` and `textFormat` are additive. Text format 2 is shipped switched off: no published model uses it.
 
 ### Added
 - Manifest `textFormat` (1 or 2, default 1; anything else throws). `loadAnswerer` reads it via the new `manifestTextFormat`, validated by `checkTextFormat`. Format 2 is format 1 plus one `hint: access` segment right after the lean, on operations that `accessHint(state)` flags (grants or widens access, creates a key or token, webhook to an outside URL, creates a login user, adds a member). `formatText(state, lean, format)` takes the format (default 1); `accessHint`, `checkTextFormat` and `manifestTextFormat` are exported. Output for 0.2.0 manifests (no `textFormat`) is unchanged byte for byte. No shipped model uses format 2; whether it ships is undecided (PRD, Round 13).

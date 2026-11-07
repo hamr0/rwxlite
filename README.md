@@ -7,96 +7,81 @@
 <p align="center">
   <a href="https://github.com/hamr0/rwxlite/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamr0/rwxlite/ci.yml?label=CI" alt="CI"></a>
   <img src="https://img.shields.io/github/package-json/v/hamr0/rwxlite?label=version&color=2a4f8c" alt="version (auto from package.json)">
-  <img src="https://img.shields.io/badge/classifier-rwxlite--0.2.0%2B8ad0a182-2a4f8c" alt="classifier: rwxlite-0.2.0+8ad0a182">
+  <img src="https://img.shields.io/badge/classifier-rwxlite--0.3.1%2B984714f0-2a4f8c" alt="classifier: rwxlite-0.3.1+984714f0 (int8 default)">
   <img src="https://img.shields.io/badge/license-Apache%202.0-2a4f8c" alt="license: Apache 2.0">
 </p>
 
-**A small local classifier that says whether an API operation reads (r), writes (w) or can't be taken back (x). Jev-shaped questions in, JSON out, no answer if it isn't confident.**
-
-> Status: module 1 (the Node answerer) is built, package version 0.2.1 (tagged v0.2.1, not yet published). 0.2.0 is published (npm and GitHub release v0.2.0) and is the model rwxmap pins; 0.2.1 has the same weights and fixes `answerMany` batch-dependence. The rest of the repo is module 0 research. Parts of this page describe the plan. They are marked *planned*.
+**A small local classifier that says whether an API operation reads (r), writes (w) or can't be taken back (x). Jev-shaped questions in, JSON out, probabilities only.**
 
 Agentic automation is on the rise, and there's no solution in sight for controlling API access with guardrails. It's impossible to account for every possibility. Today's answers don't scale and don't adapt to different shapes: scoped MCPs, policies built on MCP hints that aren't widely adopted or accurate, accountability moved into rigid sandboxes, or pushed back to the consumer through fine-grained IAM or APIs scoped at creation. Meanwhile we're creating new open standards for agents (MCP, WebMCP, headless browsing) faster than we can guardrail them.
 
-rwxlite is meant to solve that on the fly. Jev-shaped three questions in, JSON out, no answer if it isn't confident. Use it on its own, or couple it with [rwxmap](https://github.com/hamr0/rwxmap) to replace Jev. Free, local, responds in milliseconds, quantized to int8 at about 23 MB (built, see below).
+rwxlite is meant to solve that on the fly. You give it an API operation (method, path, name, summary, description). It gives back how likely each letter is. Free, local, responds in milliseconds, and the default model is about 23 MB.
 
 ## The three letters
 
-- **r** — nothing changes.
-- **w** — changes something a later call can set back.
-- **x** — can't be taken back.
+- **r** - nothing changes.
+- **w** - changes something that a later call can set back.
+- **x** - a later call can't restore things. That includes whatever anyone did in between.
 
-## Two modes
+The x rule is wider than "destroys data". Handing out or widening access is x, because someone may already have used it before you take it back:
 
-- **a. With rwxmap.** Mechanical rules lean first. The model only moves the contested rows. It answers in Jev's JSON, so rwxmap only swaps the client. *Planned (M2).*
-- **b. Standalone.** One operation in, `{letter, p}` out. A low top probability is the "ask a human" signal. The threshold is yours. *Built (M1).*
+- Creating an API key or token is x.
+- Turning on a setting that widens who can get in is x.
+- Setting up a webhook that sends data to an outside URL is x.
+- Creating a login user is x.
+- Adding a member to a team or account is x.
+- Narrowing access is w. If an access change could go either way (set or replace), it counts as x, to be safe. Policies that are not about access stay w.
+
+Restarting, or stopping, starting or pausing a server, is w. Stopping a job in a way that loses its work is x.
+
+## Two ways to use it
+
+- **With [rwxmap](https://github.com/hamr0/rwxmap).** rwxmap's mechanical rules give the first letter. rwxlite is asked about the contested rows only, and answers in Jev's JSON, so rwxmap only swaps the client.
+- **On its own.** One operation in, probabilities out. A low top probability is your "ask a human" signal. The threshold is yours.
 
 ```json
-// request (same as Jev's)
+// request (same as Jev's, plus the mechanical letter as "lean")
 { "state": { "method": "POST", "path": "/v1/search", "operationId": "search",
              "summary": "Search records", "description": "" },
-  "model": "rwxlite-0.2.0",
-  "questions": { "isX": "<the a7bc855 question text>" } }
+  "lean": { "class": "r", "rule": "path-verb" },
+  "questions": { "isX": "", "changes": "" } }
 
 // answer (same shape as Jev's)
-{ "answers": { "isX": { "noul": 0.04 } },
-  "model": "rwxlite-0.2.0+<weights-hash>" }
-
-// standalone (mode b)
-{ "letter": "r", "p": { "r": 0.91, "w": 0.07, "x": 0.02 }, "model": "rwxlite-0.2.0+<hash>" }
+{ "answers": { "isX": { "noul": 0.04 }, "changes": { "noul": 0.09 } },
+  "model": "rwxlite-0.3.1+984714f0" }
 ```
 
-The model outputs three probabilities. Every Jev question is arithmetic on them: `isX` is p(x), `changes` is p(w) + p(x).
+The model outputs three probabilities, p(r), p(w) and p(x). Every Jev question is arithmetic on them: `isX` is p(x), `changes` is p(w) + p(x).
 
-## Start here
+## How well it does
 
-Install the package: `npm i rwxlite` (set `ONNXRUNTIME_NODE_INSTALL=skip` to avoid a 285 MB GPU download; the CPU build is enough). The model files are not in the npm package; get them from the GitHub releases (see "Using the answerer"). Release order, because the package fetches those files at first load: 1. merge `m1`; 2. create the GitHub release `v<version>` with the assets from `node m1/release-assets.mjs`; 3. then "Run workflow" for `publish.yml` (it fails if the release or its assets are missing or empty, or if the release's `manifest.json` version is not the package version).
+Tested once, on 1,443 operations from 7 vendors that no model had seen (Front, PlanetScale, Paddle, Hookdeck, FusionAuth, Semaphore UI, Weaviate). Two independent AI labellers set the answers, and a human ruled on every disagreement.
 
-The rest of this repo is research (module 0): read on for the scripts.
+| | right | too loose | too tight |
+|---|---|---|---|
+| **On its own** (rwxlite 0.3.1, int8 default) | 1,280 (88.7%) | 64 (4.4%) | 99 (6.9%) |
+| **With rwxmap** (rwxmap's 0.90 cut) | 1,269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
 
-- Read the [PRD](docs/product/prd.md) first.
-- Mechanical labels: `node m0/mechanical.mjs`
-- Training: `python3 train/build_dataset.py`, `train/baseline.py`, `train/finetune.py`, `train/tune_cuts.py`
-- Gate scripts for the label exam live in `m0/`.
-- Exams: `node m0/exam-inputs.mjs [fresh]` builds the model inputs, then `python3 train/exam_score.py predict|score` (first exam) or `python3 train/exam_fresh.py predict|score` (fresh exam). The ask-rule measurements are `train/abstain.py`, `train/fallback.py` and `train/lowerflag.py`.
-- These scripts need a sibling checkout of [rwxmap](https://github.com/hamr0/rwxmap) and the trained weights, which are local and not in the repo (`data/train/`); the committed exam inputs, predictions and results are under `data/`.
+- **Too loose** means it called an operation safer than it is. This is the costly mistake.
+- **Too tight** means it called an operation riskier than it is. This is annoying but safe.
+- The fp32 model on its own scores 1,283 / 64 / 96.
+- The 0.90 cut belongs to rwxmap. It was tuned on this same test and on validation data, so it is not yet proven on vendors nobody has tested.
+- Until rwxmap updates its pin, the released rwxmap still runs rwxlite 0.2.0 at a 0.97 cut.
 
-## What's inside
+It was trained on about 102,700 labelled API operations from about 900 public API providers, labelled under the wider x rule above. Speed is about 17-20 ms per operation on a laptop CPU.
 
-| Part | State | What it does |
-|---|---|---|
-| Label recipe | built, measured | rwxmap mechanical + Jev, per-method questions, two-step POST lower, credential rule |
-| Baseline | trained | TF-IDF + logistic regression, 24 MB, about 1.5 ms/op |
-| Fine-tuned MiniLM | trained, exam failed (too loose) | 22.7M params, 90.9 MB fp32, about 22-28 ms/op in fp32 PyTorch; 95.9% exact, 0.84% too loose on the exam |
-| int8 ONNX export + Node answerer | built (M1) | the in-process answerer that speaks Jev's JSON |
-| Abstain threshold | measured, not built | "no answer when not confident"; the contract rule asks on lowerings under 0.97 and trusts raises and keeps: fresh exam 92.6% right, 5 too loose, 7.8% asked |
-| rwxmap integration | *planned (M2)* | mechanical leans first, model moves contested rows |
+## Install
 
-Input is OpenAPI operations only: method, path template, operationId, summary, description.
+```
+npm i rwxlite
+```
 
-## It tells you the truth
+Set `ONNXRUNTIME_NODE_INSTALL=skip` first to avoid a 285 MB GPU download; the CPU build is enough. `onnxruntime-node` is an optional dependency.
 
-As of 2026-11-04, module 0 (labels, training, exams) is scored and module 1 (the Node answerer) is built; the npm package is not published yet.
+The model files are not in the npm package. Download them from the [GitHub release](https://github.com/hamr0/rwxlite/releases) `v0.3.1` into one folder and point `dir` at it:
 
-- **Labels are measured.** The label recipe passed a fresh blind gate at 96.5% exact and 0.7% too loose, against 79.3% and 1.2% for mechanical alone. Two findings went back into rwxmap (D129 two-step POST, D131 credential rule).
-- **The model failed its go/no-go exam, on one line.** The fine-tuned MiniLM was scored once on 4,279 operations from vendors it never saw (cloudflare, pagerduty, sentry). It answered 95.9% exact, ahead of mechanical + Jev (93.0%) and mechanical alone (82.3%). But 0.84% of its answers were too loose (36 rows), over the 0.5% line set by Jev. Most of those are Cloudflare "create" calls that move money or start jobs, which it confidently called editable. Next step is open.
-- **Asking helps, but wasn't the pass/fail check.** When the model answers only at 95% confidence or above and asks on the rest, it answers 90.2% of rows at 98.7% exact and 0.47% too loose. That was reported, not pre-registered, so it doesn't count as a pass. Full table in the [PRD](docs/product/prd.md#m0-exam-result-2026-11-03-no-go).
-
-**How to read "ask".** Every operation lands in one pile: right, too loose (called safer than it is, the dangerous one), too tight (called riskier, annoying but safe), or asked (the user decides). The confidence bar only moves rows into "asked". On the 4,279-row exam:
-
-| bar | right | too loose | too tight | asked | what the asks held (right + loose + tight) |
-|---|---|---|---|---|---|
-| none | 4104 | 36 | 139 | 0 | |
-| 70% | 4064 | 36 | 69 | 110 | 40 + **0** + 70 |
-| 90% | 3961 | 21 | 37 | 260 | 143 + **15** + 102 |
-| 95% | 3812 | 18 | 31 | 418 | 292 + **18** + 108 |
-
-At 70% all 36 dangerous mistakes are still answered: the model was sure of them. From 90% the asks start catching them, at the cost of asking on 6% to 10% of operations.
-
-- **Training labels aren't the cause.** Two blind labellers re-labelled 1,200 training rows of the failing shapes: the training labels were too loose on only 32 (2.7%). The exam misses are mostly one vendor's pattern (Cloudflare billing and jobs).
-- **Fresh exam: missed by one row.** On 949 operations from four vendors nobody had trained on (Coolify, WorkOS, Lago, Resend), with lowerings flagged and asked under 97% confidence: 92.6% right, 7.8% asked, 5 too-loose answers (0.57%) against a line of 4 (0.5%). The lowering flag caught every wrong lowering; the 5 misses are credential updates and logouts that the mechanical rules already call too safe. Mechanical alone: 77.6% right, 6 too loose. Details in the [PRD](docs/product/prd.md#fresh-exam-result-2026-11-03-no-go-by-one-row).
-- **"No answer if not confident" is a rule, not code in the answerer.** The answerer returns probabilities only; the ask rule is measured on the exams and lives in the scoring scripts and the test reference (see "Using the answerer" and the PRD).
-- **int8 size is measured:** the per-channel int8 model is 23 MB (fp32 is 91 MB).
-- **Limits.** OpenAPI operations only. No request bodies, no query values, no hosts without a spec.
+- `manifest.json`, `model-int8-pc.onnx` (23 MB) and `vocab.txt`: the default.
+- `manifest-exact.json`, `model-fp32.onnx` (91 MB) and `vocab.txt`: the "exact" option, no int8 rounding drift.
 
 ## Using the answerer
 
@@ -110,22 +95,23 @@ const one = await a.answer(req);        // { model, answers: { isX: { noul }, ch
 const many = await a.answerMany([req]); // each slot is { model, answers } or { model, error }; a bad request does not fail the rest
 ```
 
-The HTTP `QUERY` method (RFC 10008) is read as `GET`: the model never saw `QUERY` in training.
-The lean rule `credential-set` (rwxmap D131) is read as `cant-undo-verb` in the model text, because the model never saw that name; the lean class is unchanged.
+For the fp32 model: `loadAnswerer({ dir, manifestFile: 'manifest-exact.json' })`.
 
 - `lean` is required: the mechanical letter and rule (`{class: 'r'|'w'|'x', rule}`). The model was trained with it as the first words of its input.
-- Only the keys of `questions` are read. `isX` is p(x), `changes` is p(w) + p(x). rwxlite returns probabilities only; the caller decides.
-- Two shapes, both plain JSON: success `{model, answers: {...}}` and no answer `{model, error: '<message>'}` (no `answers` key). `answerMany` never returns `Error` objects (they serialise as `{}`); `answer` throws an `Error` with the same message. On a no-answer keep the mechanical letter. Answers do not depend on batching: `answerMany` runs the model one row at a time, so a request gets byte-identical `p` from `answer`, from `answerMany` in any order, and next to any other requests, for both models (int8's dynamic quantisation would otherwise scale by the whole padded batch; measured drift up to 0.11 in p).
-- rwxlite returns only p; turning p into a letter is rwxmap's call. The rule rwxlite measured (which rows move, the cuts, the credential rule, ask on lowerings under 97%), and the comparison with rwxmap's secondPass, are in the [PRD](docs/product/prd.md#decision-rules-rwxlites-measured-rule-and-rwxmaps-secondpass). `test/fixtures/decision.jsonl` and `test/decision.test.js` are a parity and reference file for rwxlite's rule.
-- `dir` holds `manifest.json`, the model file and `vocab.txt`; every sha256 is checked and a mismatch throws. The manifest may carry `temperature` (the calibration temperature, a finite number > 0; anything else throws); without it the answerer uses 0.844, the 0.2.0 value. It may also carry `textFormat` (1 or 2, default 1); no published model uses 2.
-- `onnxruntime-node` is an optional dependency. Install it with `ONNXRUNTIME_NODE_INSTALL=skip npm install onnxruntime-node` to skip the 285 MB of GPU libraries.
-- Two model options, both on the GitHub releases: the package default, int8 per-channel (`manifest.json`, `model-int8-pc.onnx`, 23 MB) and "exact" fp32 (`manifest-exact.json`, `model-fp32.onnx`, 91 MB, no quantisation drift). rwxmap's own default is the exact fp32 model; the package default is int8-pc. Load the exact one with `loadAnswerer({ dir, manifestFile: 'manifest-exact.json' })`.
+- Only the keys of `questions` are read. `isX` is p(x), `changes` is p(w) + p(x).
+- The probabilities are calibrated: a 0.9 should be right about nine times in ten. The calibration temperature lives in the manifest (`temperature`, a finite number > 0; anything else throws). The 0.3.1 manifests carry 0.991463. A manifest without one uses 0.844.
+- rwxlite returns probabilities only. Turning them into a letter, or into "ask a human", is the caller's decision, and the cut is yours. These probabilities are not the same numbers as those of 0.2.x, so a cut tuned on 0.2.0 does not carry over. Re-check your cut when you move to 0.3.1. rwxmap's cut is rwxmap's own.
+- Two shapes, both plain JSON: success `{model, answers: {...}}` and no answer `{model, error: '<message>'}` (no `answers` key). `answerMany` never returns `Error` objects (they serialise as `{}`); `answer` throws an `Error` with the same message. On a no-answer keep the mechanical letter.
+- Answers do not depend on batching: `answerMany` runs the model one row at a time, so a request gets byte-identical probabilities from `answer`, from `answerMany` in any order, and next to any other requests, for both models.
+- The manifest may also carry `textFormat` (1 or 2, default 1). Format 2 exists but is switched off: the shipped 0.3.1 models use format 1.
+- Every file's sha256 is checked against the manifest, and a mismatch throws. The `model` string is `rwxlite-<manifest version>+<first 8 hex of the weights hash>`.
+- The HTTP `QUERY` method is read as `GET`, because the model never saw `QUERY` in training. The lean rule `credential-set` is read as `cant-undo-verb`, for the same reason; the lean class is unchanged.
 
-## Docs
+Limits: OpenAPI operations only, with method, path template, operationId, summary and description. No request bodies, no query values, no hosts without a spec.
 
-- **[PRD](docs/product/prd.md)** — scope, milestones, open questions.
-- **[Findings](docs/wiki/findings.md)** — what was measured and what was decided.
-- **[Classifier training](docs/wiki/classifier-training.md)** — how training works and how the model answers.
+## For contributors
+
+The training, labelling and test scripts are in `m0/`, `m1/` and `train/`. They need a sibling checkout of [rwxmap](https://github.com/hamr0/rwxmap) and local data that is not in the repo. Background notes are in [docs/wiki/](docs/wiki/): [findings](docs/wiki/findings.md) and [classifier training](docs/wiki/classifier-training.md). Tests: `npm test`. Types: `npm run typecheck`.
 
 ## License
 

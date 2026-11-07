@@ -2,7 +2,7 @@
 
 See also: [classifier-training.md](classifier-training.md) (how the model is trained and how it answers)
 
-Dated learnings, newest last. Plain English. The contract lives in `docs/product/prd.md`.
+Dated learnings, newest last. Plain English.
 
 ## 2026-11-03: M0 step 1, mechanical pass
 
@@ -234,7 +234,7 @@ Source: `m0/gate-score.mjs`, `data/gate-2026-11-03/score.json`. Truth: two blind
 | mechanical + Jev, rwxmap cuts 0.10/0.80/0.50 | 88.5% | 8 (1.3%) | 61 (10.2%) |
 | Jev mode (b) alone, p 0.5 | 89.8% | 10 (1.7%) | 51 (8.5%) |
 
-Vendor-clean line (472 rows; corrected 2026-11-03: the earlier 523-row line used a 14-name list, rwxmap's fuller 24-name list leaves 472): mechanical 75.4% exact / 13 too-loose / 103 too-tight; rwxmap cuts 87.9 / 8 / 49; rwxlite (PRD) cuts 90.0 / 7 / 40; Jev mode (b) alone 89.2 / 10 / 41.
+Vendor-clean line (472 rows; corrected 2026-11-03: the earlier 523-row line used a 14-name list, rwxmap's fuller 24-name list leaves 472): mechanical 75.4% exact / 13 too-loose / 103 too-tight; rwxmap cuts 87.9 / 8 / 49; rwxlite (contract) cuts 90.0 / 7 / 40; Jev mode (b) alone 89.2 / 10 / 41.
 
 Gate line by tier (all 600): raise-get 325 rows 100% exact; raise-wx 97 rows 94.8% (5 too loose); lower 145 rows 68.3% (2 too loose, 44 too tight; mechanical alone 14.5%); no pile 33 rows 87.9% (4 too tight). By method: GET 100%, PATCH 96%, PUT 90%, POST 72.6%.
 
@@ -772,7 +772,7 @@ From /self-review (ledger): the fresh-exam pre-registration (0caa381) pinned the
 
 ## 2026-11-04: M1, ONNX export, Node runtime, quantisation variants
 
-Numbers are in the PRD ("M1 result"); this is what was learned.
+This is what was learned.
 
 ### Tokenizer and text format parity
 - A Node port of `fmt_text` and the BERT WordPiece tokenizer matches the Python on all 102,781 local texts (both exams' 5,228 rows plus every train, val and v3eval text): 0 text mismatches, 0 token-id mismatches. `node m1/check-corpus.mjs` checks it.
@@ -807,7 +807,7 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 - More intra-op threads help a lot at batch 1. On a quiet 4-core i3-8100T, int8 per-channel is 15.5 ms mean / 31.0 p95 at 1 thread, 9.2 / 17.8 at 2, 6.9 / 13.1 at 4; fp32 at 4 threads is 7.9 / 14.0. The 20 ms pin is met at p95 with 4 threads. `loadAnswerer` now defaults to `Math.min(4, os.availableParallelism())`; the bench keeps 1 so old results compare.
 - int8 gains little over fp32 on these chips: 1 thread 15.5 against 19.7 ms on the server, and 4 threads 6.9 against 7.9. Inference (not measured): neither CPU (i3-8100T, i7-8665U) has VNNI, so int8 matmuls get no dedicated instruction and the gain is mostly memory traffic. A chip with VNNI may show a bigger gap; untested.
 - Laptop latency swung about 2x with background load (int8 per-channel, 1 thread: mean 19.8 to 23.3 ms, p95 39 to 46), so single runs on a busy machine say little.
-- Decision: default file is int8 per-channel; fp32 is the "exact" option. Published as GitHub release assets (PRD, "M1 result").
+- Decision: default file is int8 per-channel; fp32 is the "exact" option. Published as GitHub release assets.
 
 - QUERY read as GET (rwxmap D134): on the 383 fresh-exam GET rows relabelled QUERY, argmax changes on 1 row, 1 row crosses the 0.97 line, max |changes diff| 0.33; otherwise stable.
 - credential-set read as cant-undo-verb (guard until round 10, rwxmap D131): on the 32 credential-set ops, argmax x on 32 of 32 and 0 lowerings at p >= 0.97 (was w on 12, 3 at >= 0.97). Of those 3, only britbox /account/pin is a real credential lowering; the other 2 are truth w (whapi) and the same shape (circuitsandbox), so the guard may make them too-tight x rows, which is safe.
@@ -815,7 +815,7 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 ## 2026-11-04: Round 10 pre-measure (plan, no training)
 
 - Unseen lean rule names: training rows carry 10 rule names and none is `credential-set` (added by rwxmap after the data was built). Current int8-pc on the 32 `credential-set` ops (lean x credential-set): argmax r 0 / w 12 / x 20; 12 below x, 3 of them at max p >= 0.97 (would be ACCEPTED lowerings in rwxmap's mode b: britbox.co.uk PUT /account/pin, circuitsandbox.net PUT /spaces/{topicId}/pin, whapi.com PUT /account/plusCard/pin, all w); isX min 0.0088, median 0.625. Same 32 with trained rule `cant-undo-verb`: all x, 0 below x, isX min 0.9996, median 0.9997. So the unseen name costs a lot; round 10 rebuilds the leans. (Of the three, `circuitsandbox` /pin looks like pinning a topic, not a credential; a rule question for rwxmap, not for the model.)
-- Training labels teach the leak shapes (`m1/round10-shapes.py`): credential replace on PUT/PATCH, 59 rows over train/val/v3eval, 57 labelled w (exam truth x); logout/signout/end-session, 45 rows, 5 GET rows labelled w or r (truth x). Relabelling the truth after a hand check is round 10 item 2 (PRD, "Round 10").
+- Training labels teach the leak shapes (`m1/round10-shapes.py`): credential replace on PUT/PATCH, 59 rows over train/val/v3eval, 57 labelled w (exam truth x); logout/signout/end-session, 45 rows, 5 GET rows labelled w or r (truth x). Relabelling the truth after a hand check is round 10 item 2.
 - rwxmap R1 and R2 FAILED tuning (2026-11-04, D100 bar): every right move was workos; without workos neither closed a leak, and each added wrong moves (R1: files.com PATCH /api_key; R2: okta GET/PUT .../pages/sign-out/customized). No new rule names; `credential-set` is the only one to train on. So the leak shapes above are workos-specific, not cross-vendor: the 59 and 45 candidates are NOT relabelled by pattern, each gets a hand check and only rows judged x by BRIEF-v3 change (expect few); files.com and okta are known false positives. The 949 fresh rows (workos included) are still added as training rows.
 
 - Publish gate (2026-11-04): the "GitHub release has the model files" step now also fails on any zero-size asset and on a release `manifest.json` whose `version` differs from package.json, not just on missing names.
@@ -847,9 +847,9 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 - Parity against torch fp32 (T = 0.858, batch 1, `m1/export_r10.py parity`, practice sets only): fp32 ONNX max |dp| 2.4e-6, argmax agrees on all 4,180 val and 5,716 v3eval rows, no row crosses 0.97. int8 per-channel: argmax differs on 10 of 4,180 val and 15 of 5,716 v3eval rows, 67 and 53 rows change side of the 0.97 line, max |dp| 0.41 and 0.22. That is the same kind of int8 drift as 0.2.0 had (findings, "M1").
 - Node answerer against Python onnxruntime on the same file (949 fresh rows, p at T = 0.844 for both, `node m1/manifest-r10.mjs parity`): max |dp| 1.3e-7 for int8-pc and fp32, 0 argmax differences, 0 side flips.
 - Exam #3 code smoke test on the burned fresh exam (not a result; r10 trained on these rows): the 0.2.0 files reproduce the known fresh-exam numbers through the new code (int8-pc 809 right / 5 too loose / 61 too tight / 74 asked, fp32 810 / 5 / 60 / 74).
-- T is now read from the manifest (`manifest.json` of r10 carries `temperature: 0.858`; 0.844 when absent, so 0.2.0 manifests are unchanged). GET vs QUERY after the retrain (PRD item 4) is done, see the entry below. Round 10 was not released: exam #3 was NO-GO (see "Exam #3 result" below), so the version number and model string for a release are moot.
+- T is now read from the manifest (`manifest.json` of r10 carries `temperature: 0.858`; 0.844 when absent, so 0.2.0 manifests are unchanged). GET vs QUERY after the retrain is done, see the entry below. Round 10 was not released: exam #3 was NO-GO (see "Exam #3 result" below), so the version number and model string for a release are moot.
 
-## 2026-11-04: GET vs QUERY after round 10 (PRD Round 10 item 4)
+## 2026-11-04: GET vs QUERY after round 10
 - Setup: frozen r10 int8 `093c908d` / fp32 `8514ddcc` at T = 0.858; 0.2.0 at T = 0.844. Same text with `| GET ` replaced by `| QUERY `, bypassing the `src/text.js` mapping. Held-out GET rows: val (2,404) and v3eval (959), which contain 0 QUERY copies. Script: scratchpad `query/q.py` (not in the repo).
 - r10 int8: val 2 argmax changes, 19 rows cross 0.97, max |d changes| 0.195, max |d isX| 0.0004, read-as-r 2395 / 2393, acc .9875 / .9875; v3eval 0 changes, 1 crossing, acc 1.0 / 1.0.
 - r10 fp32: val 4 changes, 18 crossings, max |d changes| 0.353, acc .9875 / .9884; v3eval 0 changes, 1 crossing.
@@ -1002,3 +1002,12 @@ rwxmap replayed R13 and 0.2.0 through its real secondPass (src at v4, D138), swa
 - Too-tight rows fixed per leak added vs 0.97. Exam #5: 0.95 20, 0.93 11, 0.90 17, 0.85 8, 0.80 6. Val: 18, 13, 12, 6, 5. R13 clears a 10:1 bar down to 0.90 on both sets and fails it at 0.85. For 0.2.0 lowering never pays (1.1-1.7 per leak on exam #5, 1.4-2.1 on val).
 - The 3 leaks added at 0.90 on exam #5 are all fusionauth POST x->w: ex5-0293 `/api/connector` p 0.9422, ex5-0297 `/api/connector/{id}` p 0.9457, ex5-0341 `/api/entity/{id}` p 0.9695.
 - Decision: our user picked 0.90 (2026-11-07) as the joint R13+cut value and shared it with rwxmap. The cut was read off exam #5 (burned) and val, so it is a tuned value, not proven on unseen vendors; exam #6 would be the clean test. The cut lives in rwxmap's code (`LOWER_MIN_P`), so shipping it is rwxmap's user's call. Our 0.3.1 release of R13 does not depend on it.
+
+
+## 2026-11-07: Where we are for 0.3.1 (round 13 and release)
+
+- **What we trained on.** Round 13: 102,668 rows, no vendor held out. Labels are the v4 relabel under D137 by rwxmap's pipeline (rwxmap `95104e3`); 6,245 labels changed (6,244 w to x, 1 w to r).
+- **x is wider.** D137: giving or widening access is x, narrowing is w, an ambiguous access set/replace is x by doubt, non-access policies stay w. Five x seams: key/token create, access-widening toggles, webhooks to outside URLs, creating a login user, adding a member. D136: restart and server stop/start/pause = w; a job stop that loses work = x.
+- **With rwxmap.** rwxmap shipped mechanical v4 (D138). rwxmap adopted R13 by override of D135, although R13 failed the frozen product-path exact bar on exam #5. The lowering cut 0.90 was picked jointly and is rwxmap's decision D139 (rwxmap commit `5571cd0`); it lives in rwxmap. With rwxmap at 0.90, exam #5 gives 1,269 / 40 / 134 (right / too loose / too tight) on mechanical v4. The cut was tuned on exam #5 and val, so it is not yet proven on unseen vendors. Released rwxmap still runs 0.2.0 at 0.97 until its pin moves to 0.3.1.
+- **Exam #5 and int8.** Standalone R13 fp32 1,283 / 64 / 96; int8 (the package default) 1,280 / 64 / 99, about 17 ms per operation. The product path at 0.97 failed the frozen bar on exact (1,220 vs 1,272), so the frozen verdict stays NO-GO; shipping R13 as 0.3.1 is the user's and rwxmap's later decision.
+- **Release.** 0.3.1 is the first reliable release (default int8 `+984714f0`, exact fp32 `+bbe1997d`, T 0.991463, API unchanged, README and docs cleaned for outside readers). Pending: self-review, branch-review, release; push, tag and publish need user approval. The earlier "0.2.0 stays, nothing released" lines above are history.

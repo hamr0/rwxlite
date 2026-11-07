@@ -2,6 +2,8 @@
 
 Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built and published (0.2.0, npm and GitHub release v0.2.0); round 10 trained, exam #3 NO-GO (loose bar), 0.2.0 stays shipped; round 11 trained, exam #4 NO-GO on both scorers; round 12 (S0/S1/S2) showed no gain over 0.2.0, so 0.2.0 stays shipped; 0.2.1 (answerMany batch-independence fix, same weights) is tagged v0.2.1 and not yet published. Date: 2026-11-05.
 
+Status (updated 2026-11-07): round 13 (R13) is the model for release 0.3.1, the first release we call reliable. R13 trained on 102,668 rows under the widened x (D137, with D136). Exam #5 (1,443 operations, 7 unseen vendors): standalone R13 passed, the product path failed the frozen exact bar, so by the frozen rule it was NO-GO. rwxmap adopted R13 anyway by override of D135 and picked its own lowering cut 0.90 (D139). The 0.3.1 release is pending (self-review, branch-review, release; user approval before any push, tag or publish). The older status above is kept as history.
+
 ## Problem & goal
 
 rwxmap labels every API operation r, w or x (read, write, execute).
@@ -474,6 +476,12 @@ Only module 0 is sharp. The rest are sketches.
 **M3 (maybe) — Standalone mode (b) as a product.**
 - Only if its M0 and M2 numbers earn it.
 
+**Module status, updated 2026-11-07** (the older status lines above are kept as history):
+- **M0: done; R13 is the model.** Round 13 labels and training are finished (see "Round 13").
+- **M1: done; 0.3.1 ships int8 as the default plus fp32 as the exact option.**
+- **M2 (wire into rwxmap): done by rwxmap, pending their pin to 0.3.1.** rwxmap's secondPass already calls rwxlite and rwxmap is adopting R13 / 0.3.1. Until the pin moves, released rwxmap still runs 0.2.0 at 0.97.
+- **M3 (standalone product): still open, not started.** Evidence for deciding later: on exam #5 standalone R13 scored 1,283 right / 64 too loose / 96 too tight (fp32; int8 1,280 / 64 / 99) of 1,443.
+
 ## Resolved (2026-11-03)
 
 - Easy-case bias: train on Jev's p for all rows; agreement is a report, not a filter.
@@ -557,7 +565,15 @@ Exam #3 (rwxmap shared exam, 7 vendors, 1,377 ops; scored once, now burned; both
 
 **Outcome (2026-11-05).** Exam #4 (the shared exam, scored once) was NO-GO for r11 under both scorers: rwxlite's `a_none` 1447 right against 0.2.0's 1448, and the rwxmap CLI `secondPass` 18 too loose against 16. The prereg named the wrong gate config (`a_none` is not the shipped rule), so the gate number is rwxmap's CLI. Round 12 (S0/S1/S2: label fixes, D136 relabels, exam #4 rows, generated variants) gave no gain over shipped 0.2.0 on the held-out goharbor+render rows (0.2.0 425/9/21 right/loose/tight). 0.2.0 stays shipped. Detail: `docs/wiki/findings.md` (Exam #4 result, Round 12), `docs/wiki/exam-prereg-exam4.md`, `docs/wiki/prereg-r12.md`.
 
-## Round 13 (2026-11-07; R13 did not pass exam #5, 0.2.0 stays, nothing released)
+## Round 13 (2026-11-07; failed the frozen product-path bar on exam #5; adopted anyway, release 0.3.1 pending)
+
+**Where we are (2026-11-07, 0.3.1).** This block supersedes the status lines below, which are kept as history.
+- **What we trained on.** Round 13: 102,668 rows, all labelled data (no vendor held out). The labels are the v4 relabel under D137, made by rwxmap's pipeline (rwxmap `95104e3`, `export-v4-gap`); 6,245 labels changed (6,244 w to x, 1 w to r).
+- **x is wider (D137, plus D136).** x means a later call cannot restore things, including what anyone did in between. Giving or widening access is x and narrowing it is w; an ambiguous access set/replace is x by doubt; non-access policies stay w. The five x seams: API key/token create, access-widening toggles, webhooks to outside URLs, creating a login user, adding a member. D136: restart, server stop/start/pause = w; a job stop that loses work = x.
+- **Working with rwxmap.** rwxmap shipped mechanical v4 (D138). rwxmap adopted R13 by override of its own D135 gate. The lowering cut 0.90 was picked jointly and lives in rwxmap (D139, rwxmap commit `5571cd0`; `LOWER_MIN_P`). The cut was tuned on exam #5 and val, so it is not proven on unseen vendors; exam #6 would be the clean test.
+- **Exam #5.** 1,443 operations, 7 unseen vendors, standalone R13 fp32 1,283 / 64 / 96 (right / too loose / too tight); product path at 0.97 1,220 / 37 / 186, which failed the frozen exact bar (1,272 for 0.2.0). Int8 check (information only): standalone 1,280 / 64 / 99, about 17 ms per operation. With rwxmap at its 0.90 cut: 1,269 / 40 / 134.
+- **Release.** 0.3.1 is the first reliable release: default weights int8 `+984714f0`, exact fp32 `+bbe1997d`, T 0.991463, API unchanged. It is pending: self-review, branch-review, release; push, tag and publish need the user's approval. Until rwxmap moves its pin, released rwxmap still runs 0.2.0 at 0.97.
+
 
 **Status (2026-11-07).** R13 did not pass exam #5 (frozen bar, `docs/wiki/prereg-exam5.md` section 11): it passes the standalone half but fails the product path on exact (1,220 vs 1,272). 0.2.0 stays the shipped model, nothing is released, and exam #5 is burned (training data only). The paragraph below is the status before the exam.
 
