@@ -968,3 +968,18 @@ Scored once per the frozen prereg (`docs/wiki/prereg-exam5.md` section 11): 1,44
 - One scoring deviation: the final run used a new `--out` name (`results-final.json`) because the script refuses an existing `--out`; the first run was standalone only, before rwxmap's letters arrived. Same script, predictions and truth.
 - Exam #5 is burned for both sides and may be used as training data only. 0.2.0 stays shipped; nothing was released.
 
+
+## 2026-11-07: Exam #5 in int8 (information only, nothing decided)
+
+Exam #5 is burned; this is a check, not a gate. Same lean.csv, `m1/exam5-predict.mjs` unchanged, `manifest.json` (int8-pc), batch 1; scored with the definitions of `exam5-score.py` (standalone) and its mode-a replica (lower only at p >= 0.97 on rows whose lean marker is tight or loose). The replica equals rwxmap's CLI letters on all 1,443 rows for both fp32 runs; for int8 it was not checked against the CLI. Right / too loose / too tight:
+
+| model | standalone | product (replica) |
+|---|---|---|
+| R13 fp32 | 1,283 / 64 / 96 | 1,220 / 37 / 186 |
+| R13 int8 | 1,280 / 64 / 99 | 1,214 / 38 / 191 |
+| 0.2.0 fp32 | 1,281 / 141 / 21 | 1,272 / 94 / 77 |
+| 0.2.0 int8 | 1,280 / 143 / 20 | 1,265 / 95 / 83 |
+
+- R13 int8 vs fp32: the letter differs on 7 rows standalone (2 more loose, 5 more tight) and 6 rows on the product path (1 more loose, 5 more tight). Max |dp| over r, w, x between int8 and fp32: 0.214 for R13, 0.144 for 0.2.0.
+- Standalone, R13 int8 vs 0.2.0 int8: too loose 64 <= 143 and right 1,280 >= 1,280, so the standalone half of the bar would still pass in int8. On the product path R13 int8 has 1,214 right vs 1,265 (51 fewer), the same direction as fp32 (52 fewer).
+- Speed: the script does not print latency. Wall time for 1,443 ops including model load, 4 threads: R13 int8 25.2 s (about 17 ms per op), 0.2.0 int8 24.0 s (about 17 ms per op).
