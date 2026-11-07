@@ -84,12 +84,12 @@ const req = {
 const out = await a.answer(req); // { model, answers: { isX: { noul }, changes: { noul } } }; throws on a no-answer
 ```
 
-rwxlite returns probabilities only. Turning them into a letter, or into "ask a human", is your decision, and the cut is yours. The full guide is **[docs/wiki/guide.md](docs/wiki/guide.md)**: loading the int8 or fp32 model, the request and the lean, the answer shape, worked examples, choosing your cut, and the other details (batching, `QUERY`, `credential-set`, limits).
+rwxlite returns probabilities only. Turning them into a letter, or into "ask a human", is your decision, and the cut is yours. The full guide is **[docs/wiki/guide.md](https://github.com/hamr0/rwxlite/blob/main/docs/wiki/guide.md)**: loading the int8 or fp32 model, the request and the lean, the answer shape, worked examples, choosing your cut, and the other details (batching, `QUERY`, `credential-set`, limits).
 
 ## For contributors
 
-The training, labelling and test scripts are in `m0/`, `m1/` and `train/`. They need a sibling checkout of [rwxmap](https://github.com/hamr0/rwxmap) and local data that is not in the repo. Background notes are in [docs/wiki/](docs/wiki/): [findings](docs/wiki/findings.md) and [classifier training](docs/wiki/classifier-training.md). Tests: `npm test`. Types: `npm run typecheck`.
+The training, labelling and test scripts are in `m0/`, `m1/` and `train/`. They need a sibling checkout of [rwxmap](https://github.com/hamr0/rwxmap) and local data that is not in the repo. Background notes are in [docs/wiki/](https://github.com/hamr0/rwxlite/tree/main/docs/wiki/): [findings](https://github.com/hamr0/rwxlite/blob/main/docs/wiki/findings.md) and [classifier training](https://github.com/hamr0/rwxlite/blob/main/docs/wiki/classifier-training.md). Tests: `npm test`. Types: `npm run typecheck`.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+Apache License 2.0. See [LICENSE](https://github.com/hamr0/rwxlite/blob/main/LICENSE).
