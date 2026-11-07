@@ -84,7 +84,7 @@ const req = {
 const out = await a.answer(req); // { model, answers: { isX: { noul }, changes: { noul } } }; throws on a no-answer
 ```
 
-rwxlite returns probabilities only. Turning them into a letter, or into "ask a human", is your decision, and the cut is yours. The full guide is **[docs/guide.md](docs/guide.md)**: loading the int8 or fp32 model, the request and the lean, the answer shape, worked examples, choosing your cut, and the other details (batching, `QUERY`, `credential-set`, limits).
+rwxlite returns probabilities only. Turning them into a letter, or into "ask a human", is your decision, and the cut is yours. The full guide is **[docs/wiki/guide.md](docs/wiki/guide.md)**: loading the int8 or fp32 model, the request and the lean, the answer shape, worked examples, choosing your cut, and the other details (batching, `QUERY`, `credential-set`, limits).
 
 ## For contributors
 
