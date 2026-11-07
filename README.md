@@ -39,13 +39,13 @@ Restarting, or stopping, starting or pausing a server, is w. Stopping a job in a
 Every request needs a `lean`: a first-guess letter (r, w or x) and the rule behind it. rwxmap's mechanical rules produce it.
 
 - **With [rwxmap](https://github.com/hamr0/rwxmap).** rwxmap's full flow: the mechanical rules give the first letter, and rwxlite only moves the contested rows, at rwxmap's 0.90 cut. rwxlite answers in Jev's JSON, so rwxmap only swaps the client.
-- **On its own.** rwxlite gives its own letter, with rwxmap's mechanical first guess as input. One operation plus that guess in, probabilities out. A low top probability is your "ask a human" signal. The threshold is yours.
+- **On its own.** rwxlite gives its own letter, with rwxmap's mechanical first guess as input. The lean is part of the input: one operation plus its lean in, probabilities out. A low top probability is your "ask a human" signal. The threshold is yours.
 
 ```json
 // request (same as Jev's, plus the mechanical letter as "lean")
-{ "state": { "method": "POST", "path": "/v1/search", "operationId": "search",
+{ "state": { "method": "GET", "path": "/v1/search", "operationId": "search",
              "summary": "Search records", "description": "" },
-  "lean": { "class": "r", "rule": "path-verb" },
+  "lean": { "class": "r", "rule": "method" },
   "questions": { "isX": "", "changes": "" } }
 
 // answer (same shape as Jev's)
@@ -91,8 +91,8 @@ The model files are not in the npm package. Download them from the [GitHub relea
 import { loadAnswerer } from 'rwxlite';
 
 const a = await loadAnswerer({ dir: '/path/to/model-dir' }); // threads: default min(4, cores)
-const state = { method: 'POST', path: '/v1/search', operationId: 'search', summary: 'Search records', description: '' };
-const req = { state, questions: { isX: '', changes: '' }, lean: { class: 'r', rule: 'path-verb' } };
+const state = { method: 'GET', path: '/v1/search', operationId: 'search', summary: 'Search records', description: '' };
+const req = { state, questions: { isX: '', changes: '' }, lean: { class: 'r', rule: 'method' } };
 const one = await a.answer(req);        // { model, answers: { isX: { noul }, changes: { noul } } }; throws on a no-answer
 const many = await a.answerMany([req]); // each slot is { model, answers } or { model, error }; a bad request does not fail the rest
 ```
