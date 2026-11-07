@@ -1,8 +1,7 @@
 {
   "name": "rwxlite",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "license": "Apache-2.0",
-  "author": "hamr0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hamr0/rwxlite.git"
@@ -21,7 +20,7 @@
     "rwx"
   ],
   "type": "module",
-  "description": "rwxlite: a small local r/w/x classifier (int8 MiniLM on onnxruntime-node) that answers Jev's request shape with probabilities only.",
+  "description": "A small local classifier that says whether an API operation reads (r), writes (w) or can't be taken back (x).",
   "types": "./types/index.d.ts",
   "exports": {
     ".": {

@@ -2,7 +2,7 @@
 
 See also: [classifier-training.md](classifier-training.md) (how the model is trained and how it answers)
 
-Dated learnings, newest last. Plain English. The contract lives in `docs/product/prd.md`.
+Dated learnings, newest last. Plain English.
 
 ## 2026-11-03: M0 step 1, mechanical pass
 
@@ -234,7 +234,7 @@ Source: `m0/gate-score.mjs`, `data/gate-2026-11-03/score.json`. Truth: two blind
 | mechanical + Jev, rwxmap cuts 0.10/0.80/0.50 | 88.5% | 8 (1.3%) | 61 (10.2%) |
 | Jev mode (b) alone, p 0.5 | 89.8% | 10 (1.7%) | 51 (8.5%) |
 
-Vendor-clean line (472 rows; corrected 2026-11-03: the earlier 523-row line used a 14-name list, rwxmap's fuller 24-name list leaves 472): mechanical 75.4% exact / 13 too-loose / 103 too-tight; rwxmap cuts 87.9 / 8 / 49; rwxlite (PRD) cuts 90.0 / 7 / 40; Jev mode (b) alone 89.2 / 10 / 41.
+Vendor-clean line (472 rows; corrected 2026-11-03: the earlier 523-row line used a 14-name list, rwxmap's fuller 24-name list leaves 472): mechanical 75.4% exact / 13 too-loose / 103 too-tight; rwxmap cuts 87.9 / 8 / 49; rwxlite (contract) cuts 90.0 / 7 / 40; Jev mode (b) alone 89.2 / 10 / 41.
 
 Gate line by tier (all 600): raise-get 325 rows 100% exact; raise-wx 97 rows 94.8% (5 too loose); lower 145 rows 68.3% (2 too loose, 44 too tight; mechanical alone 14.5%); no pile 33 rows 87.9% (4 too tight). By method: GET 100%, PATCH 96%, PUT 90%, POST 72.6%.
 
@@ -772,7 +772,7 @@ From /self-review (ledger): the fresh-exam pre-registration (0caa381) pinned the
 
 ## 2026-11-04: M1, ONNX export, Node runtime, quantisation variants
 
-Numbers are in the PRD ("M1 result"); this is what was learned.
+This is what was learned.
 
 ### Tokenizer and text format parity
 - A Node port of `fmt_text` and the BERT WordPiece tokenizer matches the Python on all 102,781 local texts (both exams' 5,228 rows plus every train, val and v3eval text): 0 text mismatches, 0 token-id mismatches. `node m1/check-corpus.mjs` checks it.
@@ -807,7 +807,7 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 - More intra-op threads help a lot at batch 1. On a quiet 4-core i3-8100T, int8 per-channel is 15.5 ms mean / 31.0 p95 at 1 thread, 9.2 / 17.8 at 2, 6.9 / 13.1 at 4; fp32 at 4 threads is 7.9 / 14.0. The 20 ms pin is met at p95 with 4 threads. `loadAnswerer` now defaults to `Math.min(4, os.availableParallelism())`; the bench keeps 1 so old results compare.
 - int8 gains little over fp32 on these chips: 1 thread 15.5 against 19.7 ms on the server, and 4 threads 6.9 against 7.9. Inference (not measured): neither CPU (i3-8100T, i7-8665U) has VNNI, so int8 matmuls get no dedicated instruction and the gain is mostly memory traffic. A chip with VNNI may show a bigger gap; untested.
 - Laptop latency swung about 2x with background load (int8 per-channel, 1 thread: mean 19.8 to 23.3 ms, p95 39 to 46), so single runs on a busy machine say little.
-- Decision: default file is int8 per-channel; fp32 is the "exact" option. Published as GitHub release assets (PRD, "M1 result").
+- Decision: default file is int8 per-channel; fp32 is the "exact" option. Published as GitHub release assets.
 
 - QUERY read as GET (rwxmap D134): on the 383 fresh-exam GET rows relabelled QUERY, argmax changes on 1 row, 1 row crosses the 0.97 line, max |changes diff| 0.33; otherwise stable.
 - credential-set read as cant-undo-verb (guard until round 10, rwxmap D131): on the 32 credential-set ops, argmax x on 32 of 32 and 0 lowerings at p >= 0.97 (was w on 12, 3 at >= 0.97). Of those 3, only britbox /account/pin is a real credential lowering; the other 2 are truth w (whapi) and the same shape (circuitsandbox), so the guard may make them too-tight x rows, which is safe.
@@ -815,7 +815,7 @@ Numbers are in the PRD ("M1 result"); this is what was learned.
 ## 2026-11-04: Round 10 pre-measure (plan, no training)
 
 - Unseen lean rule names: training rows carry 10 rule names and none is `credential-set` (added by rwxmap after the data was built). Current int8-pc on the 32 `credential-set` ops (lean x credential-set): argmax r 0 / w 12 / x 20; 12 below x, 3 of them at max p >= 0.97 (would be ACCEPTED lowerings in rwxmap's mode b: britbox.co.uk PUT /account/pin, circuitsandbox.net PUT /spaces/{topicId}/pin, whapi.com PUT /account/plusCard/pin, all w); isX min 0.0088, median 0.625. Same 32 with trained rule `cant-undo-verb`: all x, 0 below x, isX min 0.9996, median 0.9997. So the unseen name costs a lot; round 10 rebuilds the leans. (Of the three, `circuitsandbox` /pin looks like pinning a topic, not a credential; a rule question for rwxmap, not for the model.)
-- Training labels teach the leak shapes (`m1/round10-shapes.py`): credential replace on PUT/PATCH, 59 rows over train/val/v3eval, 57 labelled w (exam truth x); logout/signout/end-session, 45 rows, 5 GET rows labelled w or r (truth x). Relabelling the truth after a hand check is round 10 item 2 (PRD, "Round 10").
+- Training labels teach the leak shapes (`m1/round10-shapes.py`): credential replace on PUT/PATCH, 59 rows over train/val/v3eval, 57 labelled w (exam truth x); logout/signout/end-session, 45 rows, 5 GET rows labelled w or r (truth x). Relabelling the truth after a hand check is round 10 item 2.
 - rwxmap R1 and R2 FAILED tuning (2026-11-04, D100 bar): every right move was workos; without workos neither closed a leak, and each added wrong moves (R1: files.com PATCH /api_key; R2: okta GET/PUT .../pages/sign-out/customized). No new rule names; `credential-set` is the only one to train on. So the leak shapes above are workos-specific, not cross-vendor: the 59 and 45 candidates are NOT relabelled by pattern, each gets a hand check and only rows judged x by BRIEF-v3 change (expect few); files.com and okta are known false positives. The 949 fresh rows (workos included) are still added as training rows.
 
 - Publish gate (2026-11-04): the "GitHub release has the model files" step now also fails on any zero-size asset and on a release `manifest.json` whose `version` differs from package.json, not just on missing names.
@@ -847,9 +847,9 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 - Parity against torch fp32 (T = 0.858, batch 1, `m1/export_r10.py parity`, practice sets only): fp32 ONNX max |dp| 2.4e-6, argmax agrees on all 4,180 val and 5,716 v3eval rows, no row crosses 0.97. int8 per-channel: argmax differs on 10 of 4,180 val and 15 of 5,716 v3eval rows, 67 and 53 rows change side of the 0.97 line, max |dp| 0.41 and 0.22. That is the same kind of int8 drift as 0.2.0 had (findings, "M1").
 - Node answerer against Python onnxruntime on the same file (949 fresh rows, p at T = 0.844 for both, `node m1/manifest-r10.mjs parity`): max |dp| 1.3e-7 for int8-pc and fp32, 0 argmax differences, 0 side flips.
 - Exam #3 code smoke test on the burned fresh exam (not a result; r10 trained on these rows): the 0.2.0 files reproduce the known fresh-exam numbers through the new code (int8-pc 809 right / 5 too loose / 61 too tight / 74 asked, fp32 810 / 5 / 60 / 74).
-- T is now read from the manifest (`manifest.json` of r10 carries `temperature: 0.858`; 0.844 when absent, so 0.2.0 manifests are unchanged). GET vs QUERY after the retrain (PRD item 4) is done, see the entry below. Round 10 was not released: exam #3 was NO-GO (see "Exam #3 result" below), so the version number and model string for a release are moot.
+- T is now read from the manifest (`manifest.json` of r10 carries `temperature: 0.858`; 0.844 when absent, so 0.2.0 manifests are unchanged). GET vs QUERY after the retrain is done, see the entry below. Round 10 was not released: exam #3 was NO-GO (see "Exam #3 result" below), so the version number and model string for a release are moot.
 
-## 2026-11-04: GET vs QUERY after round 10 (PRD Round 10 item 4)
+## 2026-11-04: GET vs QUERY after round 10
 - Setup: frozen r10 int8 `093c908d` / fp32 `8514ddcc` at T = 0.858; 0.2.0 at T = 0.844. Same text with `| GET ` replaced by `| QUERY `, bypassing the `src/text.js` mapping. Held-out GET rows: val (2,404) and v3eval (959), which contain 0 QUERY copies. Script: scratchpad `query/q.py` (not in the repo).
 - r10 int8: val 2 argmax changes, 19 rows cross 0.97, max |d changes| 0.195, max |d isX| 0.0004, read-as-r 2395 / 2393, acc .9875 / .9875; v3eval 0 changes, 1 crossing, acc 1.0 / 1.0.
 - r10 fp32: val 4 changes, 18 crossings, max |d changes| 0.353, acc .9875 / .9884; v3eval 0 changes, 1 crossing.
@@ -885,3 +885,129 @@ Training: MiniLM-L6, 1 epoch, 2,902 steps, 51.4 min on the home server, same rec
 - Verdict: no gain over shipped 0.2.0; 0.2.0 stays. No win is claimed. The S0/S1/S2 models were not shipped.
 - Lessons: the variants fixed the seen cases (the harbor leaks they trained on) but opened render PUT secret-files (2 rows, the same rows r11 got wrong). 5 harbor job stops are missed by every model.
 - Calibration afterwards (on saved 0.2.0 outputs; replica matched rwxmap's secondPass row-for-row on 9 sets): no safe gain. Temperature and the 0.97 line move essentially the same rows. Every setting that gained right rows added too-loose ones (T 0.80: +140 right, +6 loose; line 0.96: +200 right, +7 loose). The best zero-new-loose setting (T 0.84) gained +2 of 455 and +9 on 5,031 clean rows, boundary noise. Line 0.975 fixed 3 loose but lost 187 right. Remaining leaks are confident wrong lowerings (p about 0.96 to 0.975: chatwoot inbox contacts, clerk billing price, workos waitlist, permit.io env copy). Next step: real human-labelled examples of dangerous POST/PUT, not settings. 0.2.0 at T 0.844 / 0.97 stays.
+
+## 2026-11-05: Vendor labels, step A (no spend; AWS IAM access levels and GitHub fine-grained permissions vs our teacher and 0.2.0)
+- Scripts in `vendor/` (`gh_parse.py`, `join.py`, `mech.mjs`, `predict.py`, `report.py`); outputs in `data/vendor/` (gitignored; `report.md` has all tables, `candidates.csv`, `examples30.csv`, `all-rows.csv`). Vendor labels are hints that pick rows to review, not truth; BRIEF-v3 stays the only standard. Azure not done (needs a login).
+- AWS source: `@fluggo/aws-service-auth-reference` 1.0.168, 437 services, 18,264 IAM actions. Package licence MIT, but its LICENSE says the author "makes no claim to the data, which belongs to Amazon Web Services, Inc." (treat the data licence as open). GitHub source: the docs page "Permissions required for fine-grained PATs" (1,073 endpoint rows, 990 unique endpoints). github/docs licence: documentation and content (content/, assets/, data/ folders) CC-BY-4.0, code MIT (their README and LICENSE / LICENSE-CODE). Reported, not decided. The page itself is generated docs content, so CC-BY-4.0 attribution would apply if we ever redistribute it; we do not (data/ is gitignored).
+- Join, AWS: IAM prefix + action name against corpus service + operationId (strip `GET_`/`POST_` and a trailing date, 40-odd service-name aliases such as email to ses, monitoring to cloudwatch, plus a global-by-action-name fallback only when all services agree on the level). 12,602 of 13,198 corpus rows matched (95.5%): 10,927 direct, 1,305 alias, 370 global fallback; 547 unmatched, 49 ambiguous (mostly cloudfront and apigateway, s3 and ELB name differences). Matched rows by level: Write 6,709, Read 2,989, List 2,225, Tagging 451, Permissions management 228. Unique actions matched against IAM actions per level: Write 68%, Read 60%, List 71%, Tagging 64%, Permissions 73% (the rest of IAM is permission-only or not in these specs). 12,089 unique service+action keys for 12,602 rows.
+- Join, GitHub: 14,663 corpus rows are 1,043 unique method+path endpoints (about 20 spec snapshots: ghec, ghes 2.18 to 3.8, github.ae, api.github.com). 8,934 rows / 596 unique endpoints matched the vendor page (vendor lists 990; the other corpus endpoints are admin, enterprise, OAuth, GHES-only or unauthenticated ones with no fine-grained-token entry). Hints on the 596: read 289, write 181 (not-r), x/Administration 81, x/secret-key-role 38 (secrets, deploy-style keys, GPG/SSH keys, custom org roles, private registries, App installation repository access), 7 conflicts (GET listed as write, ignored). The x areas are my choice, listed here: all Administration write, every `*secrets` area, Git SSH keys, GPG keys, SSH signing keys, Custom organization roles, Organization private registries, Codespaces lifecycle admin, GitHub App installation repository access.
+- Run: 0.2.0 fp32 (safetensors sha256 `974dff01...`), PyTorch CPU, batch 1, T 0.844, 15,007 unique texts for 21,536 rows, 1,048 s (69.8 ms per text on a busy machine). rwxmap's current mechanical class equals the corpus class on all 21,536 rows. Final letter = secondPass replica (lower only at p >= 0.97, credential-set never lowered).
+- Counts are unique endpoints. Rows overlapping any exam, gate, holdout, r9-hand or calib set (by provider+method+path or corpus flag) are 256 unique / 1,360 rows and are reported separately; v3eval rows (hand truth, held out of training) 68 unique, separately too. Everything below is the plain set (12,368 unique) unless marked.
+- Agreement, share of rows whose letter is not below the vendor hint (plain set). AWS List (hint r): none below. Read (r): none below. Tagging (w): mechanical r on 36 of 414, final r on 36; teacher 1. Write (not-r): mechanical r on 862 of 6,309, teacher r on 35, 0.2.0 top r on 58, final r on 862. Permissions management (x): mechanical below x on 108 of 221, teacher 165, train label 161 of 216, 0.2.0 top 168, final 140. GitHub read (r): 0 below. Write (not-r): final r on 0 of 107. x/Administration: mechanical below x on 13 of 40, teacher 22, final 17. x/secret-key-role: mechanical 6 of 16, teacher 7, final 6.
+- Candidate dangerous mistakes (a letter below the hint), plain + v3eval, unique: final letter below hint 1,038 (AWS 1,002: 862 not-r read as r, 140 x-hint read as r or w; GitHub 36, all x-hint). Of these, 1,000 are mechanical's own letter that the model did not raise, 38 are rows 0.2.0 actually lowered (all x-hint, all at p 0.97 to 0.99, 32 AWS and 6 GitHub). Teacher or train label below an x-hint: AWS 165, GitHub 46; so the teacher itself (Jev says w, p(isX) 0.03 to 0.11) is the source for the 38 model-lowered rows. Protected set: 33 final-below rows (31 mech own leak, 2 model lowered), kept out of the counts above.
+- Shapes. (1) AWS query-protocol `GET_<Action>` twins (`GET /#Action=AttachGroupPolicy`): 1,565 plain rows (1,436 unique), mechanical says r by GET and rwxmap treats them as settled, so the model is never asked. For 1,006 of them the vendor hint is Write, Tagging or Permissions and 0.2.0's own top letter is w: the model would disagree, the shipped path never lets it. This is 848 of the 862 not-r-read-as-r rows. (2) The rest of the not-r-read-as-r rows (14) are POST read-verb rows the vendor calls Write: GetClusterCredentials, GetClusterSessionCredentials, GetRelationalDatabaseMasterUserPassword, RetrieveDomainAuthCode, GetId (credential or token handing, arguably not r). (3) The 38 model-lowered x-hint rows are policy or permission setters: IAM PutRolePolicy/PutUserPolicy/PutGroupPolicy/CreatePolicy/SetDefaultPolicyVersion, KMS PutKeyPolicy, ECR/Glue/SSM/Logs/Secrets Manager PutResourcePolicy, SNS SetTopicAttributes, Lake Formation PutDataLakeSettings, EC2 CreateNetworkInterfacePermission; GitHub create-deploy-key, branch-protection team/app restrictions, create-in-org repo, pages site. (4) Mechanical's own x-hint leaks (138 AWS x-hint, plus GitHub): lambda AddLayerVersionPermission, quicksight UpdateAnalysisPermissions, SSO AttachManagedPolicyToPermissionSet, branch-protection review settings, org Dependabot secret repository sets.
+- How good is the hint as truth? On the 24 GitHub x-hint endpoints that have hand truth (v3eval), truth is x on 9, w on 15, never r; on 43 not-r endpoints truth is w 24, x 19, never r. So "not r" held every time; the x hint over-calls (37% truth x). Reverse (vendor says r, letter above r, safe direction): AWS final above r on 114 of 4,974 (mostly POST list calls floored x), GitHub 2 of 278. These are too tight, not dangerous.
+- Verdict for steps B and C. Step B (Jev on gaps) adds little: the sources already carry Jev answers on nearly every joined row (teacher none on only a handful), and the disagreements are in Jev's own answers, not gaps. Step C looks worth doing on a small slice: BRIEF-v3 review of the 38 model-lowered rows, the 14 credential-handing POSTs, the 165 AWS and 46 GitHub teacher-below-x-hint rows (dedupe to one per service/action family), and a ruling on the `GET_<Action>` twins, which is a mechanical and rwxmap question (settled GET rows are not sent to the model). Not worth a size test on this evidence alone; the leaks are label and routing questions, not capacity.
+
+## 2026-11-06: Round 13 data built and pre-registered (training not started)
+- Labels: rwxmap `95104e3`, `export-v4.csv` and `inherit-v4.csv` hashes verified (`0e371db2...`, `e1993a27...`). Built by `m1/r13-assemble.py` into `data/round13/` (gitignored): train 102,668 rows (r 55,532 / w 22,479 / x 24,657; S0 was 53,481 / 25,449 / 16,361), val 4,180 (2,435 / 922 / 823). v4 changed 6,245 train rows (6,244 w to x, 1 w to r) and 223 val rows; 4,302 Jev-soft rows now have one-hot targets. Added: holdout 455, v3eval 5,716 at human truth, gate-1/2 1,200 and 6 gate-3/4 operations. No generated variants (570 surface variants, 91 would change w to x, not trained on).
+- Base used is `final/S0/train.jsonl` (the D136 one that S0 trained on), not the pre-D136 `round12/train.jsonl`.
+- Prereg `docs/wiki/prereg-r13.md`: three candidates (R13, R13-L3, R13-L3-t2 with a placeholder for text format 2), a frozen val-only pick, then exam #5 under the two-path same-or-better bar against 0.2.0 at T 0.844. No training has been launched; `m1/r13-train.sh R13|R13-L3` is ready.
+
+- **Launched 2026-11-06 (home server ahassan@192.168.178.180, `~/rwxlite-train/r13-R13/` and `r13-R13-L3/`, nothing else touched).** Queue `~/rwxlite-train/r13-queue.sh` (nohup, pid in `r13-queue.pid`, log `r13-queue.log`) runs `r13-train.sh R13` then `r13-train.sh R13-L3`, one after the other. R13 started 10:32:33 (+01:00); log starts `rows 102668 steps/epoch 3209 total 3209`, then `step 25/3209 loss 1.1074`, `step 50/3209 loss 1.0885`, about 0.9 step/s. Expected finish: R13 about 11:30, R13-L3 about 12:30 (same day, +01:00). R13-L3-t2 is not queued (section 4b still open).
+- Exact command lines (from `m1/r13-train.sh`, HF_HOME=$HOME/rwxlite-train/hf-cache, python = `~/rwxlite-train/.venv/bin/python`, cwd = the candidate dir):
+  - queue: `nohup ./r13-queue.sh > r13-queue.log 2>&1 &`
+  - R13: `train/finetune.py --epochs 1 --soft --alpha 0.7 --threads 4 --ckpt 250 --tag r13 > data/train/finetune-r13.log 2>&1`
+  - R13-L3: `train/finetune.py --epochs 1 --soft --alpha 0.7 --threads 4 --ckpt 250 --loose_cost 3 --tag r13-L3 > data/train/finetune-r13-L3.log 2>&1`
+- sha256 as launched (local file and both remote copies identical, checked with sha256sum on the server): `train/finetune.py` `bc680dc36472f5119e7e70e91806f3eb7f308a433d934996344ac92f54f03019`; `train/losscost.py` `15361a92385e443223464affdcf30fa21c092b205daaa137e0ed4fce64a0d6b9`; `m1/r13-train.sh` `4576106194d28aa23a832e409c39ed7dd3e16c66f24fb967a83d13a94353372b`; `train/common.py` `966638772fdac96e359ed5a89c3a93c3765871276ff8f48eefc25f5cd01d3f6b` (= S0's, in both candidate dirs; a concurrent edit changed the working-tree copy during the upload, so the R13-L3 copy was re-sent from git HEAD and re-verified before the queue started). The queue script `r13-queue.sh` is not in the repo (three lines: the two `r13-train.sh` calls in order).
+- Data on the server verified against `data/round13/SHA256SUMS`: `train.jsonl` `8144e505...`, `val.jsonl` `8c0fdcfb...`, plus parquet and v3eval, OK in both dirs.
+- Vendor list `data/round13/vendors-r13-seen.txt` (649 names) sha256 `5d1229755f8c9af73dd4731346ee8d6c5159f600d96b53b977a7c99e0bb13a73`, verified; this is the "see findings" value of prereg section 6.
+- Val-pick code committed before any candidate score: `m1/r13-valpick.py` (commit c13aea8, sha256 `82ec34bde2ce6e1a132b7084e6b69e92a4d1828e2b7dd744585b42e8881575ed`). It fits T with `temp_fit` on val, runs the rwxmap secondPass replica (mode a, 0.97, credential-set never lowered, mechanical letter from the val `mech` field, review/rule from `vendor/mech.mjs`, which agrees with the `mech` field on all 4,180 rows), and applies the frozen pick. Smoke run on 0.2.0 only (not a candidate; `ckpt-r8soft/final`): at its shipped T 0.844 product 3,774 / 204 loose / 202 tight, standalone 3,827 / 335 / 18; with T refit on the v4 val it is T 1.427, product 3,657 / 155 / 368. Mechanical alone on val: 3,646 / 172 loose / 362 tight. Information only; v4 val is not a test of 0.2.0.
+
+- **R13-L3-t2 queued 2026-11-06 10:45 (+01:00), home server, new dir `~/rwxlite-train/r13-R13-L3-t2/` only.** Waiter `~/rwxlite-train/r13-t2-waiter.sh` (sha256 `4cdc0e29...e20c503`; nohup, pid in `r13-t2-waiter.pid`, log `r13-L3-t2.log`, started with `nohup ./r13-t2-waiter.sh > r13-L3-t2.log 2>&1 < /dev/null &`): polls every 30 s until the `r13-queue.pid` process (r13-queue.sh, pid 2203603) has exited, then runs `~/rwxlite-train/r13-R13-L3-t2/r13-train.sh R13-L3-t2`. The running queue and its shared `~/rwxlite-train/r13-train.sh` (old version, `45761061...`, which does not know t2) were not touched; the new script lives in the t2 dir and the queue's R13-L3 still runs the old one (same recipe). Each candidate dir has its own `train/`, so R13 and R13-L3 keep S0's `common.py` (`96663877...`).
+- Copied from git HEAD (7b70197) to the t2 dir, local HEAD = remote: `r13-train.sh` `3037d20e182018e2401c02ec64a8892f671aaa35c26f9a7c954fcf3c39e1f22a`; `train/finetune.py` `bc680dc36472f5119e7e70e91806f3eb7f308a433d934996344ac92f54f03019`; `train/losscost.py` `15361a92385e443223464affdcf30fa21c092b205daaa137e0ed4fce64a0d6b9`; `train/common.py` (new, text format 2) `061da692d8781a104ca7e47a605983b4cad9d8ddb10ca45f2b55ca2249b3e8d8`.
+- Data `data/round13-t2/{train,val,v3eval}.{jsonl,parquet}` copied into `r13-R13-L3-t2/data/train/`; `sha256sum -c SHA256SUMS` OK on both ends (local and server; summary.json not copied). train.jsonl `55c2d80c...`, val.jsonl `b082e461...`.
+- Status at queueing: R13 at step 675/3209, 0.96 step/s. Expected times (+01:00): R13 done about 11:30, R13-L3 about 12:30, R13-L3-t2 starts about 12:30 and finishes about 13:25 (about 55 min per candidate).
+
+### Round 13 val pick (2026-11-06)
+- **Procedural deviation (documented):** `m1/r13-valpick.py` (sha256 `82ec34bd...`, unchanged) takes one `--val` file for all candidates, so the pick was run twice with the same code: R13 and R13-L3 on `data/round13/val.jsonl` (sha `8c0fdcfb...`, format 1), R13-L3-t2 on `data/round13-t2/val.jsonl` (sha `b082e461...`, format 2, the text it was trained on). Checked before running: the two val files have 4,180 rows, identical in every field except `text`; text differs on exactly 65 rows, each equal to the format-1 text plus the `hint: access` segment. The pick rule was applied by hand, unchanged; the prereg was not changed. Outputs: `data/round13/valpick-f1/`, `data/round13/valpick-t2/` (gitignored). Checkpoint sha256 of model.safetensors matched on server and local (R13 `d16276d8...`, R13-L3 `536e76cb...`, R13-L3-t2 `acf028a9...`).
+- Results (val 4,180 rows, each candidate at its own val-fitted T, mode a, 0.97):
+
+| candidate | T | product right / loose / tight | standalone right / loose / tight |
+|---|---|---|---|
+| R13 | 0.9915 | 3,776 / 74 / 330 | 3,967 / 162 / 51 |
+| R13-L3 | 1.2559 | 3,712 / 78 / 390 | 3,947 / 149 / 84 |
+| R13-L3-t2 | 1.2933 | 3,693 / 85 / 402 | 3,938 / 145 / 97 |
+
+- Context only, decides nothing: 0.2.0 smoke-run on the same val: product 3,774 / 204 / 202 at T 0.844, standalone 3,827 / 335 / 18; mechanical alone 3,646 / 172 / 362.
+- **Pick (frozen rule):** fewest too-loose on the product path: R13 74 < R13-L3 78 < R13-L3-t2 85. No tie, so exact and the R13 tie-break are not needed. **Pick: R13, T = 0.991463.** Only R13 sits exam #5.
+- **Learnings.**
+  - The label fix did the work: R13 (plain) won, so changing 6,245 labels under BRIEF-v4 mattered more than any training change.
+  - The too-loose penalty (L3) and the access hint (t2) added nothing on the product path: on val, too loose 74 (R13) vs 78 (L3) vs 85 (L3-t2), and L3 and t2 have more too-tight (390, 402 vs 330).
+  - R13 has more too-tight than 0.2.0 under v4 (product 330 vs 202 at their own T on the same val). The 0.2.0 figure is a smoke run on v4 val, so this is context, not a test. Exam #5 decides.
+
+- **Update 2026-11-06 (from rwxmap): exam #5 waits for mechanical v4.** rwxmap's user ruled that exam #5 waits until rwxmap's mechanical v4 is delivered (rwxmap plan steps 2-5: rebuilding the mechanical rules against BRIEF-v4 truth for PUT/PATCH x-extraction, POST, GET, DELETE). Reasons: the exam is scored once for both projects, scoring now would burn it on the v3 mechanical about to be replaced, and the unseen-vendor pool is too thin for an exam #6. No pool count or vendor list yet. When ready, rwxmap draws and pre-registers the exam, and mode a runs R13 on top of mechanical v4. The frozen bar is unchanged: R13 vs shipped 0.2.0 at T 0.844, both on the same mechanical v4 for the rwxmap path, plus standalone (model-only, unaffected by mechanical); no more too-loose and no fewer exact on both. R13 was picked on val using the v3 mechanical replica; the pick stands, and the exam decides.
+
+## 2026-11-07: Exam #5 result (R13 NO-GO, 0.2.0 stays)
+
+Scored once per the frozen prereg (`docs/wiki/prereg-exam5.md` section 11): 1,443 rows, 7 unseen vendors, rwxmap mech-v4 leans fed as is, truth rwxmap `bfc05c1`. Parity PASSED (rwxmap `36fb827`). Right / too loose / too tight:
+
+| | R13 | 0.2.0 |
+|---|---|---|
+| standalone | 1,283 / 64 / 96 | 1,281 / 141 / 21 |
+| product (rwxmap CLI secondPass, mode a) | 1,220 / 37 / 186 | 1,272 / 94 / 77 |
+
+- R13 more than halves too-loose on both paths (standalone 64 vs 141; product 37 vs 94). On the product path it has 52 fewer exact: the product bar's exact half fails, so the verdict is NO-GO (standalone half passes).
+- The lost exact is too-tight on rows the second pass sends to the model (186 vs 77 too tight). The second pass lowered only 23 rows for R13 at p >= 0.97 (0.2.0: 148); it raised 49 (0.2.0: 8).
+- Our secondPass replica equals the CLI letters on all 1,443 rows for both models. Our product numbers equal rwxmap's.
+- Per vendor, standalone right / loose / tight, R13 | 0.2.0 (product in brackets, R13 | 0.2.0):
+
+| vendor | rows | R13 | 0.2.0 | product R13 | product 0.2.0 |
+|---|---|---|---|---|---|
+| frontapp.com | 246 | 232/6/8 | 232/11/3 | 209/6/31 | 227/11/8 |
+| fusionauth.io | 364 | 310/29/25 | 308/53/3 | 298/21/45 | 311/40/13 |
+| hookdeck.com | 135 | 124/7/4 | 123/11/1 | 120/2/13 | 121/9/5 |
+| paddle.com | 126 | 115/7/4 | 110/14/2 | 109/3/14 | 112/6/8 |
+| planetscale.com | 291 | 249/0/42 | 268/19/4 | 241/0/50 | 254/5/32 |
+| semaphoreui.com | 155 | 141/9/5 | 132/22/1 | 137/2/16 | 140/15/0 |
+| weaviate.io | 126 | 112/6/8 | 108/11/7 | 106/3/17 | 107/8/11 |
+
+  planetscale shows the biggest too-tight for R13 (standalone 42 vs 4; product 50 vs 32).
+- R13's 64 standalone too-loose rows are concentrated on fusionauth (29): x-truth identity-provider, connector, messenger, entity, group and user endpoints that R13 answers w. 0.2.0 makes the same mistake on most of them (53 on fusionauth). By lean marker, R13 too-loose is 30 on tight, 32 on loose, 2 on settled.
+- rwxmap's own gate on mech-v4 itself: mech-v4 1,201 / 59 / 183 vs v3 1,188 / 77 / 178 on this exam; NO-GO on too tight, so v3 stays in rwxmap.
+- One scoring deviation: the final run used a new `--out` name (`results-final.json`) because the script refuses an existing `--out`; the first run was standalone only, before rwxmap's letters arrived. Same script, predictions and truth.
+- Exam #5 is burned for both sides and may be used as training data only. 0.2.0 stays shipped; nothing was released.
+
+
+## 2026-11-07: Exam #5 in int8 (information only, nothing decided)
+
+Exam #5 is burned; this is a check, not a gate. Same lean.csv, `m1/exam5-predict.mjs` unchanged, `manifest.json` (int8-pc), batch 1; scored with the definitions of `exam5-score.py` (standalone) and its mode-a replica (lower only at p >= 0.97 on rows whose lean marker is tight or loose). The replica equals rwxmap's CLI letters on all 1,443 rows for both fp32 runs; for int8 it was not checked against the CLI. Right / too loose / too tight:
+
+| model | standalone | product (replica) |
+|---|---|---|
+| R13 fp32 | 1,283 / 64 / 96 | 1,220 / 37 / 186 |
+| R13 int8 | 1,280 / 64 / 99 | 1,214 / 38 / 191 |
+| 0.2.0 fp32 | 1,281 / 141 / 21 | 1,272 / 94 / 77 |
+| 0.2.0 int8 | 1,280 / 143 / 20 | 1,265 / 95 / 83 |
+
+- R13 int8 vs fp32: the letter differs on 7 rows standalone (2 more loose, 5 more tight) and 6 rows on the product path (1 more loose, 5 more tight). Max |dp| over r, w, x between int8 and fp32: 0.214 for R13, 0.144 for 0.2.0.
+- Standalone, R13 int8 vs 0.2.0 int8: too loose 64 <= 143 and right 1,280 >= 1,280, so the standalone half of the bar would still pass in int8. On the product path R13 int8 has 1,214 right vs 1,265 (51 fewer), the same direction as fp32 (52 fewer).
+- Speed: the script does not print latency. Wall time for 1,443 ops including model load, 4 threads: R13 int8 25.2 s (about 17 ms per op), 0.2.0 int8 24.0 s (about 17 ms per op).
+
+
+## 2026-11-07: R13 lowering cut-off: 0.90 picked (joint with rwxmap)
+
+rwxmap replayed R13 and 0.2.0 through its real secondPass (src at v4, D138), swapping only `LOWER_MIN_P` in a temp copy (script: rwxmap `poc/cutoff-r13/curve.mjs`). Parity at 0.97 was exact on exam #5 and on our val (0 differing rows). R13 right / too loose / too tight:
+
+| cut | exam #5 | val |
+|---|---|---|
+| 0.97 (today) | 1220/37/186 | 3815/76/289 |
+| 0.95 | 1239/38/166 | 3865/79/236 |
+| 0.93 | 1250/40/153 | 3898/83/199 |
+| 0.90 (pick) | 1269/40/134 | 3938/87/155 |
+| 0.85 | 1280/46/117 | 3949/103/128 |
+| 0.80 | 1279/50/114 | 3964/111/105 |
+| 0.2.0 at 0.97 | 1272/94/77 | 3821/192/167 |
+
+- Too-tight rows fixed per leak added vs 0.97. Exam #5: 0.95 20, 0.93 11, 0.90 17, 0.85 8, 0.80 6. Val: 18, 13, 12, 6, 5. R13 clears a 10:1 bar down to 0.90 on both sets and fails it at 0.85. For 0.2.0 lowering never pays (1.1-1.7 per leak on exam #5, 1.4-2.1 on val).
+- The 3 leaks added at 0.90 on exam #5 are all fusionauth POST x->w: ex5-0293 `/api/connector` p 0.9422, ex5-0297 `/api/connector/{id}` p 0.9457, ex5-0341 `/api/entity/{id}` p 0.9695.
+- Decision: our user picked 0.90 (2026-11-07) as the joint R13+cut value and shared it with rwxmap. The cut was read off exam #5 (burned) and val, so it is a tuned value, not proven on unseen vendors; exam #6 would be the clean test. The cut lives in rwxmap's code (`LOWER_MIN_P`), so shipping it is rwxmap's user's call. Our 0.3.1 release of R13 does not depend on it.
+
+
+## 2026-11-07: Where we are for 0.3.1 (round 13 and release)
+
+- **What we trained on.** Round 13: 102,668 rows, no vendor held out. Labels are the v4 relabel under D137 by rwxmap's pipeline (rwxmap `95104e3`); 6,245 labels changed (6,244 w to x, 1 w to r).
+- **x is wider.** D137: giving or widening access is x, narrowing is w, an ambiguous access set/replace is x by doubt, non-access policies stay w. Five x seams: key/token create, access-widening toggles, webhooks to outside URLs, creating a login user, adding a member. D136: restart and server stop/start/pause = w; a job stop that loses work = x.
+- **With rwxmap.** rwxmap shipped mechanical v4 (D138). rwxmap adopted R13 by override of D135, although R13 failed the frozen product-path exact bar on exam #5. The lowering cut 0.90 was picked jointly and is rwxmap's decision D139 (rwxmap commit `5571cd0`); it lives in rwxmap. With rwxmap at 0.90, exam #5 gives 1,269 / 40 / 134 (right / too loose / too tight) on mechanical v4. The cut was tuned on exam #5 and val, so it is not yet proven on unseen vendors. Released rwxmap still runs 0.2.0 at 0.97 until its pin moves to 0.3.1.
+- **Exam #5 and int8.** Standalone R13 fp32 1,283 / 64 / 96; int8 (the package default) 1,280 / 64 / 99, about 17 ms per operation. The product path at 0.97 failed the frozen bar on exact (1,220 vs 1,272), so the frozen verdict stays NO-GO; shipping R13 as 0.3.1 is the user's and rwxmap's later decision.
+- **Release.** 0.3.1 is the first reliable release (default int8 `+984714f0`, exact fp32 `+bbe1997d`, T 0.991463, API unchanged, README and docs cleaned for outside readers). Pending: self-review, branch-review, release; push, tag and publish need user approval. The earlier "0.2.0 stays, nothing released" lines above are history.

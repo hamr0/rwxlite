@@ -1,6 +1,6 @@
 # How rwxlite's classifier is trained and how it answers
 
-Plain-English notes, written 2026-11-03. Some parts describe the plan rather than what's built: the int8 export and the JSON wrapper are M1 work, and the call shape is a proposal agreed in principle with rwxmap. What exists today is the fp32 model (MiniLM r8soft, trained with soft targets), scored on two exams; both missed the go/no-go. The contract is in docs/product/prd.md, and measured results are in findings.md.
+Plain-English notes, written 2026-11-03. Some parts describe the plan rather than what's built: the int8 export and the JSON wrapper are M1 work, and the call shape is a proposal agreed in principle with rwxmap. What exists today is the fp32 model (MiniLM r8soft, trained with soft targets), scored on two exams; both missed the go/no-go. Measured results are in findings.md.
 
 ## Part 1: How training works
 
@@ -95,7 +95,7 @@ The model only reports three probabilities. Three steps sit between those and a 
 - **Cuts (mode a).** Mechanical stays in charge and the model only makes Jev's one-step moves on the contested rows, at cuts tuned on practice rows only: lower 0.30, POST lowered rows go to r when p(w) + p(x) is under 0.40 (else w), raise-wx 0.15, raise-get 0.05. A narrow credential rule forces x.
 - **Lowering flag (the ask rule).** When the model moves a letter down (x to w or r, w to r) it is trusted only if its top probability is at least 0.97; otherwise the row is "ask". Raises and keeps are trusted. On the practice rows 57 of the 73 too-loose answers were lowerings, which is why the flag targets them. Earlier ask rules (ask under a confidence bar, fall back to the mechanical letter, a mix) were measured and are in findings.md.
 
-rwxlite itself never decides to ask. It returns probabilities, and rwxmap applies the rule and emits the flag (PRD, "The flow"). Confident mistakes that are not lowerings, for example credential updates the mechanical rules already call too safe, are not caught by any of this; that is what failed the fresh exam.
+rwxlite itself never decides to ask. It returns probabilities, and rwxmap applies the rule and emits the flag. Confident mistakes that are not lowerings, for example credential updates the mechanical rules already call too safe, are not caught by any of this; that is what failed the fresh exam.
 
 ### JSON only
 The model itself outputs just three numbers. A small Node wrapper (M1) turns those into Jev's exact JSON format, so rwxmap sees no difference:

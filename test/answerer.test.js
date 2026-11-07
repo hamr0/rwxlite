@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { Answerer, calibrated, checkRequest, checkTemperature, manifestTemperature, loadAnswerer, modelString, TEMPERATURE } from '../src/answerer.js';
+import { Answerer, calibrated, checkRequest, checkTemperature, manifestTemperature, manifestTextFormat, loadAnswerer, modelString, TEMPERATURE } from '../src/answerer.js';
 import { WordPiece } from '../src/tokenizer.js';
 import { stubRunner, TINY_VOCAB } from './helpers.js';
 
@@ -193,4 +193,27 @@ test('loadAnswerer validates threads before touching the disk: -1, 1.5, "2", NaN
   }
   // valid values get past the check and fail later, on the missing manifest
   for (const threads of [0, 4]) await assert.rejects(loadAnswerer({ dir, threads }), /ENOENT/, String(threads));
+});
+
+test('manifest textFormat: absent = 1 (0.2.0 text unchanged), 2 adds the hint, anything else throws before any file is read', async () => {
+  assert.equal(manifestTextFormat({}), 1);
+  assert.equal(manifestTextFormat({ textFormat: 1 }), 1);
+  assert.equal(manifestTextFormat({ textFormat: 2 }), 2);
+  for (const f of [0, 3, 1.5, '2', null, true, NaN]) assert.throws(() => manifestTextFormat({ textFormat: f }), /textFormat must be 1 or 2/);
+  const grant = req({ state: { method: 'PUT', path: '/projects/{id}/iam/policy', operationId: 'setIamPolicy', summary: 'Set the IAM policy' } });
+  assert.equal(checkRequest(grant).text, checkRequest(grant, 1).text);
+  assert.ok(!checkRequest(grant, 1).text.includes('hint:'));
+  assert.ok(checkRequest(grant, 2).text.startsWith('lean: r method | hint: access | PUT '));
+  // the Answerer feeds the tokenizer the text of its own format
+  /** @type {number[][]} */ let seen = [];
+  const mk = (/** @type {any} */ extra) => new Answerer({ tokenizer: new WordPiece(TINY_VOCAB), runner: stubRunner((ids) => { seen = ids; return [[0, 1, 2]]; }), model: 'm', ...extra });
+  await mk({}).answer(grant); const ids1 = seen;
+  await mk({ textFormat: 1 }).answer(grant); assert.deepEqual(seen, ids1);
+  await mk({ textFormat: 2 }).answer(grant); assert.notDeepEqual(seen, ids1);
+  assert.throws(() => mk({ textFormat: 3 }), /textFormat must be 1 or 2/);
+  const dir = await mkdtemp(path.join(tmpdir(), 'rwxlite-'));
+  try {
+    await writeFile(path.join(dir, 'manifest.json'), JSON.stringify({ version: '0.0.0', modelFile: 'model-x.onnx', textFormat: 3, files: {} }));
+    await assert.rejects(loadAnswerer({ dir }), /textFormat must be 1 or 2/);
+  } finally { await rm(dir, { recursive: true, force: true }); }
 });
