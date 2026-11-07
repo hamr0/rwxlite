@@ -1,11 +1,14 @@
-// Build the set of files a GitHub release carries, into a folder (default data/m1/release/). Does NOT upload.
+// Build the set of files a GitHub release carries, into a folder. Does NOT upload.
 //   node m1/release-assets.mjs [out-dir] [r10 | r13] [--skip-version-check]
-// `r10` as the second argument builds from data/m1-r10/ (default out data/m1-r10/release/) and carries each manifest's `temperature`.
-// `r13` builds from data/m1-r13/ (default out data/m1-r13/release/) and COPIES all five files verbatim, manifests included (never rewrites them):
+// The mode is the 2nd positional argument, so r10/r13 need an out-dir given first. Without an out-dir the default is data/m1/release/.
+// Note: `node m1/release-assets.mjs r13` alone treats "r13" as the out-dir and runs the default m1 build.
+// `r10` builds from data/m1-r10/ and carries each manifest's `temperature`.
+// `r13` builds from data/m1-r13/ and COPIES all five files verbatim, manifests included (never rewrites them):
 // the R13 files must stay byte-identical to what exam #5 tested. Each sha256 is checked against the five values hard-coded below
-// (same as docs/wiki/prereg-exam5.md section 9) and any mismatch exits 1. It also requires package.json's version to equal the manifests' version
-// (0.3.1); `--skip-version-check` skips only that check (for a dry run before the /release version bump).
-// Without it, data/m1/ is the source and nothing under data/m1-r10 is read or written.
+// (same as docs/wiki/prereg-exam5.md section 9) and any mismatch exits 1. The two manifests must carry the same version, and it must equal
+// package.json's version (0.3.1); `--skip-version-check` skips only the package.json comparison (for a dry run before the /release version bump).
+// The printed upload command uses the manifests' version as the tag; under --skip-version-check with a differing package.json it prints no command.
+// Without r10/r13, data/m1/ is the source and nothing under data/m1-r10 is read or written.
 // Files: manifest.json (default, int8 per-channel), manifest-exact.json (fp32), model-int8-pc.onnx, model-fp32.onnx, vocab.txt.
 // Every sha256 is recomputed from the copied bytes; version comes from package.json.
 import { createHash } from 'node:crypto';
@@ -34,16 +37,15 @@ const R13_SHA = {
   'vocab.txt': '07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3',
 };
 
+let assetVersion;
 if (r13) {
   const bad = [];
   for (const n of Object.keys(R13_SHA)) if (sha(path.join(src, n)) !== R13_SHA[n]) bad.push(`${n}: source sha256 ${sha(path.join(src, n))} != expected ${R13_SHA[n]}`);
   if (bad.length) { console.error(`R13 source files differ from the exam #5 values:\n  ${bad.join('\n  ')}`); process.exit(1); }
-  if (!flags.includes('--skip-version-check')) {
-    for (const n of ['manifest.json', 'manifest-exact.json']) {
-      const mv = JSON.parse(readFileSync(path.join(src, n), 'utf8')).version;
-      if (mv !== version) { console.error(`package.json version ${version} != ${n} version ${mv}. Bump package.json first (done in /release), or pass --skip-version-check for a dry run.`); process.exit(1); }
-    }
-  }
+  const mvs = ['manifest.json', 'manifest-exact.json'].map((n) => JSON.parse(readFileSync(path.join(src, n), 'utf8')).version);
+  if (mvs[0] !== mvs[1]) { console.error(`manifest.json version ${mvs[0]} != manifest-exact.json version ${mvs[1]}.`); process.exit(1); }
+  assetVersion = mvs[0];
+  if (!flags.includes('--skip-version-check') && assetVersion !== version) { console.error(`package.json version ${version} != manifests version ${assetVersion}. Bump package.json first (done in /release), or pass --skip-version-check for a dry run.`); process.exit(1); }
   mkdirSync(out, { recursive: true });
   for (const n of Object.keys(R13_SHA)) copyFileSync(path.join(src, n), path.join(out, n));
   for (const n of Object.keys(R13_SHA)) {
@@ -51,7 +53,9 @@ if (r13) {
     if (got !== R13_SHA[n]) { console.error(`${n}: copied sha256 ${got} != expected ${R13_SHA[n]}`); process.exit(1); }
     console.log(`${n.padEnd(22)} ${String(statSync(path.join(out, n)).size).padStart(10)} bytes  sha256 ${got}  OK`);
   }
-  console.log(`\nAll five match the exam #5 values. Not uploaded. To publish, a human runs:\n  gh release upload v${version} ${Object.keys(R13_SHA).map((n) => path.join(out, n)).join(' ')} --repo hamr0/rwxlite --clobber`);
+  console.log('\nAll five match the exam #5 values. Not uploaded.');
+  if (assetVersion !== version) console.log(`DRY RUN: package.json is ${version}, assets are ${assetVersion}; bump first (done in /release), then re-run without --skip-version-check to get the upload command.`);
+  else console.log(`To publish, a human runs:\n  gh release upload v${assetVersion} ${Object.keys(R13_SHA).map((n) => path.join(out, n)).join(' ')} --repo hamr0/rwxlite --clobber`);
   process.exit(0);
 }
 
