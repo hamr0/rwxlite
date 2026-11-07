@@ -1,19 +1,19 @@
 // Exam #5 predictions (docs/wiki/prereg-exam5.md). Runs the PUBLISHED engine (src/answerer.js loadAnswerer: formatText, tokenizer, ONNX fp32,
-// calibrated with the manifest's temperature), batch 1, and writes the contract CSV for rwxmap. Reads no truth (it only reads ops.csv).
-//   node m1/exam5-predict.mjs <ops.csv> <model-dir> <out.csv> --rwxmap-dir <rwxmap checkout or archive> [--manifest manifest-exact.json]
-//                             [--expect-model rwxlite-x.y.z+sha8] [--threads N] [--sha-file <path>]
+// calibrated with the manifest's temperature), batch 1, and writes the contract CSV for rwxmap. Reads no truth (it only reads ops.csv and lean.csv).
+//   node m1/exam5-predict.mjs <ops.csv> <model-dir> <out.csv> --lean <lean.csv> [--manifest manifest-exact.json]
+//                             [--expect-model rwxlite-x.y.z+sha8] [--threads N] [--sha-file <ops sha file>] [--lean-sha-file <lean sha file>]
 // - ops.csv sha256 must equal the hash in <ops.csv>.sha256 (or --sha-file); header must be exactly id,provider,method,path,operationId,summary,description.
-// - The model reads the mechanical letter as its first words, so the lean (class, rule) per row comes from rwxmap's classifyRow in --rwxmap-dir
-//   (QUERY read as GET, as the product does); the text is built by src/text.js formatText inside the engine. The rwxmap HEAD (if it is a git checkout) is printed.
+// - The model reads the mechanical letter as its first words. The lean (class, rule) per row is rwxmap's lean.csv, fed AS IS (no alias, no edit;
+//   src/text.js still applies its own credential-set -> cant-undo-verb alias inside formatText). lean.csv: header exactly id,class,rule,marker; sha256 must equal
+//   <lean.csv>.sha256 (or --lean-sha-file); ids and order must equal ops.csv. The marker is not read here.
+// - The text is built by src/text.js formatText inside the engine from the ops.csv fields as they are (method, path, operationId, summary, description).
 // - Output CSV: header id,model,p_is_x,p_changes ; LF ; one row per op, same order as ops.csv; p written with Number.prototype.toString (shortest round trip).
 //   p_is_x = p(x), p_changes = p(w) + p(x), both from the engine. Every p must be finite, in [0,1], and p_changes >= p_is_x, or the script stops.
-// - Also writes <out>.lean.csv (id,class,rule: the mechanical lean the model was given) so rwxmap can check it is theirs. Neither file is overwritten (exclusive create).
-// - Prints the sha256 of ops.csv, the CSV, the lean file.
+// - Also writes <out>.lean.csv (id,class,rule: the lean the model was given). Neither file is overwritten (exclusive create).
+// - Prints the sha256 of ops.csv, lean.csv, the CSV, the lean file.
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { loadAnswerer } from '../src/answerer.js';
 
 const HEADER = ['id', 'provider', 'method', 'path', 'operationId', 'summary', 'description'];
@@ -23,7 +23,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i].startsWith('--')) { opt[args[i].slice(2)] = args[++i]; } else pos.push(args[i]);
 }
 const [opsPath, modelDir, outPath] = pos;
-if (!opsPath || !modelDir || !outPath || !opt['rwxmap-dir']) die('usage: <ops.csv> <model-dir> <out.csv> --rwxmap-dir <dir> [--manifest f] [--expect-model s] [--threads n] [--sha-file f]');
+if (!opsPath || !modelDir || !outPath || !opt.lean) die('usage: <ops.csv> <model-dir> <out.csv> --lean <lean.csv> [--manifest f] [--expect-model s] [--threads n] [--sha-file f] [--lean-sha-file f]');
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 
 const opsBytes = readFileSync(opsPath);
@@ -56,10 +56,19 @@ const ops = table.slice(1).map((r, n) => {
 if (!ops.length) die('no rows');
 if (new Set(ops.map((o) => o.id)).size !== ops.length) die('duplicate id');
 
-const rwxmapDir = path.resolve(opt['rwxmap-dir']);
-const { classifyRow } = await import(pathToFileURL(path.join(rwxmapDir, 'src', 'index.js')).href);
-let head = 'not a git checkout';
-try { head = execFileSync('git', ['-C', rwxmapDir, 'rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { /* archive */ }
+const leanBytes = readFileSync(opt.lean); const leanSha = sha(leanBytes);
+const leanWant = readFileSync(opt['lean-sha-file'] ?? opt.lean + '.sha256', 'utf8').trim().split(/\s+/)[0];
+if (!/^[0-9a-f]{64}$/.test(leanWant)) die('lean sha file does not hold a sha256');
+if (leanWant !== leanSha) die(`lean.csv sha256 ${leanSha} != ${leanWant}`);
+const leanTable = parseCsv(leanBytes.toString('utf8'));
+if (leanTable[0].join(',') !== 'id,class,rule,marker') die(`lean.csv header must be exactly id,class,rule,marker, got ${leanTable[0].join(',')}`);
+const leanRows = leanTable.slice(1);
+if (leanRows.length !== ops.length) die(`lean.csv has ${leanRows.length} rows, ops.csv ${ops.length}`);
+leanRows.forEach((r, i) => {
+  if (r.length !== 4) die(`lean row ${i + 2} has ${r.length} fields`);
+  if (r[0] !== ops[i].id) die(`lean row ${i + 2}: id ${r[0]} != ops id ${ops[i].id} (ids and order must match)`);
+  if (!['r', 'w', 'x'].includes(r[1]) || !r[2]) die(`lean row ${i + 2}: bad class/rule`);
+});
 
 const threads = opt.threads === undefined ? undefined : Number(opt.threads);
 const a = await loadAnswerer({ dir: path.resolve(modelDir), manifestFile: opt.manifest ?? 'manifest-exact.json', ...(threads === undefined ? {} : { threads }) });
@@ -67,9 +76,8 @@ if (opt['expect-model'] && a.model !== opt['expect-model']) die(`model ${a.model
 
 const lines = ['id,model,p_is_x,p_changes']; const lean = ['id,class,rule'];
 for (const o of ops) {
-  const method = o.method.toUpperCase() === 'QUERY' ? 'GET' : o.method;
-  const state = { method, path: o.path, operationId: o.operationId, summary: o.summary, description: o.description };
-  const v = classifyRow(state);
+  const state = { method: o.method, path: o.path, operationId: o.operationId, summary: o.summary, description: o.description };
+  const v = { class: leanRows[lines.length - 1][1], rule: leanRows[lines.length - 1][2] };
   const out = await a.answer({ state, lean: { class: v.class, rule: v.rule }, questions: { isX: 1, changes: 1 } });
   const x = out.answers.isX.noul; const c = out.answers.changes.noul;
   for (const p of [x, c]) if (typeof p !== 'number' || !Number.isFinite(p) || p < 0 || p > 1) die(`${o.id}: p out of [0,1] or not finite: ${p}`);
@@ -83,7 +91,7 @@ if (lines.length - 1 !== ops.length) die('row count mismatch');
 const body = lines.join('\n') + '\n'; const leanBody = lean.join('\n') + '\n';
 writeFileSync(outPath, body, { flag: 'wx' }); writeFileSync(outPath + '.lean.csv', leanBody, { flag: 'wx' });
 console.log(`ops.csv    sha256 ${opsSha}  rows ${ops.length}`);
-console.log(`rwxmap     ${rwxmapDir}  HEAD ${head}`);
+console.log(`lean.csv   sha256 ${leanSha}  rows ${leanRows.length}`);
 console.log(`model      ${a.model}  T ${a.temperature}  textFormat ${a.textFormat}  manifest ${opt.manifest ?? 'manifest-exact.json'}`);
 console.log(`${sha(Buffer.from(body))}  ${outPath}`);
 console.log(`${sha(Buffer.from(leanBody))}  ${outPath}.lean.csv`);

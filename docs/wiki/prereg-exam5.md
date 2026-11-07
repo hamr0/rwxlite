@@ -2,6 +2,7 @@
 
 **Status: DRAFT until the placeholders marked `TBD` are filled; FROZEN when this file is committed with the predictions' sha256s, before truth is opened.**
 Written before the exam exists. Nothing here was run on exam #5 data: no ops.csv, no truth. The code was tested only on a synthetic ops.csv of 105 val rows (scratch, not committed) and on val/practice rows, which are R13's training data and decide nothing.
+Update 2026-11-07: exam inputs are frozen (section 3); the lean now comes from rwxmap's lean.csv (section 3 and section 9); the predict script and score script changed accordingly. Still nothing predicted on exam #5.
 Parent rule: `docs/wiki/prereg-r13.md` section 6 (pick, T, decision rule). This file adds the mechanics. Code commit: `c1d26e6`.
 
 ## 1. Question and bar (frozen, from prereg-r13 section 6)
@@ -59,24 +60,28 @@ The model text is built by `formatText` in `src/text.js` inside the engine (`src
 
 Node `formatText` equals the stored val text on 598 of 598 rows (trailing whitespace after a 400-char description cut ignored; 3 rows). Intra-op threads (1 vs 4) gave byte-identical CSVs on the 105 smoke rows.
 
-## 3. Inputs (not delivered yet)
+## 3. Inputs (frozen)
 
-`data/exam5-.../ops.csv` from rwxmap, header exactly `id,provider,method,path,operationId,summary,description`, ids `ex5-0001...`, plus `ops.csv.sha256`, spec files, `sources.json`. ops.csv sha256: **TBD** (`__OPS_SHA__`), rwxmap ref: **TBD** (`__RWXMAP_REF__`), rows: **TBD**. `truth.csv` (id,label) comes last; its sha256 is agreed with rwxmap before scoring: **TBD**.
-
-The model reads the mechanical letter (class, rule) as the first words of its input. `exam5-predict.mjs` takes it from rwxmap's `classifyRow` in a rwxmap tree passed as `--rwxmap-dir` (QUERY read as GET), so **it must be the rwxmap ref that holds mechanical v4**; its HEAD is printed and goes into the findings. The lean it used is written to `<out>.lean.csv` (id,class,rule) so rwxmap can check it equals theirs.
+- rwxmap `data/exam5-2026-11-07/ops.csv`, header exactly `id,provider,method,path,operationId,summary,description`, ids `ex5-0001...`, 1,443 rows, 7 vendors, sha256 **`f6e245ed8e6953b8a7170a0bf6b6a371860460fc7206db6a5cbe23fbba1f26ea`** (equals `ops.csv.sha256` there). Inputs and vendor list frozen at rwxmap commit `23a2b13`. Descriptions are real (multi-line, quoted CSV); the predict script reads RFC 4180.
+- Leakage check on our side: clean, `docs/wiki/exam5-leakage.md` (commit `33b484f`).
+- **Lean source (changed on 2026-11-07).** The model reads the mechanical letter (class, rule) as the first words of its input. rwxmap sends `lean.csv` with the exam (header `id,class,rule,marker`, one row per op in ops.csv order, plus `lean.csv.sha256`), produced by rwxmap `poc/mech-v4/lean.mjs` at commit `94f6cc4` (mech-v4 core unchanged since `40fe161`). `exam5-predict.mjs` takes `--lean lean.csv`, verifies its sha256 against `lean.csv.sha256`, the header, and that ids and order equal ops.csv, and feeds class and rule **exactly as given** (no alias, no edit). The old path (import rwxmap's `classifyRow` via `--rwxmap-dir`) is removed. The same lean.csv is fed to 0.2.0; it too reads the three v4 rule names it never saw, unaliased. The marker (settled|tight|loose) is not read by predict; it is the review column of the product-path replica in `exam5-score.py --mech`.
+- **No-alias decision** (section 8, decided on val before the draw): rule names fed as is; `src/text.js` still applies its own `credential-set` to `cant-undo-verb` alias, nothing else.
+- **Text from ops fields.** The engine builds the text with `src/text.js` `formatText` from the ops.csv fields as they are (method, path, operationId, summary, description; QUERY printed as GET inside `formatText`). Nothing else is done to them. On val, the ops file for rwxmap had an empty description, so the parity run below filled it with the stored text's `desc:` segment, the way `m1/r13-v4lean-check.mjs` does; exam ops have real descriptions and use them directly.
+- **Val parity of the new predict path (2026-11-07).** `exam5-predict.mjs` on the val ops (description filled as above, 4,180 rows) with `data/round13/v4-lean-val.csv` (sha256 `96e15be2048842205f5b619a3e2a684ad6977e173838a5a2f023a1bb403193f6`) gave a CSV **byte-identical** to the section 8 `asis` output `p-asis.csv` (4,180 rows, every p bit for bit).
+- `truth.csv` (id,label) comes last; its sha256 is agreed with rwxmap before scoring: **TBD**. Exam `lean.csv` sha256: **TBD** (arrives with the exam; the predict script refuses a file that does not match its `.sha256`).
 
 ## 4. Procedure
 
-1. This file and the code (commit `c1d26e6`) are committed. Hashes of the code are in section 6.
-2. rwxmap delivers ops.csv + ops.csv.sha256 (+ the rwxmap ref with mechanical v4). We fill the TBDs.
+1. This file and the code are committed (this commit; hashes in section 6).
+2. rwxmap delivers lean.csv + lean.csv.sha256 (ops.csv is already frozen). We fill the TBDs.
 3. Predict, no truth (one run per model, fp32, batch 1, exclusive create so a file is never overwritten):
 ```
-node m1/exam5-predict.mjs <ops.csv> data/m1-r13 predictions-r13.csv --rwxmap-dir <rwxmap tree at the ref> --expect-model rwxlite-0.3.1+bbe1997d
-node m1/exam5-predict.mjs <ops.csv> data/m1/release predictions-v020.csv --rwxmap-dir <same tree> --expect-model rwxlite-0.2.0+8503b655
+node m1/exam5-predict.mjs <ops.csv> data/m1-r13 predictions-r13.csv --lean <lean.csv> --expect-model rwxlite-0.3.1+bbe1997d
+node m1/exam5-predict.mjs <ops.csv> data/m1/release predictions-v020.csv --lean <same lean.csv> --expect-model rwxlite-0.2.0+8503b655
 ```
    Contract CSV: UTF-8, LF, header `id,model,p_is_x,p_changes`, one row per op in ops.csv order, p as `Number.prototype.toString`, `p_changes = p(w)+p(x)`. The script refuses a wrong ops.csv sha256, a different header, a non-finite p, a p outside [0,1], or `p_changes < p_is_x`. An int8 file (`--manifest manifest.json`, to a differently named out file) may be added as information; fp32 counts.
 4. The sha256 of both prediction CSVs (and both `.lean.csv`) go into `docs/wiki/exam5-predictions.sha256` and the table in section 6, committed **before** truth is opened. rwxmap replays our CSVs through its CLI and checks they reproduce (it can run the candidate package of section 5 itself: same p bit for bit).
-5. rwxmap shares `truth.csv`. Scored **once**: rwxmap's `secondPass` per-row letters for both models (columns `id,letter`, plus their mechanical v4 `id,class,rule,review` for an optional replica check), and ours:
+5. rwxmap shares `truth.csv`. Scored **once**: rwxmap's `secondPass` per-row letters for both models (columns `id,letter`, plus the same `lean.csv` as `--mech` for an optional replica check), and ours:
 ```
 python3 -I m1/exam5-score.py --ops <ops.csv> --truth <truth.csv> --truth-sha256 <agreed> --pred-r13 predictions-r13.csv --pred-v020 predictions-v020.csv \
   --sha-list docs/wiki/exam5-predictions.sha256 --out results.json --sp-r13 <letters> --sp-v020 <letters> [--mech <mech-v4.csv>]
@@ -86,21 +91,23 @@ python3 -I m1/exam5-score.py --ops <ops.csv> --truth <truth.csv> --truth-sha256 
 
 ## 5. Candidate package (scratch, nothing published)
 
-Built from `dev` `src/` in a scratch copy with `version` set to `0.3.1` (the repo's `package.json` stays `0.2.1`): `npm pack --ignore-scripts` after `tsc -p tsconfig.build.json`; 14 files. Tarball `rwxlite-0.3.1.tgz`, sha256 `698c0191a772879ff424875f062fd54810dbd0eb7310b2bd8bb077c67476f7c0` (a second `npm pack` of the same scratch copy gave the same hash; it lives in the worker scratch dir, not in the repo). A fresh `npm install` of it plus `loadAnswerer({dir, manifestFile})` gave CSVs byte-identical to `exam5-predict.mjs` for both models on the smoke rows. The package carries no model files; the R13 files are handed over as the directory `data/m1-r13/` (hashes in section 2).
+Built from `dev` `src/` in a scratch copy with `version` set to `0.3.1` (the repo's `package.json` stays `0.2.1`): `npm pack --ignore-scripts` after `tsc -p tsconfig.build.json`; 14 files. Tarball `rwxlite-0.3.1.tgz`, sha256 `698c0191a772879ff424875f062fd54810dbd0eb7310b2bd8bb077c67476f7c0` (rebuilt from scratch on 2026-11-07 after the scratch dir was lost: same hash). Durable copy: `data/m1-r13/rwxlite-0.3.1.tgz` (gitignored with the rest of `data/`). A fresh `npm install` of it plus `loadAnswerer({dir, manifestFile})` gave CSVs byte-identical to `exam5-predict.mjs` for both models on the smoke rows. The package carries no model files; the R13 files are handed over as the directory `data/m1-r13/` (hashes in section 2).
 
 ## 6. Hashes and placeholders
 
-Code (committed at `c1d26e6`):
+Code (this commit; `exam5-predict.mjs` and `exam5-score.py` were changed from `c1d26e6` for the lean file and the marker column):
 
 | file | sha256 |
 |---|---|
-| `m1/exam5-predict.mjs` | `dccafd098d54a1eecdd5d80cacecbdd68682d21602e5d643f4c8eb6ad68df7a7` |
-| `m1/exam5-score.py` | `ed7d0173a7180577d892b1ac9e02613294b79fa8d6c21ff55cecc79803c53704` |
+| `m1/exam5-predict.mjs` | `fe1172dfdddfb4fe6cf3a71779fd733bd12b9db403fa712eb4941303a0782d86` |
+| `m1/exam5-score.py` | `41cde546623fefc5b907b44de6abc55a0a1423eb27be03efeda422ac76ce031c` |
 | `m1/export_r13.py` | `4ecec616a4c3c3ec6804bce074ec2b2e7894d3c961fa79fa3e7f194b05f71938` |
 | `m1/manifest-r13.mjs` | `756ab27de24142c8d038038f66ca0816f88947e526a96cc4a4875af752f931af` |
+| `m1/r13-v4lean-check.mjs` | `2134e346d2bff042106d192c65f43f8737cc2269392d18f47c64034a26fa30fe` |
+| `m1/r13-v4lean-score.py` | `7f2f3b83a3d9a8dc25aea46e2a649d30e2973d1e36405a3cdacb54c1c7169095` |
 | `m1/r13-valpick.py` (the replica `exam5-score.py` copies) | `82ec34bde2ce6e1a132b7084e6b69e92a4d1828e2b7dd744585b42e8881575ed` |
 
-To fill before truth: ops.csv sha256 `TBD`; rwxmap ref `TBD`; `predictions-r13.csv` `TBD`; `predictions-v020.csv` `TBD`; `predictions-r13.csv.lean.csv` `TBD`; `predictions-v020.csv.lean.csv` `TBD`; truth sha256 `TBD`.
+To fill before truth: exam lean.csv sha256 `TBD`; `predictions-r13.csv` `TBD`; `predictions-v020.csv` `TBD`; `predictions-r13.csv.lean.csv` `TBD`; `predictions-v020.csv.lean.csv` `TBD`; truth sha256 `TBD`.
 
 ## 7. Not allowed once predictions exist
 
@@ -153,3 +160,24 @@ The 154 rows with new rule names (product / standalone, right / too loose / too 
 | content-noun (58) | 52 / 5 / 1 | 51 / 6 / 1 | 51 / 7 / 0 | 51 / 7 / 0 |
 | get-action (1) | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | all 154 | 139 / 5 / 10 | 139 / 10 / 5 | 138 / 7 / 9 | 138 / 7 / 9 |
+
+## 9. For rwxmap's candidate addendum
+
+Equivalent of `exam-prereg-exam4.md` section 3 for R13. Nothing is created or published; the tag is proposed only.
+
+- **Tarball:** `/home/hamr/PycharmProjects/rwxlite/data/m1-r13/rwxlite-0.3.1.tgz`, sha256 `698c0191a772879ff424875f062fd54810dbd0eb7310b2bd8bb077c67476f7c0`, 14 files (`src/`, `types/`, README, LICENSE, CHANGELOG, package.json), no model files. Its `src/` is byte-identical to `src/` on `dev` (checked with `diff -r` after extracting). Its `package.json` says `0.3.1` (built in a scratch copy); `package.json` on `dev` stays `0.2.1`.
+- **How to install:** from the tarball, not from a git ref: `ONNXRUNTIME_NODE_INSTALL=skip npm install <path>/rwxlite-0.3.1.tgz`. A git ref of `dev` would install version 0.2.1 and its `package.json` would not match the manifests' version `0.3.1`. (Tested: fresh install, `loadAnswerer({dir, manifestFile: 'manifest-exact.json'})`, byte-identical output to `exam5-predict.mjs`.)
+- **Package ref (source of the tarball's `src/`):** rwxlite `dev` commit `f7456a2acc66ce84fd8c87d7426c9001bab8ceb7`, the last commit that changed `src/`; `src/` is identical at every later `dev` commit, including the commit that holds this file. That ref gives the code, not the version number.
+- **Proposed tag:** `v0.3.1` (**PROPOSED, NOT created**; `v0.3.0` is the unreleased r11 candidate).
+- **Model directory:** `/home/hamr/PycharmProjects/rwxlite/data/m1-r13` (R13).
+- **R13 files (sha256):**
+  - `model-fp32.onnx` `bbe1997d43020724f9eab9e42e8f6337e9640fe46f764b6fceac1eb1d000a3cf`
+  - `model-int8-pc.onnx` `984714f0342ce551779f0ed9d95be57f71ab30b2ef72baec1d9818ce96d465d7`
+  - `manifest.json` (int8-pc) `e8477a1595578eec1e45020277319877d45cfb809785b22eaeb83bfb66c0a5b8`
+  - `manifest-exact.json` (fp32) `c6bac86970888049952305f72434abe5c9d8f854224a5537f14e5a428a977739`
+  - `vocab.txt` `07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3`
+- **R13 model strings:** fp32 (gate) `rwxlite-0.3.1+bbe1997d`; int8 (information) `rwxlite-0.3.1+984714f0`. **T 0.991463** (in both manifests as `temperature`), `textFormat` 1.
+- **0.2.0 for reference** (`data/m1/release/`, tag `v0.2.0`): `manifest-exact.json` `a484251cd4daf9c6fc7c8d2cb3f4a43f0cbdd6f4447d2c9ff65721a2f767b774`, `manifest.json` `10407b787fae2cadc318780a8c4ad171dc07af1389129c284bfd85c54f6b38bc`, `model-fp32.onnx` `8503b655a25202f8d01ced40ab685c34b287f70db8c0651528ca476f1470a48b`, `model-int8-pc.onnx` `8ad0a182b37237adc819bda2c03c01f0cb0e40afc2b20bdacb06193cd62a8844`, `vocab.txt` `07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3`; model strings fp32 `rwxlite-0.2.0+8503b655`, int8 `rwxlite-0.2.0+8ad0a182`; T 0.844 (no `temperature` in its manifests: the engine default).
+- **The command, same shape as exam #4 (rwxmap's flag names):** `--cand-ref f7456a2acc66ce84fd8c87d7426c9001bab8ceb7 --cand-tag v0.3.1 --cand-models /home/hamr/PycharmProjects/rwxlite/data/m1-r13` with the five `--cand-file` hashes above, `--cand-model-fp32 rwxlite-0.3.1+bbe1997d --cand-model-int8 rwxlite-0.3.1+984714f0`. Because `package.json` at that ref says 0.2.1, rwxmap should install the tarball above for the candidate instead of resolving the ref.
+- **Version is a placeholder** (see section 2): a different version changes both model strings and both manifest hashes; all of this is then re-agreed before any prediction.
+

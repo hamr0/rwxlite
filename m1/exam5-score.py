@@ -2,13 +2,13 @@
 
   python3 -I m1/exam5-score.py --ops OPS.csv --truth TRUTH.csv --truth-sha256 HEX \
       --pred-r13 predictions-r13.csv --pred-v020 predictions-v020.csv --sha-list docs/wiki/exam5-predictions.sha256 --out results.json \
-      [--sp-r13 secondpass-r13.csv --sp-v020 secondpass-v020.csv] [--mech mech-v4.csv]
+      [--sp-r13 secondpass-r13.csv --sp-v020 secondpass-v020.csv] [--mech lean.csv]
 
 Definitions are those of m1/r13-valpick.py: letters are ordered r < w < x; a letter BELOW the truth is "too loose", ABOVE is "too tight", equal is "right".
 STANDALONE (model only, no mechanical letter, no second pass): letter = argmax of (r, w, x) = (1 - p_changes, p_changes - p_is_x, p_is_x) read from the
 prediction CSV exactly as rwxmap derives them (first maximum wins, order r, w, x).
 PRODUCT path = rwxmap's real CLI secondPass, mode a, mechanical v4, run by rwxmap. Its per-row final letters come in --sp-* files (columns id,letter; extra columns ignored).
-We score those letters against truth with the same definitions. If --mech (id,class,rule,review from rwxmap's mechanical v4) is also given, the script recomputes the
+We score those letters against truth with the same definitions. If --mech (rwxmap's lean.csv: id,class,rule,marker; marker = settled|tight|loose is the review; an old id,class,rule,review file also works) is also given, the script recomputes the
 letters with the secondPass replica of m1/r13-valpick.py (lower only at top-letter p >= 0.97, credential-set never lowered) from OUR predictions and reports every row where
 the replica differs from rwxmap's letter. That check is information; rwxmap's letters are the product numbers.
 
@@ -125,7 +125,7 @@ if a.sp_r13 and a.sp_v020:
         m = read_csv(a.mech)
         if [r['id'] for r in m] != ids: die(f'{a.mech}: ids differ from ops.csv (set or order)')
         for k in ('r13', 'v020'):
-            rep = [final_letter(r['class'], r['rule'], r['review'], read_logits(*pred[k][i])) for i, r in enumerate(m)]
+            rep = [final_letter(r['class'], r['rule'], r.get('review', r.get('marker')), read_logits(*pred[k][i])) for i, r in enumerate(m)]
             res['checks'][f'replica_vs_rwxmap_{k}'] = {'differing_rows': [{'id': i, 'replica': x, 'rwxmap': y} for i, x, y in zip(ids, rep, sp[k]) if x != y],
                                                        'replica_counts': count(rep)}
     both = res['standalone_bar']['pass'] and res['product_bar']['pass']

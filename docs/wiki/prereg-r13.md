@@ -126,6 +126,8 @@ Everything else (data rows, labels, targets, recipe, `--loose_cost 3`) is as R13
 
 **The hint** is computed inside `src/text.js` (`accessHint`) and `train/common.py` (`access_hint`) from the operation's own method, path, operationId and summary. It is never supplied by the caller and never read from the lean. The description is not read (the round 13 data files do not carry it). DELETE is never hinted. It fires when any of six families matches (text first normalised: tags stripped, camelCase split, lower-case, non-alphanumerics to one space):
 
+> Correction (2026-11-07): the statements here and under Parity that the round 13 data files carry no description are wrong. The files have no separate description field, but each row's stored `text` carries the cut `desc:` segment (up to 400 characters), and the models trained on it. The hint still does not read the description.
+
 1. grants or widens access: IAM, ACL, permissions, role bindings and assignments, share, invite, collaborators, deploy keys, ssh keys, and resource/bucket/key/queue/topic/repository/vault/registry/secret/security/trust/network/access policies, with a write-type verb (a GET only if its name starts with a write verb);
 2. creates an API key or token (api key, access key, personal access or bearer token, client secret, application password);
 3. flips an access-widening toggle (public access, anonymous or guest access, external sharing, open registration, disable MFA or authentication and the like);
