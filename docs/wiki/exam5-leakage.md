@@ -44,7 +44,7 @@ Steps:
 Strong tokens (frontapp, planetscale, paddle*, hookdeck, fusionauth, semaphore*, weaviate): only the single PlanetScale-in-Cloudflare description above.
 
 "front" hits, all incidental:
-- Embedded in a longer word: CloudFront (amazonaws.com), FrontDoor (azure.com), Frontend (AWS `...FrontendService` X-Amz-Target ops), Frontline (twilio), Hyperdrive/other descriptions.
+- Embedded in a longer word: CloudFront (amazonaws.com), FrontDoor (azure.com), Frontend (AWS `...FrontendService` X-Amz-Target ops), Frontline (twilio), and similar.
 - Whole word "front" in R13 train: `/dcim/front-port-templates/` and `dcim_front-port-templates_*` ops (netbox.dev 21, netboxdemo.com 15 path/operationId hits; netbox "front ports" are physical cable ports), `front-ports` in v3eval (netbox.dev 2), and one ory.sh summary "OpenID Connect Front- and Back-channel Enabled Logout". Also "front" in descriptions (front-end, front of ...).
 - R13 val: three embedded hits, no vendor match.
 
@@ -79,7 +79,7 @@ Examples, generic vs coincidental:
 - Weaviate triple: `GET /namespaces/{namespace_id} getNamespace` (docker.com), one op.
 - operationId matches on a different path: frontapp `list-accounts`/`create-account` on `/accounts` (codat.io), paddle `list-customers`, `get-customer` (codat.io; the Paddle and Codat ids share kebab naming), planetscale `list_organizations`, `get_organization`, `list_audit_logs` (permit.io), fusionauth `retrieveApplication`/`createApplication` on `/api/application` (nexmo.com) and `GET/POST /api/application` (meshery.local; FusionAuth uses /api/application, the Meshery path is coincidence).
 
-Reading: this is generic REST naming overlap, spread across many unrelated providers, concentrated in CRUD routes (/accounts, /customers, /projects, /tags, /events, /organizations). It is not a copied spec: no single source provider carries more than a small slice, and no vendor's distinctive routes (e.g. paddle `/transactions/{id}/revise`, fusionauth `/api/user/registration`, weaviate `/v1/batch/objects`, planetscale `/organizations/{o}/databases/{d}/branches/{b}/...`) appear in training under another provider name.
+Reading: this is generic REST naming overlap, spread across many unrelated providers, concentrated in CRUD routes (/accounts, /customers, /projects, /tags, /events, /organizations). It is not a copied spec: no single source provider carries more than a small slice, and the vendor-specific routes checked (fusionauth `/api/user/registration`, 5 exam ops) have zero matches in R13 train or the m0 corpus.
 
 ## 6. Conclusion
 
