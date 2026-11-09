@@ -7,6 +7,7 @@ All notable changes to rwxlite are recorded here. Format follows
 
 ### Changed
 - Docs only: the README "How well it does" section now leads with rwxmap's exam #6 (modes a and b, rules only), keeps exam #5 as a shorter second block, and has a new ASCII logo. `docs/wiki/findings.md` and the PRD status line record the same numbers.
+- Docs only: the README shows one test (exam #6); exam #5 stays in docs/wiki/findings.md.
 
 ## [0.3.1] - 2026-11-07
 
