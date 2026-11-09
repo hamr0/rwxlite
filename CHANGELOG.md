@@ -3,6 +3,11 @@
 All notable changes to rwxlite are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- Docs only: the README "How well it does" section now leads with rwxmap's exam #6 (modes a and b, rules only), keeps exam #5 as a shorter second block, and has a new ASCII logo. `docs/wiki/findings.md` and the PRD status line record the same numbers.
+
 ## [0.3.1] - 2026-11-07
 
 Round 13 (R13) is the new default model.

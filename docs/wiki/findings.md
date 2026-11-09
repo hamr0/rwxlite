@@ -1011,3 +1011,22 @@ rwxmap replayed R13 and 0.2.0 through its real secondPass (src at v4, D138), swa
 - **With rwxmap.** rwxmap shipped mechanical v4 (D138). rwxmap adopted R13 by override of D135, although R13 failed the frozen product-path exact bar on exam #5. The lowering cut 0.90 was picked jointly and is rwxmap's decision D139 (rwxmap commit `5571cd0`); it lives in rwxmap. With rwxmap at 0.90, exam #5 gives 1,269 / 40 / 134 (right / too loose / too tight) on mechanical v4. The cut was tuned on exam #5 and val, so it is not yet proven on unseen vendors. Released rwxmap still runs 0.2.0 at 0.97 until its pin moves to 0.3.1.
 - **Exam #5 and int8.** Standalone R13 fp32 1,283 / 64 / 96; int8 (the package default) 1,280 / 64 / 99, about 17 ms per operation. The product path at 0.97 failed the frozen bar on exact (1,220 vs 1,272), so the frozen verdict stays NO-GO; shipping R13 as 0.3.1 is the user's and rwxmap's later decision.
 - **Release.** 0.3.1 is the first reliable release (default int8 `+984714f0`, exact fp32 `+bbe1997d`, T 0.991463, API unchanged, README and docs cleaned for outside readers). Pending: self-review, branch-review, release; push, tag and publish need user approval. The earlier "0.2.0 stays, nothing released" lines above are history.
+
+
+## 2026-11-09: rwxmap exam #6 and mode b at 85
+
+- **Source.** rwxmap v0.11.1 (docs only), commits `d4d3f1a` and `20acb95`; sweep record `poc/mode-b-r13/readout.txt` in rwxmap.
+- **Exam #6** (2026-11-08): 1,588 operations, 5 APIs (grafana, nocodb, radarr, cloudsmith, invoiceninja). Scored once through rwxmap 0.11.0 from the npm install, with rwxlite 0.3.1 fp32. Two Sonnet labellers labelled blind and agreed on 1,564 rows; a person ruled the other 24. Same-model agreement shows consistency, not truth.
+- **Result** (right / too loose / too tight):
+
+| | right | too loose | too tight |
+|---|---|---|---|
+| mode a (default; rules, then rwxlite on contested rows at the 0.90 cut) | 1,434 (90.3%) | 35 (2.2%) | 119 (7.5%) |
+| mode b (`--engine rwxlite --confidence 85`; rwxlite judges every row, under the confidence a row becomes x + review) | 1,424 (89.7%) | 19 (1.2%) | 145 (9.1%) |
+| mechanical rules alone | 1,305 (82.2%) | 43 (2.7%) | 240 (15.1%) |
+
+- **Mode a is an honest test.** The 0.90 cut was tuned on exam #5 and held on exam #6.
+- **Mode b is fitted.** The 85 was picked by a sweep on exams #5 and #6, so its exam #6 row is not an unseen test. D140 (rwxmap) is a candidate. rwxmap 0.11.1's default is still 95, so pass `--confidence 85`. Exam #7 will score it.
+- **Mode b on exam #6 at other confidences:** 95 gives 1,288 / 13 / 287; 90 gives 1,388 / 17 / 183; 85 gives 1,424 / 19 / 145; 70 gives 1,441 / 29 / 118.
+- **Exam #5 too-loose split, rwxmap at 0.90 (verified by us).** Of the 40 too-loose rows, 36 are x called w, 2 are w called r and 2 are x called r. 38 are off by one step and 2 by two.
+- **What it means for rwxlite.** Mode b is rwxlite on its own. The earlier line "Released rwxmap still runs 0.2.0 at 0.97" is superseded: rwxmap 0.11.0 pins rwxlite 0.3.1.
