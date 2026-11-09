@@ -47,7 +47,7 @@ The model outputs three probabilities, p(r), p(w) and p(x). Every Jev question i
 
 ## How well it does
 
-**Exam #6 (rwxmap's exam, run on the published packages).** 1,588 operations from 5 APIs (Grafana, NocoDB, Radarr, Cloudsmith, Invoice Ninja), scored once on 2026-11-08 through rwxmap 0.11.0 installed from npm, with rwxlite 0.3.1 (fp32).
+**Tested once on 1,588 operations from 5 APIs no model had seen** (Grafana, NocoDB, Radarr, Cloudsmith, Invoice Ninja), scored on 2026-11-08 through rwxmap 0.11.0 installed from npm, with rwxlite 0.3.1 (fp32).
 
 | | right | too loose | too tight |
 |---|---|---|---|
@@ -58,21 +58,10 @@ The model outputs three probabilities, p(r), p(w) and p(x). Every Jev question i
 - **Too loose** means it called an operation safer than it is. This is the costly mistake.
 - **Too tight** means it called an operation riskier than it is. This is annoying but safe.
 - Two Sonnet labellers labelled the exam blind. They agreed on 1,564 rows and a person ruled the other 24. Agreement between two runs of the same model shows consistency, not truth.
-- Mode a is rwxmap's default: the rules answer first, and rwxlite moves only the contested rows, at a 0.90 cut. The cut was tuned on exam #5 and held on exam #6, so this row is an honest test.
-- Mode b has rwxlite alone judge every row. Under the confidence, a row becomes x and is marked for review. The 85 was picked by a sweep on exams #5 and #6, so that row is fitted, not an unseen test. rwxmap's default is still 95, so pass `--confidence 85`. Exam #7 will test it.
-- Trade-off in mode b, exam #6, right / too loose / too tight: confidence 95 gives 1,288 / 13 / 287; 90 gives 1,388 / 17 / 183; 85 gives 1,424 / 19 / 145; 70 gives 1,441 / 29 / 118. A higher confidence leaks less but sends more rows to review.
-
-**Exam #5 (our earlier exam).** 1,443 operations from 7 vendors no model had seen (Front, PlanetScale, Paddle, Hookdeck, FusionAuth, Semaphore UI, Weaviate). Two independent AI labellers set the answers, and a human ruled on every disagreement.
-
-| | right | too loose | too tight |
-|---|---|---|---|
-| **On its own** (rwxlite 0.3.1, int8 default, given rwxmap's rules as the first guess) | 1,280 (88.7%) | 64 (4.4%) | 99 (6.9%) |
-| **With rwxmap** (mode a, 0.90 cut; fp32 model, the one rwxmap runs) | 1,269 (87.9%) | 40 (2.8%) | 134 (9.3%) |
-
-- The fp32 model on its own scores 1,283 / 64 / 96. The int8 model at the 0.90 cut was not measured.
-- The 0.90 cut was tuned on this exam and on validation data.
-- Of the 40 too-loose rows with rwxmap at 0.90, 36 are x called w, 2 are w called r, and 2 are x called r. So 38 are off by one step and 2 by two.
-- rwxmap 0.11.x runs rwxlite 0.3.1 (mode a at 0.90). rwxmap checked this from a fresh npm install, and exam #5 through that install scored 1,269 / 40 / 134.
+- Mode a is rwxmap's default: the rules answer first, and rwxlite moves only the contested rows, at a 0.90 cut. The cut was tuned on an earlier test and held on this one, so this row is an honest test.
+- Mode b has rwxlite alone judge every row. Under the confidence, a row becomes x and is marked for review. The 85 was picked using this test and an earlier one, so that row is fitted, not an unseen test. rwxmap's default is still 95, so pass `--confidence 85`. A next test will check it.
+- Trade-off in mode b, right / too loose / too tight: confidence 95 gives 1,288 / 13 / 287; 90 gives 1,388 / 17 / 183; 85 gives 1,424 / 19 / 145; 70 gives 1,441 / 29 / 118. A higher confidence leaks less but sends more rows to review.
+- This test used the fp32 model, which rwxmap runs. The default int8 model was not scored on it.
 
 It was trained on about 102,700 labelled API operations from about 690 public API providers (691 distinct providers, 682 vendors, in the round-13 training and validation data), labelled under the wider x rule above. Speed is about 17-20 ms per operation on a laptop CPU.
 
