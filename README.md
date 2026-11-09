@@ -1,11 +1,9 @@
 ```
-                       _  _  _
- _ __ __      ____  __| |(_)| |_   ___
-| '__|\ \ /\ / /\ \/ /| || || __| / _ \
-| |    \ V  V /  >  < | || || |_ |  __/
-|_|     \_/\_/  /_/\_\|_||_| \__| \___|
+                ┌───────────┐     r  reads
+  API call ───▶ │  rwxlite  │ ──▶ w  writes
+                └───────────┘     x  can't undo
 
-r / w / x for every API call, locally
+  local · 23 MB · ~20 ms
 ```
 
 <p align="center">
