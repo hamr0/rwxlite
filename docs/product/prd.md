@@ -2,6 +2,8 @@
 
 Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built and published (0.2.0, npm and GitHub release v0.2.0); round 10 trained, exam #3 NO-GO (loose bar), 0.2.0 stays shipped; round 11 trained, exam #4 NO-GO on both scorers; round 12 (S0/S1/S2) showed no gain over 0.2.0, so 0.2.0 stays shipped; 0.2.1 (answerMany batch-independence fix, same weights) is tagged v0.2.1 and not yet published. Date: 2026-11-05.
 
+Status (updated 2026-11-09): rwxmap 0.11.0 pins rwxlite 0.3.1 and runs mode a at the 0.90 cut. Latest exam is rwxmap's exam #6 (1,588 operations, 5 APIs, scored once): mode a 1,434 / 35 / 119 (right / too loose / too tight), mode b at confidence 85 1,424 / 19 / 145, rules only 1,305 / 43 / 240. Mode b's 85 was tuned on exams #5 and #6; exam #7 will test it. Details in `docs/wiki/findings.md`.
+
 Status (updated 2026-11-07): round 13 (R13) is the model for release 0.3.1, the first release we call reliable. R13 trained on 102,668 rows under the widened x (D137, with D136). Exam #5 (1,443 operations, 7 unseen vendors): standalone R13 passed, the product path failed the frozen exact bar, so by the frozen rule it was NO-GO. rwxmap adopted R13 anyway by override of D135 and picked its own lowering cut 0.90 (D139). The 0.3.1 release is pending (self-review, branch-review, release; user approval before any push, tag or publish). The older status above is kept as history.
 
 ## Problem & goal
