@@ -1,7 +1,7 @@
 ```
-                ┌───────────┐     r  reads
+                 ┌───────────┐     r  reads
   API call ───▶ │  rwxlite  │ ──▶ w  writes
-                └───────────┘     x  can't undo
+                 └───────────┘     x  can't undo
 
   local · 23 MB · ~20 ms
 ```
