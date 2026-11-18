@@ -15,11 +15,12 @@ ap.add_argument('--max_len', type=int, default=128); ap.add_argument('--tag', de
 ap.add_argument('--soft', action='store_true', help='round 8: soft targets from Jev p (see common.soft_targets)')
 ap.add_argument('--alpha', type=float, default=0.7, help='weight of soft CE; loss = alpha*soft + (1-alpha)*hard')
 ap.add_argument('--init', default=None, help='holdout experiment: start from this saved model dir (e.g. ckpt-r8soft/final) instead of the base model; default None = r10/r11 recipe unchanged')
+ap.add_argument('--base', default='sentence-transformers/all-MiniLM-L6-v2', help='round 14: base model (HF id or dir) for tokenizer and weights; default = all-MiniLM-L6-v2, recipe unchanged')
 ap.add_argument('--x_weight', type=float, default=1.0, help='class weight on x in both CE terms')
 ap.add_argument('--loose_cost', type=float, default=0.0, help='round 13 R13-L3: add train/losscost.py expected-cost term (below-truth cost = this, above-truth cost 1); 0 = off, recipe unchanged')
 a = ap.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(1); random.seed(1)
-BASE = 'sentence-transformers/all-MiniLM-L6-v2'
+BASE = a.base
 tok = AutoTokenizer.from_pretrained(BASE)
 model = AutoModelForSequenceClassification.from_pretrained(a.init or BASE, num_labels=3)
 tr, va, ev = load_split('train'), load_split('val'), load_split('v3eval')
