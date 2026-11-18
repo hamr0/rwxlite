@@ -1,6 +1,8 @@
 # rwxlite — PRD
 
 Round 14 (bge-base as a teacher for MiniLM): see [prd-bge-teacher.md](prd-bge-teacher.md).
+Round 15 (large new-vendor transfer set for distillation): see [prd-r15-github-data.md](prd-r15-github-data.md).
+
 
 Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built and published (0.2.0, npm and GitHub release v0.2.0); round 10 trained, exam #3 NO-GO (loose bar), 0.2.0 stays shipped; round 11 trained, exam #4 NO-GO on both scorers; round 12 (S0/S1/S2) showed no gain over 0.2.0, so 0.2.0 stays shipped; 0.2.1 (answerMany batch-independence fix, same weights) is tagged v0.2.1 and not yet published. Date: 2026-11-05.
 

@@ -1134,3 +1134,21 @@ Right / too loose / too tight:
 - Overall: **FAIL** (all three clauses). Stop; R13 stays.
 
 **Reading (information only).** The student did not inherit r14-bge's mode-b gain: at 85 and 80 it is about level with R13 (right -1 / -3, too loose -4 / -7), and at 90 it has more too loose. Scratch (not committed): `.../scratchpad/r14s/` (`work/` p files, `meta.json`, `report.json`, `run.log`; `pb/` per-confidence reports and `sweep.log`).
+
+## 2026-11-18: Round 15 background (transfer-set research and corpus skew)
+
+- Round 14: bge-base beats R13 in mode b at every confidence on val, is worse in mode a. A student distilled on the same 102,668 rows came out equal to R13 (all three clauses failed). R13 already learned from Jev's soft targets, so swapping teachers on the same rows was not expected to change much.
+- Research: distillation gains come mainly from a large unlabelled transfer set and grow with its size. Round 14 gave the student no new rows.
+  - https://arxiv.org/pdf/2402.14922 (Practical Insights into Knowledge Distillation for Pre-Trained Models)
+  - https://arxiv.org/pdf/1910.01769 (Distilling BERT into Simple Neural Networks with Unlabeled Transfer Data)
+  - https://arxiv.org/pdf/2004.05686 (XtremeDistil)
+- Loss changes and cost weighting give mixed results, so no new penalties:
+  - https://arxiv.org/pdf/2605.03135 (cost-sensitive methods mixed)
+  - https://arxiv.org/pdf/2609.29266 (cost weighting hurts calibration)
+- Softmax confidence is a strong selection rule: https://arxiv.org/pdf/2206.09034v4.pdf
+- MCP tool hints are untrusted: https://blog.modelcontextprotocol.io/posts/2026-03-16-tool-annotations/
+- Corpus skew: 123,339 ops from 673 providers (`data/m0/mechanical.jsonl.gz`). About 76,000 (62%) come from five companies: microsoft.com 33,869, github.com 14,663, amazonaws.com 13,198, azure.com 8,083, googleapis.com 5,992.
+- Gap to close: about 97% on val vs about 90% on unseen vendors (rwxmap exam #6, mode a).
+- Sources measured 2026-11-18: GitHub code search about 127,600 `filename:openapi.yaml` files ("openapi: 3") and about 37,800 `filename:swagger.yaml` files (`swagger: "2.0"`), JSON and other names not counted. API Evangelist org: 45,192 public repos. ToolBench (RapidAPI, about 3,400 services, about 16,000 endpoints) on Hugging Face, e.g. Maurus/ToolBench.
+- No public dataset with r/w/x-style labels found (searched 2026-11-18). The 2024 GitHub OpenAPI dataset (Di Lauro, ICWE 2024, about 600k specs) has no public download found.
+- Plan: `docs/product/prd-r15-github-data.md`.
