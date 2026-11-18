@@ -1,6 +1,6 @@
 # PRD: round 15, a large new-vendor transfer set for distillation
 
-Status: draft 2026-11-18. Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
+Status: agreed 2026-11-18, collection on hold. Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
 
 ## 1. Goal
 
@@ -29,6 +29,8 @@ Close the unseen-vendor gap. The shipped model scores about 97% on val but about
 - Permissive-licence repos only: MIT, Apache-2.0, BSD-2/3, CC0, ISC, Unlicense. Check the GitHub repo licence field. Training use only, never republished.
 - Remove petstore and template copies, tiny specs (fewer than 5 operations), and exact and near duplicates (spec hash, and host+method+path).
 - Exclude every provider already in our corpus, every exam #1-#6 vendor, and every exam #7 vendor. The exam #7 vendors are chosen with rwxmap and frozen BEFORE collection starts. Collection does not start until that list is committed. (Same idea as the main PRD: every APIs.guru snapshot of a sampled op key is excluded.)
+- Exam #7 exclusion is by vendor name, every brand alias and the vendor's spec repo, plus any fork, mirror or SDK repo that vendors the spec. Matching the provider field alone is not enough, because a GitHub-wide crawl is the likeliest way an exam vendor slips in.
+- After collection and before any teacher labelling or training, the full round-15 provider list (with repo URLs) goes to rwxmap. They confirm that no exam #7 vendor got in.
 - Cap each vendor at 300 operations.
 - Target: start at 100,000 operations from at least 3,000 new vendors. Grow to 300,000 only if the first round helps.
 
@@ -77,4 +79,4 @@ Still pending:
 
 ## 10. Status
 
-Draft 2026-11-18. Licence policy and start size are decided (section 8, agreed 2026-11-18). Waiting only on the exam #7 vendor list from rwxmap (request sent 2026-11-18). Collection does not start before it is committed.
+Agreed 2026-11-18. Licence policy and start size are decided (section 8). rwxmap agreed on 2026-11-18 to freeze the exam #7 list; their user picks the vendors. There is no shortlist yet (ringcentral and baserow are earlier candidates and need re-checking). Collection is on hold until rwxmap sends the committed exam #7 list.
