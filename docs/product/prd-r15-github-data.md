@@ -56,11 +56,16 @@ Same as `prd-bge-teacher.md` section 5: nice 19, ionice idle, 3 of 4 threads, on
 
 Estimated teacher labelling time: about 1.5 h per 100,000 rows. Round 14 phase 1 measured about 96 min for 102,668 rows.
 
-## 8. Open decisions for the user
+## 8. Decisions
 
-- Licence policy. Recommended: permissive only, as in section 4.
-- Start size. Recommended: 100,000 operations.
-- Exam #7 vendor list. To be agreed with rwxmap.
+Agreed by the user on 2026-11-18 (the plan as written above):
+
+- Licence policy: permissive only (MIT, Apache-2.0, BSD-2/3, CC0, ISC, Unlicense), as in section 4.
+- Start size: 100,000 operations. Grow to 300,000 only if round 15 helps.
+
+Still pending:
+
+- Exam #7 vendor list. To be agreed with rwxmap. A request was sent to rwxmap on 2026-11-18. Collection does not start until the list is committed (section 4).
 
 ## 9. Non-goals
 
@@ -72,4 +77,4 @@ Estimated teacher labelling time: about 1.5 h per 100,000 rows. Round 14 phase 1
 
 ## 10. Status
 
-Draft 2026-11-18. Waiting on the exam #7 vendor list from rwxmap and the user's licence and size decisions.
+Draft 2026-11-18. Licence policy and start size are decided (section 8, agreed 2026-11-18). Waiting only on the exam #7 vendor list from rwxmap (request sent 2026-11-18). Collection does not start before it is committed.

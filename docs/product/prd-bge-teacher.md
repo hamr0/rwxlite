@@ -80,6 +80,8 @@ Draft 2026-11-18. Next: the `--base` change, then the step-1 training run.
 
 2026-11-18 step 3: **FAIL** under the section 9 student rule: (a) mode b 85 right 3,900 vs > 3,901 (too loose 66 ok); (b) mode b 90 too loose 51 vs <= 46; (c) mode a 0.90 too loose 87 vs <= 86; student T 1.070938. Stop: R13 stays, nothing shipped. Details in `docs/wiki/findings.md` (2026-11-18: Round 14 step 3 result).
 
+2026-11-18 round 14 is closed. bge-base was better only in mode b (on val, information only). A student distilled on the same rows equalled R13 and failed section 9. R13 stays. Follow-up: round 15 (`docs/product/prd-r15-github-data.md`).
+
 ## 9. Step 3 addendum: distillation (pre-registered 2026-11-18, before any student training)
 
 **Why.** Step 2 FAILED the section 4 rule (mode a, 0.90: too loose 94 vs 87, right +6 rows). That verdict stands and is not edited. On 2026-11-18 the user decided to run distillation anyway, because a 5-point mode-b sweep on val (information, outside the step-2 rule; table in `docs/wiki/findings.md`, "2026-11-18: Mode-b sweep") showed r14-bge better than R13 at every confidence: right is higher and too loose is equal or lower at 95, 90, 85, 80 and 75. Val is the selection set, so this alone proves nothing; it is the reason to test whether a MiniLM student can inherit the gain, and exam #7 stays the ship judge.

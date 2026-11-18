@@ -315,6 +315,26 @@ The x share must not fall after filtering. Otherwise the model sees fewer danger
 
 **Labels that can't be learned.** Where the answer keys disagree, there is nothing to learn. "Restart" is truth w 6 times (coolify: "restart = stop + start, ends as before") and x 4 times (neon endpoint, supabase project, render postgres and service: "drops live connections"). rwxmap's user will rule. Until then restart, start, stop, pause and resume are kept out of generated variants.
 
+### 12. What rounds 14 and 15 taught us: vendors matter more than model size
+
+**Our data is narrow.** We have 123,339 operations from 673 providers. But about 62% come from just five companies: Microsoft 33,869, GitHub 14,663, Amazon 13,198, Azure 8,083 and Google 5,992. So the model has seen few vendors in depth.
+
+This is the likely reason scores move between exams. On rows that look like its training data, the model gets about 97%. On vendors it has never seen, it gets about 90%. Every new exam is a new set of vendors, so every exam gives a slightly different score.
+
+**A bigger model did not fix it.** In round 14 we tried bge-base, which is 5 times bigger (109.5M parameters). In rwxmap's default mode (mode a) it was no better. It helped only when rwxlite judges every row with a confidence bar (mode b). The reason is that its confidence is more trustworthy, not that its first guess is better.
+
+**Distillation on the same rows did nothing.** Distillation means a big teacher's percentages teach the small model. We trained a small student on the same rows, with bge-base as teacher. It came out equal to R13. R13 was already learning from Jev's percentages, so changing the teacher changed little. Research says distillation works mainly through a large pile of new, unlabelled examples. We gave it none.
+
+**So round 15 shows the small model many new vendors.** The plan is 100,000 operations from 3,000+ new vendors, at most 300 per vendor. Each row gets three opinions: rwxmap's rules, today's model, and bge. Where they disagree, Claude checks a sample against the label standard.
+
+**What does not help** (research plus our own rounds):
+
+- Extra penalties for costly mistakes. Results are mixed, and they can hurt confidence.
+- Fancy abstain methods. A plain confidence bar is already strong.
+- Few-example tricks.
+
+Numbers are in `docs/wiki/findings.md` (the 2026-11-18 sections), `docs/product/prd-bge-teacher.md` and `docs/product/prd-r15-github-data.md`.
+
 ## Training on the home server
 
 Sandbox: `ahassan@192.168.178.180:~/rwxlite-train/` (Fedora, 4-core i3-8100T, CPU only, venv at `.venv`, torch CPU, transformers 5.0.0). Nothing outside that dir is touched. Only `train/*.py` and `data/train/{train,val,v3eval}.parquet` are copied there (no exam, gate labels, keys or .env).
