@@ -22,7 +22,7 @@ RAW = os.path.normpath(RAW)
 CAND = os.path.join(RAW, "candidates.jsonl")
 SHARDS = os.path.join(RAW, "search_shards.jsonl")
 SLEEP = 6.5
-MIN_SIZE, MAX_SIZE = 1500, 400000  # <1.5 KB cannot hold 5 operations; code search skips >384 KB
+MIN_SIZE, MAX_SIZE = 3000, 400000  # <3 KB rarely holds 5 real operations; code search skips >384 KB
 
 QUERIES = [  # (id, qualifier+marker string)
     ("openapi.yaml", 'filename:openapi.yaml "openapi: 3"'),
