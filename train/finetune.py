@@ -16,6 +16,7 @@ ap.add_argument('--soft', action='store_true', help='round 8: soft targets from 
 ap.add_argument('--alpha', type=float, default=0.7, help='weight of soft CE; loss = alpha*soft + (1-alpha)*hard')
 ap.add_argument('--init', default=None, help='holdout experiment: start from this saved model dir (e.g. ckpt-r8soft/final) instead of the base model; default None = r10/r11 recipe unchanged')
 ap.add_argument('--base', default='sentence-transformers/all-MiniLM-L6-v2', help='round 14: base model (HF id or dir) for tokenizer and weights; default = all-MiniLM-L6-v2, recipe unchanged')
+ap.add_argument('--teacher', default=None, help='round 14 step 3: .npy of teacher probabilities (rows = train.parquet, T=1); replaces common.soft_targets() as the soft target; default None = recipe unchanged')
 ap.add_argument('--x_weight', type=float, default=1.0, help='class weight on x in both CE terms')
 ap.add_argument('--loose_cost', type=float, default=0.0, help='round 13 R13-L3: add train/losscost.py expected-cost term (below-truth cost = this, above-truth cost 1); 0 = off, recipe unchanged')
 a = ap.parse_args()
@@ -24,9 +25,10 @@ BASE = a.base
 tok = AutoTokenizer.from_pretrained(BASE)
 model = AutoModelForSequenceClassification.from_pretrained(a.init or BASE, num_labels=3)
 tr, va, ev = load_split('train'), load_split('val'), load_split('v3eval')
+if a.teacher: T = np.load(a.teacher); assert T.shape == (len(tr), 3), f'teacher rows {T.shape} != train rows {len(tr)}'
 if a.n: tr = tr.sample(a.n, random_state=1)
 texts, ys = list(tr.text), tr.y.values
-soft = torch.tensor(soft_targets(tr)) if a.soft else None
+soft = torch.tensor(T[tr.index.values], dtype=torch.float32) if a.teacher else (torch.tensor(soft_targets(tr)) if a.soft else None)
 cw = torch.tensor([1.0, 1.0, a.x_weight])
 enc = tok(texts, truncation=True, max_length=a.max_len)['input_ids']
 def batches(order):
