@@ -1030,3 +1030,24 @@ rwxmap replayed R13 and 0.2.0 through its real secondPass (src at v4, D138), swa
 - **Mode b on exam #6 at other confidences:** 95 gives 1,288 / 13 / 287; 90 gives 1,388 / 17 / 183; 85 gives 1,424 / 19 / 145; 70 gives 1,441 / 29 / 118.
 - **Exam #5 too-loose split, rwxmap at 0.90 (verified by us).** Of the 40 too-loose rows, 36 are x called w, 2 are w called r and 2 are x called r. 38 are off by one step and 2 by two.
 - **What it means for rwxlite.** Mode b is rwxlite on its own. The earlier line "Released rwxmap still runs 0.2.0 at 0.97" is superseded: rwxmap 0.11.0 pins rwxlite 0.3.1.
+
+
+## 2026-11-18: Bigger model and distillation, background for round 14
+
+- **Model sizes.** Only our own row is measured here; the others are published specs.
+  - all-MiniLM-L6-v2 (ours): 22.7M parameters, 6 layers, hidden size 384, 91 MB fp32 / 23 MB int8.
+  - bge-small-en-v1.5: 33M parameters, 12 layers, hidden size 384.
+  - bge-base-en-v1.5: about 109M parameters, 12 layers, hidden size 768, about 440 MB fp32 / about 110 MB int8 (estimate).
+  - bert-base-uncased: 110M parameters, same shape as bge-base.
+  - ModernBERT-base: 149M parameters, 22 layers, different tokenizer.
+- **What each is.**
+  - BERT-base was pre-trained only to fill in hidden words.
+  - MiniLM was distilled from a larger model, then trained on sentence-pair meaning (sentence-transformers).
+  - bge-base is BERT-base-shaped and trained on sentence meaning with newer data. It starts closer to our task than plain BERT, and has about 5 times MiniLM's parameters.
+- **Generalization gap.** About 97% on val vs about 90% on unseen vendors (exam #6 mode a 90.3%). The labellers agreed on 1,564 of 1,588 exam #6 rows (98.5%), so the answer is usually clear and there is room for the model to improve.
+- **Three ways to shrink or speed a model.**
+  - Quantization: same weights, stored with fewer bits. We already use int8 (91 MB to 23 MB). On exam #5 standalone, int8 got 1,280 right vs 1,283 for fp32, nearly no loss.
+  - Pruning: remove weights or parts. Scattered weights give no CPU speed-up, removing layers needs retraining, and there is little to gain on a 22.7M model.
+  - Distillation: a big teacher's probabilities train a small student. MiniLM itself was made this way. This is the one that can carry a bigger model's gain into the shipped size.
+- **Past evidence.** Gains came from labels and data, not loss tweaks (R13-L3: val too loose 78 vs R13's 74).
+- **Decision (user, 2026-11-18).** Round 14 trains bge-base on the round 13 data, recipe unchanged. If it beats R13 under the pre-registered rule, it becomes the teacher for a MiniLM student. Exam rows come later. Exam #7 judges. PRD: `docs/product/prd-bge-teacher.md`.
