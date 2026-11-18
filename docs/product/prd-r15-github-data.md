@@ -31,6 +31,7 @@ Close the unseen-vendor gap. The shipped model scores about 97% on val but about
 - Exclude every provider already in our corpus, every exam #1-#6 vendor, and every exam #7 vendor. The exam #7 vendors are chosen with rwxmap and frozen BEFORE collection starts. Collection does not start until that list is committed. (Same idea as the main PRD: every APIs.guru snapshot of a sampled op key is excluded.)
 - Exam #7 exclusion is by vendor name, every brand alias and the vendor's spec repo, plus any fork, mirror or SDK repo that vendors the spec. Matching the provider field alone is not enough, because a GitHub-wide crawl is the likeliest way an exam vendor slips in.
 - After collection and before any teacher labelling or training, the full round-15 provider list (with repo URLs) goes to rwxmap. They confirm that no exam #7 vendor got in.
+- Every exam #7 shortlist candidate stays out of the transfer set, even if it does not make the final exam. This starts with ringcentral and baserow. rwxmap releases dropped candidates only after exam #7 is frozen.
 - Cap each vendor at 300 operations.
 - Target: start at 100,000 operations from at least 3,000 new vendors. Grow to 300,000 only if the first round helps.
 
