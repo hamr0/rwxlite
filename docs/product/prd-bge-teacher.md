@@ -77,3 +77,19 @@ Each change is its own small commit, reviewed by the usual /self-review then /br
 Draft 2026-11-18. Next: the `--base` change, then the step-1 training run.
 
 2026-11-18 step 2: **FAIL** under section 4 (val, mode a, 0.90): too loose 94 vs R13's 87, right 3,944 vs 3,938 (+6 rows, +0.14 pp, needs +1 pp). Per section 3: stop; no distillation. Details in `docs/wiki/findings.md` (2026-11-18 Round 14 step 1-2).
+
+## 9. Step 3 addendum: distillation (pre-registered 2026-11-18, before any student training)
+
+**Why.** Step 2 FAILED the section 4 rule (mode a, 0.90: too loose 94 vs 87, right +6 rows). That verdict stands and is not edited. On 2026-11-18 the user decided to run distillation anyway, because a 5-point mode-b sweep on val (information, outside the step-2 rule; table in `docs/wiki/findings.md`, "2026-11-18: Mode-b sweep") showed r14-bge better than R13 at every confidence: right is higher and too loose is equal or lower at 95, 90, 85, 80 and 75. Val is the selection set, so this alone proves nothing; it is the reason to test whether a MiniLM student can inherit the gain, and exam #7 stays the ship judge.
+
+**Recipe (fixed now).** Teacher: the r14-bge checkpoint (`ckpt-r14-bge/final`), run over the round 13 `train.parquet` (same text column, max_len 128), softmax probabilities at T = 1, float32, row order = train.parquet, with the sha256 of train.parquet recorded beside them. Student: all-MiniLM-L6-v2, the R13 recipe unchanged except that the per-row soft target is the teacher's probability vector instead of `common.soft_targets()`: loss = 0.7 * soft CE + 0.3 * hard CE (`--alpha 0.7`), 1 epoch, batch size 32, learning rate 5e-5, max_len 128, seed 1, x_weight 1.0. Code: `train/teacher_probs.py` and `train/finetune.py --teacher PATH.npy`. Server rules are section 5 (nice 19, ionice idle, 3 threads, one job at a time, memory watch), run dir `~/rwxlite-train/r14-student/`.
+
+**Student rule (fixed now, before any training).** The student passes only if, on val (4,180 rows), against R13-b1 (R13 torch fp32 batch-1 path, the same scoring path the student is scored on; produced by `m1/r14-compare.py` and `m1/r14-compare.mjs`), ALL hold:
+
+- (a) mode b at confidence 85: too loose <= 70 AND right > 3,901;
+- (b) mode b at confidence 90: too loose <= 46 AND right > 3,824;
+- (c) mode a at 0.90: too loose <= 86.
+
+R13-b1 references: mode b 85 = 3,901 / 70 / 209; mode b 90 = 3,824 / 46 / 310; mode a 0.90 = 3,941 / 86 / 153 (right / too loose / too tight).
+
+The student temperature is fitted on val by the same `temp_fit` procedure as R13 and r14-bge. If the student fails any of (a)-(c): stop, R13 stays. If it passes: it is a candidate only, nothing is shipped or decided on val; exam #7 (fresh, shared with rwxmap) is the ship judge (section 3, step 5).

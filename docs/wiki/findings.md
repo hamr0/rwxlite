@@ -1085,3 +1085,18 @@ rwxmap replayed R13 and 0.2.0 through its real secondPass (src at v4, D138), swa
 - **Information only: standalone argmax** (no mechanical): r14-bge 3,953 / 179 / 48; R13 3,969 / 161 / 50 (shipped predictions; 3,967 / 162 / 51 torch path).
 - **Reading.** bge-base is not better in the rule's sense. It has more too-loose standalone (179 vs 162) and at 0.97, and about the same right at 0.90. It does better in mode b at 85 (more right, fewer too loose) on val; this is outside the rule and val is the selection set, so it carries no weight. Size alone is not the bottleneck on this rule.
 - **Files.** Server: `~/rwxlite-train/r14-bge/data/train/` (`ckpt-r14-bge/final`, model.safetensors sha256 `8bcc187e...`, `probs-r14-bge-val.npy`, `probs-r14-bge-v3eval.npy`, `finetune-r14-bge-results.json`, `finetune-r14-bge.log`). R13: `~/rwxlite-train/r13-R13/data/train/`. Local scratch (not committed): `.../scratchpad/r14/` (`work/` p files, `meta.json`, `report.json`, `run.log`, `rwxmap-pre/`). Reproduce with `m1/r14-compare.py` and `m1/r14-compare.mjs` (run lines in their headers).
+
+## 2026-11-18: Mode-b sweep, r14-bge vs R13 (information, outside the step-2 rule)
+
+Information only, outside the step-2 rule. The step-2 FAIL (section above) stands unchanged. After it, a 5-point mode-b sweep on val (4,180 rows) was run on the same scoring path for both models (R13-b1 = R13 torch fp32 batch-1 path, r14-bge at T 0.994240; `m1/r14-compare.py` / `m1/r14-compare.mjs`). Cells are right / too loose / too tight:
+
+| mode b confidence | R13-b1 | r14-bge-b1 |
+|---|---|---|
+| 95 | 3,619 / 30 / 531 | 3,668 / 30 / 482 |
+| 90 | 3,824 / 46 / 310 | 3,889 / 45 / 246 |
+| 85 | 3,901 / 70 / 209 | 3,943 / 58 / 179 |
+| 80 | 3,943 / 86 / 151 | 3,964 / 75 / 141 |
+| 75 | 3,962 / 93 / 125 | 3,980 / 84 / 116 |
+| mode a 0.90 (step-2 rule row) | 3,941 / 86 / 153 | 3,944 / 94 / 142 (R13 shipped predictions: 3,938 / 87 / 155) |
+
+r14-bge has more right at all five confidences and equal or fewer too loose. Val is the selection set, so this carries no weight as evidence. On 2026-11-18 the user decided to run distillation anyway; the student rule is pre-registered in `docs/product/prd-bge-teacher.md` section 9 before any student training. Scratch reports: `.../scratchpad/r14/pb/report-{95,90,85,80,75}.json` (not committed).
