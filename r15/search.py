@@ -21,7 +21,8 @@ RAW = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "r1
 RAW = os.path.normpath(RAW)
 CAND = os.path.join(RAW, "candidates.jsonl")
 SHARDS = os.path.join(RAW, "search_shards.jsonl")
-SLEEP = 6.5
+SLEEP = 6.2  # minimum spacing between call STARTS (10 req/min limit)
+last_call = 0.0
 MIN_SIZE, MAX_SIZE = 3000, 400000  # <3 KB rarely holds 5 real operations; code search skips >384 KB
 
 QUERIES = [  # (id, qualifier+marker string)
@@ -39,12 +40,13 @@ max_calls = None
 
 def gh_search(q, page):
     """One code-search call; returns (json, ok). Handles rate limits."""
-    global calls
+    global calls, last_call
     backoff = 30
     while True:
         if max_calls is not None and calls >= max_calls:
             print("max-calls reached", flush=True); sys.exit(0)
-        time.sleep(SLEEP)
+        time.sleep(max(0.0, last_call + SLEEP - time.time()))
+        last_call = time.time()
         calls += 1
         p = subprocess.run(["gh", "api", "-i", "-X", "GET", "search/code", "-f", "q=" + q,
                             "-f", "per_page=100", "-f", "page=%d" % page],

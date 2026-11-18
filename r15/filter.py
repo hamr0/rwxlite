@@ -5,7 +5,8 @@ No model, no labelling.  Stages (each counted in data/r15/collect-report.json):
   2. specs with < 5 operations dropped
   3. exact spec-content dedupe (spec_sha256; keep highest stars, then repo/path order)
   4. operation dedupe on (vendor_key, method, normalised path)
-  5. exclusion of every vendor already in our corpus, every exam #1-#6 vendor, and --exclude-file
+  5. (first) the frozen exam #7 list data/r15/exam7-exclusions.json, strict whole-label matching, counted per vendor;
+     then exclusion of every vendor already in our corpus, every exam #1-#6 vendor, and --exclude-file
      entries (e.g. the exam #7 list when it is committed).  A row is excluded if ANY of its identity
      keys (vendor_key, server/contact/logo domains, normalised domain label, normalised title,
      repo owner/name, fork-parent owner/name) matches an exclusion key (registrable domain, or
@@ -110,14 +111,71 @@ def build_exclusions(extra_file):
         wiki.update(re.findall(r"\b[a-z0-9][a-z0-9-]{2,}\.(?:com|io|org|net|dev|ai|co|app|cloud|so|me|sh|xyz|tech|ly)\b", txt))
     provs.update(wiki)
     srcs["docs_domains"] = len(wiki)
-    # the shortlist candidates named in the PRD, always out
-    extra = {"ringcentral", "baserow", "ringcentral.com", "baserow.io"}
+    extra = set()
     if extra_file:
         extra.update(l.strip() for l in open(extra_file) if l.strip() and not l.startswith("#"))
     provs.update(extra)
     for p in provs:
         keys |= name_keys(p)
     return keys, srcs
+
+
+EXAM7_FILE = os.path.join(D, "exam7-exclusions.json")
+
+
+def load_exam7():
+    """vendor -> (dotted aliases, plain tokens, repos).  Whole-label matching only."""
+    j = json.load(open(EXAM7_FILE))
+    out = {}
+    for grp in ("exam", "reserve"):
+        for v, e in j[grp].items():
+            al = [a.lower() for a in e["aliases"]]
+            out[v] = ([a for a in al if "." in a], [a for a in al if "." not in a], [r.lower() for r in e["repos"]], grp)
+    return out
+
+
+def _tokens(s):
+    return [t for t in re.split(r"[^a-z0-9]+", (s or "").lower()) if t]
+
+
+def _has_seq(toks, alias_toks):
+    n = len(alias_toks)
+    return n > 0 and any(toks[i:i + n] == alias_toks for i in range(len(toks) - n + 1))
+
+
+def exam7_hits(r, ex7):
+    """{vendor: set(rules)} for the frozen exam #7 vendors this spec names.  Rules: repo (listed repo or
+    fork parent), host (servers/host URL on the vendor's domain or a whole label of it, subdomains
+    included), contact (contact/logo/terms host), name (repo owner/name or fork parent owner/name equals
+    an alias), title (alias as whole tokens in info.title)."""
+    shosts = {h for h in (ids.host_of(u) for u in r.servers.split("|")) if h}
+    chosts = {h for h in (ids.host_of(u) for u in (r.contact_url, r.contact_email, r.x_logo)) if h}
+    chosts |= {d for d in (r.contact_domain + "|" + r.logo_domain).split("|") if d}
+    shosts |= {d for d in r.servers_domains.split("|") if d}
+    sl = {lb for h in shosts for lb in h.split(".")}
+    cl = {lb for h in chosts for lb in h.split(".")}
+    ttok = _tokens(r.spec_title)
+    names = {ids.norm(r.repo_owner), ids.norm(r.repo_name)}
+    fp = (r.fork_parent or "").lower()
+    if fp:
+        names |= {ids.norm(fp.split("/")[0]), ids.norm(fp.split("/")[-1])}
+    repos = {r.repo.lower(), fp}
+    hit = {}
+    for v, (dotted, plain, rps, _g) in ex7.items():
+        rules = set()
+        if repos & set(rps):
+            rules.add("repo")
+        if any(h == a or h.endswith("." + a) for h in shosts for a in dotted) or any(a in sl for a in plain):
+            rules.add("host")
+        if any(h == a or h.endswith("." + a) for h in chosts for a in dotted) or any(a in cl for a in plain):
+            rules.add("contact")
+        if any(ids.norm(a) in names for a in plain):
+            rules.add("name")
+        if any(_has_seq(ttok, _tokens(a)) for a in plain + dotted):
+            rules.add("title")
+        if rules:
+            hit[v] = rules
+    return hit
 
 
 def row_keys(df):
@@ -189,6 +247,27 @@ def main():
     df = df.drop_duplicates(["vendor_key", "method", "_pn"])
     rep["ops_after_op_dedupe"] = len(df)
     rep["vendors_after_op_dedupe"] = df["vendor_key"].nunique()
+
+    # 5a. exam #7 frozen list (strict whole-label matching), counted per vendor
+    ex7 = load_exam7()
+    cols7 = ["servers", "contact_url", "contact_email", "x_logo", "servers_domains", "contact_domain", "logo_domain",
+             "spec_title", "repo", "repo_owner", "repo_name", "fork_parent"]
+    d7 = df[cols7].drop_duplicates()
+    h7 = {tuple(r): exam7_hits(r, ex7) for r in d7.itertuples(index=False)}
+    hs = [h7[tuple(r)] for r in df[cols7].itertuples(index=False)]
+    per = {v: {"group": ex7[v][3], "specs_dropped": 0, "ops_dropped": 0, "rules_ops": {}} for v in ex7}
+    sp_seen = {v: set() for v in ex7}
+    for hv, sp in zip(hs, df["_spec"]):
+        for v, rules in hv.items():
+            per[v]["ops_dropped"] += 1
+            sp_seen[v].add(sp)
+            for ru in rules:
+                per[v]["rules_ops"][ru] = per[v]["rules_ops"].get(ru, 0) + 1
+    for v in per:
+        per[v]["specs_dropped"] = len(sp_seen[v])
+    rep["exam7_exclusion"] = per
+    df = df[[not x for x in hs]]
+    rep["ops_after_exam7_exclusion"] = len(df)
 
     # 5. exclusion
     keys, srcs = build_exclusions(a.exclude_file)
