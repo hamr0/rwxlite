@@ -1051,3 +1051,37 @@ rwxmap replayed R13 and 0.2.0 through its real secondPass (src at v4, D138), swa
   - Distillation: a big teacher's probabilities train a small student. MiniLM itself was made this way. This is the one that can carry a bigger model's gain into the shipped size.
 - **Past evidence.** Gains came from labels and data, not loss tweaks (R13-L3: val too loose 78 vs R13's 74).
 - **Decision (user, 2026-11-18).** Round 14 trains bge-base on the round 13 data, recipe unchanged. If it beats R13 under the pre-registered rule, it becomes the teacher for a MiniLM student. Exam rows come later. Exam #7 judges. PRD: `docs/product/prd-bge-teacher.md`.
+
+
+## 2026-11-18: Round 14 step 1-2 result (bge-base vs R13)
+
+**Verdict under the pre-registered rule (`docs/product/prd-bge-teacher.md` section 4): FAIL. Stop; no distillation.** The numbers are a measurement; nothing was decided or shipped here.
+
+- **Training (step 1).** bge-base-en-v1.5 (`--base`), R13 recipe unchanged (soft targets, alpha 0.7, 1 epoch, batch 32, lr 5e-5, max_len 128, seed 1). 109.5M parameters, 3,209 steps, 351.3 min on the home server (3 threads, nice 19, peak RSS about 6.9 GB as reported by the run). Data sha256 equal to R13's for train.parquet (`91808a87...`), val.parquet (`580a1141...`) and v3eval.parquet (`7c0df6fa...`). Vocabulary identical to R13's (30,522 tokens, same BertNormalizer, lower-case), so a tokenizer port would not be needed. Final val accuracy 94.57% in the run's own batched pass (R13: 94.90%).
+- **What the .npy files hold.** `probs-<tag>-val.npy` is softmax probabilities at T = 1 (float32, rows sum to 1), batched with padding in batches of 128, row order identical to val.parquet and to `data/round13/val.jsonl` (checked on id, y, text). Cross-check: PyTorch fp32 batch-1 logits from the checkpoint differ from the npy by at most 2.8e-6 (R13) and 6.9e-7 (r14-bge), 0 argmax differences, and give identical rule numbers. The r14-bge numbers below are the batch-1 ones (the way `m1/r13-valpick.py` got R13's T).
+- **Temperature.** R13 stays at its shipped T 0.991463 (refit on the same val gives 0.991463, so the procedure reproduces it). r14-bge: T = 0.994240 (same `temp_fit`: bounded minimiser of val NLL on log-probabilities, bounds 0.3 to 5).
+- **Parity check (R13, rwxmap's real replay, cut table above): PASS, exact.** Using `predictions-r13-val.csv` (rwxlite 0.3.1 fp32 predictions the cut sweep used; sha256 `6154fe74...`) through rwxmap `poc/cutoff-r13/curve.mjs` / `poc/replay-r12/replay.mjs`: 0.97 gives 3815/76/289 and 0.90 gives 3938/87/155, equal to the table. Note: rwxmap main now has `LOWER_MIN_P = 0.90` (D139), so `--lower-min-p` refuses to run there; I used the sweep-time tree (`git archive 5e6b9cb^`, read-only, in scratch). The only src differences since then are the model pin and the cut-off line.
+- **Rule numbers, val 4,180 rows, mode a, LOWER_MIN_P 0.90** (right / too loose / too tight; loose-1 / loose-2):
+
+| model | right | too loose | too tight | loose-1 / loose-2 |
+|---|---|---|---|---|
+| R13 (shipped predictions; the PRD reference) | 3,938 | 87 | 155 | 81 / 6 |
+| R13 (same torch batch-1 path as r14-bge) | 3,941 | 86 | 153 | 81 / 5 |
+| r14-bge (T 0.994240) | 3,944 | 94 | 142 | 89 / 5 |
+
+- **Rule check.** (1) too loose no higher than R13's: 94 vs 87 (vs 86 on the same-path R13), 7 more: **fails**. (2) right at least 1 point higher (about 42 rows): 3,944 - 3,938 = +6 rows = +0.14 pp (vs same-path R13: +3 rows, +0.07 pp): **fails**. Both conditions fail on either R13 reference. The PRD's R13 reference reproduced exactly, so it was used unchanged.
+- **Caveat.** The shipped R13 predictions come from the Node runtime on text built from rwxmap's ops.csv; the torch batch-1 numbers use the text stored in val.jsonl. They differ on 142 rows (99 by more than 0.01 in p, 10 by more than 0.1; max 0.34), which is why the two R13 rows differ by a few rows. This does not change the verdict.
+- **Information only: full mode-a curve for r14-bge** (right / too loose / too tight; loose-1 / loose-2), with R13 (shipped predictions) beside it:
+
+| cut | r14-bge | R13 |
+|---|---|---|
+| 0.97 | 3,780 / 87 / 313 (82 / 5) | 3,815 / 76 / 289 |
+| 0.95 | 3,851 / 88 / 241 (83 / 5) | 3,865 / 79 / 236 |
+| 0.93 | 3,899 / 89 / 192 (84 / 5) | 3,898 / 83 / 199 |
+| 0.90 | 3,944 / 94 / 142 (89 / 5) | 3,938 / 87 / 155 |
+| 0.85 | 3,963 / 100 / 117 (94 / 6) | 3,949 / 103 / 128 |
+
+- **Information only: mode b at confidence 85** (every row sent): r14-bge 3,943 / 58 / 179 (54 / 4); R13 3,908 / 71 / 201 (shipped predictions; 3,901 / 70 / 209 on the torch path). Mechanical alone: 3,722 / 140 / 318.
+- **Information only: standalone argmax** (no mechanical): r14-bge 3,953 / 179 / 48; R13 3,969 / 161 / 50 (shipped predictions; 3,967 / 162 / 51 torch path).
+- **Reading.** bge-base is not better in the rule's sense. It has more too-loose standalone (179 vs 162) and at 0.97, and about the same right at 0.90. It does better in mode b at 85 (more right, fewer too loose) on val; this is outside the rule and val is the selection set, so it carries no weight. Size alone is not the bottleneck on this rule.
+- **Files.** Server: `~/rwxlite-train/r14-bge/data/train/` (`ckpt-r14-bge/final`, model.safetensors sha256 `8bcc187e...`, `probs-r14-bge-val.npy`, `probs-r14-bge-v3eval.npy`, `finetune-r14-bge-results.json`, `finetune-r14-bge.log`). R13: `~/rwxlite-train/r13-R13/data/train/`. Local scratch (not committed): `.../scratchpad/r14/` (`work/` p files, `meta.json`, `report.json`, `run.log`, `rwxmap-pre/`). Reproduce with `m1/r14-compare.py` and `m1/r14-compare.mjs` (run lines in their headers).

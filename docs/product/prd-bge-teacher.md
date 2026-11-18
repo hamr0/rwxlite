@@ -75,3 +75,5 @@ Each change is its own small commit, reviewed by the usual /self-review then /br
 ## 8. Status
 
 Draft 2026-11-18. Next: the `--base` change, then the step-1 training run.
+
+2026-11-18 step 2: **FAIL** under section 4 (val, mode a, 0.90): too loose 94 vs R13's 87, right 3,944 vs 3,938 (+6 rows, +0.14 pp, needs +1 pp). Per section 3: stop; no distillation. Details in `docs/wiki/findings.md` (2026-11-18 Round 14 step 1-2).
