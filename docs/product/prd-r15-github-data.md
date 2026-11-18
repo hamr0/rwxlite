@@ -81,3 +81,5 @@ Still pending:
 ## 10. Status
 
 Agreed 2026-11-18. Licence policy and start size are decided (section 8). rwxmap agreed on 2026-11-18 to freeze the exam #7 list; their user picks the vendors. There is no shortlist yet (ringcentral and baserow are earlier candidates and need re-checking). Collection is on hold until rwxmap sends the committed exam #7 list.
+
+2026-11-18: raw collection started under quarantine (user decision): download and table building only; no labelling, scoring or training until the exam #7 list is committed and applied.
