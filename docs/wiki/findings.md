@@ -1100,3 +1100,37 @@ Information only, outside the step-2 rule. The step-2 FAIL (section above) stand
 | mode a 0.90 (step-2 rule row) | 3,941 / 86 / 153 | 3,944 / 94 / 142 (R13 shipped predictions: 3,938 / 87 / 155) |
 
 r14-bge has more right at all five confidences and equal or fewer too loose. Val is the selection set, so this carries no weight as evidence. On 2026-11-18 the user decided to run distillation anyway; the student rule is pre-registered in `docs/product/prd-bge-teacher.md` section 9 before any student training. Scratch reports: `.../scratchpad/r14/pb/report-{95,90,85,80,75}.json` (not committed).
+
+## 2026-11-18: Round 14 step 3 result (distilled MiniLM student)
+
+**Verdict: FAIL** under the pre-registered student rule (`docs/product/prd-bge-teacher.md` section 9, commit ae69e18). The rule was applied mechanically and not reinterpreted. R13 stays; nothing is shipped.
+
+**Training facts.** Teacher: r14-bge over the round 13 train.parquet (102,668 rows, sha256 `91808a87...`, T = 1, fp32; argmax agrees with y on 97.36%), phase 1 ran 16:23-17:59. Student: all-MiniLM-L6-v2, 22.7M params, `--teacher` soft targets, alpha 0.7, 1 epoch, 3,209 steps, batch 32, lr 5e-5, seed 1; phase 2 train time 63.1 min. Server rules held (nice 19, ionice idle, 3 threads, one job at a time); memwatch exits were clean. Student checkpoint model.safetensors sha256 `bfd7b12e...`. Server: `~/rwxlite-train/r14-student/data/train/` (`ckpt-r14-student/final`, `probs-r14-student-val.npy`, `finetune-r14-student-results.json`, `teacher-r14-bge-train.npy(.json)`).
+
+**Scoring.** Same path as step 2: `m1/r14-compare.py` (generalised with optional `--student-ckpt/--student-npy`, nothing else changed) and `m1/r14-compare.mjs`, rwxmap pre-sweep tree, val 4,180 rows. Student = PyTorch fp32 batch 1 from the checkpoint, T fitted on val with `temp_fit`: **T = 1.070938** (R13 0.991463 fixed, r14-bge 0.994240). The npy cross-check (padded batches) matches the batch-1 path exactly (max abs dp 7.5e-07, 0 argmax differences).
+
+**Reference check: reproduced.** R13-b1 in this run: mode b 85 = 3,901 / 70 / 209, mode b 90 = 3,824 / 46 / 310, mode a 0.90 = 3,941 / 86 / 153, exactly the registered values. r14-bge-b1 matches the earlier sweep at every cell.
+
+Right / too loose / too tight:
+
+| setting | R13-b1 | r14-bge-b1 | student-b1 |
+|---|---|---|---|
+| mode a 0.97 | 3,815 / 76 / 289 | 3,780 / 87 / 313 | 3,809 / 75 / 296 |
+| mode a 0.95 | 3,865 / 79 / 236 | 3,851 / 88 / 241 | 3,866 / 76 / 238 |
+| mode a 0.93 | 3,900 / 82 / 198 | 3,899 / 89 / 192 | 3,907 / 80 / 193 |
+| mode a 0.90 | 3,941 / 86 / 153 | 3,944 / 94 / 142 | 3,935 / 87 / 158 |
+| mode a 0.85 | 3,950 / 103 / 127 | 3,963 / 100 / 117 | 3,951 / 96 / 133 |
+| mode b 95 | 3,619 / 30 / 531 | 3,668 / 30 / 482 | 3,619 / 27 / 534 |
+| mode b 90 | 3,824 / 46 / 310 | 3,889 / 45 / 246 | 3,834 / 51 / 295 |
+| mode b 85 | 3,901 / 70 / 209 | 3,943 / 58 / 179 | 3,900 / 66 / 214 |
+| mode b 80 | 3,943 / 86 / 151 | 3,964 / 75 / 141 | 3,940 / 79 / 161 |
+| mode b 75 | 3,962 / 93 / 125 | 3,980 / 84 / 116 | 3,958 / 91 / 131 |
+| standalone argmax | 3,967 / 162 / 51 | 3,953 / 179 / 48 | 3,954 / 172 / 54 |
+
+**Rule, per clause (student vs R13-b1 references):**
+- (a) mode b 85: too loose 66 <= 70 holds, but right 3,900 is not > 3,901 (one row short). **FAIL.**
+- (b) mode b 90: too loose 51 is not <= 46 (right 3,834 > 3,824 holds). **FAIL.**
+- (c) mode a 0.90: too loose 87 is not <= 86. **FAIL.**
+- Overall: **FAIL** (all three clauses). Stop; R13 stays.
+
+**Reading (information only).** The student did not inherit r14-bge's mode-b gain: at 85 and 80 it is about level with R13 (right -1 / -3, too loose -4 / -7), and at 90 it has more too loose. Scratch (not committed): `.../scratchpad/r14s/` (`work/` p files, `meta.json`, `report.json`, `run.log`; `pb/` per-confidence reports and `sweep.log`).

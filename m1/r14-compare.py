@@ -15,6 +15,7 @@ from scipy.optimize import minimize_scalar
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ap = argparse.ArgumentParser(); ap.add_argument('--work', required=True); ap.add_argument('--tree', required=True)
 ap.add_argument('--r14-ckpt', required=True); ap.add_argument('--r14-npy', required=True); ap.add_argument('--r13-npy', required=True)
+ap.add_argument('--student-ckpt'); ap.add_argument('--student-npy')   # optional third model (step 3 distilled student), scored like r14-bge
 ap.add_argument('--r13-ckpt', default=os.path.join(R, 'data/round13/models/R13')); ap.add_argument('--val', default=os.path.join(R, 'data/round13/val.jsonl'))
 ap.add_argument('--rwxmap-val', default='/home/hamr/PycharmProjects/rwxmap/.claude/scratchpad/rwxlite-val'); ap.add_argument('--threads', type=int, default=3)
 a = ap.parse_args(); os.makedirs(a.work, exist_ok=True)
@@ -52,7 +53,7 @@ pc = os.path.join(a.rwxmap_val, 'predictions-r13-val.csv'); assert sha(pc) == '6
 rows = {r['id']: r for r in csv.DictReader(open(pc))}; px = np.array([float(rows[i]['p_is_x']) for i in ids]); pch = np.array([float(rows[i]['p_changes']) for i in ids])
 Psh = np.stack([1 - pch, pch - px, px], 1); write_p('R13-shipped', Psh); meta['R13-shipped'] = dict(T=T13, standalone=standalone(Psh))
 # R13 / r14 from the npy files and from batch-1 checkpoint logits
-for tag, npy, ck in (('R13', a.r13_npy, a.r13_ckpt), ('r14', a.r14_npy, a.r14_ckpt)):
+for tag, npy, ck in (('R13', a.r13_npy, a.r13_ckpt), ('r14', a.r14_npy, a.r14_ckpt)) + ((('student', a.student_npy, a.student_ckpt),) if a.student_ckpt else ()):
     P1 = np.load(npy).astype(np.float64); Tn = T13 if tag == 'R13' else temp_fit(P1, y); Pn = softmax(np.log(np.clip(P1, 1e-12, 1)), Tn)
     write_p(f'{tag}-npy', Pn); meta[f'{tag}-npy'] = dict(T=Tn, T_fitted=tag != 'R13', standalone=standalone(Pn), npy_sha256=sha(npy))
     L = logits_b1(ck); np.save(os.path.join(a.work, f'logits-{tag}-b1.npy'), L)
