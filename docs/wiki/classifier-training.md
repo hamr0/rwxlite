@@ -335,6 +335,16 @@ This is the likely reason scores move between exams. On rows that look like its 
 
 Numbers are in `docs/wiki/findings.md` (the 2026-11-18 sections), `docs/product/prd-bge-teacher.md` and `docs/product/prd-r15-github-data.md`.
 
+### 13. Label in a cascade: cheap broad first, trusted passes on the delta
+
+**The rule.** Do not send every row to the best labeller. Run cheap opinions on all rows, let the rows where they agree take that letter, and send only the disputed rows to a more trusted labeller. Repeat with a still more trusted one on what is left. Check each pass against a held-out set of rows reviewed by hand, which never enters training.
+
+**Why.** In round 15, three cheap opinions (rules, R13, bge) agreed on 87.5% of 200,000 new rows. That left 25,033 disputed rows for the expensive passes. On 400 blind-reviewed disputed rows, Sonnet was 87.2% exact, bge 74.8%, Jev 65.0%, R13 57.6%, rules 20.1%. Where Sonnet was sure it was right 99.6% of the time, so its "unsure" can pick the rows for the next labeller (Opus, about 21% of rows). The leftover rows get the strictest letter and a low weight. Caveat: the reviewer was also a Claude model with the same brief, so those scores are optimistic.
+
+**Each round gets cheaper.** The retrained model becomes the next round's cheap pass, so fewer rows are disputed.
+
+Numbers: `docs/wiki/findings.md` (2026-11-19) and `docs/product/prd-r15-github-data.md` section 5.
+
 ## Training on the home server
 
 Sandbox: `ahassan@192.168.178.180:~/rwxlite-train/` (Fedora, 4-core i3-8100T, CPU only, venv at `.venv`, torch CPU, transformers 5.0.0). Nothing outside that dir is touched. Only `train/*.py` and `data/train/{train,val,v3eval}.parquet` are copied there (no exam, gate labels, keys or .env).

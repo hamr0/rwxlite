@@ -1,6 +1,6 @@
 # PRD: round 15, a large new-vendor transfer set for distillation
 
-Status: collection done, labelling and blind review done, Jev pilot done (2026-11-19); next step needs the user's go (section 16). Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
+Status: collection done, labelling and blind review done, Jev pilot and Sonnet pilot done (2026-11-19); labelling cascade agreed (section 5, 17); next is the preregistered pass rule and mix (section 16). Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
 
 ## 1. Goal
 
@@ -35,17 +35,19 @@ Close the unseen-vendor gap. The shipped model scores about 97% on val but about
 - Cap each vendor at 300 operations.
 - Target: start at 100,000 operations from at least 3,000 new vendors. Grow to 300,000 only if the first round helps.
 
-## 5. Labelling: three opinions per row
+## 5. Labelling: a cascade (agreed by the user, 2026-11-19)
 
-1. rwxmap's mechanical rules. These also give the lean that every request needs.
-2. R13 through rwxmap mode a.
-3. The bge-base teacher's probabilities (r14-bge checkpoint).
+Cheap and broad passes come first; each more trusted pass only sees the remaining delta. The labelling contract:
 
-Rows where all three agree go in as they are.
+- **Pass 1: three cheap opinions on all 200k rows (done).** rwxmap's mechanical rules (these also give the lean every request needs), R13 through rwxmap mode a, and the bge-base teacher (r14-bge checkpoint). The 87.5% where all three agree take that letter, with bge's soft probabilities as targets. A Sonnet audit of 300 agreed rows, stratified by source and letter, checks that agreement means correct. If Sonnet disagrees on more than about 3%, those patterns join the delta.
+- **Pass 2: Sonnet on the 25,033 disputed rows.** Its sure and likely answers are final. Sonnet runs as Claude Code subagents in the session, so there is no API bill.
+- **Pass 3: Opus labels independently the rows Sonnet marked unsure** (expected about 5,000, i.e. 21% in the pilot). Where Opus and Sonnet agree, that letter is final.
+- **Pass 4: the residue** takes the strictest opinion (BRIEF's unsure goes to x) and gets a low training weight. Rows hitting one of the five BRIEF-v4 ambiguities (findings.md, 2026-11-19) go on a short list for rwxmap's user to rule on.
+- **Across rounds**, bge is retrained on the cleaned labels and becomes the next round's pass 1, so the delta shrinks each round.
+- **Holdout.** The 400 reviewed rows never enter training. Every pass is checked against them.
+- **Jev is not in the cascade.** It scored below bge on the pilot (section 15.1).
 
-Disagreements are the risky rows. Claude checks a sample of them against the current label standard (BRIEF-v4 / D137 wider x; rwxmap's pipeline is the label truth). This measures how often the teacher is wrong on new vendors, before training.
-
-Same model plus same brief is one opinion, not independent labellers. No Jev or other paid calls in this first labelling pass (changed on 2026-11-19: see section 15). Using rwxmap on training rows burns nothing; only scored exams are burned.
+Label standard is BRIEF-v4 plus D136/D137 (rwxmap's pipeline is the label truth). Same model plus same brief is one opinion, not independent labellers; this is why pass 3 uses a different model (Opus) and why residue rows get low weight. Using rwxmap on training rows burns nothing; only scored exams are burned.
 
 ## 6. Training and rule
 
@@ -168,8 +170,26 @@ On bge's weak spot (the two big types, 66 sampled rows standing for 11,250): bge
 
 Cost: 374 calls, 802,541 input tokens, $0.034 computed from token counts at rwxmap's recorded price (42e-9 per input token); not a vendor invoice. Projection for 25,033 rows: about $3.5 (weighted by type, about 35,000 calls), about $2.1 flat. Both far under the $50 cap.
 
-Verdict: Jev did not win, so the fallback in section 15 is the working plan unless the user decides otherwise (section 16).
+Verdict: Jev did not win and is dropped from the cascade. The user chose the cascade of section 5 instead of the fallback (section 17).
 
 ## 16. Status (2026-11-19)
 
-Collection, copy check, master, picker, labelling, blind review and the Jev pilot are done. Raw downloads are deleted; sheets are kept. Pending: the user's choice between the fallback (bge soft targets, drop the about 11.3k loosest rows) and labelling the disputed rows with Jev anyway; then the preregistered pass rule and the bge retrain. Nothing trained yet.
+Collection, copy check, master, picker, labelling, blind review, Jev pilot and Sonnet pilot are done. Raw downloads are deleted; sheets are kept. The user agreed the labelling cascade (section 5). Next: run the Sonnet audit of 300 agreed rows, pass 2 and pass 3; preregister the pass rule and the mix; retrain bge as teacher (102,668 + about 200k rows); distil MiniLM; exam #7 judges. Nothing trained yet.
+
+## 17. Sonnet pilot (2026-11-19)
+
+A Sonnet pilot labelled the same 400 blind-reviewed disputed rows, blind, using BRIEF-v4 + D136/D137 (`data/r15/labels/sonnet-pilot-400.csv`, not committed). Weighted to the 25,033 disputed rows, against the blind review (exact / too loose / too tight, %):
+
+| opinion | exact | too loose | too tight |
+|---|---|---|---|
+| Sonnet | 87.2 | 9.8 | 3.1 |
+| bge | 74.8 | 17.5 | 7.8 |
+| Jev | 65.0 | 10.7 | 24.3 |
+| R13 mode a | 57.6 | 7.5 | 34.9 |
+| mechanical | 20.1 | 10.8 | 69.1 |
+
+In the risky pocket where bge is looser than both R13 and mechanical (11,250 rows): Sonnet 82.6 / 15.2 / 2.2, bge 62.4 / 33.1 / 4.4, Jev 60.2 / 4.4 / 35.4.
+
+On rows the reviewer marked sure, Sonnet's exact rate is 99.6%. Where both were sure, they agreed on 157 of 157. In the pocket, Sonnet sure was right on 33 of 34. Its misses sit mostly on rows Sonnet itself marked unsure, especially "verify code/email" (one of the five BRIEF-v4 ambiguities). So Sonnet's confidence is usable as the pass 2 / pass 3 split.
+
+**Caveat.** The reviewer is also a Claude model with the same brief, so the Sonnet scores are optimistic (same model family plus same brief is not independent). Pass 3 uses Opus and the residue rule for this reason.

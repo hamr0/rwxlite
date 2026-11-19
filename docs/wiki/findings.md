@@ -1178,3 +1178,26 @@ Source: `docs/product/prd-r15-github-data.md` sections 12-16; `data/r15/labels/o
 **Blind review of 400 disputed rows** (weighted to the population by disagreement type; exact / too loose / too tight): bge 74.8 / 17.5 / 7.8, R13 57.6 / 7.5 / 34.9, mechanical 20.1 / 10.8 / 69.1. Sure-only exact (of 175): bge 145, R13 113, mechanical 23. bge is too loose about a third of the time when it is looser than both others (about 11.3k rows).
 
 **Jev pilot (offline, rwxmap mode-c pipeline at 1c25be1, jev-1.14.0, 400 rows).** Jev 65.0 / 10.7 / 24.3 weighted; sure-only exact 86 of 175. It does not beat bge (74.8 exact). In the two big types where bge is looser than both others (66 sampled rows for 11,250), bge is 62.4 / 33.1 / 4.4 and Jev 60.2 / 4.4 / 35.4: Jev trades too loose for too tight. 114 of the 400 rows sit in no Jev pile and keep the mechanical letter, which caps Jev's gain by design. Cost: 374 calls, $0.034 (computed from token counts at rwxmap's recorded price, not an invoice); projection for 25,033 rows about $3.5 weighted by type, about $2.1 flat. Caveats: 33 rows per big type, one run, Jev is not repeatable.
+
+## 2026-11-19: Sonnet pilot and the labelling cascade
+
+Source: `docs/product/prd-r15-github-data.md` sections 5 and 17; `data/r15/labels/sonnet-pilot-400.csv` (not committed).
+
+**Pilot.** A Sonnet pilot labelled the same 400 blind-reviewed disputed rows, blind, with BRIEF-v4 + D136/D137. Weighted to the 25,033 disputed rows (exact / too loose / too tight, %): Sonnet 87.2 / 9.8 / 3.1, bge 74.8 / 17.5 / 7.8, Jev 65.0 / 10.7 / 24.3, R13 57.6 / 7.5 / 34.9, mechanical 20.1 / 10.8 / 69.1.
+
+**Risky pocket** (bge looser than both R13 and mechanical, 11,250 rows): Sonnet 82.6 / 15.2 / 2.2, bge 62.4 / 33.1 / 4.4, Jev 60.2 / 4.4 / 35.4.
+
+**Confidence.** On rows the reviewer marked sure, Sonnet's exact rate is 99.6%. Where both Sonnet and the reviewer were sure, they agreed on 157 of 157. In the pocket, Sonnet sure was right on 33 of 34. Its misses sit mostly on rows Sonnet itself marked unsure, especially "verify code/email" (one of the five BRIEF-v4 ambiguities).
+
+**Caveat.** The reviewer is also a Claude model with the same brief, so the Sonnet scores are optimistic (same model family plus same brief is not independent). Sonnet labelling runs as Claude Code subagents in the session, so there is no API bill.
+
+**Jev dropped.** Jev scored below bge on these rows (65.0 vs 74.8 exact), and in the pocket it only swapped too loose for too tight. It is out of the cascade.
+
+**Decision (user, 2026-11-19): labelling cascade.** Cheap and broad passes first; each more trusted pass sees only the delta.
+1. Pass 1: mechanical, R13 mode a and bge on all 200k rows (done). The 87.5% where all agree take that letter, with bge soft probabilities as targets. A Sonnet audit of 300 agreed rows (stratified by source and letter) checks that agreement means correct; above about 3% disagreement, those patterns join the delta.
+2. Pass 2: Sonnet on the 25,033 disputed rows; sure and likely answers are final.
+3. Pass 3: Opus labels independently the rows Sonnet marked unsure (about 5,000 expected, 21% in the pilot). Where Opus and Sonnet agree, that letter is final.
+4. Pass 4: the residue takes the strictest opinion (unsure goes to x) with a low training weight. Rows on one of the five ambiguities go to rwxmap's user.
+5. Across rounds bge is retrained on the cleaned labels and becomes the next pass 1.
+
+The 400 reviewed rows are the holdout and never enter training. Next: preregister the pass rule and mix, retrain bge as teacher (102,668 + about 200k rows), distil MiniLM, exam #7 judges.
