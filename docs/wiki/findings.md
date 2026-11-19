@@ -1217,3 +1217,13 @@ Source: `r15/label_final.py`, `r15/label_holdout_score.py`, `data/r15/labels/fin
 **Run facts.** 101 + 3 subagents; about 24 minutes. 463 unsure rows first missed the Opus hand-off because 6 batches wrote incomplete lists; they were filled afterwards (missed-a, missed-b). Some workers shared a scratch folder; ids and letter/reason consistency were checked and no crossing was found. The refill overlapped 66 rows already answered in unsure-012; 6 of those had different letters, and the script keeps the stricter Opus letter for them. Opus covers exactly the 3,595 Sonnet-unsure rows.
 
 **Learning.** The trusted pass fixes most of the cheap pass's looseness. On the holdout, too-loose fell from 17.5% (bge) to 9.8% (Sonnet) to 3.8% (cascade). The remaining loose risk is now mostly the agreed rows, about 2% in the audit.
+
+### 2026-11-19: D141 relabel of the round 15 labels
+
+rwxmap's user ruled on five BRIEF-v4 ambiguities (D141, rwxmap 54355e1): login/refresh tokens = x, email/code verification = x, group update without members/roles = w, callback/webhook/endpoint/signing-key/push-token changes = x, POST/PUT/PATCH member removal = x. A regex net (families a-e, shared with rwxmap) matched 9,740 of the 199,600 rows; Sonnet relabelled all blind (sure/likely = new letter, unsure = stricter of old and new).
+
+**Changes: 1,274 rows.** By family (a row can hold several): a login/token 642, b verify 446, d callback/endpoint/push 202, e member removal 44, c group update 38. By move: r to x 885, w to x 191, x to w 161, x to r 26, r to w 9, w to r 2. So it is mostly r to x in login and verify (a: 445 r to x; b: 310 r to x). Family c goes the other way (22 x to w). By tier: agree3 831, sonnet 401, strict 21, opus_agree 21. Letter mix r 54.7 / w 15.5 / x 29.8 became r 54.2 / w 15.5 / x 30.3. 171 changed rows rest on an unsure Sonnet answer and get weight 0.3.
+
+**Holdout re-check.** Opus re-reviewed the 400 holdout rows under D141: 30 changed. Re-scoring the unchanged opinions (made without D141) against it: cascade 92.0 / 3.8 / 4.2 to 89.4 / 6.1 / 4.5; Sonnet 87.2 / 9.8 / 3.1 to 85.4 / 11.6 / 3.0; bge 74.8 / 17.5 / 7.8 to 74.0 / 18.4 / 7.6. Pocket cascade 90.9 / 4.7 / 4.4 to 88.5 / 6.3 / 5.2. The drop is the opinions not knowing D141, not a worse cascade. Only 33 of 400 holdout rows match the net (a 15, b 5, c 4, d 8, e 4), so the labels were relabelled on the matching rows and the rest are unchanged.
+
+**Learning.** D141 moves about 0.6% of rows, almost all toward stricter. The opinion scores measured on the holdout are now an upper bound for D141 families. Next: rwxmap's export-v4-d141 of the other 102,668 rows before training.

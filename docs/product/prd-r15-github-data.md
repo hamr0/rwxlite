@@ -1,6 +1,6 @@
 # PRD: round 15, a large new-vendor transfer set for distillation
 
-Status: collection done, labelling and blind review done, Jev pilot and Sonnet pilot done (2026-11-19); labelling cascade agreed (section 5, 17); next is the preregistered pass rule and mix (section 16). Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
+Status: D141 relabel applied to the labels (section 19, 2026-11-19); training waits for rwxmap's export-v4-d141. Before that: collection done, labelling and blind review done, Jev pilot and Sonnet pilot done (2026-11-19); labelling cascade agreed (section 5, 17); next is the preregistered pass rule and mix (section 16). Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
 
 ## 1. Goal
 
@@ -199,3 +199,15 @@ On rows the reviewer marked sure, Sonnet's exact rate is 99.6%. Where both were 
 ## 18. Status (2026-11-19, cascade done)
 
 Passes 1 to 3 and the pass 4 flagging are done; final labels are built (section 5, cascade result). Next: preregister the pass rule and the soft/hard mix, retrain bge as teacher, distil MiniLM, exam #7 judges, and send the pass 4 short list to rwxmap's user. Nothing trained yet.
+
+## 19. D141 relabel (2026-11-19)
+
+The labels follow BRIEF-v4 plus the D141 addendum (rwxmap 54355e1, `BRIEF-v4-addendum-D141.md`); where they conflict the addendum wins. Rulings: (a) login, sign-in or refresh returning any token = x; (b) verifying an email or code, pure checks included = x; (c) group update without members, roles or permissions in the text = w, adding members stays x; (d) changing a callback, webhook or endpoint setting, uploading a signing key, registering a push token = x; (e) removing members via POST/PUT/PATCH = x, narrowing a role without removing anyone stays w.
+
+**How.** `d141/pattern-net.json` (shared with rwxmap) found 9,740 candidates among the 199,600 rows. Sonnet relabelled all blind. Rule: sure/likely takes the new letter; unsure takes the stricter of old and new. `r15/label_d141.py` writes `final-labels-r15-d141.parquet` and `.csv.gz` (new columns d141_candidate, d141_families, d141_changed, label_pre_d141) plus `d141-report.json`. The old `final-labels-r15.*` files are untouched.
+
+**Counts.** 1,274 rows changed (mostly r to x: 885; w to x 191; x to w 161; x to r 26; r to w 9; w to r 2). Letters before r 109,142 / w 30,917 / x 59,541; after r 108,276 / w 30,894 / x 60,430. Changed rows whose new letter came from an unsure Sonnet answer (171) get weight 0.3; weight total 198,589.9 to 198,470.2. Tiers unchanged.
+
+**Holdout.** Opus re-checked the 400 holdout reviews under D141: 30 changed. `r15/label_holdout_score_d141.py` re-scores; the cascade falls from 92.0 / 3.8 / 4.2 to 89.4 / 6.1 / 4.5 (exact / loose / tight), since the opinions predate D141. 33 holdout rows match the net.
+
+**Next.** rwxmap will re-export the other 102,668 rows as export-v4-d141 using the same net (pending their user's go-ahead). Training waits for that export. Data stays under `data/r15/` and is not committed.
