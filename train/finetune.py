@@ -18,6 +18,7 @@ ap.add_argument('--init', default=None, help='holdout experiment: start from thi
 ap.add_argument('--base', default='sentence-transformers/all-MiniLM-L6-v2', help='round 14: base model (HF id or dir) for tokenizer and weights; default = all-MiniLM-L6-v2, recipe unchanged')
 ap.add_argument('--teacher', default=None, help='round 14 step 3: .npy of teacher probabilities (rows = train.parquet, T=1); replaces common.soft_targets() as the soft target; default None = recipe unchanged')
 ap.add_argument('--x_weight', type=float, default=1.0, help='class weight on x in both CE terms')
+ap.add_argument('--row_weight', default=None, help='round 15: name of a train.parquet column holding a per-row loss weight (e.g. weight); each row loss is multiplied by it before the batch mean; default None = recipe unchanged')
 ap.add_argument('--loose_cost', type=float, default=0.0, help='round 13 R13-L3: add train/losscost.py expected-cost term (below-truth cost = this, above-truth cost 1); 0 = off, recipe unchanged')
 a = ap.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(1); random.seed(1)
@@ -30,6 +31,7 @@ if a.n: tr = tr.sample(a.n, random_state=1)
 texts, ys = list(tr.text), tr.y.values
 soft = torch.tensor(T[tr.index.values], dtype=torch.float32) if a.teacher else (torch.tensor(soft_targets(tr)) if a.soft else None)
 cw = torch.tensor([1.0, 1.0, a.x_weight])
+rw = torch.tensor(tr[a.row_weight].values, dtype=torch.float32) if a.row_weight else None
 enc = tok(texts, truncation=True, max_length=a.max_len)['input_ids']
 def batches(order):
     # bucket: sort within chunks of 50 batches by length so padding is small, then shuffle batch order
@@ -74,11 +76,16 @@ while not done:
     for b in bl[skip:]:
         x, m = collate(b, enc); y = torch.tensor(ys[b])
         logits = model(input_ids=x, attention_mask=m).logits
-        hard = torch.nn.functional.cross_entropy(logits, y, weight=cw)
-        if soft is not None:
-            sce = -(soft[b] * cw * torch.log_softmax(logits, -1)).sum(1).mean()
-            loss = a.alpha * sce + (1 - a.alpha) * hard
-        else: loss = hard
+        if rw is not None:   # round 15: per-row weights; row losses (cw as above, cw=1 here) are scaled by rw[b] then averaged over the batch
+            hard_i = torch.nn.functional.cross_entropy(logits, y, weight=cw, reduction='none')
+            loss_i = a.alpha * -(soft[b] * cw * torch.log_softmax(logits, -1)).sum(1) + (1 - a.alpha) * hard_i if soft is not None else hard_i
+            loss = (rw[b] * loss_i).mean()
+        else:
+            hard = torch.nn.functional.cross_entropy(logits, y, weight=cw)
+            if soft is not None:
+                sce = -(soft[b] * cw * torch.log_softmax(logits, -1)).sum(1).mean()
+                loss = a.alpha * sce + (1 - a.alpha) * hard
+            else: loss = hard
         if a.loose_cost > 0: loss = loss + expected_cost(logits, y, a.loose_cost)
         loss.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step(); sch.step(); opt.zero_grad(); step += 1
         ema = loss.item() if ema is None else 0.98 * ema + 0.02 * loss.item()
