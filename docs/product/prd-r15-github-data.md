@@ -83,3 +83,17 @@ Still pending:
 Agreed 2026-11-18. Licence policy and start size are decided (section 8). rwxmap agreed on 2026-11-18 to freeze the exam #7 list; their user picks the vendors. There is no shortlist yet (ringcentral and baserow are earlier candidates and need re-checking). Collection is on hold until rwxmap sends the committed exam #7 list.
 
 2026-11-18: raw collection started under quarantine (user decision): download and table building only; no labelling, scoring or training until the exam #7 list is committed and applied.
+
+## 11. Extra sources, licence decision and copy check (2026-11-18)
+
+Extra sources, collected under the same quarantine (download and tables only; each has its own script and output files, all under `data/r15/`, never committed):
+
+- Catalogues (`r15/catalogues.py`, `ops-r15-catalogues.*`): Microsoft PowerPlatformConnectors (MIT), wso2/api-specs (Apache-2.0), konfig-sdks/openapi-examples, Activepieces community pieces (MIT).
+- SwaggerHub public registry (`r15/swaggerhub.py`, `ops-r15-swaggerhub.*`): public, published API definitions; latest published version per owner/api; junk titles skipped before fetching; polite rate (about 1.5 requests/s, backoff, Retry-After honoured).
+- Cloud catalogues (`r15/cloud.py`, `ops-r15-cloud.*`): Alibaba Cloud (aliyun/aliyun-openapi-meta, Apache-2.0) and Huawei Cloud (huaweicloud-sdk-python-v3, Apache-2.0). Each product or service is its own vendor (`aliyun:<product>`, `huaweicloud:<service>`), so the 300-op cap applies per product. RPC-style Alibaba APIs use the action name as the path; the `api_style` column says rpc or roa.
+
+Same filters as the GitHub pipeline: template/petstore drop, at least 5 ops per spec, spec and op dedupe, corpus exclusion keys, exam #7 exclusion (whole-label matching), 300 ops per vendor. Every output has a `source` column; the `licence` column is filled from the spec's info.license, or `none-stated`.
+
+**Licence decision (user, 2026-11-18).** For round 15 the user dropped the "permissive licences only" rule of section 4 for public API definitions. Reasoning: these are public API descriptions anyone can download, we do not reuse code, and we only label the operations and train on them. Nothing is published or redistributed: data is never committed, and Hugging Face publishing stays out of scope. The `licence` column is kept anyway.
+
+**rwxmap copy check (agreed).** rwxmap reads our `ops-r15*.csv.gz` files in place and flags any spec that shares at least 5 METHOD+path pairs with an exam or reserve spec, where those pairs are also at least 25% of the spec's ops. Normalisation: method uppercased, `{param}` collapsed, path lowercased, trailing slash dropped. Specs at 3 or more pairs, or 15% or more, are reported as near misses. Borderline cases go to rwxmap's user. We drop the flagged `spec_sha256` ids before labelling.
