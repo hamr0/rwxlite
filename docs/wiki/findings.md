@@ -1152,3 +1152,29 @@ Right / too loose / too tight:
 - Sources measured 2026-11-18: GitHub code search about 127,600 `filename:openapi.yaml` files ("openapi: 3") and about 37,800 `filename:swagger.yaml` files (`swagger: "2.0"`), JSON and other names not counted. API Evangelist org: 45,192 public repos. ToolBench (RapidAPI, about 3,400 services, about 16,000 endpoints) on Hugging Face, e.g. Maurus/ToolBench.
 - No public dataset with r/w/x-style labels found (searched 2026-11-18). The 2024 GitHub OpenAPI dataset (Di Lauro, ICWE 2024, about 600k specs) has no public download found.
 - Plan: `docs/product/prd-r15-github-data.md`.
+
+## 2026-11-19: round 15 sources, labelling and review
+
+Source: `docs/product/prd-r15-github-data.md` sections 12-16; `data/r15/labels/opinions-report.json`, `jev-pilot-report.json` (not committed).
+
+**Sources.**
+- GitHub: only about 3,660 of 15,167 vendor keys have a real domain; the rest are hobby projects and personal repos.
+- SwaggerHub: the real size is 39,044 APIs, not the 796k its counter suggests. Paging quirks apply, and the listing caps at 10k results per query.
+- Huawei Cloud's text is Chinese.
+- Activepieces parsed only 22.7%.
+- Final ops: GitHub 455k, SwaggerHub 288k, catalogues 33k, cloud 40k. Master 802,196 ops from 25,345 vendors after 8,789 cross-source dups and 4,963 ops (319 specs) dropped by the rwxmap copy check (commit 1c25be1; near misses kept; no exam copy got through). Picker: 200,000 ops, 21,604 vendors, water level 29, title share 24.8%.
+
+**Labelling (f664afd).** Three opinions agree on 87.48% (174,967 of 200,000). Mechanical is far too strict on new vendors: on the 400 blind-reviewed disputed rows it is 20.1% exact and 69.1% too tight (weighted). R13 mode a is too tight 34.9%, bge too loose 17.5%.
+
+**R13 mode-a too-loose cases that bge catches:** about 1,500 rows in bge_x_r13_r_mech_r, bge_w_r13_r_mech_r and bge_x_r13_w_mech_w (those three types hold 2,224 rows).
+
+**Five BRIEF-v4 ambiguities the reviewer found:**
+1. A login that returns your own session token, under rule (ii).
+2. Verifying an OTP or email token: (i) against (b)/(g).
+3. A user-group or OAuth-client update where the text never mentions access: (g).
+4. A push device token or an LLM endpoint config, against the webhook-destination amendment.
+5. A PUT that removes a membership, against clause (a).
+
+**Blind review of 400 disputed rows** (weighted to the population by disagreement type; exact / too loose / too tight): bge 74.8 / 17.5 / 7.8, R13 57.6 / 7.5 / 34.9, mechanical 20.1 / 10.8 / 69.1. Sure-only exact (of 175): bge 145, R13 113, mechanical 23. bge is too loose about a third of the time when it is looser than both others (about 11.3k rows).
+
+**Jev pilot (offline, rwxmap mode-c pipeline at 1c25be1, jev-1.14.0, 400 rows).** Jev 65.0 / 10.7 / 24.3 weighted; sure-only exact 86 of 175. It does not beat bge (74.8 exact). In the two big types where bge is looser than both others (66 sampled rows for 11,250), bge is 62.4 / 33.1 / 4.4 and Jev 60.2 / 4.4 / 35.4: Jev trades too loose for too tight. 114 of the 400 rows sit in no Jev pile and keep the mechanical letter, which caps Jev's gain by design. Cost: 374 calls, $0.034 (computed from token counts at rwxmap's recorded price, not an invoice); projection for 25,033 rows about $3.5 weighted by type, about $2.1 flat. Caveats: 33 rows per big type, one run, Jev is not repeatable.

@@ -1,6 +1,6 @@
 # PRD: round 15, a large new-vendor transfer set for distillation
 
-Status: agreed 2026-11-18, collection on hold. Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
+Status: collection done, labelling and blind review done, Jev pilot done (2026-11-19); next step needs the user's go (section 16). Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
 
 ## 1. Goal
 
@@ -45,7 +45,7 @@ Rows where all three agree go in as they are.
 
 Disagreements are the risky rows. Claude checks a sample of them against the current label standard (BRIEF-v4 / D137 wider x; rwxmap's pipeline is the label truth). This measures how often the teacher is wrong on new vendors, before training.
 
-Same model plus same brief is one opinion, not independent labellers. No Jev or other paid calls. Using rwxmap on training rows burns nothing; only scored exams are burned.
+Same model plus same brief is one opinion, not independent labellers. No Jev or other paid calls in this first labelling pass (changed on 2026-11-19: see section 15). Using rwxmap on training rows burns nothing; only scored exams are burned.
 
 ## 6. Training and rule
 
@@ -75,7 +75,7 @@ Still pending:
 - Shipping bge-base.
 - Layer-wise (weight) distillation, for now.
 - New loss penalties (research and round 13 show mixed results).
-- Jev labelling.
+- Jev at runtime. (Changed 2026-11-19: Jev may label disputed training rows offline, once, under the $50 cap; see section 15.)
 - Republishing any collected spec.
 
 ## 10. Status
@@ -97,3 +97,79 @@ Same filters as the GitHub pipeline: template/petstore drop, at least 5 ops per 
 **Licence decision (user, 2026-11-18).** For round 15 the user dropped the "permissive licences only" rule of section 4 for public API definitions. Reasoning: these are public API descriptions anyone can download, we do not reuse code, and we only label the operations and train on them. Nothing is published or redistributed: data is never committed, and Hugging Face publishing stays out of scope. The `licence` column is kept anyway.
 
 **rwxmap copy check (agreed).** rwxmap reads our `ops-r15*.csv.gz` files in place and flags any spec that shares at least 5 METHOD+path pairs with an exam or reserve spec, where those pairs are also at least 25% of the spec's ops. Normalisation: method uppercased, `{param}` collapsed, path lowercased, trailing slash dropped. Specs at 3 or more pairs, or 15% or more, are reported as near misses. Borderline cases go to rwxmap's user. We drop the flagged `spec_sha256` ids before labelling.
+
+## 12. Final counts per source (2026-11-19)
+
+Operations after each source's own filters, before the master:
+
+| source | ops |
+|---|---|
+| GitHub | 455k |
+| SwaggerHub | 288k |
+| catalogues (PowerPlatform, wso2, konfig, Activepieces) | 33k |
+| cloud (Alibaba, Huawei) | 40k |
+
+Raw downloads (`data/r15/raw`, 4.7 GB) were deleted on the user's request on 2026-11-19. The per-source sheets (`ops-r15*.csv.gz`, `providers-r15*.csv`) are kept, so the master can be rebuilt from them.
+
+## 13. rwxmap copy check and master sheet
+
+**Copy check result.** rwxmap checked our sheets at its commit 1c25be1. It flagged 318 specs; one more, a GitbookIO spec, was added by hand. That is 319 specs and 4,963 ops dropped. Near misses were kept. No exam copy got through.
+
+**Master sheet** (`r15/master.py`): 802,196 ops from 25,345 vendors. Cross-source dedupe removed 8,789 rows. There are 563 spec groups. Flags are tag, don't drop: a flagged row stays in the sheet with its flag.
+
+**Picker** (`r15/pick.py`): 200,000 ops from 21,604 vendors. Water level 29 (the per-vendor cap that fills the 200,000). Title share 24.8%.
+
+## 14. Labelling and blind review (2026-11-19)
+
+**Labelling** (commit f664afd, `r15/label_*`). Each of the 200,000 picked rows got three opinions: the bge-base teacher (temperature 0.99424), R13 through rwxmap mode a, and rwxmap's mechanical rules. All three agree on 174,967 rows (87.48%). The rest, 25,033 rows in 18 disagreement types, are the disputed rows. Counts per type: `data/r15/labels/opinions-report.json`.
+
+**Blind review.** Claude reviewed 400 disputed rows against BRIEF-v4 without seeing the opinions (about 33 rows per big type; letter, confidence, reason). Results, weighted to the 25,033 by disagreement type (exact / too loose / too tight, %):
+
+| opinion | exact | too loose | too tight |
+|---|---|---|---|
+| bge | 74.8 | 17.5 | 7.8 |
+| R13 mode a | 57.6 | 7.5 | 34.9 |
+| mechanical | 20.1 | 10.8 | 69.1 |
+
+On the 175 rows the reviewer was "sure" of, exact: bge 145, R13 113, mechanical 23.
+
+bge's weak spot: when bge is looser than BOTH others (about 11.3k rows: bge_w_r13_x_mech_x 8,239 and bge_r_r13_x_mech_x 3,011), it is too loose about a third of the time.
+
+These 400 rows never enter training. They are the teacher-quality holdout.
+
+## 15. Plan after the review (user decisions, 2026-11-19)
+
+The user approved Jev as a one-time OFFLINE labeller for training data, on disputed rows only. It is never used at runtime. Spend cap for all Jev use: $50.
+
+1. Pilot first, on the 400 reviewed rows: does Jev beat bge? (Result: section 15.1.)
+2. If Jev wins: Jev labels the 25,033 disputed rows.
+3. Retrain bge-base as the permanent teacher on our 102,668 checked rows plus the 200k round 15 rows. Labels: the three-way consensus where all agree, Jev where they disputed. Server estimate under the gentle rules: about 15-20 h.
+4. Distil the MiniLM student from the new bge.
+5. The pass rule is preregistered before training. Exam #7 judges.
+
+**Fallback if Jev does not beat bge:** drop the about 11.3k rows where bge is loosest (bge looser than both others) and use bge soft targets for the rest.
+
+### 15.1 Jev pilot result
+
+Jev was run as rwxmap's own mode-c pipeline (commit 1c25be1: mechanical, then the per-tier question for rows in a Jev pile, with rwxmap's thresholds), on the 400 reviewed rows only. 286 rows sit in a pile and got Jev calls; 114 sit in no pile and keep the mechanical letter, as in rwxmap. Scripts: `r15/jev_pilot_prep.py`, `r15/jev_pilot.mjs`, `r15/jev_pilot_score.py`; outputs `data/r15/labels/jev-pilot-400.csv`, `jev-pilot-report.json` (not committed).
+
+Weighted (exact / too loose / too tight, %), then raw exact counts out of the 175 sure rows:
+
+| opinion | weighted exact | too loose | too tight | sure-only exact (of 175) |
+|---|---|---|---|---|
+| bge | 74.8 | 17.5 | 7.8 | 145 |
+| R13 | 57.6 | 7.5 | 34.9 | 113 |
+| mechanical | 20.1 | 10.8 | 69.1 | 23 |
+| Jev (mode c) | 65.0 | 10.7 | 24.3 | 86 |
+
+Jev does not beat bge on exact (65.0 vs 74.8 weighted; 86 vs 145 sure-only). On the 286 rows where Jev was actually asked, raw exact is bge 195, Jev 168, R13 144, mechanical 73.
+
+On bge's weak spot (the two big types, 66 sampled rows standing for 11,250): bge 62.4 / 33.1 / 4.4, Jev 60.2 / 4.4 / 35.4. Jev is about as exact but swaps too loose for too tight. Small sample; one run (Jev is not repeatable).
+
+Cost: 374 calls, 802,541 input tokens, $0.034 computed from token counts at rwxmap's recorded price (42e-9 per input token); not a vendor invoice. Projection for 25,033 rows: about $3.5 (weighted by type, about 35,000 calls), about $2.1 flat. Both far under the $50 cap.
+
+Verdict: Jev did not win, so the fallback in section 15 is the working plan unless the user decides otherwise (section 16).
+
+## 16. Status (2026-11-19)
+
+Collection, copy check, master, picker, labelling, blind review and the Jev pilot are done. Raw downloads are deleted; sheets are kept. Pending: the user's choice between the fallback (bge soft targets, drop the about 11.3k loosest rows) and labelling the disputed rows with Jev anyway; then the preregistered pass rule and the bge retrain. Nothing trained yet.
