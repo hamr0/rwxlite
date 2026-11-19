@@ -347,6 +347,14 @@ Numbers are in `docs/wiki/findings.md` (the 2026-11-18 sections), `docs/product/
 
 Numbers: `docs/wiki/findings.md` (2026-11-19) and `docs/product/prd-r15-github-data.md` section 5.
 
+### 14. Two lessons from round 15 labelling and lean
+
+**(a) Write an ambiguity ruling into the brief before relabelling, and put the new rule FIRST in the labeller prompt.** Sonnet under-applied D141 in pass 1. A narrow second pass with the ruling up front raised 114 of 395 rows.
+
+**(b) Train on the exact input the exam will feed.** The lean comes from rwxmap's mechanical rules, so when those rules change, regenerate the training texts from the frozen exam ref.
+
+Numbers: `docs/wiki/findings.md` (2026-11-19) and `docs/product/prd-r15-github-data.md` sections 19-20.
+
 ## Training on the home server
 
 Sandbox: `ahassan@192.168.178.180:~/rwxlite-train/` (Fedora, 4-core i3-8100T, CPU only, venv at `.venv`, torch CPU, transformers 5.0.0). Nothing outside that dir is touched. Only `train/*.py` and `data/train/{train,val,v3eval}.parquet` are copied there (no exam, gate labels, keys or .env).

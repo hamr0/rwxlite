@@ -1,5 +1,7 @@
 # PRD: round 15, a large new-vendor transfer set for distillation
 
+Status (2026-11-19): training plan and gates decided (section 20, draft `docs/wiki/prereg-r15.md`, uncommitted until its gates are met); training waits for export-v4-d141 and the frozen exam #7 ref SHA.
+
 Status: D141 relabel applied to the labels (section 19, 2026-11-19); training waits for rwxmap's export-v4-d141. Before that: collection done, labelling and blind review done, Jev pilot and Sonnet pilot done (2026-11-19); labelling cascade agreed (section 5, 17); next is the preregistered pass rule and mix (section 16). Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
 
 ## 1. Goal
@@ -213,3 +215,20 @@ The labels follow BRIEF-v4 plus the D141 addendum (rwxmap 54355e1, `BRIEF-v4-add
 **Pass 2.** rwxmap spotted Sonnet under-applying D141 on pure token checks, 2FA disabling, credential storing, login-code generation and webhook activation. A narrow Opus pass with the D141 wording covered 395 family a/b/d candidates whose applied letter was below x and whose reason mentioned token, verify, 2FA, key, credential, activate and the like. It raised 114 of them (r to x 73, w to x 41; a 57, b 43, d 23). The final letter is the stricter of the Sonnet-based letter and the pass-2 letter. Columns d141_pass2 and d141_pass2_letter mark them; a raised row keeps weight 1.0 unless its pass-2 confidence is unsure (0.3). Final totals: 1,330 rows changed against the pre-D141 labels; letters r 108,203 / w 30,853 / x 60,544 (r 54.2 / w 15.5 / x 30.3); 199 rows at weight 0.3, weight total 198,450.6. The counts above (1,274 changed, 171 at 0.3) are the state before pass 2. New sha256: parquet d36972fe2f9be2107581fbe30a7a5edecdf7d191418bf03f85c041b7e42e93eb, csv.gz bc6c3d8a7863f5621cf2bdfcae031f476f4f8cb6128b3d2a3118280d278ba2e6. Holdout numbers are unchanged.
 
 **Next.** rwxmap will re-export the other 102,668 rows as export-v4-d141 using the same net (pending their user's go-ahead). Training waits for that export. Data stays under `data/r15/` and is not committed.
+
+## 20. Training plan and gates (2026-11-19)
+
+User decisions of 2026-11-19. All are recorded in the draft `docs/wiki/prereg-r15.md`, which stays uncommitted until its gates (point 7) are met.
+
+1. **Row weights in training.** Contested rows count x3, because that is where wrong judgements happen.
+   - Weight 1.0: the R13 rows, and r15 agree3 rows not changed by D141.
+   - Weight 3.0: r15 sonnet or opus_agree rows, and D141-changed rows whose deciding answer was sure or likely.
+   - Weight 1.0: rows resting on an unsure answer (3 x the old 0.3).
+   - This is a row weight, not R13-L3's x3 too-loose loss cost. The loss stays 0.7 soft + 0.3 hard with x_weight 1.0.
+2. **Exam #7 precision.** Primary is int8 at batch 1 (what ships); fp32 is info only. The student uses its own val-fit T. The baseline R13 stays at its shipped T 0.991463. A val floor guard stops a clearly broken student before it can use up exam #7.
+3. **Teacher go/no-go.** The teacher is bge-base retrained on the R13 rows plus the r15 rows. It has a written go/no-go, relative to the old bge, on val and on the D141 holdout. If it fails, the student uses the round 14 bge teacher; those fallback targets are prebuilt.
+4. **Val overlap.** The 57 r15 rows that exactly match a val row (method + path + operationId + summary) are dropped from training, because val decides the teacher go/no-go.
+5. **Lean matching.** Exam #7 is scored through rwxmap's real CLI at one frozen ref (the "frozen exam #7 rwxmap ref" in rwxmap's exam #7 prereg). If rwxmap's D141 mechanical word list passes its bar, that ref includes it. The user chose to train on the same lean, so all training and val texts are regenerated with that ref's mechanical lean before training. We byte-compare our regenerated lean.csv with the exam's.
+6. **Exam #7 truth.** Two blind labellers on BRIEF-v4 + D141 (rwxmap 54355e1), no scripts. rwxmap's user rules every disagreement. No Jev. The default pair is Sonnet + Opus; rwxmap's exam #7 prereg names it.
+7. **Training gates.** Training starts only after BOTH rwxmap's export-v4-d141 of the 102,668 R13 rows (same pattern net and method) AND the frozen exam #7 ref SHA have arrived. Then the prereg is finalised and committed (frozen), and the teacher runs on the home server under the gentle rules: about 20 h in total, at most about 25 h.
+8. **Caveat.** Labels, the holdout truth and exam #7 truth are all Claude models reading BRIEF-v4 + D141. That is consistent and it is the chosen standard, but "correct" means agreement with that rulebook, not an outside truth.

@@ -1229,3 +1229,18 @@ rwxmap's user ruled on five BRIEF-v4 ambiguities (D141, rwxmap 54355e1): login/r
 **Learning.** D141 moves about 0.6% of rows, almost all toward stricter. The opinion scores measured on the holdout are now an upper bound for D141 families. Next: rwxmap's export-v4-d141 of the other 102,668 rows before training.
 
 **Pass 2 (same day).** rwxmap spotted Sonnet under-applying D141 on pure token checks, 2FA disabling, credential storing, login-code generation and webhook activation. A narrow Opus pass with the D141 wording took 395 candidates (families a/b/d, applied letter below x, reason mentioning token/verify/2FA/key/credential/activate) and raised 114: r to x 73, w to x 41 (a 57, b 43, d 23). Opus said r for 260, x for 114 and w for 21 of the 395. The final letter is the stricter of the two. Totals after pass 2: 1,330 rows changed against the pre-D141 labels (r to x 957, w to x 206, x to w 139, x to r 21, r to w 5, w to r 2); letters r 54.2 / w 15.5 / x 30.3; 199 rows at weight 0.3. The holdout scores are identical to before (cascade 89.4 / 6.1 / 4.5) since pass 2 touches only the non-holdout rows. Learning: a single blind Sonnet pass under-applies a ruling on rows that read as checks or reads; a targeted stricter second look found about 29% more x in that pocket.
+
+## 2026-11-19: decisions before training
+
+User decisions, recorded in the draft `docs/wiki/prereg-r15.md` (uncommitted until its gates are met). Full list: PRD `docs/product/prd-r15-github-data.md` section 20.
+
+- **Row weights.** Contested rows count x3: r15 sonnet or opus_agree rows, and D141-changed rows whose deciding answer was sure or likely. R13 rows and unchanged agree3 rows stay 1.0. Rows resting on an unsure answer get 1.0 (3 x the old 0.3). This is a row weight, not R13-L3's x3 too-loose loss cost; the loss stays 0.7 soft + 0.3 hard, x_weight 1.0.
+- **Val overlap.** 57 r15 rows exactly match a val row (method + path + operationId + summary). They are dropped from training, because val decides the teacher go/no-go.
+- **Lean matching.** Exam #7 is scored through rwxmap's real CLI at one frozen ref. If rwxmap's D141 mechanical word list passes its bar, that ref includes it, and all training and val texts are regenerated with that lean before training. We byte-compare our regenerated lean.csv with the exam's.
+- **Caveat.** Labels, the holdout truth and exam #7 truth are all Claude models reading BRIEF-v4 + D141. That is consistent and it is the chosen standard, but "correct" means agreement with that rulebook, not an outside truth.
+
+**Open items (training waits on the first two).**
+- rwxmap's export-v4-d141 of the 102,668 R13 rows (same pattern net and method).
+- The frozen exam #7 rwxmap ref SHA.
+- The exam #7 labeller pair: two blind labellers, default Sonnet + Opus, named in rwxmap's exam #7 prereg; rwxmap's user rules every disagreement.
+
