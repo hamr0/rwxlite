@@ -49,6 +49,8 @@ Cheap and broad passes come first; each more trusted pass only sees the remainin
 
 Label standard is BRIEF-v4 plus D136/D137 (rwxmap's pipeline is the label truth). Same model plus same brief is one opinion, not independent labellers; this is why pass 3 uses a different model (Opus) and why residue rows get low weight. Using rwxmap on training rows burns nothing; only scored exams are burned.
 
+**Cascade result (2026-11-19; `r15/label_final.py`, `r15/label_holdout_score.py`; data not committed).** Final labels: 199,600 rows (200,000 minus the 400 holdout rows). Tiers: agree3 174,967; sonnet 21,038 (sure 13,547 and likely 7,491, less the unsure ones); opus_agree 2,152; strict 1,443 (weight 0.3). Letters overall r 54.7% / w 15.5% / x 29.8% (agreed-only: 59.1 / 9.4 / 31.5). Weight total 198,589.9. Audit of 300 agreed rows: Sonnet same 274, agreed-looser 6 (2.0%, under the 3% limit, so the agreed rows stand), agreed-stricter 20. Holdout (weighted to 25,033 disputed rows, exact / too loose / too tight): cascade 92.0 / 3.8 / 4.2, Sonnet 87.2 / 9.8 / 3.1, bge 74.8 / 17.5 / 7.8; risky pocket cascade 90.9 / 4.7 / 4.4, Sonnet 82.6 / 15.2 / 2.2, bge 62.4 / 33.1 / 4.4. Pass 4 short list: 12,056 flags on 11,496 ops in `pass4-ambiguity-list.csv` (flag only, no label changed). Details: findings.md, 2026-11-19, "Cascade run".
+
 ## 6. Training and rule
 
 - Student: all-MiniLM-L6-v2, R13 recipe. Data: our 102,668 labelled rows plus the transfer rows, with the teacher's probabilities as soft targets. The exact mix is fixed in this round's prereg before training.
@@ -193,3 +195,7 @@ In the risky pocket where bge is looser than both R13 and mechanical (11,250 row
 On rows the reviewer marked sure, Sonnet's exact rate is 99.6%. Where both were sure, they agreed on 157 of 157. In the pocket, Sonnet sure was right on 33 of 34. Its misses sit mostly on rows Sonnet itself marked unsure, especially "verify code/email" (one of the five BRIEF-v4 ambiguities). So Sonnet's confidence is usable as the pass 2 / pass 3 split.
 
 **Caveat.** The reviewer is also a Claude model with the same brief, so the Sonnet scores are optimistic (same model family plus same brief is not independent). Pass 3 uses Opus and the residue rule for this reason.
+
+## 18. Status (2026-11-19, cascade done)
+
+Passes 1 to 3 and the pass 4 flagging are done; final labels are built (section 5, cascade result). Next: preregister the pass rule and the soft/hard mix, retrain bge as teacher, distil MiniLM, exam #7 judges, and send the pass 4 short list to rwxmap's user. Nothing trained yet.

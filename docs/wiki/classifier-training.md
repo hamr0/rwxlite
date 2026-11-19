@@ -343,6 +343,8 @@ Numbers are in `docs/wiki/findings.md` (the 2026-11-18 sections), `docs/product/
 
 **Each round gets cheaper.** The retrained model becomes the next round's cheap pass, so fewer rows are disputed.
 
+**Result.** The trusted pass fixes most of the cheap pass's looseness: on the holdout, too-loose fell from 17.5% (bge) to 9.8% (Sonnet) to 3.8% (cascade); the remaining loose risk is mostly the agreed rows, about 2% in the audit.
+
 Numbers: `docs/wiki/findings.md` (2026-11-19) and `docs/product/prd-r15-github-data.md` section 5.
 
 ## Training on the home server

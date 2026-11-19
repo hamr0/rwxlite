@@ -1201,3 +1201,19 @@ Source: `docs/product/prd-r15-github-data.md` sections 5 and 17; `data/r15/label
 5. Across rounds bge is retrained on the cleaned labels and becomes the next pass 1.
 
 The 400 reviewed rows are the holdout and never enter training. Next: preregister the pass rule and mix, retrain bge as teacher (102,668 + about 200k rows), distil MiniLM, exam #7 judges.
+
+### 2026-11-19: Cascade run and final labels
+
+Source: `r15/label_final.py`, `r15/label_holdout_score.py`, `data/r15/labels/final-labels-report.json` (not committed).
+
+**Tiers (199,600 rows; the 400 holdout rows excluded).** agree3 174,967 (r 103,470 / w 16,382 / x 55,115); sonnet 21,038 (r 5,520 / w 13,729 / x 1,789); opus_agree 2,152 (r 152 / w 690 / x 1,310); strict 1,443 at weight 0.3 (w 116 / x 1,327). Sonnet confidence on the 24,633 disputed rows: sure 13,547, likely 7,491, unsure 3,595. Letter mix overall r 54.7% / w 15.5% / x 29.8%, against r 59.1 / w 9.4 / x 31.5 for the agreed rows only. Weight total 198,589.9. bge probabilities are kept on every row; `label_source_letters` holds all opinions.
+
+**Audit.** Sonnet on 300 agreed rows: 274 same, 6 agreed-looser (2.0%), 20 agreed-stricter (6.7%). Agreed-looser is under the 3% limit, so the agreed rows stand.
+
+**Holdout (400 blind-reviewed rows, weighted to 25,033; exact / too loose / too tight).** Recomputed by script, all match the earlier figures. Cascade 92.0 / 3.8 / 4.2; Sonnet alone 87.2 / 9.8 / 3.1; bge 74.8 / 17.5 / 7.8. Risky pocket (66 rows): cascade 90.9 / 4.7 / 4.4; Sonnet 82.6 / 15.2 / 2.2; bge 62.4 / 33.1 / 4.4. Same caveat as before: the reviewer is also a Claude model with the same brief.
+
+**Pass 4 short list** (`pass4-ambiguity-list.csv`, rough text patterns, flag only): 12,056 flags on 11,496 ops: login/session 7,508; oauth client/register 3,288; verify code/otp/email/token 1,102; device or push token / endpoint config 107; PUT membership removal 51. The login and oauth patterns are broad on purpose; most flags sit on agree3 rows (10,187).
+
+**Run facts.** 101 + 3 subagents; about 24 minutes. 463 unsure rows first missed the Opus hand-off because 6 batches wrote incomplete lists; they were filled afterwards (missed-a, missed-b). Some workers shared a scratch folder; ids and letter/reason consistency were checked and no crossing was found. The refill overlapped 66 rows already answered in unsure-012; 6 of those had different letters, and the script keeps the stricter Opus letter for them. Opus covers exactly the 3,595 Sonnet-unsure rows.
+
+**Learning.** The trusted pass fixes most of the cheap pass's looseness. On the holdout, too-loose fell from 17.5% (bge) to 9.8% (Sonnet) to 3.8% (cascade). The remaining loose risk is now mostly the agreed rows, about 2% in the audit.
