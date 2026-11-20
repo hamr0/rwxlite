@@ -93,7 +93,7 @@ rwxlite was trained with the lean as the first words of its input, so it is part
 
 The measured way to get a lean is rwxmap's mechanical rules (https://github.com/hamr0/rwxmap). That is what the scores in the README were measured with, so it is the recommended source. If you write your own first guess, you are outside what was measured.
 
-The rule names the 0.3.1 model saw in training (the part of the input after the lean letter):
+The rule names the 0.4.0 model saw in training (the part of the input after the lean letter):
 
 | Rule | Lean letter | Typical method |
 |---|---|---|
@@ -104,17 +104,20 @@ The rule names the 0.3.1 model saw in training (the part of the input after the 
 | `floor-post` | x | POST |
 | `method-delete` | x | DELETE |
 | `cant-undo-verb`, `cant-undo-verb-summary` | x | POST, PUT, PATCH with a can't-undo-style name |
+| `path-x-word` | x | POST, PUT, PATCH with a can't-undo word in the path |
+| `content-noun` | w | POST with a content-style noun |
+| `get-action` | x | GET that acts |
 
-(Counted over the 102,668 training texts in `data/round13/train.jsonl`.)
+(Counted over the 302,211 training texts of round 15, `data/round15/train.parquet`, which is not shipped.)
 
-Three more rule names exist in rwxmap's current mechanical rules: `path-x-word`, `content-noun` and `get-action`. **The model never saw these three in training.** They were fed to it unchanged and checked on 154 validation rows (139 right, 5 too loose, 10 too tight in the product flow), which is why they are not blocked, but it is a small sample. The rule name `credential-set` is also not in the training set; rwxlite reads it as `cant-undo-verb` (the lean class you send is kept). **Any other unseen rule name is untested**: the model will read it as unfamiliar words in its input, and nobody has measured what that does to the answer. If you invent your own rule names, measure them first.
+The last three rules in the table, `path-x-word`, `content-noun` and `get-action`, were in the training data of 0.4.0 (8,737, 3,593 and 266 rows); the 0.3.1 model had never seen them and was only spot-checked on 154 validation rows. The rule name `credential-set` is not read as such by the model; rwxlite reads it as `cant-undo-verb` (the lean class you send is kept). **Any other unseen rule name is untested**: the model will read it as unfamiliar words in its input, and nobody has measured what that does to the answer. If you invent your own rule names, measure them first.
 
 ## 5. The answer
 
 ```js
 const one = await a.answer(req);
-// { model: 'rwxlite-0.3.1+984714f0',
-//   answers: { isX: { noul: 0.00018958376213002917 }, changes: { noul: 0.007416255903099448 } } }
+// { model: 'rwxlite-0.4.0+470708b0',
+//   answers: { isX: { noul: 0.0012527997670124082 }, changes: { noul: 0.01085614682218233 } } }
 ```
 
 `noul` is the probability. For each question you asked there is one entry under `answers`. Two shapes exist, both plain JSON:
@@ -173,22 +176,22 @@ Real answers, with the arithmetic done (rounded to 4 places):
 
 | # | Answer JSON (`isX`, `changes`) | p(r) | p(w) | p(x) | Letter |
 |---|---|---|---|---|---|
-| 1 GET read | `0.00018958376213002917`, `0.007416255903099448` | 0.9926 | 0.0072 | 0.0002 | **r** |
-| 2 PUT update | `0.017573521378007922`, `0.9983811919017629` | 0.0016 | 0.9808 | 0.0176 | **w** |
-| 3 POST create | `0.032569596453775274`, `0.9867117866387414` | 0.0133 | 0.9541 | 0.0326 | **w** |
-| 4 POST create API key | `0.9910524465521778`, `0.9974375359218973` | 0.0026 | 0.0064 | 0.9911 | **x** |
-| 5 DELETE project | `0.9977202904060377`, `0.9989789430250046` | 0.0010 | 0.0013 | 0.9977 | **x** |
+| 1 GET read | `0.0012527997670124082`, `0.01085614682218233` | 0.9891 | 0.0096 | 0.0013 | **r** |
+| 2 PUT update | `0.018779843778726487`, `0.9925372159732244` | 0.0075 | 0.9738 | 0.0188 | **w** |
+| 3 POST create | `0.023517771785246885`, `0.9872990344481938` | 0.0127 | 0.9638 | 0.0235 | **w** |
+| 4 POST create API key | `0.9733988058311938`, `0.9954438745538006` | 0.0046 | 0.0220 | 0.9734 | **x** |
+| 5 DELETE project | `0.9928668568432085`, `0.9973209991014456` | 0.0027 | 0.0045 | 0.9929 | **x** |
 
 What they show:
 
-- Example 3 arrived with lean `x` (a plain POST starts out at x because a POST might do anything) and the model lowered it to `w` with 95% confidence. This is the kind of row where the model earns its place, and also the kind of row where a mistake would be "too loose", so this is where your cut matters.
-- Example 4 stays `x`: creating a key is x under the widened rule, and the model is 99% sure.
+- Example 3 arrived with lean `x` (a plain POST starts out at x because a POST might do anything) and the model lowered it to `w` with 96% confidence. This is the kind of row where the model earns its place, and also the kind of row where a mistake would be "too loose", so this is where your cut matters.
+- Example 4 stays `x`: creating a key is x under the widened rule, and the model is 97% sure.
 - Example 5 (DELETE) is x, and the model agrees with its lean.
 
 The complete answer for example 4, as returned:
 
 ```json
-{"model":"rwxlite-0.3.1+984714f0","answers":{"isX":{"noul":0.9910524465521778},"changes":{"noul":0.9974375359218973}}}
+{"model":"rwxlite-0.4.0+470708b0","answers":{"isX":{"noul":0.9733988058311938},"changes":{"noul":0.9954438745538006}}}
 ```
 
 The script used (save outside the package, adjust `dir`):
@@ -212,7 +215,7 @@ The probabilities are calibrated: among answers where the top probability is abo
 
 > **Answer automatically when the top probability is at least your cut. Otherwise ask a human (or keep the lean).**
 
-A higher cut means fewer automatic answers and fewer mistakes. A lower cut means more automatic answers and more mistakes. Nothing else changes. The cut is yours: rwxmap uses 0.90 for lowering, tuned to its needs. A cut tuned on 0.2.x does not carry over: the 0.3.1 calibration temperature differs (0.991463 against 0.844), so the same number now means something different. Re-check your cut when you move to 0.3.1.
+A higher cut means fewer automatic answers and fewer mistakes. A lower cut means more automatic answers and more mistakes. Nothing else changes. The cut is yours: rwxmap uses 0.90 for lowering, tuned to its needs. A cut tuned on an earlier version does not carry over: the calibration temperature differs between versions (0.2.x 0.844, 0.3.1 0.991463, 0.4.0 1.3832182330120317), so the same number means something different. Re-check your cut when you move to 0.4.0.
 
 ### What the cut does, measured
 
