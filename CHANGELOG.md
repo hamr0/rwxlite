@@ -3,11 +3,23 @@
 All notable changes to rwxlite are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.4.0] - 2026-11-20
+
+Round 15 (R15) is the new default model.
+
+- New default weights, trained on 302,211 labelled operations that include about 21,600 vendors the earlier models never saw (round 15 data, one label base). A bge teacher is distilled into the MiniLM student. Calibration temperature is 1.3832 (it was 0.991463), so the probabilities change and a decision cut tuned on 0.3.x values does not carry over. Callers should re-check their cut.
+- Model strings: `rwxlite-0.4.0+470708b0` (int8, the default `manifest.json`) and `rwxlite-0.4.0+4608f470` (fp32, `manifest-exact.json`).
+- Measured once on exam #7 (1,579 operations, official numbers from rwxmap's own CLI), right / too loose / too tight: mode a (rules plus model at the 0.90 cut) 1432 / 66 / 81 against 0.3.1 at 1431 / 68 / 80; mode b85 1449 / 39 / 91 against 1447 / 54 / 78. Verdict GO under D142. Exam #7 is now used up: no tuning or gating on it again.
+- The API is unchanged. Text format 1 is kept; the manifest keys are the same as in 0.3.1. rwxmap adopts this release by its own decision; nothing here changes what rwxmap runs until it does.
+
+### Added
+- `m1/release-assets.mjs` has an `r15` mode (`node m1/release-assets.mjs [out-dir] r15 [--skip-version-check]`): copies the five R15 files byte for byte from `data/m1-r15/`, checks each sha256, and checks package.json's version equals the manifests' version.
+- 0.4.0 integration tests for the R15 model strings and answers.
+- Training tooling: `train/finetune.py` takes `--row_weight` (a per-row loss weight column), `--teacher` (soft targets from a teacher model, for distillation) and `--base` (the starting model, default all-MiniLM-L6-v2, recipe unchanged); a teacher-probabilities script; `m1/export_r15.py`, `m1/manifest-r15.mjs`, `m1/r15-train.sh`, and the exam #7 scoring and round 14 comparison scripts. Round 15 data pipelines (GitHub, SwaggerHub, cloud and catalogue sources), labelling scripts, pre-registrations and recorded results are in the repo. None of this ships in the npm package.
 
 ### Changed
-- Docs only: the README "How well it does" section now leads with rwxmap's exam #6 (modes a and b, rules only), keeps exam #5 as a shorter second block, and has a new ASCII logo. `docs/wiki/findings.md` and the PRD status line record the same numbers.
-- Docs only: the README shows one test (exam #6); exam #5 stays in docs/wiki/findings.md.
+- README and `docs/wiki/guide.md` are updated to 0.4.0 (badge, worked examples re-run on the int8 model, calibration temperature note); the PRD and `docs/wiki/findings.md` record round 14 (bge-base teacher, closed) and round 15.
+- README: the "How well it does" section shows one test, rwxmap's exam #7 (modes a and b, rules only; 1,579 operations from 6 APIs no model had seen); exams #5 and #6 stay in `docs/wiki/findings.md`. The README opens with an ASCII logo.
 
 ## [0.3.1] - 2026-11-07
 

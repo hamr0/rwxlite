@@ -9,7 +9,7 @@
 <p align="center">
   <a href="https://github.com/hamr0/rwxlite/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hamr0/rwxlite/ci.yml?label=CI" alt="CI"></a>
   <img src="https://img.shields.io/github/package-json/v/hamr0/rwxlite?label=version&color=2a4f8c" alt="version (auto from package.json)">
-  <img src="https://img.shields.io/badge/classifier-rwxlite--0.3.1%2B984714f0-2a4f8c" alt="classifier: rwxlite-0.3.1+984714f0 (int8 default)">
+  <img src="https://img.shields.io/badge/classifier-rwxlite--0.4.0%2B470708b0-2a4f8c" alt="classifier: rwxlite-0.4.0+470708b0 (int8 default)">
   <img src="https://img.shields.io/badge/license-Apache%202.0-2a4f8c" alt="license: Apache 2.0">
 </p>
 
@@ -47,23 +47,22 @@ The model outputs three probabilities, p(r), p(w) and p(x). Every Jev question i
 
 ## How well it does
 
-**Tested once on 1,588 operations from 5 APIs no model had seen** (Grafana, NocoDB, Radarr, Cloudsmith, Invoice Ninja), scored on 2026-11-08 through rwxmap 0.11.0 installed from npm, with rwxlite 0.3.1 (fp32).
+**Tested once on 1,579 operations from 6 APIs no model had seen**, scored on 2026-11-20 through rwxmap's real CLI (rwxmap `7dce23e`), with rwxlite 0.4.0 (fp32, `rwxlite-0.4.0+4608f470`).
 
 | | right | too loose | too tight |
 |---|---|---|---|
-| **With rwxmap** (mode a, 0.90 cut) | 1,434 (90.3%) | 35 (2.2%) | 119 (7.5%) |
-| **On its own** (rwxmap mode b, rwxlite judges every row, confidence 85) | 1,424 (89.7%) | 19 (1.2%) | 145 (9.1%) |
-| **Rules only** (no model) | 1,305 (82.2%) | 43 (2.7%) | 240 (15.1%) |
+| **With rwxmap** (mode a, 0.90 cut) | 1,432 (90.7%) | 66 (4.2%) | 81 (5.1%) |
+| **On its own** (rwxmap mode b, rwxlite judges every row, confidence 85) | 1,449 (91.8%) | 39 (2.5%) | 91 (5.8%) |
+| **Rules only** (no model) | 1,333 (84.4%) | 72 (4.6%) | 174 (11.0%) |
 
 - **Too loose** means it called an operation safer than it is. This is the costly mistake.
 - **Too tight** means it called an operation riskier than it is. This is annoying but safe.
-- Two Sonnet labellers labelled the exam blind. They agreed on 1,564 rows and a person ruled the other 24. Agreement between two runs of the same model shows consistency, not truth.
-- Mode a is rwxmap's default: the rules answer first, and rwxlite moves only the contested rows, at a 0.90 cut. The cut was tuned on an earlier test and held on this one, so this row is an honest test.
-- Mode b has rwxlite alone judge every row. Under the confidence, a row becomes x and is marked for review. The 85 was picked using this test and an earlier one, so that row is fitted, not an unseen test. rwxmap's default is still 95, so pass `--confidence 85`. A next test will check it.
-- Trade-off in mode b, right / too loose / too tight: confidence 95 gives 1,288 / 13 / 287; 90 gives 1,388 / 17 / 183; 85 gives 1,424 / 19 / 145; 70 gives 1,441 / 29 / 118. A higher confidence leaks less but sends more rows to review.
-- This test used the fp32 model, which rwxmap runs. The default int8 model was not scored on it.
+- Two Claude models (Sonnet and Opus) labelled the exam blind, on the BRIEF-v4 rules plus the D141 addendum, and a person ruled every disagreement. Agreement between models reading the same rulebook shows consistency, not truth.
+- Mode a is rwxmap's default: the rules answer first, and rwxlite moves only the contested rows, at a 0.90 cut. The previous model, 0.3.1, scored 1,431 / 68 / 80 on the same rows and cut, so 0.4.0 is level with it here (exact +1, too loose -2).
+- Mode b has rwxlite alone judge every row. Under the confidence, a row becomes x and is marked for review. The 85 was picked on earlier tests, so this is its first unseen test. rwxmap's default is still 95, so pass `--confidence 85`.
+- The default int8 model was scored by us in mode a, not through rwxmap: 1,431 / 66 / 82.
 
-It was trained on about 102,700 labelled API operations from about 690 public API providers (691 distinct providers, 682 vendors, in the round-13 training and validation data), labelled under the wider x rule above. Speed is about 17-20 ms per operation on a laptop CPU.
+It was trained on 302,211 labelled API operations: 102,668 from the earlier set (about 690 public API providers) plus 199,543 from about 21,600 new vendors, labelled under the wider x rule above. Speed is about 17-20 ms per operation on a laptop CPU.
 
 ## Install
 
@@ -73,7 +72,7 @@ ONNXRUNTIME_NODE_INSTALL=skip npm i rwxlite
 
 Setting `ONNXRUNTIME_NODE_INSTALL=skip` avoids a 285 MB GPU download; the CPU build is enough. `onnxruntime-node` is an optional dependency.
 
-The model files are not in the npm package. Download them from the [GitHub release](https://github.com/hamr0/rwxlite/releases) `v0.3.1` into one folder and point `dir` at it: `manifest.json`, `model-int8-pc.onnx` (23 MB) and `vocab.txt` for the default, or `manifest-exact.json`, `model-fp32.onnx` (91 MB) and `vocab.txt` for the fp32 "exact" option. Details and the sha256 values are in the guide.
+The model files are not in the npm package. Download them from the [GitHub release](https://github.com/hamr0/rwxlite/releases) `v0.4.0` into one folder and point `dir` at it: `manifest.json`, `model-int8-pc.onnx` (23 MB) and `vocab.txt` for the default, or `manifest-exact.json`, `model-fp32.onnx` (91 MB) and `vocab.txt` for the fp32 "exact" option. Details and the sha256 values are in the guide.
 
 ## Using rwxlite on its own
 

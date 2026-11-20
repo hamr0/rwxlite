@@ -1030,3 +1030,321 @@ rwxmap replayed R13 and 0.2.0 through its real secondPass (src at v4, D138), swa
 - **Mode b on exam #6 at other confidences:** 95 gives 1,288 / 13 / 287; 90 gives 1,388 / 17 / 183; 85 gives 1,424 / 19 / 145; 70 gives 1,441 / 29 / 118.
 - **Exam #5 too-loose split, rwxmap at 0.90 (verified by us).** Of the 40 too-loose rows, 36 are x called w, 2 are w called r and 2 are x called r. 38 are off by one step and 2 by two.
 - **What it means for rwxlite.** Mode b is rwxlite on its own. The earlier line "Released rwxmap still runs 0.2.0 at 0.97" is superseded: rwxmap 0.11.0 pins rwxlite 0.3.1.
+
+
+## 2026-11-18: Bigger model and distillation, background for round 14
+
+- **Model sizes.** Only our own row is measured here; the others are published specs.
+  - all-MiniLM-L6-v2 (ours): 22.7M parameters, 6 layers, hidden size 384, 91 MB fp32 / 23 MB int8.
+  - bge-small-en-v1.5: 33M parameters, 12 layers, hidden size 384.
+  - bge-base-en-v1.5: about 109M parameters, 12 layers, hidden size 768, about 440 MB fp32 / about 110 MB int8 (estimate).
+  - bert-base-uncased: 110M parameters, same shape as bge-base.
+  - ModernBERT-base: 149M parameters, 22 layers, different tokenizer.
+- **What each is.**
+  - BERT-base was pre-trained only to fill in hidden words.
+  - MiniLM was distilled from a larger model, then trained on sentence-pair meaning (sentence-transformers).
+  - bge-base is BERT-base-shaped and trained on sentence meaning with newer data. It starts closer to our task than plain BERT, and has about 5 times MiniLM's parameters.
+- **Generalization gap.** About 97% on val vs about 90% on unseen vendors (exam #6 mode a 90.3%). The labellers agreed on 1,564 of 1,588 exam #6 rows (98.5%), so the answer is usually clear and there is room for the model to improve.
+- **Three ways to shrink or speed a model.**
+  - Quantization: same weights, stored with fewer bits. We already use int8 (91 MB to 23 MB). On exam #5 standalone, int8 got 1,280 right vs 1,283 for fp32, nearly no loss.
+  - Pruning: remove weights or parts. Scattered weights give no CPU speed-up, removing layers needs retraining, and there is little to gain on a 22.7M model.
+  - Distillation: a big teacher's probabilities train a small student. MiniLM itself was made this way. This is the one that can carry a bigger model's gain into the shipped size.
+- **Past evidence.** Gains came from labels and data, not loss tweaks (R13-L3: val too loose 78 vs R13's 74).
+- **Decision (user, 2026-11-18).** Round 14 trains bge-base on the round 13 data, recipe unchanged. If it beats R13 under the pre-registered rule, it becomes the teacher for a MiniLM student. Exam rows come later. Exam #7 judges. PRD: `docs/product/prd-bge-teacher.md`.
+
+
+## 2026-11-18: Round 14 step 1-2 result (bge-base vs R13)
+
+**Verdict under the pre-registered rule (`docs/product/prd-bge-teacher.md` section 4): FAIL. Stop; no distillation.** The numbers are a measurement; nothing was decided or shipped here.
+
+- **Training (step 1).** bge-base-en-v1.5 (`--base`), R13 recipe unchanged (soft targets, alpha 0.7, 1 epoch, batch 32, lr 5e-5, max_len 128, seed 1). 109.5M parameters, 3,209 steps, 351.3 min on the home server (3 threads, nice 19, peak RSS about 6.9 GB as reported by the run). Data sha256 equal to R13's for train.parquet (`91808a87...`), val.parquet (`580a1141...`) and v3eval.parquet (`7c0df6fa...`). Vocabulary identical to R13's (30,522 tokens, same BertNormalizer, lower-case), so a tokenizer port would not be needed. Final val accuracy 94.57% in the run's own batched pass (R13: 94.90%).
+- **What the .npy files hold.** `probs-<tag>-val.npy` is softmax probabilities at T = 1 (float32, rows sum to 1), batched with padding in batches of 128, row order identical to val.parquet and to `data/round13/val.jsonl` (checked on id, y, text). Cross-check: PyTorch fp32 batch-1 logits from the checkpoint differ from the npy by at most 2.8e-6 (R13) and 6.9e-7 (r14-bge), 0 argmax differences, and give identical rule numbers. The r14-bge numbers below are the batch-1 ones (the way `m1/r13-valpick.py` got R13's T).
+- **Temperature.** R13 stays at its shipped T 0.991463 (refit on the same val gives 0.991463, so the procedure reproduces it). r14-bge: T = 0.994240 (same `temp_fit`: bounded minimiser of val NLL on log-probabilities, bounds 0.3 to 5).
+- **Parity check (R13, rwxmap's real replay, cut table above): PASS, exact.** Using `predictions-r13-val.csv` (rwxlite 0.3.1 fp32 predictions the cut sweep used; sha256 `6154fe74...`) through rwxmap `poc/cutoff-r13/curve.mjs` / `poc/replay-r12/replay.mjs`: 0.97 gives 3815/76/289 and 0.90 gives 3938/87/155, equal to the table. Note: rwxmap main now has `LOWER_MIN_P = 0.90` (D139), so `--lower-min-p` refuses to run there; I used the sweep-time tree (`git archive 5e6b9cb^`, read-only, in scratch). The only src differences since then are the model pin and the cut-off line.
+- **Rule numbers, val 4,180 rows, mode a, LOWER_MIN_P 0.90** (right / too loose / too tight; loose-1 / loose-2):
+
+| model | right | too loose | too tight | loose-1 / loose-2 |
+|---|---|---|---|---|
+| R13 (shipped predictions; the PRD reference) | 3,938 | 87 | 155 | 81 / 6 |
+| R13 (same torch batch-1 path as r14-bge) | 3,941 | 86 | 153 | 81 / 5 |
+| r14-bge (T 0.994240) | 3,944 | 94 | 142 | 89 / 5 |
+
+- **Rule check.** (1) too loose no higher than R13's: 94 vs 87 (vs 86 on the same-path R13), 7 more: **fails**. (2) right at least 1 point higher (about 42 rows): 3,944 - 3,938 = +6 rows = +0.14 pp (vs same-path R13: +3 rows, +0.07 pp): **fails**. Both conditions fail on either R13 reference. The PRD's R13 reference reproduced exactly, so it was used unchanged.
+- **Caveat.** The shipped R13 predictions come from the Node runtime on text built from rwxmap's ops.csv; the torch batch-1 numbers use the text stored in val.jsonl. They differ on 142 rows (99 by more than 0.01 in p, 10 by more than 0.1; max 0.34), which is why the two R13 rows differ by a few rows. This does not change the verdict.
+- **Information only: full mode-a curve for r14-bge** (right / too loose / too tight; loose-1 / loose-2), with R13 (shipped predictions) beside it:
+
+| cut | r14-bge | R13 |
+|---|---|---|
+| 0.97 | 3,780 / 87 / 313 (82 / 5) | 3,815 / 76 / 289 |
+| 0.95 | 3,851 / 88 / 241 (83 / 5) | 3,865 / 79 / 236 |
+| 0.93 | 3,899 / 89 / 192 (84 / 5) | 3,898 / 83 / 199 |
+| 0.90 | 3,944 / 94 / 142 (89 / 5) | 3,938 / 87 / 155 |
+| 0.85 | 3,963 / 100 / 117 (94 / 6) | 3,949 / 103 / 128 |
+
+- **Information only: mode b at confidence 85** (every row sent): r14-bge 3,943 / 58 / 179 (54 / 4); R13 3,908 / 71 / 201 (shipped predictions; 3,901 / 70 / 209 on the torch path). Mechanical alone: 3,722 / 140 / 318.
+- **Information only: standalone argmax** (no mechanical): r14-bge 3,953 / 179 / 48; R13 3,969 / 161 / 50 (shipped predictions; 3,967 / 162 / 51 torch path).
+- **Reading.** bge-base is not better in the rule's sense. It has more too-loose standalone (179 vs 162) and at 0.97, and about the same right at 0.90. It does better in mode b at 85 (more right, fewer too loose) on val; this is outside the rule and val is the selection set, so it carries no weight. Size alone is not the bottleneck on this rule.
+- **Files.** Server: `~/rwxlite-train/r14-bge/data/train/` (`ckpt-r14-bge/final`, model.safetensors sha256 `8bcc187e...`, `probs-r14-bge-val.npy`, `probs-r14-bge-v3eval.npy`, `finetune-r14-bge-results.json`, `finetune-r14-bge.log`). R13: `~/rwxlite-train/r13-R13/data/train/`. Local scratch (not committed): `.../scratchpad/r14/` (`work/` p files, `meta.json`, `report.json`, `run.log`, `rwxmap-pre/`). Reproduce with `m1/r14-compare.py` and `m1/r14-compare.mjs` (run lines in their headers).
+
+## 2026-11-18: Mode-b sweep, r14-bge vs R13 (information, outside the step-2 rule)
+
+Information only, outside the step-2 rule. The step-2 FAIL (section above) stands unchanged. After it, a 5-point mode-b sweep on val (4,180 rows) was run on the same scoring path for both models (R13-b1 = R13 torch fp32 batch-1 path, r14-bge at T 0.994240; `m1/r14-compare.py` / `m1/r14-compare.mjs`). Cells are right / too loose / too tight:
+
+| mode b confidence | R13-b1 | r14-bge-b1 |
+|---|---|---|
+| 95 | 3,619 / 30 / 531 | 3,668 / 30 / 482 |
+| 90 | 3,824 / 46 / 310 | 3,889 / 45 / 246 |
+| 85 | 3,901 / 70 / 209 | 3,943 / 58 / 179 |
+| 80 | 3,943 / 86 / 151 | 3,964 / 75 / 141 |
+| 75 | 3,962 / 93 / 125 | 3,980 / 84 / 116 |
+| mode a 0.90 (step-2 rule row) | 3,941 / 86 / 153 | 3,944 / 94 / 142 (R13 shipped predictions: 3,938 / 87 / 155) |
+
+r14-bge has more right at all five confidences and equal or fewer too loose. Val is the selection set, so this carries no weight as evidence. On 2026-11-18 the user decided to run distillation anyway; the student rule is pre-registered in `docs/product/prd-bge-teacher.md` section 9 before any student training. Scratch reports: `.../scratchpad/r14/pb/report-{95,90,85,80,75}.json` (not committed).
+
+## 2026-11-18: Round 14 step 3 result (distilled MiniLM student)
+
+**Verdict: FAIL** under the pre-registered student rule (`docs/product/prd-bge-teacher.md` section 9, commit ae69e18). The rule was applied mechanically and not reinterpreted. R13 stays; nothing is shipped.
+
+**Training facts.** Teacher: r14-bge over the round 13 train.parquet (102,668 rows, sha256 `91808a87...`, T = 1, fp32; argmax agrees with y on 97.36%), phase 1 ran 16:23-17:59. Student: all-MiniLM-L6-v2, 22.7M params, `--teacher` soft targets, alpha 0.7, 1 epoch, 3,209 steps, batch 32, lr 5e-5, seed 1; phase 2 train time 63.1 min. Server rules held (nice 19, ionice idle, 3 threads, one job at a time); memwatch exits were clean. Student checkpoint model.safetensors sha256 `bfd7b12e...`. Server: `~/rwxlite-train/r14-student/data/train/` (`ckpt-r14-student/final`, `probs-r14-student-val.npy`, `finetune-r14-student-results.json`, `teacher-r14-bge-train.npy(.json)`).
+
+**Scoring.** Same path as step 2: `m1/r14-compare.py` (generalised with optional `--student-ckpt/--student-npy`, nothing else changed) and `m1/r14-compare.mjs`, rwxmap pre-sweep tree, val 4,180 rows. Student = PyTorch fp32 batch 1 from the checkpoint, T fitted on val with `temp_fit`: **T = 1.070938** (R13 0.991463 fixed, r14-bge 0.994240). The npy cross-check (padded batches) matches the batch-1 path exactly (max abs dp 7.5e-07, 0 argmax differences).
+
+**Reference check: reproduced.** R13-b1 in this run: mode b 85 = 3,901 / 70 / 209, mode b 90 = 3,824 / 46 / 310, mode a 0.90 = 3,941 / 86 / 153, exactly the registered values. r14-bge-b1 matches the earlier sweep at every cell.
+
+Right / too loose / too tight:
+
+| setting | R13-b1 | r14-bge-b1 | student-b1 |
+|---|---|---|---|
+| mode a 0.97 | 3,815 / 76 / 289 | 3,780 / 87 / 313 | 3,809 / 75 / 296 |
+| mode a 0.95 | 3,865 / 79 / 236 | 3,851 / 88 / 241 | 3,866 / 76 / 238 |
+| mode a 0.93 | 3,900 / 82 / 198 | 3,899 / 89 / 192 | 3,907 / 80 / 193 |
+| mode a 0.90 | 3,941 / 86 / 153 | 3,944 / 94 / 142 | 3,935 / 87 / 158 |
+| mode a 0.85 | 3,950 / 103 / 127 | 3,963 / 100 / 117 | 3,951 / 96 / 133 |
+| mode b 95 | 3,619 / 30 / 531 | 3,668 / 30 / 482 | 3,619 / 27 / 534 |
+| mode b 90 | 3,824 / 46 / 310 | 3,889 / 45 / 246 | 3,834 / 51 / 295 |
+| mode b 85 | 3,901 / 70 / 209 | 3,943 / 58 / 179 | 3,900 / 66 / 214 |
+| mode b 80 | 3,943 / 86 / 151 | 3,964 / 75 / 141 | 3,940 / 79 / 161 |
+| mode b 75 | 3,962 / 93 / 125 | 3,980 / 84 / 116 | 3,958 / 91 / 131 |
+| standalone argmax | 3,967 / 162 / 51 | 3,953 / 179 / 48 | 3,954 / 172 / 54 |
+
+**Rule, per clause (student vs R13-b1 references):**
+- (a) mode b 85: too loose 66 <= 70 holds, but right 3,900 is not > 3,901 (one row short). **FAIL.**
+- (b) mode b 90: too loose 51 is not <= 46 (right 3,834 > 3,824 holds). **FAIL.**
+- (c) mode a 0.90: too loose 87 is not <= 86. **FAIL.**
+- Overall: **FAIL** (all three clauses). Stop; R13 stays.
+
+**Reading (information only).** The student did not inherit r14-bge's mode-b gain: at 85 and 80 it is about level with R13 (right -1 / -3, too loose -4 / -7), and at 90 it has more too loose. Scratch (not committed): `.../scratchpad/r14s/` (`work/` p files, `meta.json`, `report.json`, `run.log`; `pb/` per-confidence reports and `sweep.log`).
+
+## 2026-11-18: Round 15 background (transfer-set research and corpus skew)
+
+- Round 14: bge-base beats R13 in mode b at every confidence on val, is worse in mode a. A student distilled on the same 102,668 rows came out equal to R13 (all three clauses failed). R13 already learned from Jev's soft targets, so swapping teachers on the same rows was not expected to change much.
+- Research: distillation gains come mainly from a large unlabelled transfer set and grow with its size. Round 14 gave the student no new rows.
+  - https://arxiv.org/pdf/2402.14922 (Practical Insights into Knowledge Distillation for Pre-Trained Models)
+  - https://arxiv.org/pdf/1910.01769 (Distilling BERT into Simple Neural Networks with Unlabeled Transfer Data)
+  - https://arxiv.org/pdf/2004.05686 (XtremeDistil)
+- Loss changes and cost weighting give mixed results, so no new penalties:
+  - https://arxiv.org/pdf/2605.03135 (cost-sensitive methods mixed)
+  - https://arxiv.org/pdf/2609.29266 (cost weighting hurts calibration)
+- Softmax confidence is a strong selection rule: https://arxiv.org/pdf/2206.09034v4.pdf
+- MCP tool hints are untrusted: https://blog.modelcontextprotocol.io/posts/2026-03-16-tool-annotations/
+- Corpus skew: 123,339 ops from 673 providers (`data/m0/mechanical.jsonl.gz`). About 76,000 (62%) come from five companies: microsoft.com 33,869, github.com 14,663, amazonaws.com 13,198, azure.com 8,083, googleapis.com 5,992.
+- Gap to close: about 97% on val vs about 90% on unseen vendors (rwxmap exam #6, mode a).
+- Sources measured 2026-11-18: GitHub code search about 127,600 `filename:openapi.yaml` files ("openapi: 3") and about 37,800 `filename:swagger.yaml` files (`swagger: "2.0"`), JSON and other names not counted. API Evangelist org: 45,192 public repos. ToolBench (RapidAPI, about 3,400 services, about 16,000 endpoints) on Hugging Face, e.g. Maurus/ToolBench.
+- No public dataset with r/w/x-style labels found (searched 2026-11-18). The 2024 GitHub OpenAPI dataset (Di Lauro, ICWE 2024, about 600k specs) has no public download found.
+- Plan: `docs/product/prd-r15-github-data.md`.
+
+## 2026-11-19: round 15 sources, labelling and review
+
+Source: `docs/product/prd-r15-github-data.md` sections 12-16; `data/r15/labels/opinions-report.json`, `jev-pilot-report.json` (not committed).
+
+**Sources.**
+- GitHub: only about 3,660 of 15,167 vendor keys have a real domain; the rest are hobby projects and personal repos.
+- SwaggerHub: the real size is 39,044 APIs, not the 796k its counter suggests. Paging quirks apply, and the listing caps at 10k results per query.
+- Huawei Cloud's text is Chinese.
+- Activepieces parsed only 22.7%.
+- Final ops: GitHub 455k, SwaggerHub 288k, catalogues 33k, cloud 40k. Master 802,196 ops from 25,345 vendors after 8,789 cross-source dups and 4,963 ops (319 specs) dropped by the rwxmap copy check (commit 1c25be1; near misses kept; no exam copy got through). Picker: 200,000 ops, 21,604 vendors, water level 29, title share 24.8%.
+
+**Labelling (f664afd).** Three opinions agree on 87.48% (174,967 of 200,000). Mechanical is far too strict on new vendors: on the 400 blind-reviewed disputed rows it is 20.1% exact and 69.1% too tight (weighted). R13 mode a is too tight 34.9%, bge too loose 17.5%.
+
+**R13 mode-a too-loose cases that bge catches:** about 1,500 rows in bge_x_r13_r_mech_r, bge_w_r13_r_mech_r and bge_x_r13_w_mech_w (those three types hold 2,224 rows).
+
+**Five BRIEF-v4 ambiguities the reviewer found:**
+1. A login that returns your own session token, under rule (ii).
+2. Verifying an OTP or email token: (i) against (b)/(g).
+3. A user-group or OAuth-client update where the text never mentions access: (g).
+4. A push device token or an LLM endpoint config, against the webhook-destination amendment.
+5. A PUT that removes a membership, against clause (a).
+
+**Blind review of 400 disputed rows** (weighted to the population by disagreement type; exact / too loose / too tight): bge 74.8 / 17.5 / 7.8, R13 57.6 / 7.5 / 34.9, mechanical 20.1 / 10.8 / 69.1. Sure-only exact (of 175): bge 145, R13 113, mechanical 23. bge is too loose about a third of the time when it is looser than both others (about 11.3k rows).
+
+**Jev pilot (offline, rwxmap mode-c pipeline at 1c25be1, jev-1.14.0, 400 rows).** Jev 65.0 / 10.7 / 24.3 weighted; sure-only exact 86 of 175. It does not beat bge (74.8 exact). In the two big types where bge is looser than both others (66 sampled rows for 11,250), bge is 62.4 / 33.1 / 4.4 and Jev 60.2 / 4.4 / 35.4: Jev trades too loose for too tight. 114 of the 400 rows sit in no Jev pile and keep the mechanical letter, which caps Jev's gain by design. Cost: 374 calls, $0.034 (computed from token counts at rwxmap's recorded price, not an invoice); projection for 25,033 rows about $3.5 weighted by type, about $2.1 flat. Caveats: 33 rows per big type, one run, Jev is not repeatable.
+
+## 2026-11-19: Sonnet pilot and the labelling cascade
+
+Source: `docs/product/prd-r15-github-data.md` sections 5 and 17; `data/r15/labels/sonnet-pilot-400.csv` (not committed).
+
+**Pilot.** A Sonnet pilot labelled the same 400 blind-reviewed disputed rows, blind, with BRIEF-v4 + D136/D137. Weighted to the 25,033 disputed rows (exact / too loose / too tight, %): Sonnet 87.2 / 9.8 / 3.1, bge 74.8 / 17.5 / 7.8, Jev 65.0 / 10.7 / 24.3, R13 57.6 / 7.5 / 34.9, mechanical 20.1 / 10.8 / 69.1.
+
+**Risky pocket** (bge looser than both R13 and mechanical, 11,250 rows): Sonnet 82.6 / 15.2 / 2.2, bge 62.4 / 33.1 / 4.4, Jev 60.2 / 4.4 / 35.4.
+
+**Confidence.** On rows the reviewer marked sure, Sonnet's exact rate is 99.6%. Where both Sonnet and the reviewer were sure, they agreed on 157 of 157. In the pocket, Sonnet sure was right on 33 of 34. Its misses sit mostly on rows Sonnet itself marked unsure, especially "verify code/email" (one of the five BRIEF-v4 ambiguities).
+
+**Caveat.** The reviewer is also a Claude model with the same brief, so the Sonnet scores are optimistic (same model family plus same brief is not independent). Sonnet labelling runs as Claude Code subagents in the session, so there is no API bill.
+
+**Jev dropped.** Jev scored below bge on these rows (65.0 vs 74.8 exact), and in the pocket it only swapped too loose for too tight. It is out of the cascade.
+
+**Decision (user, 2026-11-19): labelling cascade.** Cheap and broad passes first; each more trusted pass sees only the delta.
+1. Pass 1: mechanical, R13 mode a and bge on all 200k rows (done). The 87.5% where all agree take that letter, with bge soft probabilities as targets. A Sonnet audit of 300 agreed rows (stratified by source and letter) checks that agreement means correct; above about 3% disagreement, those patterns join the delta.
+2. Pass 2: Sonnet on the 25,033 disputed rows; sure and likely answers are final.
+3. Pass 3: Opus labels independently the rows Sonnet marked unsure (about 5,000 expected, 21% in the pilot). Where Opus and Sonnet agree, that letter is final.
+4. Pass 4: the residue takes the strictest opinion (unsure goes to x) with a low training weight. Rows on one of the five ambiguities go to rwxmap's user.
+5. Across rounds bge is retrained on the cleaned labels and becomes the next pass 1.
+
+The 400 reviewed rows are the holdout and never enter training. Next: preregister the pass rule and mix, retrain bge as teacher (102,668 + about 200k rows), distil MiniLM, exam #7 judges.
+
+### 2026-11-19: Cascade run and final labels
+
+Source: `r15/label_final.py`, `r15/label_holdout_score.py`, `data/r15/labels/final-labels-report.json` (not committed).
+
+**Tiers (199,600 rows; the 400 holdout rows excluded).** agree3 174,967 (r 103,470 / w 16,382 / x 55,115); sonnet 21,038 (r 5,520 / w 13,729 / x 1,789); opus_agree 2,152 (r 152 / w 690 / x 1,310); strict 1,443 at weight 0.3 (w 116 / x 1,327). Sonnet confidence on the 24,633 disputed rows: sure 13,547, likely 7,491, unsure 3,595. Letter mix overall r 54.7% / w 15.5% / x 29.8%, against r 59.1 / w 9.4 / x 31.5 for the agreed rows only. Weight total 198,589.9. bge probabilities are kept on every row; `label_source_letters` holds all opinions.
+
+**Audit.** Sonnet on 300 agreed rows: 274 same, 6 agreed-looser (2.0%), 20 agreed-stricter (6.7%). Agreed-looser is under the 3% limit, so the agreed rows stand.
+
+**Holdout (400 blind-reviewed rows, weighted to 25,033; exact / too loose / too tight).** Recomputed by script, all match the earlier figures. Cascade 92.0 / 3.8 / 4.2; Sonnet alone 87.2 / 9.8 / 3.1; bge 74.8 / 17.5 / 7.8. Risky pocket (66 rows): cascade 90.9 / 4.7 / 4.4; Sonnet 82.6 / 15.2 / 2.2; bge 62.4 / 33.1 / 4.4. Same caveat as before: the reviewer is also a Claude model with the same brief.
+
+**Pass 4 short list** (`pass4-ambiguity-list.csv`, rough text patterns, flag only): 12,056 flags on 11,496 ops: login/session 7,508; oauth client/register 3,288; verify code/otp/email/token 1,102; device or push token / endpoint config 107; PUT membership removal 51. The login and oauth patterns are broad on purpose; most flags sit on agree3 rows (10,187).
+
+**Run facts.** 101 + 3 subagents; about 24 minutes. 463 unsure rows first missed the Opus hand-off because 6 batches wrote incomplete lists; they were filled afterwards (missed-a, missed-b). Some workers shared a scratch folder; ids and letter/reason consistency were checked and no crossing was found. The refill overlapped 66 rows already answered in unsure-012; 6 of those had different letters, and the script keeps the stricter Opus letter for them. Opus covers exactly the 3,595 Sonnet-unsure rows.
+
+**Learning.** The trusted pass fixes most of the cheap pass's looseness. On the holdout, too-loose fell from 17.5% (bge) to 9.8% (Sonnet) to 3.8% (cascade). The remaining loose risk is now mostly the agreed rows, about 2% in the audit.
+
+### 2026-11-19: D141 relabel of the round 15 labels
+
+rwxmap's user ruled on five BRIEF-v4 ambiguities (D141, rwxmap 54355e1): login/refresh tokens = x, email/code verification = x, group update without members/roles = w, callback/webhook/endpoint/signing-key/push-token changes = x, POST/PUT/PATCH member removal = x. A regex net (families a-e, shared with rwxmap) matched 9,740 of the 199,600 rows; Sonnet relabelled all blind (sure/likely = new letter, unsure = stricter of old and new).
+
+**Changes: 1,274 rows.** By family (a row can hold several): a login/token 642, b verify 446, d callback/endpoint/push 202, e member removal 44, c group update 38. By move: r to x 885, w to x 191, x to w 161, x to r 26, r to w 9, w to r 2. So it is mostly r to x in login and verify (a: 445 r to x; b: 310 r to x). Family c goes the other way (22 x to w). By tier: agree3 831, sonnet 401, strict 21, opus_agree 21. Letter mix r 54.7 / w 15.5 / x 29.8 became r 54.2 / w 15.5 / x 30.3. 171 changed rows rest on an unsure Sonnet answer and get weight 0.3.
+
+**Holdout re-check.** Opus re-reviewed the 400 holdout rows under D141: 30 changed. Re-scoring the unchanged opinions (made without D141) against it: cascade 92.0 / 3.8 / 4.2 to 89.4 / 6.1 / 4.5; Sonnet 87.2 / 9.8 / 3.1 to 85.4 / 11.6 / 3.0; bge 74.8 / 17.5 / 7.8 to 74.0 / 18.4 / 7.6. Pocket cascade 90.9 / 4.7 / 4.4 to 88.5 / 6.3 / 5.2. The drop is the opinions not knowing D141, not a worse cascade. Only 33 of 400 holdout rows match the net (a 15, b 5, c 4, d 8, e 4), so the labels were relabelled on the matching rows and the rest are unchanged.
+
+**Learning.** D141 moves about 0.6% of rows, almost all toward stricter. The opinion scores measured on the holdout are now an upper bound for D141 families. Next: rwxmap's export-v4-d141 of the other 102,668 rows before training.
+
+**Pass 2 (same day).** rwxmap spotted Sonnet under-applying D141 on pure token checks, 2FA disabling, credential storing, login-code generation and webhook activation. A narrow Opus pass with the D141 wording took 395 candidates (families a/b/d, applied letter below x, reason mentioning token/verify/2FA/key/credential/activate) and raised 114: r to x 73, w to x 41 (a 57, b 43, d 23). Opus said r for 260, x for 114 and w for 21 of the 395. The final letter is the stricter of the two. Totals after pass 2: 1,330 rows changed against the pre-D141 labels (r to x 957, w to x 206, x to w 139, x to r 21, r to w 5, w to r 2); letters r 54.2 / w 15.5 / x 30.3; 199 rows at weight 0.3. The holdout scores are identical to before (cascade 89.4 / 6.1 / 4.5) since pass 2 touches only the non-holdout rows. Learning: a single blind Sonnet pass under-applies a ruling on rows that read as checks or reads; a targeted stricter second look found about 29% more x in that pocket.
+
+## 2026-11-19: decisions before training
+
+User decisions, recorded in the draft `docs/wiki/prereg-r15.md` (uncommitted until its gates are met). Full list: PRD `docs/product/prd-r15-github-data.md` section 20.
+
+- **Row weights.** Contested rows count x3: r15 sonnet or opus_agree rows, and D141-changed rows whose deciding answer was sure or likely. R13 rows and unchanged agree3 rows stay 1.0. Rows resting on an unsure answer get 1.0 (3 x the old 0.3). This is a row weight, not R13-L3's x3 too-loose loss cost; the loss stays 0.7 soft + 0.3 hard, x_weight 1.0.
+- **Val overlap.** 57 r15 rows exactly match a val row (method + path + operationId + summary). They are dropped from training, because val decides the teacher go/no-go.
+- **Lean matching.** Exam #7 is scored through rwxmap's real CLI at one frozen ref. If rwxmap's D141 mechanical word list passes its bar, that ref includes it, and all training and val texts are regenerated with that lean before training. We byte-compare our regenerated lean.csv with the exam's.
+- **Caveat.** Labels, the holdout truth and exam #7 truth are all Claude models reading BRIEF-v4 + D141. That is consistent and it is the chosen standard, but "correct" means agreement with that rulebook, not an outside truth.
+
+**Open items (training waits on the first two).**
+- rwxmap's export-v4-d141 of the 102,668 R13 rows (same pattern net and method).
+- The frozen exam #7 rwxmap ref SHA.
+- The exam #7 labeller pair: two blind labellers, default Sonnet + Opus, named in rwxmap's exam #7 prereg; rwxmap's user rules every disagreement.
+
+
+## 2026-11-20: round 15 teacher go/no-go (prereg 5.2 and 5.3): NO-GO, fallback targets
+
+The bge-base teacher finished on the server 2026-11-20 03:08, exit 0, 9,445 steps, train time 801.3 min, memwatch never fired (lowest MemAvailable 3,970,012 kB). Checkpoint `~/rwxlite-train/r15-teacher/data/train/ckpt-r15-teacher/final`, **`model.safetensors` sha256 `d53deafc13190f6c4807ca360b0de438828728680ee248abee93ce9d1457b741`** (437,961,700 bytes; the local copy has the same sha256). Final training loss about 0.16 to 0.19, finite. Training-log eval on the v3eval 5,716 rows: val acc 94.62% (the log's own "val" line).
+
+**(a) Val, mode a at 0.90, PyTorch fp32 batch 1, D141 val labels on the new-lean val text (data/round15/val.parquet, 4,180 rows; ops.csv unchanged; 6 labels differ from the old val-truth).** Scored with the unchanged `m1/r14-compare.mjs` on rwxmap's pre-sweep tree (`5e6b9cb^`), teacher only (a scratch copy of the `m1/r14-compare.py` logic that skips the R13 and r14 slots; the R13-b1 reference 3,938 / 90 is the locked prereg figure and was not rerun). Teacher T fitted on val with `temp_fit`: **1.362087**.
+
+| Teacher (right / too loose / too tight) | value | bar | |
+|---|---|---|---|
+| mode a 0.90 | 3,929 / 115 / 136 | right >= 3,896 AND too loose <= 104 | right PASS, **too loose FAIL (115 > 104)** |
+| mode a 0.97 / 0.95 / 0.93 / 0.85 (information) | 3,772 / 106 / 302; 3,834 / 108 / 238; 3,881 / 112 / 187; 3,960 / 125 / 95 | | |
+| mode b 85 (information) | 3,941 / 91 / 148 | | |
+| standalone argmax at T (information) | 3,955 / 180 / 45 | | |
+| mechanical alone | 3,722 / 143 / 315 | | |
+
+**(b) The 400-row D141 holdout** (`r15/r15_holdout_score.py`, truth sha256 `96a62488...`, weighted to 25,033 rows, teacher's own argmax; the script reproduced the stored references: yes).
+
+| Row set | exact / too loose / too tight | bar | |
+|---|---|---|---|
+| all, teacher standalone | 81.8 / 10.5 / 7.7 | exact >= 79.0, too loose <= 12.9 | PASS, PASS |
+| pocket (66 rows), teacher standalone | 73.5 / 15.7 / 10.7 | too loose <= 25.9 | PASS |
+| old bge reference, all | 74.0 / 18.4 / 7.6 | | |
+| old bge reference, pocket | 61.6 / 33.9 / 4.4 | | |
+| teacher mode a 0.90 replica (information), all / pocket | 68.5 / 13.4 / 18.0; 60.0 / 11.9 / 28.1 | | |
+| R13 mode a stored (information), all / pocket | 56.5 / 8.8 / 34.7; 32.3 / 0.0 / 67.7 | | |
+
+**(c) Sanity:** PASS (all 9,445 steps, finite loss, memwatch never fired, sha256 recorded).
+
+**Training-log per-tier table (end of `finetune-r15-teacher.log`, v3eval 5,716 rows, exact / too loose / too tight).**
+
+| Tier | n | mechanical | a_cuts | a_argmax | b_argmax |
+|---|---|---|---|---|---|
+| overall | 5,716 | 75.2 / 0.5 / 24.2 | 82.6 / 0.5 / 16.8 | 83.2 / 0.6 / 16.1 | 84.0 / 0.6 / 15.4 |
+| tier_lower | 1,641 | 36.0 / 0.1 / 63.9 | 72.8 / 0.9 / 26.3 | 75.3 / 1.3 / 23.3 | 75.3 / 1.3 / 23.4 |
+| tier_raise-wx | 1,486 | 80.1 / 1.6 / 18.3 | 67.9 / 0.7 / 31.4 | 67.6 / 0.7 / 31.8 | 70.4 / 0.7 / 28.9 |
+| tier_raise-get | 959 | 100.0 / 0.0 / 0.0 | 99.8 / 0.0 / 0.2 | 99.8 / 0.0 / 0.2 | 99.8 / 0.0 / 0.2 |
+| tier_none | 1,630 | 95.8 / 0.3 / 3.9 | 95.8 / 0.3 / 3.9 | 95.8 / 0.3 / 3.9 | 95.8 / 0.1 / 4.0 |
+
+**Decision: NO-GO (5.3 requires (a) and (b) and (c); (a) fails on too loose, 115 against a limit of 104, by 11 rows).** The bars were not changed and no second run was made. Per prereg 5.4 the student uses the round 14 bge fallback targets, `data/round15/teacher-fallback-oldbge-train.npy` (sha256 `1d775b1c43ee7dcdcd2d3edfd19535235da0cdb1edacfb7373cfdec7a3f3925e`, sidecar records train.parquet `16a34b05...`). The `probs` step was not run. The holdout (b) passed clearly (exact +7.8 pp, too loose -7.9 pp, pocket too loose -18.2 pp against the old bge), so the teacher learned the relabelled rows; the val failure is in the R13-row val where it is looser under mode a than R13-b1 (115 vs 90). Scratch: `.../scratchpad/teacher-gonogo/` (`val_teacher.py`, `holdout.json`, `work/report.json`), not committed.
+
+**USER OVERRIDE 2026-11-20:** the user ruled the teacher go/no-go above a PASS ("it's a pass to me, it's overall better ... why not reuse the big model to train mini"); the student trains on the new teacher's probabilities (prereg 5.5), the fallback student was stopped at step 1,175 of 9,445 and is not a candidate; no exam #7 truth or score had been seen.
+
+## 2026-11-20: round 15 student (stage B) val floor guard: FAIL, not taken to exam #7
+
+The MiniLM student trained on the new teacher's probabilities (prereg 5.5) finished on the server 2026-11-20 14:27, exit 0. Checkpoint `~/rwxlite-train/r15-student/data/train/ckpt-r15-student/final`, **`model.safetensors` sha256 `e431763878ffaec9753b94ef5d26ebe4227eaea432d132637307673f9e2061d9`** (verified on the laptop copy).
+
+**Student T (frozen, `temp_fit` on val, PyTorch fp32 batch 1): 1.3832182330120317.** Written before anything touched exam #7 (nothing did).
+
+**Val floor guard (prereg section 6), mode a 0.90, D141 val, same replay path as the teacher go/no-go:** right 3,910 / too loose 120 / too tight 150. Bars: right >= 3,896 (PASS), too loose <= 104 (**FAIL, 120 > 104, by 16 rows**). **Guard FAILED: the student is not taken to exam #7 and was not exported.** Bars not changed, no second run.
+
+| Information only (right / too loose / too tight) | value |
+|---|---|
+| student mode a 0.97 / 0.95 / 0.93 / 0.85 | 3,750 / 109 / 321; 3,823 / 111 / 246; 3,870 / 113 / 197; 3,939 / 134 / 107 |
+| student mode b 85 | 3,908 / 95 / 177 |
+| student standalone argmax at T | 3,949 / 182 / 49 |
+| teacher mode a 0.90 (go/no-go) | 3,929 / 115 / 136 |
+| teacher mode b 85 / standalone | 3,941 / 91 / 148; 3,955 / 180 / 45 |
+| R13-b1 mode a 0.90 | 3,938 / 90 / 152 |
+
+**400 holdout (`r15/r15_holdout_score.py`, D141 review, student at T 1.3832, information only; refs reproduced: yes), exact / too loose / too tight:** standalone all 80.9 / 10.0 / 9.1, pocket 75.2 / 12.7 / 12.1; mode a 0.90 replica all 65.5 / 8.9 / 25.6, pocket 53.5 / 2.2 / 44.3. Beside: teacher standalone 81.8 / 10.5 / 7.7 (pocket 73.5 / 15.7 / 10.7), old bge 74.0 / 18.4 / 7.6, R13 mode a stored 56.5 / 8.8 / 34.7.
+
+**USER RULINGS 2026-11-20 (before any exam #7 truth or score was seen):** (1) the val floor guard failure above is WAIVED (better on new vendors; a small rise in too loose with more exact is a trade); (2) the exam #7 gate is now cand exact >= base exact AND cand too loose <= base + 1.0 pp (floor(0.01 x 1579) = 15 rows), real CLI, fp32 exact, mode a 0.90, same 1,579 rows; rwxmap D142, commit `728bb16`, branch `exam7-prep`; (3) this student is the one and only candidate; exam #7 also guides round 16. Prereg section 5.6 and 8.1.
+
+**Export 2026-11-20 (`m1/export_r15.py`, `m1/manifest-r15.mjs`, `R15_T` 1.3832182330120317, ckpt sha verified), `data/m1-r15/` (gitignored, frozen from here, abs path `/home/hamr/PycharmProjects/rwxlite/data/m1-r15`), version 0.4.0:**
+- `model-fp32.onnx` 90,973,979 B, sha256 `4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19`; `model-int8-pc.onnx` 23,126,902 B (23.1 MB, inside 22-24), sha256 `470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7`; `vocab.txt` sha256 `07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3`.
+- `manifest-exact.json` (fp32, sha256 `5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8`): model **`rwxlite-0.4.0+4608f470`**; `manifest.json` (int8, sha256 `b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf`): model `rwxlite-0.4.0+470708b0`. Both textFormat 1, T 1.3832182330120317; every hash and sha8 checked against the file bytes.
+- Parity (598 val rows, every 7th): ORT fp32 vs torch max |dp| 6.0e-7, 0 argmax diffs; int8 vs fp32 max |dp| 0.114, mean 0.0022, 0 argmax diffs (information); Node vs Python ORT max |dp| 2.4e-16 both precisions, 0 argmax diffs, Node text == stored text on all rows.
+- Latency (Node, batch 1, 1 thread, 300 val rows after 20 warm-up; `m1/bench.mjs` was not used because it is hard-wired to `data/m1/` and would overwrite its manifests; a scratch script with the same `loadAnswerer` path was used): int8 median 44.4 ms / p95 88.0 ms; fp32 median 51.9 ms / p95 103.2 ms. This is above the expected 15-25 ms window; the machine load average was about 15-20 (4 threads, other jobs running), so it is a finding about load, not re-measured idle.
+- `package.json` and `package-lock.json` version 0.4.0; no hard-coded 0.3.1 in `src/`. README still names 0.3.1 (badge, tested-once line, release link), not changed.
+- Package ref for rwxmap: the commit that adds these lines (hash reported from `git log`; tag `v0.4.0` only if it ships, none created).
+
+## Exam #7 result (2026-11-20): GO under D142
+
+Exam #7 is scored once and is now **BURNED**: no tuning, gating or re-scoring on it again; it may be training data only. rwxmap's official result comes from its real CLI at rwxmap `7dce23e` (exit 0, joins 1579/1579, retag diff only the RWXLITE_TAG line). Each line is exact / too loose (loose-1, loose-2) / too tight. Candidate = rwxlite 0.4.0 (R15 student, fp32 exact, T 1.3832); base = 0.3.1 (R13).
+
+**Verdict: GO under D142** (a-cand vs a-base). Too loose 66 vs 68 (-2, needs <= +15): OK. Exact 1432 vs 1431 (+1): OK. It would also have passed D135 (no more too loose, no fewer exact).
+
+| Official (rwxmap) | exact | too loose (l1, l2) | too tight | other |
+|---|---|---|---|---|
+| mech | 1333 | 72 (54, 18) | 174 | |
+| a-base 0.3.1 | 1431 | 68 (50, 18) | 80 | sent 664, raised 33, lowered 123, undecided 73 |
+| a-cand 0.4.0 | 1432 | 66 (50, 16) | 81 | sent 664, raised 21, lowered 108, undecided 71 |
+| b85-base | 1447 | 54 (46, 8) | 78 | asked 178 |
+| b85-cand | 1449 | 39 (38, 1) | 91 | asked 164 |
+
+D133 bar (exact >= 1412) passes for both mode a models. 53 rows differ between a-base and a-cand. truth sha256 `af0fe041ff0bc2a372d915b63f2937a9f44a0808d911d821a1a4ffde851783ec` (truth.csv stays out of git; rwxmap's rows are in its `data/exam7-2026-11-19/score/`).
+
+**Our own information scoring** (scratchpad `exam7-score/results.md` and `an-out.txt`): mode a fp32 base 1431/68/80 and cand 1432/66/81, **agreeing exactly with rwxmap's official numbers**. Standalone fp32: base 1453/91/35, cand 1456/80/43; x->r errors fall 16 -> 3. int8 information: mode a base 1426/68/85, cand 1431/66/82.
+
+**Leaks closed (10):** ex7-0282, 0314, 0398, 0578 (hf resource-group); 0454, 0470 (hf SCIM user PATCH); 1331 (glip conversation); 0951 (pipedrive oauth/token, loose-2); 1416 (vikunja openid callback, loose-2); 1562 (totp disable).
+
+**Leaks opened (8), all x->w:** ex7-0006 (gitness admin PATCH), 0007 (connectors), 0370 (hf jobs expose), and five openziti access policies: 0653 and 0654 (auth-policies), 0721 (edge-router-policies PUT), 0801 (service-edge-router-policies PUT), 0809 (service-policies PUT).
+
+### Lessons for round 16
+
+- Gains come mostly from new data. The teacher matters for standalone and mode b; the student is overconfident on old-vendor val (T 1.38).
+- The openziti access-policy PUT/PATCH cluster is a D137 target (access grants = x).
+- User's round 16 plan: about 300k new rows; train bge first, then MiniLM, both initialised from today's r15 models; keep old rows in the mix; lower lr; fix confidence before training; exam #8 needed (exam #7 is burned).
+
+## 2026-11-20: export_r15.py checkpoint path is overridable
+
+`m1/export_r15.py` reads the student checkpoint folder from `R15_CKPT_DIR` when set; unset, it uses `data/round15/models/R15-student` exactly as before. A wrong or different checkpoint still fails loudly on `R15_CKPT_SHA`, so the override does not weaken the check.
+
+The `--row_weight` loss in `train/finetune.py` differs from the default path when `--x_weight` != 1. This is left as is on purpose so round 16 can repeat the round 15 recipe; any change would be a pre-registered decision.

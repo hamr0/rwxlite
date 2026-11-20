@@ -1,6 +1,12 @@
 # rwxlite — PRD
 
+Round 14 (bge-base as a teacher for MiniLM): see [prd-bge-teacher.md](prd-bge-teacher.md).
+Round 15 (large new-vendor transfer set for distillation): see [prd-r15-github-data.md](prd-r15-github-data.md).
+
+
 Status: contract, round 6 signed off; M0 exam NO-GO (too loose); fresh exam NO-GO by one row (5 vs 4 too-loose rows); M1 answerer built and published (0.2.0, npm and GitHub release v0.2.0); round 10 trained, exam #3 NO-GO (loose bar), 0.2.0 stays shipped; round 11 trained, exam #4 NO-GO on both scorers; round 12 (S0/S1/S2) showed no gain over 0.2.0, so 0.2.0 stays shipped; 0.2.1 (answerMany batch-independence fix, same weights) is tagged v0.2.1 and not yet published. Date: 2026-11-05.
+
+Status (updated 2026-11-20): round 15 (MiniLM student distilled from a bge-base teacher, trained on 302,211 rows, T 1.3832182330120317, int8 `+470708b0`, fp32 `+4608f470`) was scored once on rwxmap's exam #7 (1,579 operations, 6 APIs): GO under D142 (rwxmap `7dce23e`). Mode a (right / too loose / too tight): 0.4.0 1,432 / 66 / 81 against 0.3.1 1,431 / 68 / 80. package.json is 0.4.0; the release (GitHub release with the five model assets, then publish.yml) is pending self-review, branch-review and `/release`, and rwxmap still pins 0.3.1 until then. Details in `docs/product/prd-r15-github-data.md` and `docs/wiki/findings.md`.
 
 Status (updated 2026-11-09): rwxmap 0.11.0 pins rwxlite 0.3.1 and runs mode a at the 0.90 cut. Latest exam is rwxmap's exam #6 (1,588 operations, 5 APIs, scored once): mode a 1,434 / 35 / 119 (right / too loose / too tight), mode b at confidence 85 1,424 / 19 / 145, rules only 1,305 / 43 / 240. Mode b's 85 was tuned on exams #5 and #6; exam #7 will test it. Details in `docs/wiki/findings.md`.
 

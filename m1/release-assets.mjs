@@ -1,14 +1,15 @@
 // Build the set of files a GitHub release carries, into a folder. Does NOT upload.
-//   node m1/release-assets.mjs [out-dir] [r10 | r13] [--skip-version-check]
-// The mode is the 2nd positional argument, so r10/r13 need an out-dir given first. Without an out-dir (possible only in plain m1 mode, since r10/r13 need one) the default is data/m1/release/.
-// Note: `node m1/release-assets.mjs r13` alone (mode name as the out-dir) is refused with exit 1 before anything is written.
+//   node m1/release-assets.mjs [out-dir] [r10 | r13 | r15] [--skip-version-check]
+// The mode is the 2nd positional argument, so r10/r13/r15 need an out-dir given first. Without an out-dir (possible only in plain m1 mode, since r10/r13 need one) the default is data/m1/release/.
+// Note: `node m1/release-assets.mjs r13` (or r15) alone (mode name as the out-dir) is refused with exit 1 before anything is written.
 // `r10` builds from data/m1-r10/ and carries each manifest's `temperature`.
 // `r13` builds from data/m1-r13/ and COPIES all five files verbatim, manifests included (never rewrites them):
 // the R13 files must stay byte-identical to what exam #5 tested. Each sha256 is checked against the five values hard-coded below
 // (same as docs/wiki/prereg-exam5.md section 9) and any mismatch exits 1. The two manifests must carry the same version, and it must equal
 // package.json's version (0.3.1); `--skip-version-check` skips only the package.json comparison (for a dry run before the /release version bump).
 // The printed upload command uses the manifests' version as the tag; under --skip-version-check with a differing package.json it prints no command.
-// Without r10/r13, data/m1/ is the source and nothing under data/m1-r10 is read or written.
+// `r15` is the same as r13 but builds from data/m1-r15/ (rwxlite 0.4.0) and checks the five sha256 values recorded in docs/wiki/prereg-r15.md / findings.md.
+// Without r10/r13/r15, data/m1/ is the source and nothing under data/m1-r10 is read or written.
 // Files: manifest.json (default, int8 per-channel), manifest-exact.json (fp32), model-int8-pc.onnx, model-fp32.onnx, vocab.txt.
 // Every sha256 is recomputed from the copied bytes; version comes from package.json.
 import { createHash } from 'node:crypto';
@@ -19,14 +20,15 @@ import { modelString } from '../src/answerer.js';
 
 const flags = process.argv.slice(2).filter((a) => a.startsWith('--'));
 const pos = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-if (pos[0] === 'r10' || pos[0] === 'r13') {
-  console.error(`release-assets: '${pos[0]}' looks like a mode, not an out-dir. Usage: node m1/release-assets.mjs [out-dir] [r10|r13] [--skip-version-check]; r10/r13 need an out-dir first.`);
+if (pos[0] === 'r10' || pos[0] === 'r13' || pos[0] === 'r15') {
+  console.error(`release-assets: '${pos[0]}' looks like a mode, not an out-dir. Usage: node m1/release-assets.mjs [out-dir] [r10|r13|r15] [--skip-version-check]; r10/r13/r15 need an out-dir first.`);
   process.exit(1);
 }
 const r10 = pos[1] === 'r10';
 const r13 = pos[1] === 'r13';
+const r15 = pos[1] === 'r15';
 const outArg = pos[0];
-const dataDir = r13 ? 'm1-r13' : r10 ? 'm1-r10' : 'm1';
+const dataDir = r15 ? 'm1-r15' : r13 ? 'm1-r13' : r10 ? 'm1-r10' : 'm1';
 const src = fileURLToPath(new URL(`../data/${dataDir}/`, import.meta.url));
 const out = path.resolve(outArg ?? fileURLToPath(new URL('../data/m1/release/', import.meta.url)));
 const temperature = r10 ? JSON.parse(readFileSync(path.join(src, 'manifest.json'), 'utf8')).temperature : undefined;
@@ -41,25 +43,36 @@ const R13_SHA = {
   'vocab.txt': '07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3',
 };
 
+const R15_SHA = {
+  'manifest.json': 'b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf',
+  'manifest-exact.json': '5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8',
+  'model-int8-pc.onnx': '470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7',
+  'model-fp32.onnx': '4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19',
+  'vocab.txt': '07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3',
+};
+
 let assetVersion;
-if (r13) {
+if (r13 || r15) {
+  const EXPECT = r15 ? R15_SHA : R13_SHA;
+  const label = r15 ? 'R15' : 'R13';
+  const exam = r15 ? 'recorded R15' : 'exam #5';
   const bad = [];
-  for (const n of Object.keys(R13_SHA)) if (sha(path.join(src, n)) !== R13_SHA[n]) bad.push(`${n}: source sha256 ${sha(path.join(src, n))} != expected ${R13_SHA[n]}`);
-  if (bad.length) { console.error(`R13 source files differ from the exam #5 values:\n  ${bad.join('\n  ')}`); process.exit(1); }
+  for (const n of Object.keys(EXPECT)) if (sha(path.join(src, n)) !== EXPECT[n]) bad.push(`${n}: source sha256 ${sha(path.join(src, n))} != expected ${EXPECT[n]}`);
+  if (bad.length) { console.error(`${label} source files differ from the ${exam} values:\n  ${bad.join('\n  ')}`); process.exit(1); }
   const mvs = ['manifest.json', 'manifest-exact.json'].map((n) => JSON.parse(readFileSync(path.join(src, n), 'utf8')).version);
   if (mvs[0] !== mvs[1]) { console.error(`manifest.json version ${mvs[0]} != manifest-exact.json version ${mvs[1]}.`); process.exit(1); }
   assetVersion = mvs[0];
   if (!flags.includes('--skip-version-check') && assetVersion !== version) { console.error(`package.json version ${version} != manifests version ${assetVersion}. Bump package.json first (done in /release), or pass --skip-version-check for a dry run.`); process.exit(1); }
   mkdirSync(out, { recursive: true });
-  for (const n of Object.keys(R13_SHA)) copyFileSync(path.join(src, n), path.join(out, n));
-  for (const n of Object.keys(R13_SHA)) {
+  for (const n of Object.keys(EXPECT)) copyFileSync(path.join(src, n), path.join(out, n));
+  for (const n of Object.keys(EXPECT)) {
     const got = sha(path.join(out, n));
-    if (got !== R13_SHA[n]) { console.error(`${n}: copied sha256 ${got} != expected ${R13_SHA[n]}`); process.exit(1); }
+    if (got !== EXPECT[n]) { console.error(`${n}: copied sha256 ${got} != expected ${EXPECT[n]}`); process.exit(1); }
     console.log(`${n.padEnd(22)} ${String(statSync(path.join(out, n)).size).padStart(10)} bytes  sha256 ${got}  OK`);
   }
-  console.log('\nAll five match the exam #5 values. Not uploaded.');
+  console.log(`\nAll five match the ${exam} values. Not uploaded.`);
   if (assetVersion !== version) console.log(`DRY RUN: package.json is ${version}, assets are ${assetVersion}; bump first (done in /release), then re-run without --skip-version-check to get the upload command.`);
-  else console.log(`To publish, a human runs:\n  gh release upload v${assetVersion} ${Object.keys(R13_SHA).map((n) => path.join(out, n)).join(' ')} --repo hamr0/rwxlite --clobber`);
+  else console.log(`To publish, a human runs:\n  gh release upload v${assetVersion} ${Object.keys(EXPECT).map((n) => path.join(out, n)).join(' ')} --repo hamr0/rwxlite --clobber`);
   process.exit(0);
 }
 

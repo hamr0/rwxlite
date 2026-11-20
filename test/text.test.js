@@ -86,7 +86,9 @@ test('format 2 puts the hint right after the lean; unhinted operations are uncha
   // the description is not read
   assert.equal(accessHint(/** @type {any} */ ({ ...plain, description: 'Grants permissions to other users and shares access.' })), false);
   // DELETE is never hinted
-  assert.equal(accessHint({ method: 'DELETE', path: '/a/b/members/{id}', operationId: 'addMember', summary: 'Add member' }), false);
+  const member = { path: '/teams/{t}/members/{u}', operationId: 'addTeamMember', summary: 'Add a member to a team' };
+  assert.equal(accessHint({ method: 'PUT', ...member }), true);
+  assert.equal(accessHint({ method: 'DELETE', ...member }), false);
   // the hint sits right behind the lean, so the 128-token cut cannot reach it (the long fields come after it)
   const long = formatText({ ...grant, summary: 'x '.repeat(300), description: 'y '.repeat(300) }, lean, 2);
   assert.ok(long.startsWith('lean: w floor-put | hint: access | PUT '));

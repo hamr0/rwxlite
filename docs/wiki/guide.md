@@ -14,7 +14,7 @@ Node 22 or newer. `onnxruntime-node` is an optional dependency of rwxlite and is
 
 ## 2. Get the model files
 
-The model files are not in the npm package. Download the five files from the GitHub release `v0.3.1` (https://github.com/hamr0/rwxlite/releases) into one folder:
+The model files are not in the npm package. Download the five files from the GitHub release `v0.4.0` (https://github.com/hamr0/rwxlite/releases) into one folder:
 
 | File | Size | What it is |
 |---|---|---|
@@ -27,19 +27,19 @@ The model files are not in the npm package. Download the five files from the Git
 Check them against these sha256 values (the same values `m1/release-assets.mjs` enforces before a release is built):
 
 ```
-e8477a1595578eec1e45020277319877d45cfb809785b22eaeb83bfb66c0a5b8  manifest.json
-c6bac86970888049952305f72434abe5c9d8f854224a5537f14e5a428a977739  manifest-exact.json
-984714f0342ce551779f0ed9d95be57f71ab30b2ef72baec1d9818ce96d465d7  model-int8-pc.onnx
-bbe1997d43020724f9eab9e42e8f6337e9640fe46f764b6fceac1eb1d000a3cf  model-fp32.onnx
+b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf  manifest.json
+5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8  manifest-exact.json
+470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7  model-int8-pc.onnx
+4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19  model-fp32.onnx
 07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3  vocab.txt
 ```
 
 ```
 cd /path/to/model-dir && sha256sum -c <<'EOF'
-e8477a1595578eec1e45020277319877d45cfb809785b22eaeb83bfb66c0a5b8  manifest.json
-c6bac86970888049952305f72434abe5c9d8f854224a5537f14e5a428a977739  manifest-exact.json
-984714f0342ce551779f0ed9d95be57f71ab30b2ef72baec1d9818ce96d465d7  model-int8-pc.onnx
-bbe1997d43020724f9eab9e42e8f6337e9640fe46f764b6fceac1eb1d000a3cf  model-fp32.onnx
+b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf  manifest.json
+5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8  manifest-exact.json
+470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7  model-int8-pc.onnx
+4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19  model-fp32.onnx
 07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3  vocab.txt
 EOF
 ```
@@ -67,7 +67,7 @@ Which model to choose:
 
 On the 1,443 exam #5 operations both score almost the same on their own (int8 1,280 right / 64 too loose / 99 too tight; fp32 1,283 / 64 / 96), so the choice is about size and numeric stability, not accuracy.
 
-The `model` string in every answer is `rwxlite-<manifest version>+<first 8 hex of the weights hash>`, here `rwxlite-0.3.1+984714f0` (int8) or `rwxlite-0.3.1+bbe1997d` (fp32). Log it next to every decision so you can tell which model gave an answer.
+The `model` string in every answer is `rwxlite-<manifest version>+<first 8 hex of the weights hash>`, here `rwxlite-0.4.0+470708b0` (int8) or `rwxlite-0.4.0+4608f470` (fp32). Log it next to every decision so you can tell which model gave an answer.
 
 ## 4. The request
 
@@ -93,7 +93,7 @@ rwxlite was trained with the lean as the first words of its input, so it is part
 
 The measured way to get a lean is rwxmap's mechanical rules (https://github.com/hamr0/rwxmap). That is what the scores in the README were measured with, so it is the recommended source. If you write your own first guess, you are outside what was measured.
 
-The rule names the 0.3.1 model saw in training (the part of the input after the lean letter):
+The rule names the 0.4.0 model saw in training (the part of the input after the lean letter):
 
 | Rule | Lean letter | Typical method |
 |---|---|---|
@@ -104,17 +104,20 @@ The rule names the 0.3.1 model saw in training (the part of the input after the 
 | `floor-post` | x | POST |
 | `method-delete` | x | DELETE |
 | `cant-undo-verb`, `cant-undo-verb-summary` | x | POST, PUT, PATCH with a can't-undo-style name |
+| `path-x-word` | x | POST, PUT, PATCH with a can't-undo word in the path |
+| `content-noun` | w | POST with a content-style noun |
+| `get-action` | x | GET that acts |
 
-(Counted over the 102,668 training texts in `data/round13/train.jsonl`.)
+(Counted over the 302,211 training texts of round 15, `data/round15/train.parquet`, which is not shipped.)
 
-Three more rule names exist in rwxmap's current mechanical rules: `path-x-word`, `content-noun` and `get-action`. **The model never saw these three in training.** They were fed to it unchanged and checked on 154 validation rows (139 right, 5 too loose, 10 too tight in the product flow), which is why they are not blocked, but it is a small sample. The rule name `credential-set` is also not in the training set; rwxlite reads it as `cant-undo-verb` (the lean class you send is kept). **Any other unseen rule name is untested**: the model will read it as unfamiliar words in its input, and nobody has measured what that does to the answer. If you invent your own rule names, measure them first.
+The last three rules in the table, `path-x-word`, `content-noun` and `get-action`, were in the training data of 0.4.0 (8,737, 3,593 and 266 rows); the 0.3.1 model had never seen them and was only spot-checked on 154 validation rows. The rule name `credential-set` is not read as such by the model; rwxlite reads it as `cant-undo-verb` (the lean class you send is kept). **Any other unseen rule name is untested**: the model will read it as unfamiliar words in its input, and nobody has measured what that does to the answer. If you invent your own rule names, measure them first.
 
 ## 5. The answer
 
 ```js
 const one = await a.answer(req);
-// { model: 'rwxlite-0.3.1+984714f0',
-//   answers: { isX: { noul: 0.00018958376213002917 }, changes: { noul: 0.007416255903099448 } } }
+// { model: 'rwxlite-0.4.0+470708b0',
+//   answers: { isX: { noul: 0.0012527997670124082 }, changes: { noul: 0.01085614682218233 } } }
 ```
 
 `noul` is the probability. For each question you asked there is one entry under `answers`. Two shapes exist, both plain JSON:
@@ -173,22 +176,22 @@ Real answers, with the arithmetic done (rounded to 4 places):
 
 | # | Answer JSON (`isX`, `changes`) | p(r) | p(w) | p(x) | Letter |
 |---|---|---|---|---|---|
-| 1 GET read | `0.00018958376213002917`, `0.007416255903099448` | 0.9926 | 0.0072 | 0.0002 | **r** |
-| 2 PUT update | `0.017573521378007922`, `0.9983811919017629` | 0.0016 | 0.9808 | 0.0176 | **w** |
-| 3 POST create | `0.032569596453775274`, `0.9867117866387414` | 0.0133 | 0.9541 | 0.0326 | **w** |
-| 4 POST create API key | `0.9910524465521778`, `0.9974375359218973` | 0.0026 | 0.0064 | 0.9911 | **x** |
-| 5 DELETE project | `0.9977202904060377`, `0.9989789430250046` | 0.0010 | 0.0013 | 0.9977 | **x** |
+| 1 GET read | `0.0012527997670124082`, `0.01085614682218233` | 0.9891 | 0.0096 | 0.0013 | **r** |
+| 2 PUT update | `0.018779843778726487`, `0.9925372159732244` | 0.0075 | 0.9738 | 0.0188 | **w** |
+| 3 POST create | `0.023517771785246885`, `0.9872990344481938` | 0.0127 | 0.9638 | 0.0235 | **w** |
+| 4 POST create API key | `0.9733988058311938`, `0.9954438745538006` | 0.0046 | 0.0220 | 0.9734 | **x** |
+| 5 DELETE project | `0.9928668568432085`, `0.9973209991014456` | 0.0027 | 0.0045 | 0.9929 | **x** |
 
 What they show:
 
-- Example 3 arrived with lean `x` (a plain POST starts out at x because a POST might do anything) and the model lowered it to `w` with 95% confidence. This is the kind of row where the model earns its place, and also the kind of row where a mistake would be "too loose", so this is where your cut matters.
-- Example 4 stays `x`: creating a key is x under the widened rule, and the model is 99% sure.
+- Example 3 arrived with lean `x` (a plain POST starts out at x because a POST might do anything) and the model lowered it to `w` with 96% confidence. This is the kind of row where the model earns its place, and also the kind of row where a mistake would be "too loose", so this is where your cut matters.
+- Example 4 stays `x`: creating a key is x under the widened rule, and the model is 97% sure.
 - Example 5 (DELETE) is x, and the model agrees with its lean.
 
 The complete answer for example 4, as returned:
 
 ```json
-{"model":"rwxlite-0.3.1+984714f0","answers":{"isX":{"noul":0.9910524465521778},"changes":{"noul":0.9974375359218973}}}
+{"model":"rwxlite-0.4.0+470708b0","answers":{"isX":{"noul":0.9733988058311938},"changes":{"noul":0.9954438745538006}}}
 ```
 
 The script used (save outside the package, adjust `dir`):
@@ -212,7 +215,7 @@ The probabilities are calibrated: among answers where the top probability is abo
 
 > **Answer automatically when the top probability is at least your cut. Otherwise ask a human (or keep the lean).**
 
-A higher cut means fewer automatic answers and fewer mistakes. A lower cut means more automatic answers and more mistakes. Nothing else changes. The cut is yours: rwxmap uses 0.90 for lowering, tuned to its needs. A cut tuned on 0.2.x does not carry over: the 0.3.1 calibration temperature differs (0.991463 against 0.844), so the same number now means something different. Re-check your cut when you move to 0.3.1.
+A higher cut means fewer automatic answers and fewer mistakes. A lower cut means more automatic answers and more mistakes. Nothing else changes. The cut is yours: rwxmap uses 0.90 for lowering, tuned to its needs. A cut tuned on an earlier version does not carry over: the calibration temperature differs between versions (0.2.x 0.844, 0.3.1 0.991463, 0.4.0 1.3832182330120317), so the same number means something different. Re-check your cut when you move to 0.4.0.
 
 ### What the cut does, measured
 
@@ -262,7 +265,7 @@ n, a, l, t = run(0.5, 0.9)
 print(f'asym 0.5 up / 0.9 down: {a/n:6.1%}   {l} ({l/a:5.2%})   {t} ({t/a:5.2%})')
 ```
 
-The validation files are not shipped in the repository; to produce the same table on your own data, give the script your own three CSVs of the same shape.
+The validation files are not shipped in the repository; to produce the same table on your own data, give the script your own three CSVs of the same shape. The model's CSV (`id,p_is_x,p_changes`; `p_changes` = p(w) + p(x)) is made by the repo script `m1/exam5-predict.mjs`: `node m1/exam5-predict.mjs <ops.csv> <model-dir> <out.csv> --lean <lean.csv>` (`ops.csv` and `lean.csv` need the headers and `.sha256` files described at the top of that script). The table above came from `node m1/r13-v4lean-check.mjs --val <val.jsonl> --lean <lean.csv> --variant asis --out p-asis.csv` (docs/wiki/prereg-exam5.md section 4); both write the same `p_is_x,p_changes` columns.
 
 ### The asymmetric option: stricter before lowering than before raising
 
@@ -320,7 +323,7 @@ const many = await a.answerMany([req1, req2, req3]); // one slot per request, sa
 
 ## 12. Other facts
 
-- The manifest may carry `textFormat` (1 or 2, default 1) and `temperature` (a finite number above 0; anything else makes `loadAnswerer` throw before it reads any file; a manifest with none uses 0.844). The 0.3.1 manifests carry `temperature` 0.991463 and `textFormat` 1. Format 2 exists but is switched off: the shipped 0.3.1 models use format 1.
+- The manifest may carry `textFormat` (1 or 2, default 1) and `temperature` (a finite number above 0; anything else makes `loadAnswerer` throw before it reads any file; a manifest with none uses 0.844). The 0.4.0 manifests carry `temperature` 1.3832182330120317 and `textFormat` 1. Format 2 exists but is switched off: the shipped 0.4.0 models use format 1.
 - Every file's sha256 is checked against the manifest at load; a mismatch throws.
 - Limits: OpenAPI operations only, with method, path template, operationId, summary and description. No request bodies, no query values, no hosts without a spec.
 

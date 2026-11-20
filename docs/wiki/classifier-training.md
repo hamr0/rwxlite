@@ -315,6 +315,46 @@ The x share must not fall after filtering. Otherwise the model sees fewer danger
 
 **Labels that can't be learned.** Where the answer keys disagree, there is nothing to learn. "Restart" is truth w 6 times (coolify: "restart = stop + start, ends as before") and x 4 times (neon endpoint, supabase project, render postgres and service: "drops live connections"). rwxmap's user will rule. Until then restart, start, stop, pause and resume are kept out of generated variants.
 
+### 12. What rounds 14 and 15 taught us: vendors matter more than model size
+
+**Our data is narrow.** We have 123,339 operations from 673 providers. But about 62% come from just five companies: Microsoft 33,869, GitHub 14,663, Amazon 13,198, Azure 8,083 and Google 5,992. So the model has seen few vendors in depth.
+
+This is the likely reason scores move between exams. On rows that look like its training data, the model gets about 97%. On vendors it has never seen, it gets about 90%. Every new exam is a new set of vendors, so every exam gives a slightly different score.
+
+**A bigger model did not fix it.** In round 14 we tried bge-base, which is 5 times bigger (109.5M parameters). In rwxmap's default mode (mode a) it was no better. It helped only when rwxlite judges every row with a confidence bar (mode b). The reason is that its confidence is more trustworthy, not that its first guess is better.
+
+**Distillation on the same rows did nothing.** Distillation means a big teacher's percentages teach the small model. We trained a small student on the same rows, with bge-base as teacher. It came out equal to R13. R13 was already learning from Jev's percentages, so changing the teacher changed little. Research says distillation works mainly through a large pile of new, unlabelled examples. We gave it none.
+
+**So round 15 shows the small model many new vendors.** The plan is 100,000 operations from 3,000+ new vendors, at most 300 per vendor. Each row gets three opinions: rwxmap's rules, today's model, and bge. Where they disagree, Claude checks a sample against the label standard.
+
+**What does not help** (research plus our own rounds):
+
+- Extra penalties for costly mistakes. Results are mixed, and they can hurt confidence.
+- Fancy abstain methods. A plain confidence bar is already strong.
+- Few-example tricks.
+
+Numbers are in `docs/wiki/findings.md` (the 2026-11-18 sections), `docs/product/prd-bge-teacher.md` and `docs/product/prd-r15-github-data.md`.
+
+### 13. Label in a cascade: cheap broad first, trusted passes on the delta
+
+**The rule.** Do not send every row to the best labeller. Run cheap opinions on all rows, let the rows where they agree take that letter, and send only the disputed rows to a more trusted labeller. Repeat with a still more trusted one on what is left. Check each pass against a held-out set of rows reviewed by hand, which never enters training.
+
+**Why.** In round 15, three cheap opinions (rules, R13, bge) agreed on 87.5% of 200,000 new rows. That left 25,033 disputed rows for the expensive passes. On 400 blind-reviewed disputed rows, Sonnet was 87.2% exact, bge 74.8%, Jev 65.0%, R13 57.6%, rules 20.1%. Where Sonnet was sure it was right 99.6% of the time, so its "unsure" can pick the rows for the next labeller (Opus, about 21% of rows). The leftover rows get the strictest letter and a low weight. Caveat: the reviewer was also a Claude model with the same brief, so those scores are optimistic.
+
+**Each round gets cheaper.** The retrained model becomes the next round's cheap pass, so fewer rows are disputed.
+
+**Result.** The trusted pass fixes most of the cheap pass's looseness: on the holdout, too-loose fell from 17.5% (bge) to 9.8% (Sonnet) to 3.8% (cascade); the remaining loose risk is mostly the agreed rows, about 2% in the audit.
+
+Numbers: `docs/wiki/findings.md` (2026-11-19) and `docs/product/prd-r15-github-data.md` section 5.
+
+### 14. Two lessons from round 15 labelling and lean
+
+**(a) Write an ambiguity ruling into the brief before relabelling, and put the new rule FIRST in the labeller prompt.** Sonnet under-applied D141 in pass 1. A narrow second pass with the ruling up front raised 114 of 395 rows.
+
+**(b) Train on the exact input the exam will feed.** The lean comes from rwxmap's mechanical rules, so when those rules change, regenerate the training texts from the frozen exam ref.
+
+Numbers: `docs/wiki/findings.md` (2026-11-19) and `docs/product/prd-r15-github-data.md` sections 19-20.
+
 ## Training on the home server
 
 Sandbox: `ahassan@192.168.178.180:~/rwxlite-train/` (Fedora, 4-core i3-8100T, CPU only, venv at `.venv`, torch CPU, transformers 5.0.0). Nothing outside that dir is touched. Only `train/*.py` and `data/train/{train,val,v3eval}.parquet` are copied there (no exam, gate labels, keys or .env).
