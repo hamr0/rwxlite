@@ -65,3 +65,31 @@ for (const [name, manifestFile] of [['int8-pc', 'manifest.json'], ['fp32', 'mani
     assert.deepEqual(await a.answerMany(reqs.slice(3, 9)), single.slice(3, 9));
   });
 }
+
+// The 0.4.0 model (R15 student, data/m1-r15): manifests, model string, T, textFormat, and known rows against the Python probabilities recorded at export.
+const dir15 = new URL('../data/m1-r15/', import.meta.url);
+for (const [name, manifestFile, modelFile, model] of [['int8-pc', 'manifest.json', 'model-int8-pc.onnx', 'rwxlite-0.4.0+470708b0'], ['fp32', 'manifest-exact.json', 'model-fp32.onnx', 'rwxlite-0.4.0+4608f470']]) {
+  test(`0.4.0 ${name}: manifest, model string, T and textFormat load, and known rows answer as recorded`, async (t) => {
+    const need = [manifestFile, modelFile, 'vocab.txt', 'parity-rows.jsonl'];
+    const missing = need.filter((f) => !existsSync(new URL(f, dir15)));
+    if (missing.length) { t.skip(`not present in data/m1-r15: ${missing.join(', ')} (model files are not in git)`); return; }
+    /** @type {import('../src/answerer.js').Answerer} */
+    let a;
+    try { a = await loadAnswerer({ dir: new URL(dir15).pathname, manifestFile }); } catch (e) {
+      if (/onnxruntime-node/.test(String(/** @type {Error} */ (e).message))) { t.skip('onnxruntime-node is not installed'); return; }
+      throw e;
+    }
+    assert.equal(a.model, model);
+    assert.ok(Math.abs(a.temperature - 1.3832182330120317) < 1e-12);
+    assert.equal(a.textFormat, 1);
+    const rows = readFileSync(new URL('parity-rows.jsonl', dir15), 'utf8').split('\n').filter(Boolean).slice(0, 3).map((l) => JSON.parse(l));
+    for (const r of rows) {
+      const o = await a.answer({ state: r.state, questions: { isX: 1, changes: 1 }, lean: r.lean });
+      const [, pw, px] = r.p[name];
+      const ans = /** @type {any} */ (o).answers;
+      assert.equal(/** @type {any} */ (o).model, model);
+      assert.ok(Math.abs(ans.isX.noul - px) < 1e-3, `${r.id} isX`);
+      assert.ok(Math.abs(ans.changes.noul - (pw + px)) < 1e-3, `${r.id} changes`);
+    }
+  });
+}

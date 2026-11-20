@@ -14,7 +14,7 @@ Node 22 or newer. `onnxruntime-node` is an optional dependency of rwxlite and is
 
 ## 2. Get the model files
 
-The model files are not in the npm package. Download the five files from the GitHub release `v0.3.1` (https://github.com/hamr0/rwxlite/releases) into one folder:
+The model files are not in the npm package. Download the five files from the GitHub release `v0.4.0` (https://github.com/hamr0/rwxlite/releases) into one folder:
 
 | File | Size | What it is |
 |---|---|---|
@@ -27,19 +27,19 @@ The model files are not in the npm package. Download the five files from the Git
 Check them against these sha256 values (the same values `m1/release-assets.mjs` enforces before a release is built):
 
 ```
-e8477a1595578eec1e45020277319877d45cfb809785b22eaeb83bfb66c0a5b8  manifest.json
-c6bac86970888049952305f72434abe5c9d8f854224a5537f14e5a428a977739  manifest-exact.json
-984714f0342ce551779f0ed9d95be57f71ab30b2ef72baec1d9818ce96d465d7  model-int8-pc.onnx
-bbe1997d43020724f9eab9e42e8f6337e9640fe46f764b6fceac1eb1d000a3cf  model-fp32.onnx
+b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf  manifest.json
+5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8  manifest-exact.json
+470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7  model-int8-pc.onnx
+4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19  model-fp32.onnx
 07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3  vocab.txt
 ```
 
 ```
 cd /path/to/model-dir && sha256sum -c <<'EOF'
-e8477a1595578eec1e45020277319877d45cfb809785b22eaeb83bfb66c0a5b8  manifest.json
-c6bac86970888049952305f72434abe5c9d8f854224a5537f14e5a428a977739  manifest-exact.json
-984714f0342ce551779f0ed9d95be57f71ab30b2ef72baec1d9818ce96d465d7  model-int8-pc.onnx
-bbe1997d43020724f9eab9e42e8f6337e9640fe46f764b6fceac1eb1d000a3cf  model-fp32.onnx
+b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf  manifest.json
+5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8  manifest-exact.json
+470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7  model-int8-pc.onnx
+4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19  model-fp32.onnx
 07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3  vocab.txt
 EOF
 ```
@@ -67,7 +67,7 @@ Which model to choose:
 
 On the 1,443 exam #5 operations both score almost the same on their own (int8 1,280 right / 64 too loose / 99 too tight; fp32 1,283 / 64 / 96), so the choice is about size and numeric stability, not accuracy.
 
-The `model` string in every answer is `rwxlite-<manifest version>+<first 8 hex of the weights hash>`, here `rwxlite-0.3.1+984714f0` (int8) or `rwxlite-0.3.1+bbe1997d` (fp32). Log it next to every decision so you can tell which model gave an answer.
+The `model` string in every answer is `rwxlite-<manifest version>+<first 8 hex of the weights hash>`, here `rwxlite-0.4.0+470708b0` (int8) or `rwxlite-0.4.0+4608f470` (fp32). Log it next to every decision so you can tell which model gave an answer.
 
 ## 4. The request
 
@@ -262,7 +262,7 @@ n, a, l, t = run(0.5, 0.9)
 print(f'asym 0.5 up / 0.9 down: {a/n:6.1%}   {l} ({l/a:5.2%})   {t} ({t/a:5.2%})')
 ```
 
-The validation files are not shipped in the repository; to produce the same table on your own data, give the script your own three CSVs of the same shape.
+The validation files are not shipped in the repository; to produce the same table on your own data, give the script your own three CSVs of the same shape. The model's CSV (`id,p_is_x,p_changes`; `p_changes` = p(w) + p(x)) is made by the repo script `m1/exam5-predict.mjs`: `node m1/exam5-predict.mjs <ops.csv> <model-dir> <out.csv> --lean <lean.csv>` (`ops.csv` and `lean.csv` need the headers and `.sha256` files described at the top of that script). The table above came from `node m1/r13-v4lean-check.mjs --val <val.jsonl> --lean <lean.csv> --variant asis --out p-asis.csv` (docs/wiki/prereg-exam5.md section 4); both write the same `p_is_x,p_changes` columns.
 
 ### The asymmetric option: stricter before lowering than before raising
 
@@ -320,7 +320,7 @@ const many = await a.answerMany([req1, req2, req3]); // one slot per request, sa
 
 ## 12. Other facts
 
-- The manifest may carry `textFormat` (1 or 2, default 1) and `temperature` (a finite number above 0; anything else makes `loadAnswerer` throw before it reads any file; a manifest with none uses 0.844). The 0.3.1 manifests carry `temperature` 0.991463 and `textFormat` 1. Format 2 exists but is switched off: the shipped 0.3.1 models use format 1.
+- The manifest may carry `textFormat` (1 or 2, default 1) and `temperature` (a finite number above 0; anything else makes `loadAnswerer` throw before it reads any file; a manifest with none uses 0.844). The 0.4.0 manifests carry `temperature` 1.3832182330120317 and `textFormat` 1. Format 2 exists but is switched off: the shipped 0.4.0 models use format 1.
 - Every file's sha256 is checked against the manifest at load; a mismatch throws.
 - Limits: OpenAPI operations only, with method, path template, operationId, summary and description. No request bodies, no query values, no hosts without a spec.
 

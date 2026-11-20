@@ -10,7 +10,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'train'))
 from common import ROOT
 
-CKPT = os.path.join(ROOT, 'data', 'round15', 'models', 'R15-student')
+CKPT = os.environ.get('R15_CKPT_DIR') or os.path.join(ROOT, 'data', 'round15', 'models', 'R15-student')
 # Both come from the environment so nothing in this file changes after the prereg: R15_CKPT_SHA = model.safetensors sha256 of the student, R15_T = the val-fit temperature (prereg section 6), frozen before exam #7.
 CKPT_SHA = os.environ['R15_CKPT_SHA']
 T = float(os.environ['R15_T'])

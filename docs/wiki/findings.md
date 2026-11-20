@@ -1342,3 +1342,9 @@ D133 bar (exact >= 1412) passes for both mode a models. 53 rows differ between a
 - Gains come mostly from new data. The teacher matters for standalone and mode b; the student is overconfident on old-vendor val (T 1.38).
 - The openziti access-policy PUT/PATCH cluster is a D137 target (access grants = x).
 - User's round 16 plan: about 300k new rows; train bge first, then MiniLM, both initialised from today's r15 models; keep old rows in the mix; lower lr; fix confidence before training; exam #8 needed (exam #7 is burned).
+
+## 2026-11-20: export_r15.py checkpoint path is overridable
+
+`m1/export_r15.py` reads the student checkpoint folder from `R15_CKPT_DIR` when set; unset, it uses `data/round15/models/R15-student` exactly as before. A wrong or different checkpoint still fails loudly on `R15_CKPT_SHA`, so the override does not weaken the check.
+
+The `--row_weight` loss in `train/finetune.py` differs from the default path when `--x_weight` != 1. This is left as is on purpose so round 16 can repeat the round 15 recipe; any change would be a pre-registered decision.

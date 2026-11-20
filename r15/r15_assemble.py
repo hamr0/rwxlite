@@ -1,5 +1,7 @@
 """Round 15 (docs/wiki/prereg-r15.md section 3): build the teacher/student training set. Deterministic, no training, stops on any assertion.
-  python3 r15/r15_assemble.py            # writes data/round15/ (gitignored)
+  The final set (the one SHA256SUMS and the prereg record) needs the 5 env vars of prereg-r15.md section 3.4; the plain `python3 r15/r15_assemble.py` builds the PROVISIONAL set and overwrites data/round15/ (gitignored, OUT is fixed):
+  R15_R13_DIR=data/round13-d141 R15_R13_SHAS=train=ae9a44184538e571185479907da4e9ead9211e1d0a6f6b185f34fc7f12341ae7,val=bc7bc643ecfdea2ce3bc6d5fb3faa972ca07ae19cc45440f52bcb99412fc3400,v3eval=7c0df6fa7f38f79a4e603239c54d78db7c92fe7213930918b12988002af907ad \
+  R15_MECH_REF=1c25be1 R15_LEAN_CSV=<export-v4-d141.csv> R15_LEAN_SHA=8d802cf42d56fbcf050102fb854a958696bf59abdeca1a43fe6c88bcdc53034f python3 r15/r15_assemble.py
 Inputs (sha256 are asserted against the prereg values): data/round13/{train,val,v3eval}.parquet (R13 rows, unchanged), data/r15/labels/final-labels-r15-d141-tight.parquet (199,600 cascade rows after the D141 relabel; never edited here),
 data/r15/labels/texts-r15.jsonl (model input text of every pick row; src/text.js formatText format 1 with rwxmap's mechanical lean), data/r15/labels/mech-r15.jsonl (mech letter and rule),
 data/r15/labels/disagree-sample-400.csv (the holdout: must NOT be in the output).
