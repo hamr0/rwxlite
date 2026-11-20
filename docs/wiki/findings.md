@@ -1244,3 +1244,42 @@ User decisions, recorded in the draft `docs/wiki/prereg-r15.md` (uncommitted unt
 - The frozen exam #7 rwxmap ref SHA.
 - The exam #7 labeller pair: two blind labellers, default Sonnet + Opus, named in rwxmap's exam #7 prereg; rwxmap's user rules every disagreement.
 
+
+## 2026-11-20: round 15 teacher go/no-go (prereg 5.2 and 5.3): NO-GO, fallback targets
+
+The bge-base teacher finished on the server 2026-11-20 03:08, exit 0, 9,445 steps, train time 801.3 min, memwatch never fired (lowest MemAvailable 3,970,012 kB). Checkpoint `~/rwxlite-train/r15-teacher/data/train/ckpt-r15-teacher/final`, **`model.safetensors` sha256 `d53deafc13190f6c4807ca360b0de438828728680ee248abee93ce9d1457b741`** (437,961,700 bytes; the local copy has the same sha256). Final training loss about 0.16 to 0.19, finite. Training-log eval on the v3eval 5,716 rows: val acc 94.62% (the log's own "val" line).
+
+**(a) Val, mode a at 0.90, PyTorch fp32 batch 1, D141 val labels on the new-lean val text (data/round15/val.parquet, 4,180 rows; ops.csv unchanged; 6 labels differ from the old val-truth).** Scored with the unchanged `m1/r14-compare.mjs` on rwxmap's pre-sweep tree (`5e6b9cb^`), teacher only (a scratch copy of the `m1/r14-compare.py` logic that skips the R13 and r14 slots; the R13-b1 reference 3,938 / 90 is the locked prereg figure and was not rerun). Teacher T fitted on val with `temp_fit`: **1.362087**.
+
+| Teacher (right / too loose / too tight) | value | bar | |
+|---|---|---|---|
+| mode a 0.90 | 3,929 / 115 / 136 | right >= 3,896 AND too loose <= 104 | right PASS, **too loose FAIL (115 > 104)** |
+| mode a 0.97 / 0.95 / 0.93 / 0.85 (information) | 3,772 / 106 / 302; 3,834 / 108 / 238; 3,881 / 112 / 187; 3,960 / 125 / 95 | | |
+| mode b 85 (information) | 3,941 / 91 / 148 | | |
+| standalone argmax at T (information) | 3,955 / 180 / 45 | | |
+| mechanical alone | 3,722 / 143 / 315 | | |
+
+**(b) The 400-row D141 holdout** (`r15/r15_holdout_score.py`, truth sha256 `96a62488...`, weighted to 25,033 rows, teacher's own argmax; the script reproduced the stored references: yes).
+
+| Row set | exact / too loose / too tight | bar | |
+|---|---|---|---|
+| all, teacher standalone | 81.8 / 10.5 / 7.7 | exact >= 79.0, too loose <= 12.9 | PASS, PASS |
+| pocket (66 rows), teacher standalone | 73.5 / 15.7 / 10.7 | too loose <= 25.9 | PASS |
+| old bge reference, all | 74.0 / 18.4 / 7.6 | | |
+| old bge reference, pocket | 61.6 / 33.9 / 4.4 | | |
+| teacher mode a 0.90 replica (information), all / pocket | 68.5 / 13.4 / 18.0; 60.0 / 11.9 / 28.1 | | |
+| R13 mode a stored (information), all / pocket | 56.5 / 8.8 / 34.7; 32.3 / 0.0 / 67.7 | | |
+
+**(c) Sanity:** PASS (all 9,445 steps, finite loss, memwatch never fired, sha256 recorded).
+
+**Training-log per-tier table (end of `finetune-r15-teacher.log`, v3eval 5,716 rows, exact / too loose / too tight).**
+
+| Tier | n | mechanical | a_cuts | a_argmax | b_argmax |
+|---|---|---|---|---|---|
+| overall | 5,716 | 75.2 / 0.5 / 24.2 | 82.6 / 0.5 / 16.8 | 83.2 / 0.6 / 16.1 | 84.0 / 0.6 / 15.4 |
+| tier_lower | 1,641 | 36.0 / 0.1 / 63.9 | 72.8 / 0.9 / 26.3 | 75.3 / 1.3 / 23.3 | 75.3 / 1.3 / 23.4 |
+| tier_raise-wx | 1,486 | 80.1 / 1.6 / 18.3 | 67.9 / 0.7 / 31.4 | 67.6 / 0.7 / 31.8 | 70.4 / 0.7 / 28.9 |
+| tier_raise-get | 959 | 100.0 / 0.0 / 0.0 | 99.8 / 0.0 / 0.2 | 99.8 / 0.0 / 0.2 | 99.8 / 0.0 / 0.2 |
+| tier_none | 1,630 | 95.8 / 0.3 / 3.9 | 95.8 / 0.3 / 3.9 | 95.8 / 0.3 / 3.9 | 95.8 / 0.1 / 4.0 |
+
+**Decision: NO-GO (5.3 requires (a) and (b) and (c); (a) fails on too loose, 115 against a limit of 104, by 11 rows).** The bars were not changed and no second run was made. Per prereg 5.4 the student uses the round 14 bge fallback targets, `data/round15/teacher-fallback-oldbge-train.npy` (sha256 `1d775b1c43ee7dcdcd2d3edfd19535235da0cdb1edacfb7373cfdec7a3f3925e`, sidecar records train.parquet `16a34b05...`). The `probs` step was not run. The holdout (b) passed clearly (exact +7.8 pp, too loose -7.9 pp, pocket too loose -18.2 pp against the old bge), so the teacher learned the relabelled rows; the val failure is in the R13-row val where it is looser under mode a than R13-b1 (115 vs 90). Scratch: `.../scratchpad/teacher-gonogo/` (`val_teacher.py`, `holdout.json`, `work/report.json`), not committed.
