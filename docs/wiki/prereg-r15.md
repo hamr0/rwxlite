@@ -160,6 +160,14 @@ Why these numbers: on the same 400 rows, Sonnet alone scored 87.2 / 9.8 and the 
 
 If any of (a), (b), (c) fails, **the round 14 bge teacher is used** and nothing else about stage B changes: soft targets for every row from `data/round15/teacher-fallback-oldbge-train.npy` (R13 rows from `teacher-r14-bge-train.npy`, r15 rows from `bge_raw_p_*` of the opinions file; built by `r15/r15_fallback_targets.py`, no server time; provisional file sha256 `1d775b1c43ee7dcdcd2d3edfd19535235da0cdb1edacfb7373cfdec7a3f3925e`, rebuilt and re-hashed with the final train.parquet), hard label and row weight from the (revised) cascade. The failure and the numbers go into the findings.
 
+### 5.5 AMENDMENT 2026-11-20: USER OVERRIDE of the teacher go/no-go
+
+**USER OVERRIDE (the user owns this prereg).** The user's words: "it's a pass to me, it's overall better ... why not reuse the big model to train mini". The teacher go/no-go of 5.3 is overridden to **PASS**.
+- Numbers (findings 2026-11-20): (a) val mode a 0.90 right 3,929 (bar >= 3,896, pass), too loose **115 against a limit of 104, failed by 11 rows**; (b) holdout 81.8 exact / 10.5 too loose / pocket too loose 15.7 against the old bge 74.0 / 18.4 / 33.9, all three bars passed clearly; (c) sanity passed.
+- Section 5.4 (fallback to the old bge targets) is NOT used. The stage B student trains on the NEW r15 teacher's probabilities (`r15-train.sh probs`, then `student`), exactly the section 6 recipe.
+- A fallback student (old-bge targets) had been started on the server 2026-11-20 08:03 and was stopped cleanly at 08:22 at step 1,175 of 9,445 (last checkpoint last.pt only, no final model). It is **not a candidate**; its directory is kept, renamed `~/rwxlite-train/r15-student-fallback-stopped/`. Nothing from it is scored or used.
+- The stage B student is **the one and only candidate**. The student val floor guard (section 6) and exam #7 (section 8.1) are unchanged. **No exam #7 truth and no exam #7 score had been seen** when this override was made.
+
 ## 6. Stage B: the student
 
 - **Model and recipe:** all-MiniLM-L6-v2, trained from the base model (no `--init`), R13 / round 14 student recipe unchanged: `--teacher <stage A probs> --alpha 0.7` (0.7 soft CE on the teacher's probabilities + 0.3 hard CE on the label), `--row_weight weight` (rule of 3.3), 1 epoch, batch 32, lr 5e-5, weight decay 0.01, warmup 6%, linear decay, max_len 128, x_weight 1.0, seed 1, `--threads 3`, `--ckpt 250`. No loss change (research and round 13 show mixed results). 9,445 steps. Dir `~/rwxlite-train/r15-student/`, tag `r15-student`:
