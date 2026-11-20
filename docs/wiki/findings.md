@@ -1348,3 +1348,70 @@ D133 bar (exact >= 1412) passes for both mode a models. 53 rows differ between a
 `m1/export_r15.py` reads the student checkpoint folder from `R15_CKPT_DIR` when set; unset, it uses `data/round15/models/R15-student` exactly as before. A wrong or different checkpoint still fails loudly on `R15_CKPT_SHA`, so the override does not weaken the check.
 
 The `--row_weight` loss in `train/finetune.py` differs from the default path when `--x_weight` != 1. This is left as is on purpose so round 16 can repeat the round 15 recipe; any change would be a pre-registered decision.
+
+## Fine-tuning learnings carried into round 16 (2026-11-20)
+
+Plain summary: our own rounds say the gains come from new vendors and from fixing labels, not from bigger models or fancier losses. The literature mostly agrees, and adds one warning: the r15 student is over-confident, probably because of how we made its soft targets. Sources: `docs/wiki/research-finetuning-r16.md` (a reading review; nothing was run for it), the sections above, `docs/wiki/prereg-r15.md`, `m1/r15-train.sh`, `docs/product/prd-r16-vendor-data.md`.
+
+### What our own rounds proved
+
+These are measured facts from our history.
+
+- **New vendors lifted the unseen holdout.** Round 15 (new-vendor data) took the unseen-vendor holdout from 74.0 to 81.8 exact.
+- **A bigger teacher on old data gave nothing.** Round 14 (bge-base teacher, then a distilled MiniLM student) failed val against R13. Round 14 closed.
+- **The label fix did the work in round 13.** rwxmap's v4 relabel (6,029 w to x under D137) lifted R13. The L3 loss (extra cost on too-loose answers) and the access hint added nothing.
+- **Refitting the baseline's T is unfair.** Refitting 0.2.0's T moved it by 7 exact, more than training did. The baseline keeps its shipped T.
+- **Score at batch 1.** int8 with padded batches makes the probability depend on the batch. Scoring at batch 1 avoids it. int8 is information only under D142.
+- **Val is easier than real use.** Val is about 97% exact; unseen vendors are about 90%. A number from val says little about a new vendor.
+- **The r15 student is over-confident.** Its fitted T is 1.3832, against 0.991463 for R13. A T above 1 means the raw model says it is surer than it is. The 0.90 cut-off depends on these probabilities being honest.
+
+### What the literature says (and how strong it is)
+
+Strength is for our setup (a small 3-class text model, about 300k rows, CPU only), not for the paper in general. "Unverified" means the research doc itself did not check that number or claim in the paper.
+
+| Topic | Takeaway | Strength for us |
+|---|---|---|
+| Continue or retrain | Warm start can generalise worse than a fresh start (Ash & Adams 2020), but that was image models trained from random weights. Nobody measured it for a BERT-size model continued from its own fine-tune. Retraining from base is the safe default; it is what worked in rounds 13 and 15. | Weak. Open question, not a known risk. |
+| Replay of old data | A small share of old rows protects old skill. Ibrahim et al. 2024 used about 5% (mild shift) to 25% (big shift) (unverified, from a figure caption). Scialom et al. 2022 kept most skill with 1%, but on different tasks. Our new data is the same task with new vendors, so forgetting should be milder. | Moderate. The principle carries; the exact share does not. |
+| LR for continued training | Warm up again, decay again, and use a lower peak LR than first time. A higher peak adapts more and forgets more. Example in the review: 2e-5 instead of 5e-5. | Moderate for the principle, weak for the number. |
+| Distillation alpha | Alpha is the share of the loss taken from the teacher's soft probabilities (ours: 0.7 soft, 0.3 hard). It carries "this w row looks a bit like an x" information that a single letter cannot. No paper gives a universal best value, and changing alpha alone is unlikely to matter much. | Strong for what it is, weak for any number. |
+| Students inherit over-confidence | A student copies its teacher's confidence, and can end up more confident than the teacher. Calibrating the teacher first (divide its scores by its own T) gave better students. | Moderate. Mostly image work and preprints. |
+| Calibration out of domain | A T fitted on in-domain data does less on out-of-domain data (Desai & Durrett 2020, BERT-style models). Our val is in-domain, the cut-off is used on unseen vendors, so a val T likely leaves us too confident there. Fit T on unseen-vendor data. | Strong, good transfer. |
+| Costs belong in the cut-off | With honest probabilities, the best decision for any cost table is a threshold, with no retraining (Elkan 2001). Our L3 null result fits. A cost in the loss also distorts the probabilities. | Strong. |
+| LLM label noise | BERT copes with random noise but not with systematic noise (errors that depend on the text), and LLM labeller errors are systematic. Fix them at the source (rulings, prompt order, rwxmap's pipeline), not with a clever loss. Whether to weight disputed rows 3x or 1x is unsettled. | Moderate, good transfer. |
+| More vendors beat more rows | More distinct domains help unseen data more than more rows from known ones. Duplicates waste compute (Lee et al. 2022). Direct text evidence is thin; our own 74.0 to 81.8 is the stronger proof. | Moderate. |
+| Recipe tweaks | all-MiniLM-L6-v2 was trained with mean pooling; we read the [CLS] token through a pooler it never trained. LR 2e-5 to 5e-5 is the normal range. Check how many rows lose words at max_len 128. Expect small gains from each. | Weak. Cheap experiments only. |
+
+Not found in the literature: any calibration study of int8 BERT or MiniLM models. Keep measuring fp32 against int8 at the cut-off ourselves.
+
+Also noted by the research doc: one run per recipe with no repeat seeds is a weak point, so a val difference of a few tenths of a point may be noise.
+
+### What we take into round 16
+
+Working rules, and the tests that are still open.
+
+**(a) Data first.**
+- Use the 118,812 new-vendor master rows (3,741 vendors) before any new download.
+- Use the other 483k master rows (more rows from known vendors) only if a test shows gain.
+- Exam #8 vendor freeze applies to everything, including val: gitbook, baserow, looker, wekan, shortcut, bitrise.
+
+**(b) Teacher soft targets must not come from rows the teacher trained on.**
+- In `m1/r15-train.sh`, the `probs` phase ran `train/teacher_probs.py` over `train.parquet` at T=1. That is the same set the teacher had just trained on, towards one-hot labels for the r15 rows.
+- So the teacher's soft targets were probably near one-hot, and the student learned close to hard labels. This is the likely cause of the student's T of 1.3832. **It is a hypothesis, not a finding.**
+- Check first, with no training: compare the teacher's mean top probability on its own training rows with the same figure on val. If the training-row figure is clearly higher, the hypothesis holds.
+- If it holds, test either dividing the teacher's scores by its val-fitted T, or out-of-fold teacher scores (each row scored by a teacher that did not train on it, 2 to 3 times the teacher time). Leave alpha at 0.7 unless the student is still over-confident after that.
+
+**(c) Replay when continuing from r15.**
+- Start with about 20% old rows mixed in, and test that against replaying all of them.
+- Use a lower LR than 5e-5 (the review suggests 2e-5) with a fresh warmup and decay.
+- Open test: continue from r15 against retraining from base. Both must be judged on the unseen-vendor dev set below, not on val alone.
+
+**(d) Calibration.**
+- Fit the candidate's T on unseen-vendor data, not on val.
+- Never refit the baseline's T; it keeps its shipped value.
+- Keep the loss plain. Put the cost of too-loose answers in the 0.90 cut-off, not in the loss.
+
+**(e) Small experiments rank options before the full run.**
+- Use a fixed subset of about 30 to 50k rows, stratified by vendor.
+- Such a run predicts which option wins, not the final score. A few tenths of a point between single runs may be noise, so use the same seed for both arms.
+- Judge on val and on a fixed unseen-vendor dev set that is **not** exam #8. Exam #8 is scored once and then burned.
