@@ -87,6 +87,15 @@ Time: the teacher needs rows labelled (about 1.5 h per 100k) and then trained. W
 - **Preregistration:** write the prereg before training (draft `docs/wiki/prereg-r16.md`). It includes the predict and score code, committed before the truth is revealed, and the prediction sha256s committed before truth. Use the real gate (rwxmap CLI secondPass), never a_none or a replica.
 - **Truth for exam #8:** rwxmap's process (two blind labellers on BRIEF-v4 + D141, rwxmap's user rules disagreements, no Jev).
 
+### Dev set: fixed unseen-vendor set (2026-11-20)
+
+- **Rule: never trained on; used only to compare small round 16 test runs; exam #8 is the gate.** It is not the ship gate and is never scored for a decision. It is excluded from all round 16 training and from val.
+- **What it is:** 182 never-used vendors, 4,039 ops (cap 30 ops per vendor, seeded random 30; median 22), picked whole-vendor by `r16/pick_dev.py`, seed 16 (best of 300 seeded draws on method mix). Files (gitignored): `data/r16/dev/dev-vendors.csv` (for rwxmap's copy check), `dev-ops.csv.gz`, `pick-report.json` (counts, mixes, drop lists, sha256).
+- **Never used** means: vendor_key not among the r15 pick's vendors, and not an exact key in R13's seen list or `exclusion-keys.txt`. This reproduces the 118,812 ops from 3,741 vendors. The script also drops (and counts) pool vendors that share an R13 token, a spec hash with the r15 pick or a flagged spec, or an exam #7 alias.
+- **Exam #8 freeze applied** (whole label / domain / repo on every vendor field). No pool vendor matched the six names; one look-alike (`title:shortcuter`) was dropped by a substring audit.
+- **Finding:** the 118,812 pool ops are not like r15's rows. They were left out because they are mostly non-English (zh 47k, ru 12k, other languages 25k), duplicates (13k), no text (10k), RPC style (19k, Alibaba) or junk domain (3k). Under r15's own switches (English, text, not duplicate, not junk, not RPC) the pool has 0 rows. The dev set therefore allows Latin-script non-English text (lang `other`: French, German, Spanish, Portuguese, Korean and similar) and still excludes dup, junk and RPC rows. Its sources are SwaggerHub and GitHub (plus one konfig vendor); cloud ops are all zh or RPC, so none are in. Method and source mix match this eligible pool, not the full 118,812.
+- Access-policy style ops (word match on path, operationId, summary) are rare: 25 ops from 10 vendors in the dev set (0.6%), 93 in the eligible pool. Not forced.
+
 ## 8. Server and resource rules
 
 Home server `ahassan@192.168.178.180`, sandbox `~/rwxlite-train` only; touch nothing else. nice 19, ionice -c3, 3 of 4 threads, one job at a time, memwatch kills under 2 GB free. nohup, nothing left running; workers use their own scratch dir and never broad-pkill.
