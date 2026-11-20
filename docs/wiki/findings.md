@@ -1415,3 +1415,25 @@ Working rules, and the tests that are still open.
 - Use a fixed subset of about 30 to 50k rows, stratified by vendor.
 - Such a run predicts which option wins, not the final score. A few tenths of a point between single runs may be noise, so use the same seed for both arms.
 - Judge on val and on a fixed unseen-vendor dev set that is **not** exam #8. Exam #8 is scored once and then burned.
+
+### Check 1: teacher over-confidence (2026-11-20)
+
+Question: were the r15 student's soft targets near one-hot because the teacher scored rows it had trained on (hypothesis in (b) above)? No training; the teacher (`r15-teacher/.../ckpt-r15-teacher/final`) and student checkpoints were only scored, fp32, batches of 64, on the server in `~/rwxlite-train/r16-check/` (280 s). The probs file used by the student is `teacher-r15-train.npy` (sha256 `60cd818b...`, identical in `r15-teacher/` and `r15-student/`, sidecar sha of train.parquet `16a34b05...`, 302,211 rows). "top" = mean top probability; ">=.99" = share of rows with top p >= 0.99; H = mean entropy (nats).
+
+| Set (model) | rows | top | >=.99 | H | argmax = label |
+|---|---|---|---|---|---|
+| train, all (teacher) | 302,211 | 0.9766 | 75.5% | 0.0759 | 97.9% |
+| train, src r13 | 102,668 | 0.9626 | 61.4% | 0.1164 | 96.7% |
+| train, src r15 | 199,543 | 0.9838 | 82.7% | 0.0551 | 98.6% |
+| train, argmax = label | 295,958 | 0.9812 | 77.0% | 0.0664 | |
+| train, argmax != label | 6,253 | 0.7606 | 2.7% | 0.5292 | |
+| val 4,180 (teacher, unseen) | 4,180 | 0.9762 | 76.2% | 0.0769 | 94.6% |
+| val, argmax = label | 3,955 | 0.9834 | 79.9% | 0.0606 | |
+| val, argmax != label | 225 | 0.8501 | 10.7% | 0.3635 | |
+| 400 holdout (teacher, new vendors, unweighted) | 400 | 0.8950 | 17.3% | 0.2911 | 80.0% |
+| val (student) | 4,180 | 0.9749 | 77.0% | 0.0782 | 94.5% |
+| 400 holdout (student) | 400 | 0.8897 | 18.8% | 0.2977 | 77.3% |
+
+Teacher val-fitted T (grid 0.5 to 3): 1.36. Student val-fitted T on the same grid: 1.385 (matches the shipped 1.3832). The teacher's soft targets were not near one-hot (mean entropy 0.076, 25% of rows below 0.99).
+
+**Verdict: hypothesis rejected as the cause.** The teacher is equally sure on its own training rows (top 0.9766, entropy 0.0759) as on unseen val (0.9762, 0.0769). One caveat: val is in-distribution for the r13 vendors, so it is not a clean "unseen vendor" test; on the 400-row holdout (hard disputed rows, unweighted, so not comparable in level) the teacher is clearly less sure (0.895), as is the student (0.890). What the numbers do show: the teacher itself is over-confident (val T 1.36) and the student simply copied it (T 1.385, top 0.9749 vs teacher 0.9762). So the fix to test is calibrating the teacher (divide its scores by its val T, or better an unseen-vendor T) before making soft targets; out-of-fold scoring would not be expected to help much since in-sample and held-out confidence are the same. Not tested: whether dividing by T improves the student (needs training). Note r13 rows show lower confidence (0.963) than r15 rows (0.984), partly because r15 rows were trained on one-hot cascade labels.
