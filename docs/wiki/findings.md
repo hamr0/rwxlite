@@ -1285,3 +1285,32 @@ The bge-base teacher finished on the server 2026-11-20 03:08, exit 0, 9,445 step
 **Decision: NO-GO (5.3 requires (a) and (b) and (c); (a) fails on too loose, 115 against a limit of 104, by 11 rows).** The bars were not changed and no second run was made. Per prereg 5.4 the student uses the round 14 bge fallback targets, `data/round15/teacher-fallback-oldbge-train.npy` (sha256 `1d775b1c43ee7dcdcd2d3edfd19535235da0cdb1edacfb7373cfdec7a3f3925e`, sidecar records train.parquet `16a34b05...`). The `probs` step was not run. The holdout (b) passed clearly (exact +7.8 pp, too loose -7.9 pp, pocket too loose -18.2 pp against the old bge), so the teacher learned the relabelled rows; the val failure is in the R13-row val where it is looser under mode a than R13-b1 (115 vs 90). Scratch: `.../scratchpad/teacher-gonogo/` (`val_teacher.py`, `holdout.json`, `work/report.json`), not committed.
 
 **USER OVERRIDE 2026-11-20:** the user ruled the teacher go/no-go above a PASS ("it's a pass to me, it's overall better ... why not reuse the big model to train mini"); the student trains on the new teacher's probabilities (prereg 5.5), the fallback student was stopped at step 1,175 of 9,445 and is not a candidate; no exam #7 truth or score had been seen.
+
+## 2026-11-20: round 15 student (stage B) val floor guard: FAIL, not taken to exam #7
+
+The MiniLM student trained on the new teacher's probabilities (prereg 5.5) finished on the server 2026-11-20 14:27, exit 0. Checkpoint `~/rwxlite-train/r15-student/data/train/ckpt-r15-student/final`, **`model.safetensors` sha256 `e431763878ffaec9753b94ef5d26ebe4227eaea432d132637307673f9e2061d9`** (verified on the laptop copy).
+
+**Student T (frozen, `temp_fit` on val, PyTorch fp32 batch 1): 1.3832182330120317.** Written before anything touched exam #7 (nothing did).
+
+**Val floor guard (prereg section 6), mode a 0.90, D141 val, same replay path as the teacher go/no-go:** right 3,910 / too loose 120 / too tight 150. Bars: right >= 3,896 (PASS), too loose <= 104 (**FAIL, 120 > 104, by 16 rows**). **Guard FAILED: the student is not taken to exam #7 and was not exported.** Bars not changed, no second run.
+
+| Information only (right / too loose / too tight) | value |
+|---|---|
+| student mode a 0.97 / 0.95 / 0.93 / 0.85 | 3,750 / 109 / 321; 3,823 / 111 / 246; 3,870 / 113 / 197; 3,939 / 134 / 107 |
+| student mode b 85 | 3,908 / 95 / 177 |
+| student standalone argmax at T | 3,949 / 182 / 49 |
+| teacher mode a 0.90 (go/no-go) | 3,929 / 115 / 136 |
+| teacher mode b 85 / standalone | 3,941 / 91 / 148; 3,955 / 180 / 45 |
+| R13-b1 mode a 0.90 | 3,938 / 90 / 152 |
+
+**400 holdout (`r15/r15_holdout_score.py`, D141 review, student at T 1.3832, information only; refs reproduced: yes), exact / too loose / too tight:** standalone all 80.9 / 10.0 / 9.1, pocket 75.2 / 12.7 / 12.1; mode a 0.90 replica all 65.5 / 8.9 / 25.6, pocket 53.5 / 2.2 / 44.3. Beside: teacher standalone 81.8 / 10.5 / 7.7 (pocket 73.5 / 15.7 / 10.7), old bge 74.0 / 18.4 / 7.6, R13 mode a stored 56.5 / 8.8 / 34.7.
+
+**USER RULINGS 2026-11-20 (before any exam #7 truth or score was seen):** (1) the val floor guard failure above is WAIVED (better on new vendors; a small rise in too loose with more exact is a trade); (2) the exam #7 gate is now cand exact >= base exact AND cand too loose <= base + 1.0 pp (floor(0.01 x 1579) = 15 rows), real CLI, fp32 exact, mode a 0.90, same 1,579 rows; rwxmap D142, commit `728bb16`, branch `exam7-prep`; (3) this student is the one and only candidate; exam #7 also guides round 16. Prereg section 5.6 and 8.1.
+
+**Export 2026-11-20 (`m1/export_r15.py`, `m1/manifest-r15.mjs`, `R15_T` 1.3832182330120317, ckpt sha verified), `data/m1-r15/` (gitignored, frozen from here, abs path `/home/hamr/PycharmProjects/rwxlite/data/m1-r15`), version 0.4.0:**
+- `model-fp32.onnx` 90,973,979 B, sha256 `4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19`; `model-int8-pc.onnx` 23,126,902 B (23.1 MB, inside 22-24), sha256 `470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7`; `vocab.txt` sha256 `07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3`.
+- `manifest-exact.json` (fp32, sha256 `5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8`): model **`rwxlite-0.4.0+4608f470`**; `manifest.json` (int8, sha256 `b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf`): model `rwxlite-0.4.0+470708b0`. Both textFormat 1, T 1.3832182330120317; every hash and sha8 checked against the file bytes.
+- Parity (598 val rows, every 7th): ORT fp32 vs torch max |dp| 6.0e-7, 0 argmax diffs; int8 vs fp32 max |dp| 0.114, mean 0.0022, 0 argmax diffs (information); Node vs Python ORT max |dp| 2.4e-16 both precisions, 0 argmax diffs, Node text == stored text on all rows.
+- Latency (Node, batch 1, 1 thread, 300 val rows after 20 warm-up; `m1/bench.mjs` was not used because it is hard-wired to `data/m1/` and would overwrite its manifests; a scratch script with the same `loadAnswerer` path was used): int8 median 44.4 ms / p95 88.0 ms; fp32 median 51.9 ms / p95 103.2 ms. This is above the expected 15-25 ms window; the machine load average was about 15-20 (4 threads, other jobs running), so it is a finding about load, not re-measured idle.
+- `package.json` and `package-lock.json` version 0.4.0; no hard-coded 0.3.1 in `src/`. README still names 0.3.1 (badge, tested-once line, release link), not changed.
+- Package ref for rwxmap: the commit that adds these lines (hash reported from `git log`; tag `v0.4.0` only if it ships, none created).
