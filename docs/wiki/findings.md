@@ -1314,3 +1314,31 @@ The MiniLM student trained on the new teacher's probabilities (prereg 5.5) finis
 - Latency (Node, batch 1, 1 thread, 300 val rows after 20 warm-up; `m1/bench.mjs` was not used because it is hard-wired to `data/m1/` and would overwrite its manifests; a scratch script with the same `loadAnswerer` path was used): int8 median 44.4 ms / p95 88.0 ms; fp32 median 51.9 ms / p95 103.2 ms. This is above the expected 15-25 ms window; the machine load average was about 15-20 (4 threads, other jobs running), so it is a finding about load, not re-measured idle.
 - `package.json` and `package-lock.json` version 0.4.0; no hard-coded 0.3.1 in `src/`. README still names 0.3.1 (badge, tested-once line, release link), not changed.
 - Package ref for rwxmap: the commit that adds these lines (hash reported from `git log`; tag `v0.4.0` only if it ships, none created).
+
+## Exam #7 result (2026-11-20): GO under D142
+
+Exam #7 is scored once and is now **BURNED**: no tuning, gating or re-scoring on it again; it may be training data only. rwxmap's official result comes from its real CLI at rwxmap `7dce23e` (exit 0, joins 1579/1579, retag diff only the RWXLITE_TAG line). Each line is exact / too loose (loose-1, loose-2) / too tight. Candidate = rwxlite 0.4.0 (R15 student, fp32 exact, T 1.3832); base = 0.3.1 (R13).
+
+**Verdict: GO under D142** (a-cand vs a-base). Too loose 66 vs 68 (-2, needs <= +15): OK. Exact 1432 vs 1431 (+1): OK. It would also have passed D135 (no more too loose, no fewer exact).
+
+| Official (rwxmap) | exact | too loose (l1, l2) | too tight | other |
+|---|---|---|---|---|
+| mech | 1333 | 72 (54, 18) | 174 | |
+| a-base 0.3.1 | 1431 | 68 (50, 18) | 80 | sent 664, raised 33, lowered 123, undecided 73 |
+| a-cand 0.4.0 | 1432 | 66 (50, 16) | 81 | sent 664, raised 21, lowered 108, undecided 71 |
+| b85-base | 1447 | 54 (46, 8) | 78 | asked 178 |
+| b85-cand | 1449 | 39 (38, 1) | 91 | asked 164 |
+
+D133 bar (exact >= 1412) passes for both mode a models. 53 rows differ between a-base and a-cand. truth sha256 `af0fe041ff0bc2a372d915b63f2937a9f44a0808d911d821a1a4ffde851783ec` (truth.csv stays out of git; rwxmap's rows are in its `data/exam7-2026-11-19/score/`).
+
+**Our own information scoring** (scratchpad `exam7-score/results.md` and `an-out.txt`): mode a fp32 base 1431/68/80 and cand 1432/66/81, **agreeing exactly with rwxmap's official numbers**. Standalone fp32: base 1453/91/35, cand 1456/80/43; x->r errors fall 16 -> 3. int8 information: mode a base 1426/68/85, cand 1431/66/82.
+
+**Leaks closed (10):** ex7-0282, 0314, 0398, 0578 (hf resource-group); 0454, 0470 (hf SCIM user PATCH); 1331 (glip conversation); 0951 (pipedrive oauth/token, loose-2); 1416 (vikunja openid callback, loose-2); 1562 (totp disable).
+
+**Leaks opened (8), all x->w:** ex7-0006 (gitness admin PATCH), 0007 (connectors), 0370 (hf jobs expose), and five openziti access policies: 0653 and 0654 (auth-policies), 0721 (edge-router-policies PUT), 0801 (service-edge-router-policies PUT), 0809 (service-policies PUT).
+
+### Lessons for round 16
+
+- Gains come mostly from new data. The teacher matters for standalone and mode b; the student is overconfident on old-vendor val (T 1.38).
+- The openziti access-policy PUT/PATCH cluster is a D137 target (access grants = x).
+- User's round 16 plan: about 300k new rows; train bge first, then MiniLM, both initialised from today's r15 models; keep old rows in the mix; lower lr; fix confidence before training; exam #8 needed (exam #7 is burned).

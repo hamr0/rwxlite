@@ -1,5 +1,7 @@
 # PRD: round 15, a large new-vendor transfer set for distillation
 
+Status (2026-11-20): exam #7 scored once, GO under D142 (rwxmap `7dce23e`), burned; see `docs/wiki/findings.md`. Round 16 plan recorded there.
+
 Status (2026-11-19): training plan and gates decided (section 20, draft `docs/wiki/prereg-r15.md`, uncommitted until its gates are met); training waits for export-v4-d141 and the frozen exam #7 ref SHA.
 
 Status: D141 relabel applied to the labels (section 19, 2026-11-19); training waits for rwxmap's export-v4-d141. Before that: collection done, labelling and blind review done, Jev pilot and Sonnet pilot done (2026-11-19); labelling cascade agreed (section 5, 17); next is the preregistered pass rule and mix (section 16). Part of the rwxlite PRD (`docs/product/prd.md`). Builds on round 14 (`docs/product/prd-bge-teacher.md`, its `--teacher` code). Background and facts: `docs/wiki/findings.md`, section "2026-11-18: Round 15 background".
