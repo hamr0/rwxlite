@@ -40,6 +40,7 @@ assert [len(ans[n]) for n in ans] == [359, 263, 13, 237, 526, 400], [len(ans[n])
 # ---- A: new rows, D143 booking answers
 new = fin.copy(); a = ans['answers-d143.csv']; assert a.index.isin(new.op_id).all()
 m = new.op_id.isin(a.index); new['prior_label'] = new.label; new.loc[m, 'label'] = a.loc[new.op_id[m], 'rwxmap_letter'].values; new.loc[m, 'label_source'] = 'rwxmap'; new.loc[m, 'weight'] = 1.0
+new['weight_reason'] = ''; dch = (new.label != new.prior_label).values; new.loc[dch, 'weight'] = 3.0; new.loc[dch, 'weight_reason'] = 'd143_new'   # user ruling: rows a D143 file changed get weight 3 (r15 D141 precedent)
 assert (a.shown.loc[new.op_id[m]].values == new.prior_label[m].values).all(), 'D143 shown label differs from the final label'
 chg = {'answers-d143.csv': dict(rows=len(a), applied=int(m.sum()), changed=int((new.label != new.prior_label).sum()))}
 new['part'] = 'new'; new['src'] = 'r16'; new['prior_label'] = new.prior_label
@@ -48,13 +49,13 @@ new['part'] = 'new'; new['src'] = 'r16'; new['prior_label'] = new.prior_label
 h = rd(D('data/r16/labels/disagree-sample-400.csv')); a = ans['answers-h400.csv']; assert len(h) == 400 and set(h.op_id) == set(a.index) and h.op_id.isin(op.index).all() and not set(h.op_id) & set(fin.op_id)
 H = op.loc[h.op_id]; hold = pd.DataFrame(dict(op_id=h.op_id.values, label=a.loc[h.op_id, 'rwxmap_letter'].values, label_source='rwxmap', sonnet_confidence='', weight=1.0, part='holdout', bge_letter=H.bge_letter.values,
     r13_letter=H.r13_letter_modea.values, mech_letter=H.mech_letter.values, disagreement_type=H.disagreement_type.values, method=H.method.values, path=H.path.values, operationId=H.operationId.values, summary=H.summary.values,
-    description=H.description.values, source=H.source.values, vendor_id=H.vendor_id.values, vendor_kind=H.vendor_kind.values)); hold['src'] = 'r16'; hold['prior_label'] = ''
+    description=H.description.values, source=H.source.values, vendor_id=H.vendor_id.values, vendor_kind=H.vendor_kind.values)); hold['src'] = 'r16'; hold['weight_reason'] = ''; hold['prior_label'] = ''
 newall = pd.concat([new, hold], ignore_index=True)
 mt = mech.loc[newall.op_id]; newall['text'] = mt.text.values; newall['mech'] = mt.mech_letter.values; newall['rule'] = mt.mech_rule.values
 newall['id'] = newall.op_id; newall['y'] = newall.label.map(Y).astype('int64'); newall['provider'] = newall.vendor_id; newall['vendor'] = newall.vendor_id; newall['status'] = 'r16'; newall['tier'] = 'none'; newall['r15_tier'] = ''
 
 # ---- C: old replay + rwxmap rulings
-cur = old[['label']].copy(); cur['ruled_by'] = ''; ruled = set(); conflicts = []; per = {}
+d143chg = {}; cur = old[['label']].copy(); cur['ruled_by'] = ''; ruled = set(); conflicts = []; per = {}
 order = ['answers.csv', 'answers-r15.csv', 'answers-d143-r13.csv', 'answers-d143-r15.csv']
 for n in order:
     a = ans[n]; assert a.index.isin(old.index).all(), n + ': ids not in data/round15/train.parquet'
@@ -64,6 +65,7 @@ for n in order:
             prev = cur.at[i, 'label']
             if r.rwxmap_letter != prev: conflicts.append((i, n, r.rwxmap_letter, prev)); continue
         if r.shown != old.at[i, 'label'] and i not in ruled and n != 'answers-d143-r15.csv': raise SystemExit(f'{n} {i}: file label {r.shown} != train label {old.at[i, "label"]}')
+        if n.startswith('answers-d143') and r.rwxmap_letter != cur.at[i, 'label']: d143chg[i] = n
         ch += r.rwxmap_letter != cur.at[i, 'label']; cur.at[i, 'label'] = r.rwxmap_letter; cur.at[i, 'ruled_by'] = n; ruled.add(i)
     per[n] = dict(rows=len(a), changed=int(ch), sha256=SHAS[n])
 cf = pd.DataFrame(conflicts, columns=['id', 'later_file', 'later_file_letter', 'letter_after_earlier_file'])
@@ -76,7 +78,10 @@ rid = set(rep.id) - skip; extra_ids = sorted(ruled - set(rep.id))
 oldrows = old.loc[[i for i in rep.id if i not in skip] + extra_ids].copy()
 oldrows['label'] = cur.loc[oldrows.id, 'label'].values; ru = oldrows.id.isin(ruled).values
 oldrows['label_source'] = ['rwxmap' if r else 'replay_' + s for r, s in zip(ru, oldrows.src)]
-oldrows.loc[ru, 'weight'] = 1.0; oldrows['y'] = oldrows.label.map(Y).astype('int64')
+oldrows.loc[ru, 'weight'] = 1.0; oldrows['weight_reason'] = ['r15_weight' if w == 3.0 and not r else '' for w, r in zip(oldrows.weight, ru)]
+for i, n in d143chg.items():
+    if i in oldrows.index: oldrows.at[i, 'weight'] = 3.0; oldrows.at[i, 'weight_reason'] = 'd143_' + n.split('-')[-1].split('.')[0]
+oldrows['y'] = oldrows.label.map(Y).astype('int64')
 oldrows['part'] = ['extra-ruled' if i not in rid else 'replay-' + s for i, s in zip(oldrows.id, oldrows.src)]
 oldrows['prior_label'] = old.loc[oldrows.id, 'label'].values; oldrows['op_id'] = oldrows.id
 for c in ('description', 'source', 'vendor_kind', 'sonnet_confidence'): oldrows[c] = ''
@@ -97,13 +102,13 @@ with tempfile.TemporaryDirectory() as tmp:
     o = [json.loads(l) for l in open(fo, encoding='utf-8')]
 assert [x['id'] for x in o] == e.id.tolist()
 ex = pd.DataFrame(dict(id=e.id, op_id=e.id, text=[x['text'] for x in o], label=e.label, y=e.label.map(Y).astype('int64'), status='exam7', summary=e.summary, mech=[x['class'] for x in o], rule=[x['rule'] for x in o], tier='none',
-    method=e.method, provider=e.provider, vendor=e.provider, path=e.path, operationId=e.operationId, src='exam7', weight=1.0, r15_tier='', part='exam7', label_source='exam7', description=e.description,
+    method=e.method, provider=e.provider, vendor=e.provider, path=e.path, operationId=e.operationId, src='exam7', weight=3.0, weight_reason='exam7', r15_tier='', part='exam7', label_source='exam7', description=e.description,
     source='exam7', vendor_kind='', sonnet_confidence='', prior_label=sc.set_index('id').loc[bad, 'predicted'].values))
 
 if A.no_exam7: ex = ex.iloc[0:0]
 # ---- assemble
 COLS = ['id', 'text', 'label', 'y', 'status', 'summary', 'mech', 'rule', 'tier', 'method', 'provider', 'vendor', 'path', 'operationId', 'src', 'weight', 'r15_tier',
-        'op_id', 'part', 'label_source', 'sonnet_confidence', 'prior_label', 'description', 'source', 'vendor_kind']
+        'op_id', 'weight_reason', 'part', 'label_source', 'sonnet_confidence', 'prior_label', 'description', 'source', 'vendor_kind']
 parts = [oldrows[oldrows.part == 'replay-r13'], oldrows[oldrows.part == 'replay-r15'], oldrows[oldrows.part == 'extra-ruled'], newall[newall.part == 'new'], newall[newall.part == 'holdout'], ex]
 T = pd.concat([p[COLS] for p in parts], ignore_index=True)
 for c in ('jev_p', 'jev_pC', 'jev_pA', 'jev_pB'): T[c] = float('nan')
@@ -130,7 +135,7 @@ lastl = {}
 for n in order + ['answers-d143.csv', 'answers-h400.csv']:
     for i, r in ans[n].iterrows():
         if i not in skip: lastl[i] = r.rwxmap_letter
-rr = T[T.label_source == 'rwxmap']; assert (rr.label.values == [lastl[i] for i in rr.id]).all() and (rr.weight == 1.0).all()
+rr = T[T.label_source == 'rwxmap']; assert (rr.label.values == [lastl[i] for i in rr.id]).all() and (rr.weight == rr.weight_reason.map(lambda x: 3.0 if x.startswith('d143') else 1.0)).all()
 assert len(rr) == len(lastl) - len(set(lastl) & set(dropped_ex8.id)), 'not every ruled row is in the set'
 T.drop(columns=['dup_k1']).to_parquet(os.path.join(OUT, NAME + '.parquet'), index=False)
 T.drop(columns=['dup_k1']).to_csv(os.path.join(OUT, NAME + '.csv.gz'), index=False, compression=dict(method='gzip', mtime=0))
@@ -156,7 +161,7 @@ def tbl(s): return ', '.join(f'{k} {v:,}' for k, v in s.items())
 L = ['# Round 16 teacher training set v2', '', f'Rows {len(T):,}. Made by `r16/build_teacher_train.py`. Text = model input text (lean format 1, rwxmap 1c25be1 mechanical); no soft targets here (teacher probabilities come from `train/teacher_probs.py`).', '']
 L += ['## By part', '', tbl(T.part.value_counts().reindex(['new', 'holdout', 'replay-r13', 'replay-r15', 'extra-ruled', 'exam7']).fillna(0).astype(int)), '', '## By letter', '', tbl(T.label.value_counts()), '']
 L += ['## By label_source', '', tbl(T.label_source.value_counts()), '', '## By weight', '', tbl(T.weight.value_counts().sort_index()) + f'; total {T.weight.sum():,.1f}', '']
-L += ['## Letter by part', '', md(T.groupby(['part', 'label']).size().unstack(fill_value=0).reset_index()), '']
+L += ['## Weight 3.0 by reason (weight 3.0 rows: ' + str(int((T.weight == 3.0).sum())) + ')', '', tbl(T[T.weight == 3.0].weight_reason.value_counts()), '', '## Letter by part', '', md(T.groupby(['part', 'label']).size().unstack(fill_value=0).reset_index()), '']
 L += ['## Answer files', '', '| file | rows | in set | changed vs label before it | sha256 |', '|---|---|---|---|---|']
 for n in ans:
     ch_ = per.get(n, chg.get(n, {})).get('changed', '')
