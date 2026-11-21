@@ -12,9 +12,10 @@ import argparse, glob, gzip, hashlib, json, os, re, subprocess, sys, tempfile
 import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import opkey
-ap = argparse.ArgumentParser(); ap.add_argument('--conflicts', choices=['abort', 'exclude'], default='abort'); ap.add_argument('--no-exam7', action='store_true', help='build without the exam #7 rows; output name gets -noexam7'); A = ap.parse_args()
+ap = argparse.ArgumentParser(); ap.add_argument('--conflicts', choices=['abort', 'exclude'], default='abort'); ap.add_argument('--no-exam7', action='store_true', help='build without the exam #7 rows; output name gets -noexam7')
+ap.add_argument('--old-pool', choices=['replay', 'all'], default='replay', help="'all' = ALL 302,211 old rows (minus exam #8 vendors) instead of the 60k replay + extra-ruled, same rwxmap rulings and weights; writes only <name>-allold.parquet + SHA256SUMS-allold and exits before the dev/summary part (prereg-r16-small-runs.md)"); A = ap.parse_args()
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'); D = lambda *a: os.path.join(ROOT, *a)
-RA = D('data/r16/review/rwxmap-r13-answers'); OUT = D('data/r16/train'); os.makedirs(OUT, exist_ok=True); NAME = 'teacher-train-v2' + ('-noexam7' if A.no_exam7 else '')
+RA = D('data/r16/review/rwxmap-r13-answers'); OUT = D('data/r16/train'); os.makedirs(OUT, exist_ok=True); NAME = 'teacher-train-v2' + ('-noexam7' if A.no_exam7 else '') + ('-allold' if A.old_pool == 'all' else '')
 sha = lambda p: hashlib.sha256(open(p, 'rb').read()).hexdigest()
 Y = {'r': 0, 'w': 1, 'x': 2}
 EX8 = re.compile(r'gitbook|baserow|looker|wekan|shortcut|clubhouse|bitrise', re.I)
@@ -75,14 +76,15 @@ if len(cf):
     ruled -= set(cf.id); cur = cur.drop(index=cf.id); skip = set(cf.id)
 else: skip = set()
 rid = set(rep.id) - skip; extra_ids = sorted(ruled - set(rep.id))
-oldrows = old.loc[[i for i in rep.id if i not in skip] + extra_ids].copy()
+oldrows = old.loc[[i for i in old.index if i not in skip] if A.old_pool == 'all' else [i for i in rep.id if i not in skip] + extra_ids].copy()
 oldrows['label'] = cur.loc[oldrows.id, 'label'].values; ru = oldrows.id.isin(ruled).values
 oldrows['label_source'] = ['rwxmap' if r else 'replay_' + s for r, s in zip(ru, oldrows.src)]
 oldrows.loc[ru, 'weight'] = 1.0; oldrows['weight_reason'] = ['r15_weight' if w == 3.0 and not r else '' for w, r in zip(oldrows.weight, ru)]
 for i, n in d143chg.items():
     if i in oldrows.index: oldrows.at[i, 'weight'] = 3.0; oldrows.at[i, 'weight_reason'] = 'd143_' + n.split('-')[-1].split('.')[0]
 oldrows['y'] = oldrows.label.map(Y).astype('int64')
-oldrows['part'] = ['extra-ruled' if i not in rid else 'replay-' + s for i, s in zip(oldrows.id, oldrows.src)]
+oldrows['part'] = [('old-' if A.old_pool == 'all' else 'extra-ruled') if i not in rid else 'replay-' + s for i, s in zip(oldrows.id, oldrows.src)]
+if A.old_pool == 'all': oldrows['part'] = [p if p.startswith('replay-') else p + oldrows.at[i, 'src'] for p, i in zip(oldrows.part, oldrows.id)]
 oldrows['prior_label'] = old.loc[oldrows.id, 'label'].values; oldrows['op_id'] = oldrows.id
 for c in ('description', 'source', 'vendor_kind', 'sonnet_confidence'): oldrows[c] = ''
 ex8 = oldrows.provider.str.contains(EX8) | oldrows.vendor.str.contains(EX8); dropped_ex8 = oldrows[ex8][['id', 'vendor', 'part']]; oldrows = oldrows[~ex8]
@@ -110,6 +112,7 @@ if A.no_exam7: ex = ex.iloc[0:0]
 COLS = ['id', 'text', 'label', 'y', 'status', 'summary', 'mech', 'rule', 'tier', 'method', 'provider', 'vendor', 'path', 'operationId', 'src', 'weight', 'r15_tier',
         'op_id', 'weight_reason', 'part', 'label_source', 'sonnet_confidence', 'prior_label', 'description', 'source', 'vendor_kind']
 parts = [oldrows[oldrows.part == 'replay-r13'], oldrows[oldrows.part == 'replay-r15'], oldrows[oldrows.part == 'extra-ruled'], newall[newall.part == 'new'], newall[newall.part == 'holdout'], ex]
+if A.old_pool == 'all': parts = [oldrows, newall[newall.part == 'new'], newall[newall.part == 'holdout'], ex]
 T = pd.concat([p[COLS] for p in parts], ignore_index=True)
 for c in ('jev_p', 'jev_pC', 'jev_pA', 'jev_pB'): T[c] = float('nan')
 T['weight'] = T.weight.astype('float64')
@@ -138,6 +141,8 @@ for n in order + ['answers-d143.csv', 'answers-h400.csv']:
 rr = T[T.label_source == 'rwxmap']; assert (rr.label.values == [lastl[i] for i in rr.id]).all() and (rr.weight == rr.weight_reason.map(lambda x: 3.0 if x.startswith('d143') else 1.0)).all()
 assert len(rr) == len(lastl) - len(set(lastl) & set(dropped_ex8.id)), 'not every ruled row is in the set'
 T.drop(columns=['dup_k1']).to_parquet(os.path.join(OUT, NAME + '.parquet'), index=False)
+if A.old_pool == 'all':
+    open(os.path.join(OUT, 'SHA256SUMS-allold'), 'w').write(f"{sha(os.path.join(OUT, NAME + '.parquet'))}  {NAME}.parquet\n"); print(len(T), T.part.value_counts().to_dict(), T.label.value_counts().to_dict(), f'weight total {T.weight.sum():,.1f}'); sys.exit(0)
 T.drop(columns=['dup_k1']).to_csv(os.path.join(OUT, NAME + '.csv.gz'), index=False, compression=dict(method='gzip', mtime=0))
 
 # ---- D143 dev candidates (dev labels untouched)
