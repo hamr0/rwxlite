@@ -1,0 +1,14 @@
+"""Round 16 labelling, step 0: v2 dev + v2 pick -> ops jsonl (op_id, method, path, operationId, summary, description); dev rows first, then the pick (same order as r16/rate_prep.py).
+  python3 -I r16/label_prep.py OUT_OPS.jsonl   (stdlib only; same fields as r15/label_prep.py)"""
+import csv, gzip, json, os, sys
+csv.field_size_limit(10**9)
+D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'r16')
+n = 0; seen = set()
+with open(sys.argv[1], 'w') as o:
+    for f in ('dev-en/dev-ops-v2.csv.gz', 'pick/new-300k-v2.csv.gz'):
+        with gzip.open(os.path.join(D, f), 'rt', newline='') as fh:
+            for r in csv.DictReader(fh):
+                assert r['op_id'] not in seen; seen.add(r['op_id'])
+                o.write(json.dumps({k: r[k] for k in ('op_id', 'method', 'path', 'operationId', 'summary', 'description')}, ensure_ascii=False) + '\n'); n += 1
+assert n == 304475, n
+print('rows', n)
