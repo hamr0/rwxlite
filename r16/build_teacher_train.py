@@ -1,20 +1,20 @@
-"""Round 16 teacher training set v1 (new rows + holdout 400 + old replay + rwxmap rulings + exam #7 mistakes). Deterministic, stops on any failed check.
+"""Round 16 teacher training set v2 (new rows + holdout 400 + old replay + rwxmap rulings + exam #7 mistakes). Deterministic, stops on any failed check.
   data/r16/scratch/venv/bin/python -I r16/build_teacher_train.py [--conflicts abort|exclude]
 rwxmap's pipeline is the only label truth: rwxmap_letter is applied as given, nothing is relabelled here.
 Parts: new (final-labels-r16, D143 booking answers applied), holdout (400, rwxmap letters), replay-r13 / replay-r15 (60k old replay, rwxmap answers applied),
 extra-ruled (rwxmap-ruled old rows outside the replay), exam7 (rows the 0.4.0 product path got wrong; label = truth).
 Answer files (data/r16/review/rwxmap-r13-answers/), applied in this order to old rows: answers.csv, answers-r15.csv, answers-d143-r13.csv, answers-d143-r15.csv.
-Overlap rule: when an id is in an earlier and a later file, the later file's `label` column must equal the earlier file's rwxmap_letter; else --conflicts abort (default) stops,
+Overlap rule: when an id is in an earlier and a later file, the two files' rwxmap_letter must be equal (the `label` column is only the candidate list's stale label); else --conflicts abort (default) stops,
 --conflicts exclude drops those ids from the set entirely (neither applied nor kept) and lists them in summary.md.
 Exam #8 vendors (gitbook, baserow, looker, wekan, shortcut/clubhouse, bitrise): old rows matching are dropped and counted; any in new/holdout/exam7 stops the build.
-Outputs data/r16/train/: teacher-train-v1.{parquet,csv.gz}, SHA256SUMS, summary.md, d143 dev candidates in data/r16/labels/sonnet-recheck/d143-dev-candidates-for-rwxmap.csv."""
+Outputs data/r16/train/: teacher-train-v2.{parquet,csv.gz}, SHA256SUMS, summary.md, d143 dev candidates in data/r16/labels/sonnet-recheck/d143-dev-candidates-for-rwxmap.csv."""
 import argparse, glob, gzip, hashlib, json, os, re, subprocess, sys, tempfile
 import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import opkey
-ap = argparse.ArgumentParser(); ap.add_argument('--conflicts', choices=['abort', 'exclude'], default='abort'); A = ap.parse_args()
+ap = argparse.ArgumentParser(); ap.add_argument('--conflicts', choices=['abort', 'exclude'], default='abort'); ap.add_argument('--no-exam7', action='store_true', help='build without the exam #7 rows; output name gets -noexam7'); A = ap.parse_args()
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'); D = lambda *a: os.path.join(ROOT, *a)
-RA = D('data/r16/review/rwxmap-r13-answers'); OUT = D('data/r16/train'); os.makedirs(OUT, exist_ok=True)
+RA = D('data/r16/review/rwxmap-r13-answers'); OUT = D('data/r16/train'); os.makedirs(OUT, exist_ok=True); NAME = 'teacher-train-v2' + ('-noexam7' if A.no_exam7 else '')
 sha = lambda p: hashlib.sha256(open(p, 'rb').read()).hexdigest()
 Y = {'r': 0, 'w': 1, 'x': 2}
 EX8 = re.compile(r'gitbook|baserow|looker|wekan|shortcut|clubhouse|bitrise', re.I)
@@ -62,11 +62,11 @@ for n in order:
     for i, r in a.iterrows():
         if i in ruled:
             prev = cur.at[i, 'label']
-            if r.shown != prev: conflicts.append((i, n, r.shown, prev)); continue
+            if r.rwxmap_letter != prev: conflicts.append((i, n, r.rwxmap_letter, prev)); continue
         if r.shown != old.at[i, 'label'] and i not in ruled and n != 'answers-d143-r15.csv': raise SystemExit(f'{n} {i}: file label {r.shown} != train label {old.at[i, "label"]}')
         ch += r.rwxmap_letter != cur.at[i, 'label']; cur.at[i, 'label'] = r.rwxmap_letter; cur.at[i, 'ruled_by'] = n; ruled.add(i)
     per[n] = dict(rows=len(a), changed=int(ch), sha256=SHAS[n])
-cf = pd.DataFrame(conflicts, columns=['id', 'later_file', 'later_file_label', 'letter_after_earlier_file'])
+cf = pd.DataFrame(conflicts, columns=['id', 'later_file', 'later_file_letter', 'letter_after_earlier_file'])
 if len(cf):
     print(cf.to_string())
     if A.conflicts == 'abort': raise SystemExit('STOP: later-file label column disagrees with the earlier file letter (listed above)')
@@ -100,6 +100,7 @@ ex = pd.DataFrame(dict(id=e.id, op_id=e.id, text=[x['text'] for x in o], label=e
     method=e.method, provider=e.provider, vendor=e.provider, path=e.path, operationId=e.operationId, src='exam7', weight=1.0, r15_tier='', part='exam7', label_source='exam7', description=e.description,
     source='exam7', vendor_kind='', sonnet_confidence='', prior_label=sc.set_index('id').loc[bad, 'predicted'].values))
 
+if A.no_exam7: ex = ex.iloc[0:0]
 # ---- assemble
 COLS = ['id', 'text', 'label', 'y', 'status', 'summary', 'mech', 'rule', 'tier', 'method', 'provider', 'vendor', 'path', 'operationId', 'src', 'weight', 'r15_tier',
         'op_id', 'part', 'label_source', 'sonnet_confidence', 'prior_label', 'description', 'source', 'vendor_kind']
@@ -131,19 +132,29 @@ for n in order + ['answers-d143.csv', 'answers-h400.csv']:
         if i not in skip: lastl[i] = r.rwxmap_letter
 rr = T[T.label_source == 'rwxmap']; assert (rr.label.values == [lastl[i] for i in rr.id]).all() and (rr.weight == 1.0).all()
 assert len(rr) == len(lastl) - len(set(lastl) & set(dropped_ex8.id)), 'not every ruled row is in the set'
-T.drop(columns=['dup_k1']).to_parquet(os.path.join(OUT, 'teacher-train-v1.parquet'), index=False)
-T.drop(columns=['dup_k1']).to_csv(os.path.join(OUT, 'teacher-train-v1.csv.gz'), index=False, compression=dict(method='gzip', mtime=0))
+T.drop(columns=['dup_k1']).to_parquet(os.path.join(OUT, NAME + '.parquet'), index=False)
+T.drop(columns=['dup_k1']).to_csv(os.path.join(OUT, NAME + '.csv.gz'), index=False, compression=dict(method='gzip', mtime=0))
 
 # ---- D143 dev candidates (dev labels untouched)
 t = (devd.path + ' ' + devd.operationId + ' ' + devd.summary).str.lower()
 dc = devd[(devd.method == 'POST') & t.str.contains(r'booking|reservation|(?<![a-z])reserve') & (devd.label != 'x')][['op_id', 'method', 'path', 'operationId', 'summary', 'description', 'label']]
 dcp = D('data/r16/labels/sonnet-recheck/d143-dev-candidates-for-rwxmap.csv'); dc.to_csv(dcp, index=False); dsha = sha(dcp)
 
+# ---- dev v2: D143 dev answers (old dev file untouched)
+da = rd(os.path.join(RA, 'answers-d143-dev.csv')).set_index('op_id', drop=False); DSHA = sha(os.path.join(RA, 'answers-d143-dev.csv'))
+assert DSHA == '9364587d81969b6486dad19b3d3f7321735f3d177f44fd3b8a0ad0ea322d7099' and len(da) == 9 and set(da.op_id) == set(dc.op_id) and da.rwxmap_letter.isin(list(Y)).all()
+dv2 = dev.copy(); dv2['prior_label'] = dv2.label; mm = dv2.op_id.isin(da.index)
+assert (da.label.loc[dv2.op_id[mm]].values == dv2.label[mm].values).all()
+dv2.loc[mm, 'label'] = da.rwxmap_letter.loc[dv2.op_id[mm]].values; dv2.loc[mm, 'label_source'] = 'rwxmap'
+assert int(mm.sum()) == 9 and int((dv2.label != dv2.prior_label).sum()) == 7 and int(((dv2.prior_label == 'w') & (dv2.label == 'x')).sum()) == 7 and int((dv2.label[mm] == 'w').sum()) == 2, 'expected 7 w->x and 2 stay w'
+FD = D('data/r16/labels/final'); dv2.to_parquet(os.path.join(FD, 'final-labels-r16-dev-v2.parquet'), index=False); dv2.to_csv(os.path.join(FD, 'final-labels-r16-dev-v2.csv.gz'), index=False, compression=dict(method='gzip', mtime=0))
+keep = [l for l in open(os.path.join(FD, 'SHA256SUMS')).read().splitlines() if 'dev-v2' not in l]
+open(os.path.join(FD, 'SHA256SUMS'), 'w').write('\n'.join(keep + [f'{sha(os.path.join(FD, n))}  {n}' for n in ('final-labels-r16-dev-v2.csv.gz', 'final-labels-r16-dev-v2.parquet')]) + '\n')
 # ---- summary
 def md(d): return '\n'.join(['| ' + ' | '.join(map(str, d.columns)) + ' |', '|' + '---|' * len(d.columns)] + ['| ' + ' | '.join(map(str, r)) + ' |' for r in d.itertuples(index=False)])
 def tbl(s): return ', '.join(f'{k} {v:,}' for k, v in s.items())
-L = ['# Round 16 teacher training set v1', '', f'Rows {len(T):,}. Made by `r16/build_teacher_train.py`. Text = model input text (lean format 1, rwxmap 1c25be1 mechanical); no soft targets here (teacher probabilities come from `train/teacher_probs.py`).', '']
-L += ['## By part', '', tbl(T.part.value_counts().reindex(['new', 'holdout', 'replay-r13', 'replay-r15', 'extra-ruled', 'exam7'])), '', '## By letter', '', tbl(T.label.value_counts()), '']
+L = ['# Round 16 teacher training set v2', '', f'Rows {len(T):,}. Made by `r16/build_teacher_train.py`. Text = model input text (lean format 1, rwxmap 1c25be1 mechanical); no soft targets here (teacher probabilities come from `train/teacher_probs.py`).', '']
+L += ['## By part', '', tbl(T.part.value_counts().reindex(['new', 'holdout', 'replay-r13', 'replay-r15', 'extra-ruled', 'exam7']).fillna(0).astype(int)), '', '## By letter', '', tbl(T.label.value_counts()), '']
 L += ['## By label_source', '', tbl(T.label_source.value_counts()), '', '## By weight', '', tbl(T.weight.value_counts().sort_index()) + f'; total {T.weight.sum():,.1f}', '']
 L += ['## Letter by part', '', md(T.groupby(['part', 'label']).size().unstack(fill_value=0).reset_index()), '']
 L += ['## Answer files', '', '| file | rows | in set | changed vs label before it | sha256 |', '|---|---|---|---|---|']
@@ -153,13 +164,14 @@ for n in ans:
     L.append(f'| {n} | {len(ans[n])} | {found[n]} | {ch_} | `{SHAS[n]}` |')
 L += ['', f'Extra-ruled rows (rwxmap ruled, not in the 60k replay, added as old rows): {len(extra_ids)} (r13 {sum(i.startswith("ag-") for i in extra_ids)}, r15 {sum(not i.startswith("ag-") for i in extra_ids)}).',
       f'Old rows dropped for exam #8 vendor (clubhouse): {len(dropped_ex8)} ({dropped_ex8.part.value_counts().to_dict()}); vendors {sorted(dropped_ex8.vendor.unique())}.',
-      f'Overlap conflicts (later file label != earlier letter): {len(cf)} ({"excluded from the set" if len(cf) else "none"}).']
+      f'Overlap conflicts (later file rwxmap_letter != earlier file rwxmap_letter): {len(cf)} ({"excluded from the set" if len(cf) else "none"}).']
 if len(cf): L += ['', md(cf)]
 L += ['', f'Exam #7: {len(ex)} rows where rwxmap rows-a-cand predicted != truth (1579 - 1432); label = truth (`truth.csv` sha256 af0fe041...); product path (mode a 0.90, the shipped 0.4.0 letter). Letter by prior: ' + tbl(ex.prior_label.value_counts()) + '.',
       f'Checks passed: unique ids; no train/dev overlap by id or exact opkey (method, path, operationId, summary); rows sharing the looser norm key with dev (info): {k2ov}; letters r/w/x; weights > 0; no exam #8 vendor; every ruling applied.',
       f'Exact-opkey duplicates inside the set (info, kept; all in old rows, none in new, holdout or exam7): {int(T.dup_k1.sum())} rows ({T[T.dup_k1].part.value_counts().to_dict()}).',
+      f'Dev v2 (`data/r16/labels/final/final-labels-r16-dev-v2.*`, old dev file untouched): answers-d143-dev.csv sha256 `{DSHA}`, 9 rows applied (label_source rwxmap), 7 w to x, 2 stay w; prior_label kept.',
       f'D143 dev candidates: {len(dc)} rows, `data/r16/labels/sonnet-recheck/d143-dev-candidates-for-rwxmap.csv` sha256 `{dsha}` (rule: POST, path+operationId+summary lowercased contains booking, reservation or a word starting reserve, label != x; the word-start form reproduces the 526 pick candidates exactly).']
-open(os.path.join(OUT, 'summary.md'), 'w').write('\n'.join(L) + '\n')
-with open(os.path.join(OUT, 'SHA256SUMS'), 'w') as f:
-    for n in ('teacher-train-v1.parquet', 'teacher-train-v1.csv.gz', 'summary.md'): f.write(f'{sha(os.path.join(OUT, n))}  {n}\n')
+open(os.path.join(OUT, 'summary.md' if not A.no_exam7 else 'summary-noexam7.md'), 'w').write('\n'.join(L) + '\n')
+with open(os.path.join(OUT, 'SHA256SUMS' if not A.no_exam7 else 'SHA256SUMS-noexam7'), 'w') as f:
+    for n in (NAME + '.parquet', NAME + '.csv.gz', 'summary.md'): f.write(f'{sha(os.path.join(OUT, n))}  {n}\n')
 print('\n'.join(L))
