@@ -25,6 +25,7 @@ REPO = os.path.normpath(os.path.join(HERE, ".."))
 sys.path.insert(0, os.path.join(REPO, "r15"))
 sys.path.insert(0, HERE)
 import ids  # r15/ids.py (r16/ids.py is a byte copy apart from the docstring)
+import opkey  # exact operation key (tuples; see its docstring for why the first version with hashes matched nothing)
 
 
 def load(name, path):
@@ -286,9 +287,11 @@ def main():
         stage(name, q)
 
     # cross-source duplicate ops: same method+path+operationId+summary as any master row
-    k_m = set(pd.util.hash_pandas_object(mast["method"].str.upper() + "\0" + mast["path"] + "\0" + mast["operationId"] + "\0" + mast["summary"], index=False).to_numpy())
-    k_q = pd.util.hash_pandas_object(q["method"].str.upper() + "\0" + q["path"] + "\0" + q["operationId"].fillna("") + "\0" + q["summary"].fillna(""), index=False).to_numpy()
-    xd = np.array([k in k_m for k in k_q])
+    # Fixed 2026-11-21: the first version hashed "method\0path\0operationId\0summary" with pandas hash_pandas_object, which stops at the first NUL
+    # (so the master side was hashed on the method alone) while the object-dtype r16 side lost its NULs; the two never agreed and 0 ops were dropped
+    # (cause and proof: PRD "Cleaning" section). The key is now a python tuple (r16/opkey.py).
+    k_m = set(opkey.k1(mast))
+    xd = np.array([k in k_m for k in opkey.k1(q)])
     REP["cross_source_dup_ops_dropped"] = int(xd.sum())
     q = q[~xd]; stage("after_nv_cross_source_duplicate_ops", q)
     REP["new_vendor_note"] = "per-stage counts are sequential; 'new_vendor_independent_hits_ops' counts each rule alone on the post-exam8 table"

@@ -1,9 +1,9 @@
 #!/bin/bash
-# Round 16 rating: r15 bge teacher over the new-pick + dev texts on the home server. Own dir ~/rwxlite-train/r16-rate/ (nothing else touched).
+# Round 16 rating: r15 bge teacher over the new-pick + dev texts on the home server. Own dir ~/rwxlite-train/r16-rate/ (v2 re-rating of the added rows: RATE_DIR=r16-rate-v2) (nothing else touched).
 # nice 19, ionice idle, 3 threads, one job; memwatch kills python if MemAvailable < 2 GB. Reuses r15/label_bge.py unchanged (raw logits, resumable chunks).
 # Start: nohup ~/rwxlite-train/r16-rate/rate_bge.sh > ~/rwxlite-train/r16-rate/run.log 2>&1 & echo $! > ~/rwxlite-train/r16-rate/run.pid
 export HF_HOME=$HOME/rwxlite-train/hf-cache OMP_NUM_THREADS=3
-D=$HOME/rwxlite-train/r16-rate; cd $D || exit 1
+D=$HOME/rwxlite-train/${RATE_DIR:-r16-rate}; cd $D || exit 1
 PY=$HOME/rwxlite-train/.venv/bin/python
 CK=$HOME/rwxlite-train/r15-teacher/data/train/ckpt-r15-teacher/final
 echo "$(date -Is) start ckpt sha256 $(sha256sum $CK/model.safetensors | cut -d' ' -f1)"

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Master list of every API operation collected for rounds 13, 15 and 16, one row per op_id, one status per row.
+v2 (2026-11-21): reads the v2 dev/pick (pick_round16_v2.py), v2 rating, fills lang for every row, adds non_english; see docs PRD "Cleaning".
 No labelling, no training, no server. Deterministic (no randomness; the r16 stage replay reuses the committed filter code).
 Run (scratch venv has pandas/pyarrow):  nice -n 19 data/r16/scratch/venv/bin/python r16/build_master_all.py
 Outputs: data/master/master-all.{parquet,csv.gz}, data/master/master-summary.md, data/master/master-report.json
@@ -12,7 +13,8 @@ STATUS PRECEDENCE (first match wins; exactly one status per row)
   r16 rows      : replay of the r16/filter_github.py stages, first stage that removes the op names the status:
                   dropped_template, dropped_min5, dropped_duplicate (spec / op / cross_source), dropped_no_text, dropped_junk, dropped_rpc,
                   dropped_non_http, dropped_non_english, exam8_drop_name, dropped_known_vendor, dropped_near_dup, dropped_cap;
-                  kept ops: exam8_drop_rwxmap > r16_dev > r16_pick_new > unused_clean | unused_other
+                  kept ops: exam8_drop_rwxmap > r16_dev > r16_pick_new > dropped_op_key_known (exact key = a
+                  R13 train/val/v3eval or r15 master row) > dropped_op_key_dup (key duplicate inside the pick/dev or of a dev op; v2 pick) > unused_clean | unused_other
   unused_other  = passes every hard rule but carries a soft flag (huge_spec, odd_path, lorem, placeholder_text, autogen_opid_only, test_endpoint);
                   unused_clean = no soft flag.  Hard rules = the ones the r15/r16 filters applied (English, has text, not a duplicate, not a junk domain,
                   not RPC, HTTP method, not an exam #8 name hit).
@@ -30,6 +32,7 @@ REPO = os.path.normpath(os.path.join(HERE, ".."))
 sys.path.insert(0, os.path.join(REPO, "r15"))
 sys.path.insert(0, HERE)
 import ids  # noqa: E402
+import opkey  # noqa: E402
 
 
 def load(name, path):
@@ -265,11 +268,12 @@ def r16_replay():
         nxt = q[~q["_f_" + c]]
         mark(q, nxt, "dropped_known_vendor", c); q = nxt; chk(name, q)
 
-    # cross-source duplicate rule: the committed run (collect-report-github.json) dropped 0 ops here, so this replay drops 0 too. The would-be
-    # matches (same method+path+operationId+summary as an r15 master row) are recorded as a flag for the summary; see the Master list PRD section.
-    k_m = set(zip(mast["method"].str.upper(), mast["path"], mast["operationId"], mast["summary"]))
-    xd_ids = {o for o, a_, b_, c_, d_ in zip(q["op_id"], q["method"].str.upper(), q["path"], q["operationId"].fillna(""), q["summary"].fillna("")) if (a_, b_, c_, d_) in k_m}
-    log("cross-source key matches (not dropped, as in the committed run)", len(xd_ids))
+    # cross-source duplicate rule: the committed collection run (collect-report-github.json) dropped 0 ops here because its hash-based key was broken
+    # (PRD "Cleaning"; fixed in r16/filter_github.py, not re-run), so this replay drops 0 too and the stage counts keep matching the report. The ops that
+    # the fixed rule matches (exact key = r16/opkey.py k1 against the r15 master) are flagged; the v2 pick/dev and the status dropped_op_key_known apply it.
+    k_m = set(opkey.k1(mast))
+    xd_ids = {o for o, kk in zip(q["op_id"], opkey.k1(q)) if kk in k_m}
+    log("cross-source key matches (exact key vs r15 master; not dropped in the committed collection run)", len(xd_ids))
     chk("after_nv_cross_source_duplicate_ops", q)
 
     stats = q.groupby("spec_sha256").agg(tl=("text_clean", lambda s: int(s.str.len().sum())))
@@ -401,19 +405,39 @@ def main():
         raw, stage_counts, n_hit8 = r16_replay()
         os.makedirs(os.path.dirname(cache), exist_ok=True)
         raw.to_parquet(cache + ".parquet", index=False); json.dump({"stage_counts": stage_counts, "n_hit8": n_hit8}, open(cache + ".json", "w"))
-    kept_ids = pd.read_parquet(os.path.join(D, "r16", "ops-r16-github.parquet"), columns=["op_id"])["op_id"]
+    pool = pd.read_parquet(os.path.join(D, "r16", "ops-r16-github.parquet"), columns=["op_id", "method", "path", "operationId", "summary"])
+    kept_ids = pool["op_id"]
     assert len(kept_ids) == 807949 and set(kept_ids) == set(raw.loc[raw.status0 == "kept", "op_id"])
-    new = pd.read_csv(os.path.join(D, "r16", "pick", "new-300k.csv.gz"), usecols=["op_id"])["op_id"]
-    devn = pd.read_csv(os.path.join(D, "r16", "dev-en", "dev-ops.csv.gz"), usecols=["op_id"])["op_id"]
-    assert len(new) == 300000 and len(devn) == 4475 and new.is_unique and devn.is_unique
+    new = pd.read_csv(os.path.join(D, "r16", "pick", "new-300k-v2.csv.gz"), usecols=["op_id"])["op_id"]
+    devn = pd.read_csv(os.path.join(D, "r16", "dev-en", "dev-ops-v2.csv.gz"), usecols=["op_id"])["op_id"]
+    pr2 = json.load(open(os.path.join(D, "r16", "pick", "pick-report-v2.json")))
+    N_DEV = pr2["dev_v2"]["ops"]
+    assert len(new) == 300000 and len(devn) == N_DEV and new.is_unique and devn.is_unique
     new, devn = set(new), set(devn)
+    # exact-key copies of rows we trained on or hold out (r13 train/val/v3eval, r15 master incl. trained and holdout): r16/opkey.py
+    S1, _S2 = opkey.known_sets(opkey.load_known(D))
+    pool["k1"] = opkey.k1(pool)
+    pool["src1"] = opkey.first_source(pool["k1"], S1)
+    A_known = pool.set_index("op_id")["src1"]
+    allk = set().union(*S1.values())
+    pk = pool[pool["op_id"].isin(new | devn)]
+    assert not any(k in allk for k in pk["k1"]), "pick/dev op shares its exact key with a trained/holdout row"
+    assert not pk.loc[pk["op_id"].isin(new), "k1"].duplicated().any(), "exact-key duplicate inside the pick"
+    assert not pk.loc[pk["op_id"].isin(devn), "k1"].duplicated().any(), "exact-key duplicate inside dev"
+    assert not set(pk.loc[pk["op_id"].isin(new), "k1"]) & set(pk.loc[pk["op_id"].isin(devn), "k1"]), "pick op shares its exact key with a dev op"
+    dv2 = pd.read_csv(os.path.join(D, "r16", "pick", "dropped-v2.csv.gz"), dtype=str, keep_default_na=False)
+    dup_ids = set(dv2.loc[dv2["reason"].isin(["dup_in_dev", "dup_of_dev", "dup_in_pick"]), "op_id"])
+    del pool, pk
     assert new <= set(kept_ids) and devn <= set(kept_ids) and not (new & devn)
     ex8r = raw["spec_sha256"].isin(drop_sha) & (raw["status0"] == "kept")
     assert int(ex8r.sum()) == 4680
     assert not (new & set(raw.loc[ex8r, "op_id"])) and not (devn & set(raw.loc[ex8r, "op_id"]))
     softk = raw["soft_flag"]
-    s16 = np.select([raw["status0"] != "kept", ex8r, raw["op_id"].isin(devn), raw["op_id"].isin(new), softk],
-                    [raw["status0"], "exam8_drop_rwxmap", "r16_dev", "r16_pick_new", "unused_other"], default="unused_clean")
+    known_src = raw["op_id"].map(A_known).fillna("")
+    s16 = np.select([raw["status0"] != "kept", ex8r, raw["op_id"].isin(devn), raw["op_id"].isin(new), known_src != "", raw["op_id"].isin(dup_ids), softk],
+                    [raw["status0"], "exam8_drop_rwxmap", "r16_dev", "r16_pick_new", "dropped_op_key_known", "dropped_op_key_dup", "unused_other"], default="unused_clean")
+    detail_k = np.where((raw["status0"] == "kept") & ~ex8r & ~raw["op_id"].isin(devn) & ~raw["op_id"].isin(new) & (known_src != ""), "exact key = a " + known_src + " row", "")
+    raw["status_detail"] = np.where(detail_k != "", detail_k, raw["status_detail"].to_numpy())
     r16_all = pd.DataFrame({"op_id": raw["op_id"], "source_round": "r16", "source": "github", "vendor_key": raw["vendor_key"], "vendor_kind": raw["vendor_kind"],
                             "method": raw["method"], "path": raw["path"], "operationId": raw["operationId"], "summary": raw["summary"], "lang": raw["lang"],
                             "licence": raw["licence"], "spec_sha256": raw["spec_sha256"], "origin": raw["repo"], "status": s16,
@@ -428,6 +452,25 @@ def main():
     for c in ["vendor_key", "operationId", "licence", "spec_sha256", "lang", "origin", "status_detail"]:
         A[c] = A[c].fillna("")
 
+    # ---------------- language: every row gets one (nothing is deleted; non-English rows keep their status)
+    # Same detector as the collections (r15/master.py lang_signal) on the text that exists: summary + description (r16 raw ops), else summary, else operationId, else 'unknown'.
+    # Rows that already carry a collection-time lang keep it (that one also uses the spec-majority smoothing for weak English evidence).
+    A["lang_computed_here"] = A["lang"].fillna("") == ""
+    blank16 = set(A.loc[A["lang_computed_here"] & (A["source_round"] == "r16"), "op_id"])
+    t16 = {}
+    for b in pq.ParquetFile(os.path.join(RAW, "ops-raw.parquet")).iter_batches(batch_size=50000, columns=["op_id", "summary", "description"]):
+        t = b.to_pandas()
+        t = t[t["op_id"].isin(blank16)]
+        for o, su, de in zip(t["op_id"], t["summary"], t["description"]):
+            t16[o] = M.make_text(su, de)
+    bl = A[A["lang_computed_here"]]
+    texts = [t16.get(o) or su or oi for o, su, oi in zip(bl["op_id"], bl["summary"].fillna(""), bl["operationId"].fillna(""))]
+    sig = [M.lang_signal(t) for t in texts]
+    A.loc[bl.index, "lang"] = [(l[0] if l[0] else "unknown") for l in sig]
+    assert (A["lang"].fillna("") != "").all()
+    A["non_english"] = A["lang"].isin(["zh", "ru", "other"])
+    log("lang filled for", int(A["lang_computed_here"].sum()), "rows; non-English", int(A["non_english"].sum()))
+
     # ---------------- flags
     rep_ids = pd.read_csv(os.path.join(D, "r16", "pick", "old-replay-ids.csv"))
     assert len(rep_ids) == 60000 and rep_ids["id"].is_unique
@@ -440,11 +483,11 @@ def main():
     conf = set(pd.read_csv(os.path.join(D, "r16", "review", "confident.csv.gz"), usecols=["id"])["id"])
     A["confident_disagreement"] = A["op_id"].isin(conf)
     assert int(A["confident_disagreement"].sum()) == 755 == len(conf)
-    bge = pd.read_parquet(os.path.join(D, "r16", "pick", "bge-rating.parquet"), columns=["op_id", "opus", "part"])
+    bge = pd.read_parquet(os.path.join(D, "r16", "pick", "bge-rating-v2.parquet"), columns=["op_id", "opus", "part"])
     assert len(bge) == 304475
     opus_ids = set(bge.loc[bge["opus"] & (bge["part"] != "dev"), "op_id"])
     A["opus_candidate"] = A["op_id"].isin(opus_ids)
-    rs = json.load(open(os.path.join(D, "r16", "pick", "rating-summary.json")))
+    rs = json.load(open(os.path.join(D, "r16", "pick", "rating-summary-v2.json")))
     assert int(A["opus_candidate"].sum()) == rs["opus_union_new"], (int(A["opus_candidate"].sum()), rs["opus_union_new"])
     assert set(A.loc[A["opus_candidate"], "status"]) == {"r16_pick_new"}
 
@@ -481,20 +524,24 @@ def main():
     assert not set(A.loc[A["status"].isin(tr_st), "op_id"]) & set(A.loc[A["status"].isin({"r16_dev", "exam8_drop_rwxmap", "exam8_drop_name", "r16_dev_old_unused"}), "op_id"])
     assert (A["status"] == "trained_r13").sum() == 102668 and (A["status"] == "trained_r15").sum() == 199543
     assert (A["status"] == "r15_holdout").sum() == 400 and (A["status"] == "dropped_val_overlap").sum() == 57
-    assert (A["status"] == "r16_dev").sum() == 4475 and (A["status"] == "r16_pick_new").sum() == 300000 and (A["status"] == "exam8_drop_rwxmap").sum() == 4680
+    assert (A["status"] == "r16_dev").sum() == N_DEV and (A["status"] == "r16_pick_new").sum() == 300000 and (A["status"] == "exam8_drop_rwxmap").sum() == 4680
     assert (A["status"] == "rwxmap_flagged_r15").sum() == 4963 and (A["status"] == "r16_dev_old_unused").sum() == 4039
     assert ((A["source_round"] == "r15").sum()) == 802196 + 4963 + 8812
     assert ((A["source_round"] == "r16").sum()) == 1773972
-    kept16 = A[(A["source_round"] == "r16") & A["status"].isin(["r16_pick_new", "r16_dev", "exam8_drop_rwxmap", "unused_clean", "unused_other"])]
+    kept16 = A[(A["source_round"] == "r16") & A["status"].isin(["r16_pick_new", "r16_dev", "exam8_drop_rwxmap", "unused_clean", "unused_other", "dropped_op_key_known", "dropped_op_key_dup"])]
     assert len(kept16) == 807949
     assert A["status"].notna().all()
     ex8_train = A[A["status"].isin(tr_st) & A["spec_sha256"].isin(ex8_master_sha)]
     R["trained_rows_on_exam8_name_hit_master_specs"] = int(len(ex8_train))
+    # no pick/dev op shares the exact key with a trained/holdout row, none duplicated inside the pick or dev or between them: asserted in the r16 stage above
+    # (before the status assignment); here: the statuses must agree with it
+    assert not (A["status"].isin(["r16_pick_new", "r16_dev"]) & A["status_detail"].str.startswith("exact key =")).any()
+    assert not (A.loc[A["status"].isin(["unused_clean", "unused_other"]) & (A["source_round"] == "r16"), "status_detail"].str.startswith("exact key =")).any()
     log("asserts passed", len(A))
 
     # ---------------- write
     cols = ["op_id", "source_round", "source", "vendor_key", "vendor_kind", "method", "path", "operationId", "summary", "lang", "licence", "spec_sha256",
-            "origin", "status", "status_detail", "key_in_r15_master", "r13_v3eval", "r16_old_replay", "confident_disagreement", "opus_candidate", "soft_flag", "vendor_used", "vendor_class", "vendor_key_used_by_rule"]
+            "origin", "status", "status_detail", "lang_computed_here", "non_english", "key_in_r15_master", "r13_v3eval", "r16_old_replay", "confident_disagreement", "opus_candidate", "soft_flag", "vendor_used", "vendor_class", "vendor_key_used_by_rule"]
     A = A[cols].sort_values("op_id").reset_index(drop=True)
     A.to_parquet(os.path.join(OUT, "master-all.parquet"), index=False)
     A.to_csv(os.path.join(OUT, "master-all.csv.gz"), index=False, compression={"method": "gzip", "mtime": 0})
@@ -502,37 +549,43 @@ def main():
     # ---------------- summary
     tab = pd.crosstab(A["status"], A["source_round"], margins=True, margins_name="total")
     ue = A[(A["status"] == "unused_clean") & (A["lang"] == "en")]
-    ue_nokey = ue[~ue["key_in_r15_master"]]
     avail = ue[~ue["vendor_used"]]  # strict: never-used vendor
     cls = ue.groupby("vendor_class").agg(ops=("op_id", "size"), vendors=("vendor_key", "nunique"))
-    cls["ops_not_key_dup_of_r15"] = ue_nokey.groupby("vendor_class").size()
     cls = cls.fillna(0).astype(int)
     byr = ue.groupby(["source_round", "vendor_class"]).agg(ops=("op_id", "size"), vendors=("vendor_key", "nunique")).reset_index()
     R["counts_status_by_round"] = {k: {c: int(v) for c, v in r.items()} for k, r in tab.iterrows()}
     R["headline"] = {"strict_never_used_vendor_ops": int(len(avail)), "strict_never_used_vendor_vendors": int(avail["vendor_key"].nunique()),
                      "unused_clean_en_ops": int(len(ue)), "unused_clean_en_vendors": int(ue["vendor_key"].nunique()),
-                     "unused_clean_en_ops_not_key_dup_of_r15": int(len(ue_nokey)),
                      "by_vendor_class": cls.to_dict("index"), "by_round_and_class": byr.to_dict("records"),
                      "unused_other_en_ops": int(((A["status"] == "unused_other") & (A["lang"] == "en")).sum())}
     R["r16_stage_counts_match_report"] = stage_counts
     R["r16_exam8_raw_spec_hits"] = n_hit8
     R["master_sha256"] = sha_file(os.path.join(OUT, "master-all.parquet"))
     json.dump(R, open(os.path.join(OUT, "master-report.json"), "w"), indent=1, default=str)
-    lang_tab = pd.crosstab(A["lang"].replace("", "(not computed)"), A["source_round"], margins=True, margins_name="total")
+    lang_tab = pd.crosstab(A["lang"], A["source_round"], margins=True, margins_name="total")
 
     def md(t):
         t = t.reset_index()
         h = "| " + " | ".join(str(c) for c in t.columns) + " |\n|" + "---|" * len(t.columns) + "\n"
         return h + "\n".join("| " + " | ".join(f"{v:,}" if isinstance(v, (int, np.integer)) else str(v) for v in r) + " |" for r in t.itertuples(index=False)) + "\n"
+    ne = A[A["non_english"]]
+    ne_tab = ne.groupby(["lang", "source_round", "status"]).size().rename("ops").reset_index().set_index(["lang", "source_round", "status"])
+    ne_clean = ne[ne["status"] == "dropped_non_english"]
+    ne_clean_tab = pd.crosstab(ne_clean["lang"], ne_clean["source_round"], margins=True, margins_name="total")
+    R["non_english"] = {"total": int(len(ne)), "unknown_lang": int((A["lang"] == "unknown").sum()), "otherwise_clean": int(len(ne_clean)),
+                        "otherwise_clean_vendors": int(ne_clean["vendor_key"].nunique()),
+                        "by_lang_round_status": {"|".join(k): int(v) for k, v in ne.groupby(["lang", "source_round", "status"]).size().items()},
+                        "lang_computed_here": int(A["lang_computed_here"].sum())}
+    json.dump(R, open(os.path.join(OUT, "master-report.json"), "w"), indent=1, default=str)
     dt = A[A["status_detail"] != ""].groupby(["status", "status_detail"]).size().rename("ops").reset_index()
     L = ["# Master list: every op collected for rounds 13, 15 and 16\n",
          f"Built by `r16/build_master_all.py` (deterministic). File: `data/master/master-all.parquet` ({len(A):,} rows, sha256 `{R['master_sha256']}`) and `.csv.gz`.\n",
          "One row per `op_id`; exactly one `status` per row (precedence in the script docstring and in `docs/product/prd-r16-vendor-data.md`, Master list).\n",
          "## Headline\n",
-         f"**Clean English rows from never-used vendors still available after round 16: {len(avail):,} ops from {avail['vendor_key'].nunique():,} vendors.** "
-         "Every vendor that still has clean unused rows already has at least one row used somewhere: r15 and r16 both drew from every eligible vendor (water-filling, small vendors whole), "
-         "so no vendor is wholly untouched. The honest available pool is therefore the unused rows of already-touched vendors:\n",
-         f"**Unused clean English rows (any vendor class): {len(ue):,} ops from {ue['vendor_key'].nunique():,} vendors** ({len(ue_nokey):,} after removing rows whose method+path+operationId+summary equals an r15 master row).\n",
+         f"**Clean English rows from never-used vendors still available after round 16: {len(avail):,} ops from {avail['vendor_key'].nunique():,} vendors** "
+         "(vendors whose every pick row was removed as a key copy in v2, so they are not used any more). Apart from them every vendor that has clean unused rows already has at least one row used somewhere: "
+         "r15 and r16 both drew from every eligible vendor (water-filling, small vendors whole), so no vendor is wholly untouched. The honest available pool is therefore the unused rows of already-touched vendors:\n",
+         f"**Unused clean English rows (any vendor class): {len(ue):,} ops from {ue['vendor_key'].nunique():,} vendors** (r16 rows whose exact key equals a trained/holdout row are status `dropped_op_key_known`, not counted here; r15 unused rows were not key-checked against trained rows).\n",
          md(cls),
          "Vendor classes (precedence): `reserved_dev_exam` = vendor has a row in val, holdout, dev (r16 or earlier unused dev), exam #8 drop, or rwxmap flagged list, or matches an R13 seen token; "
          "`trained_r13_r15` = vendor has a trained or val-overlap row; `r16_pick_only` = vendor's only used rows are the r16 new pick (not yet trained: the nearest thing to a new vendor for round 17); `never_used` = none of those.\n",
@@ -540,13 +593,22 @@ def main():
          f"(huge_spec / odd_path / lorem / placeholder_text / autogen_opid_only / test_endpoint). Soft-flagged unused rows (`unused_other`, English): {int(((A['status']=='unused_other') & (A['lang']=='en')).sum()):,}.\n",
          "By source round and class:\n", md(byr.set_index(["source_round", "vendor_class"])),
          "## Status by source round\n", md(tab),
-         "## Language by source round\n", "r13 rows carry no language tag; r16 rows dropped before the text stage (template, min5, duplicates) and r15 rows only in the input files were never language-tagged.\n", md(lang_tab),
+         "## Language by source round\n", "Every row has a lang (see the non-English section for how the blanks of the earlier build were filled).\n", md(lang_tab),
+         "## Non-English rows (kept, never deleted)\n",
+         "`lang` is filled for every row; `non_english` = lang in zh, ru, other. Rows keep their status (for example `dropped_non_english`). `lang_computed_here` marks rows tagged in this build "
+         "(r13 rows, r16 ops dropped before the text stage, r15 input-only rows) with the same detector (r15/master.py `lang_signal`) on summary+description, else summary, else operationId, else `unknown` "
+         "(no letters). Collection-time tags (spec-majority smoothed) were kept as they were.\n",
+         f"Non-English rows in total: **{int(A['non_english'].sum()):,}**; `unknown` (no text): {int((A['lang']=='unknown').sum()):,}.\n",
+         "By lang x source round x status:\n", md(ne_tab),
+         f"**Non-English rows that are otherwise clean** (status `dropped_non_english`: has text, not a duplicate, not a junk domain, not RPC, HTTP method; the pool a person might look at some day): **{int(len(ne_clean)):,}** ops from {ne_clean['vendor_key'].nunique():,} vendors. By lang x round:\n",
+         md(ne_clean_tab),
+         "Non-English rows dropped for another reason first (template, fewer than 5 ops, duplicate, no text, junk, ...) are in the first table under their own status and are not counted as clean.\n",
          "## Status detail\n", md(dt.set_index("status")),
          "## Reconciliation\n",
          "- r13: 102,668 train + 4,180 val; the 5,716 v3eval rows are inside train (column `r13_v3eval`).\n- r15: 802,196 master + 4,963 rwxmap-dropped + 8,812 master-dedupe removals (8,789 cross-source + 23 exact duplicates; the per-row split is not stored) = 815,971 = the four r15 input files.",
          "- r16: 1,773,972 raw ops, each assigned the stage that removed it; every stage count equals `collect-report-github.json` (asserted); kept 807,949 = 4,680 exam8_drop_rwxmap + 4,475 r16_dev + 300,000 r16_pick_new + unused.",
          "- Count-only stages: r15 raw-collection stages before the input files (template, min 5 ops, spec/op dedupe, cap; r15 raw data was deleted 2026-11-19) are in `data/r15/collect-report*.json`, not per row.",
-         f"- Finding: the cross-source duplicate rule of `r16/filter_github.py` dropped 0 ops in the committed run, but {int(A['key_in_r15_master'].sum()):,} r16 ops that reached that stage have the same method+path+operationId+summary as an r15 master row (column `key_in_r15_master`; {int((A['key_in_r15_master'] & (A['status']=='r16_pick_new')).sum()):,} are in the r16 pick). Statuses follow what was actually done, so they are not dropped here.",
+         f"- Cleaning (2026-11-21): the cross-source duplicate rule of `r16/filter_github.py` dropped 0 ops in the committed collection run (broken hash key, see PRD Cleaning); {int(A['key_in_r15_master'].sum()):,} r16 ops that reached that stage have the same exact key as an r15 master row (column `key_in_r15_master`). The v2 pick/dev applies the fixed rule: r16 rows whose exact key equals a row of R13 train/val/v3eval or the r15 master get status `dropped_op_key_known` ({int((A['status']=='dropped_op_key_known').sum()):,}), rows removed as key duplicates inside the pick/dev or against dev get `dropped_op_key_dup` ({int((A['status']=='dropped_op_key_dup').sum()):,}). Collection-stage statuses are unchanged (replay of the committed run).",
          "- Out of scope: exam #1-#7 pools beyond the R13 train/val/v3eval rows, gate sets, and the r12 and earlier corpora.\n"]
     open(os.path.join(OUT, "master-summary.md"), "w").write("\n".join(L))
     print(tab.to_string()); print(json.dumps(R["headline"], indent=1, default=str))
