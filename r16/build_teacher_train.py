@@ -173,5 +173,5 @@ L += ['', f'Exam #7: {len(ex)} rows where rwxmap rows-a-cand predicted != truth 
       f'D143 dev candidates: {len(dc)} rows, `data/r16/labels/sonnet-recheck/d143-dev-candidates-for-rwxmap.csv` sha256 `{dsha}` (rule: POST, path+operationId+summary lowercased contains booking, reservation or a word starting reserve, label != x; the word-start form reproduces the 526 pick candidates exactly).']
 open(os.path.join(OUT, 'summary.md' if not A.no_exam7 else 'summary-noexam7.md'), 'w').write('\n'.join(L) + '\n')
 with open(os.path.join(OUT, 'SHA256SUMS' if not A.no_exam7 else 'SHA256SUMS-noexam7'), 'w') as f:
-    for n in (NAME + '.parquet', NAME + '.csv.gz', 'summary.md'): f.write(f'{sha(os.path.join(OUT, n))}  {n}\n')
+    for n in (NAME + '.parquet', NAME + '.csv.gz', 'summary.md' if not A.no_exam7 else 'summary-noexam7.md'): f.write(f'{sha(os.path.join(OUT, n))}  {n}\n')
 print('\n'.join(L))
