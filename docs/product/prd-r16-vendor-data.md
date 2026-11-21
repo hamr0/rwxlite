@@ -157,3 +157,41 @@ Each question has a plain explanation and a recommended answer.
    What it means: the home server has no graphics card; training the teacher on about 600k rows may take 30-40 h.
    Options: (a) accept up to about 40 h; (b) cut the mix to fit about 25 h (like r15).
    Recommended: (a) if a measured short run supports it, since the user accepted 25 h last time and the gains came from data.
+
+## Collection (GitHub, unfetched r15 candidates) - 2026-11-21
+
+Code: `r16/search.py`, `licences.py`, `fetch.py`, `extract.py` (copies of r15 with paths changed; fetch/extract now take the repos r15 did NOT fetch: not permissive-kept, not fork, not missing), `drive.sh`, `filter_github.py` (r15 rules, exam #8 freeze, new-vendor rule, cap; imports r15 `master.py` and `filter.py` unchanged), `verify_github.py` (audit of the output file). Data (gitignored): `data/r16/ops-r16-github.{csv.gz,parquet}`, `vendors-r16-github.csv`, `collect-report-github.json`, `data/r16/raw/`.
+
+**Why a new search.** r15's `data/r15/raw` (candidates, repos, specs) was deleted on 2026-11-19, so the list of unfetched files no longer existed. The code search was re-run (about 7 h under GitHub's code-search throttle). It was stopped by hand: `openapi.yaml` and `swagger.yaml` are complete, `openapi.json` reached 11,269 bytes, and `swagger.json`, `openapi.yml`, `swagger.yml` were not run. The search is resumable (`r16/search.py`) if more is wanted. Result: 141,366 candidate files in 88,283 repos (r15: 139,871 / 87,363). 23,008 repos are permissive-licence (r15 fetched those); 65,273 repos / 99,089 files were fetched here (99,088 ok, 1 not found). Licence column: GitHub spdx id, `none` when GitHub detects no licence (58,263 of 88,283 repos). No forks appeared (code search skips them). Licence is not a filter.
+
+Stage counts (ops / specs / vendor_keys):
+
+| stage | ops | specs | vendors |
+|---|---|---|---|
+| extracted (96,928 specs parsed ok; 1,882 invalid) | 1,773,972 | 96,046 | 53,830 |
+| template / petstore drop | 1,751,454 | 94,018 | 53,535 |
+| spec has at least 5 ops | 1,691,190 | 70,317 | 42,955 |
+| exact spec dedupe | 1,425,245 | 59,194 | 42,797 |
+| op dedupe (vendor, method, path) | 1,246,604 | 54,185 | 42,797 |
+| has text | 1,226,788 | 53,721 | 42,453 |
+| junk-domain flag | 1,218,197 | 53,298 | 42,365 |
+| language is en (1,007,149 en; 114,991 other; 61,034 zh; 35,023 ru) | 1,007,149 | 46,646 | 37,157 |
+| exam #8 freeze | 1,006,577 | 46,627 | 37,145 |
+| spec sha in r15 master | 999,430 | 46,244 | 36,900 |
+| vendor_key in r15 master | 901,889 | 40,635 | 35,016 |
+| registrable domain in master (vendor, servers, contact, logo) | 888,399 | 40,071 | 34,894 |
+| R13 tokens | 852,869 | 38,400 | 34,388 |
+| r15 exclusion keys | 833,165 | 37,220 | 33,925 |
+| exam #7 list | 832,199 | 37,199 | 33,907 |
+| rwxmap-flagged specs | 832,178 | 37,197 | 33,906 |
+| r16 dev pick | 832,178 | 37,197 | 33,906 |
+| near-duplicate of a master spec | 823,262 | 36,309 | 33,152 |
+| same method+path+operationId+summary as a master row | 823,262 | 36,309 | 33,152 |
+| near-duplicate specs inside this set (primary kept) | 815,128 | 35,812 | 32,725 |
+| cap 300 per vendor (seed 16) | **807,949** | 35,810 | **32,725** |
+
+(RPC flag removed nothing: GitHub specs carry no rpc tag. The row-level order is as in the table; the full per-rule counts are in the report.)
+
+Exam #8 freeze: 46 raw specs hit (gitbook 27, shortcut 15, looker 1, plus 3 substring-only look-alikes); 19 specs / 572 ops were still alive at the freeze and were dropped (427 ops own hits, 145 ops one near-duplicate of a dropped spec, `truvera` copy of the docknetwork gitbook spec). Baserow, wekan and bitrise had no hits. Every dropped spec (repo, path, rule) is listed in `collect-report-github.json` under `exam8`. The output file was re-checked with the same matcher: 0 hits, 0 vendors/specs/domains in the r15 master, 0 non-English rows.
+
+Diversity: 32,725 vendors, ops per vendor median 14, mean 24.7, p90 54, 49 vendors at the cap; top 10 vendors 0.4% of ops, top 100 3.5%. Method mix GET 46.6%, POST 33.9%, DELETE 8.3%, PUT 6.3%, PATCH 4.8%. Caution: 21,978 vendors are title-keyed and 5,329 owner-keyed (small hobby/student projects, 652k ops); only 5,418 are real registrable domains (155k ops). Largest same-title families (backend, go, {{title}}, service) are different projects sharing a name (path-set overlap about 0); no family looks like one template copied many times (the `{{title}}` placeholder family is 21 specs / 188 ops). Licences by ops: none 81%, NOASSERTION 10%, AGPL-3.0 5%, GPL-3.0 3%.
