@@ -198,6 +198,8 @@ Diversity: 32,725 vendors, ops per vendor median 14, mean 24.7, p90 54, 49 vendo
 
 ## Pick (round 16) - 2026-11-21
 
+> Superseded 2026-11-21 by the v2 pick/dev (section "Cleaning" below): v1 files kept, but 39,477 pick ops and 453 dev ops were copies and were replaced. The numbers in this section are v1.
+
 Code: `r16/pick_round16.py` (dev, pick, replay; seed 16, deterministic, asserts), `r16/rate_prep.py`, `r16/rate_bge.sh` (reuses `r15/label_bge.py`), `r16/rate_report.py`. Data (gitignored): `data/r16/dev-en/`, `data/r16/pick/` (`new-300k.csv.gz`, `old-replay-ids.csv`, `pick-report.json`, `bge-rating.parquet`, `rating-report.md`). Input: `ops-r16-github` (csv.gz sha 8aa27faa...). rwxmap exam #8 drop list sha 75d5fc70...; all 260 specs dropped, 4,680 ops (matches), 803,269 ops left. Text lean = rwxmap 1c25be1 (as r15).
 
 - **Dev set (English, replaces nothing: `data/r16/dev/` kept):** 200 whole vendors, 4,475 ops (cap 30, min 12 pool ops per vendor; best of 1,000 seeded draws on method mix, L1 0.03 vs pool); 140 domain vendors (3,207 ops, 71.7%), 50 title, 10 owner. Never trained on.
@@ -209,6 +211,8 @@ Rating (r15 bge teacher, 304,475 rows, 2.97 h on the server): p_top >= 0.9 for 9
 
 ## Master list - 2026-11-21
 
+> Rebuilt 2026-11-21 with the v2 pick/dev, language on every row and the new duplicate statuses (section "Cleaning" below). The numbers in this section are the first build (sha `97f88665...`); the finding at the end is explained and fixed there.
+
 One table of every op collected for rounds 13, 15 and 16: `data/master/master-all.{parquet,csv.gz}` (2,696,791 rows, one per `op_id`, exactly one `status`), `master-summary.md`, `master-report.json`. Built by `r16/build_master_all.py` (deterministic; the same parquet sha256 `97f88665...` on two runs). It replays `r16/filter_github.py` stage by stage over `data/r16/raw` so each dropped r16 op carries the stage that removed it (every stage count is asserted equal to `collect-report-github.json`).
 
 - **Status precedence.** r13: `trained_r13`, `r13_val` (the 5,716 v3eval rows are inside train: boolean `r13_v3eval`). r15: `trained_r15` (199,543) > `r15_holdout` (400) > `dropped_val_overlap` (57) > `r16_dev_old_unused` (the earlier non-English dev, 4,039) > `exam8_drop_rwxmap` > `exam8_drop_name` (108) > `rwxmap_flagged_r15` (4,963, rows removed from the master) > `dropped_*` (duplicate, no_text, junk, rpc, non_english) > `unused_clean` / `unused_other`. r16: first removing stage (`dropped_template`, `min5`, `duplicate`, `no_text`, `junk`, `non_english`, `exam8_drop_name`, `known_vendor` with the rule in `status_detail`, `near_dup`, `cap`); kept ops: `exam8_drop_rwxmap` (4,680) > `r16_dev` (4,475) > `r16_pick_new` (300,000) > `unused_*`. `unused_other` = passes the hard rules but has a soft flag (huge_spec, odd_path, lorem, placeholder_text, autogen_opid_only, test_endpoint).
@@ -216,3 +220,76 @@ One table of every op collected for rounds 13, 15 and 16: `data/master/master-al
 - **Reconciliation.** r15 802,196 master + 4,963 rwxmap-dropped + 8,812 master-dedupe removals = 815,971 (the four r15 input files; the 23 exact vs 8,789 cross-source split is count-only). r16 1,773,972 raw, 807,949 kept = 4,680 + 4,475 + 300,000 + 498,794 unused. No training row is dev or exam #8 dropped (asserted). r15 raw-collection stages (before the input files) are count-only: r15 raw data was deleted 2026-11-19. Lang is blank for r13 and for r16 ops dropped before the text stage.
 - **Headline.** Clean English rows from never-used vendors: **0**. Every vendor with clean unused rows already has a row used (r15 and r16 drew from every eligible vendor). Unused clean English rows: 890,928 from 36,675 vendors (844,354 without op-text copies of r15 rows). By vendor class: `r16_pick_only` 486,232 ops / 21,901 vendors (the nearest thing to new vendors for round 17), `trained_r13_r15` 391,957 / 14,404, `reserved_dev_exam` 12,739 / 370 (off limits).
 - **Finding.** The cross-source duplicate rule in `r16/filter_github.py` dropped 0 ops, yet 83,088 ops that reached it match an r15 master row on method+path+operationId+summary (32,918 are in the r16 pick). The statuses record what was done; the flag `key_in_r15_master` marks them.
+
+## Cleaning (round 16 v2: duplicate-op root cause, v2 pick and dev, rating, language) - 2026-11-21
+
+Code: `r16/opkey.py` (the one definition of the op key), `r16/filter_github.py` (rule fixed), `r16/pick_round16_v2.py`, `r16/rate_prep_v2.py`, `r16/rate_bge.sh` (`RATE_DIR`), `r16/rate_report.py` (refactored, v1 report reproduced byte for byte apart from one thousands separator), `r16/rate_report_v2.py`, `r16/build_master_all.py`. Data (gitignored, v1 files kept): `data/r16/pick/new-300k-v2.csv.gz`, `data/r16/dev-en/dev-ops-v2.csv.gz`, `dev-vendors-v2.csv`, `pick-report-v2.json`, `dropped-v2.csv.gz` (every v1 dev/pick op removed, with reason), `added-v2.csv`, `bge-rating-v2.parquet`, `rating-report-v2.md`, `rating-summary-v2.json`.
+
+### 1. Root cause: why the cross-source duplicate rule dropped 0 ops
+
+The rule (`filter_github.py`, "same method+path+operationId+summary as any master row") built its key as `method + "\0" + path + "\0" + operationId + "\0" + summary` and compared `pandas.util.hash_pandas_object` values (master side and r16 side hashed as two separate Series). The collection run used the system python (pandas 3.0.0). In pandas 3.0.0 that hash is wrong for strings that contain a NUL byte: different keys collide, and the same key gets a different hash depending on which other keys are in the Series. So the two hash sets could not overlap.
+
+Proof on the real columns (the committed code, run up to that line, tables dumped to `data/r16/scratch/v2/`): master 802,196 keys gave 9 distinct hash values, the r16 table at that stage (823,262 ops) gave 9 distinct values, 0 in common, and the original expression returned `xd.sum() = 0`. The same comparison with python tuples (method upper, path, operationId, summary) matches **83,088** of the 823,262 ops, and the fixed rule (`opkey.k1`) on the same dumped tables drops 83,088. Dtypes were not the cause (both sides `str`; the r15 master has no nulls in operationId or summary).
+
+Tiny reproduction (`r16/repro_hash_bug.py`):
+
+```
+h = lambda l: pd.util.hash_pandas_object(pd.Series(l), index=False).tolist()
+h(["GET\0/a\0x", "GET\0/b\0y"])              # pandas 3.0.0: [1576164044250810843, 1576164044250810843]  (two keys, one hash)
+h(["GET\0/a\0x", "GET\0/b\0y"])[1]            # 1576164044250810843
+h(["GET\0/aaaaaa\0x", "GET\0/b\0y"])[1]       # 17362308838366959468  (same key, other Series, other hash)
+```
+
+pandas 3.1.1 (the scratch venv) returns two different, stable hashes (9056232381540259794 for the key in both Series); a key without NUL separators is stable in both versions. So the fault is the NUL separator plus the pandas version, not the data. **Fix at the source:** the key is a python tuple, `r16/opkey.py` (`k1`), used by the filter, the v2 pick and the master build; a set of tuples depends on no hash function. The filter was not re-run (its output feeds v1; the fixed rule is applied on top in v2 and in the master statuses, and the replay in `build_master_all.py` finds the same 83,088 with `opkey.k1`).
+
+### 2. The rule, exact key and normalised key
+
+Exact key K1 = (METHOD upper, path, operationId, summary) is the drop rule. Normalised key K2 = (METHOD upper, path with `{..}` to `{}`, lower case, trailing slash dropped, operationId) is only reported. Known rows = R13 train (102,668), val (4,180), v3eval (5,716, inside train), r15 master (802,196, includes the 199,543 trained r15 rows and the 400 holdout rows); the exam sets of r15 are inside these.
+
+Independent matches (an op can match several sources); v1 pick 300,000 ops and v1 dev 4,475 ops:
+
+| source | pick K1 | pick K2 | dev K1 | dev K2 |
+|---|---|---|---|---|
+| R13 train | 1,427 | 21,996 | 12 | 337 |
+| R13 val | 134 | 3,690 | 0 | 54 |
+| R13 v3eval | 35 | 1,255 | 0 | 30 |
+| r15 trained | 23,811 | 78,945 | 327 | 1,184 |
+| r15 holdout | 31 | 540 | 0 | 4 |
+| r15 master (all) | 32,918 | 99,492 | 451 | 1,508 |
+| any source (union) | **33,390** | 100,185 | **451** | 1,510 |
+
+K2 finds 66,795 more pick ops (25,043 with a non-empty operationId) and 1,059 more dev ops (370 with operationId) than K1. 20 random K2-only examples are in `pick-report-v2.json` (`norm_only_examples`): same method, path and operationId, but the summaries differ in meaning or language ("Login" vs "ユーザーログイン", "Get dish by ID" vs "Получение данных о блюде", "List observations" vs "List benchmark observations", "Update a class" vs "Update kelas (Super Admin)"). They are generic names (`GET /members listMembers`) from unrelated APIs, not copies. **Decision: K2-only matches are not dropped.**
+
+### 3. Drops from v1, per reason (exact key)
+
+| set | reason | ops |
+|---|---|---|
+| dev | exact key = a known row (R13 train 12, r15 trained 315, other r15 master 124) | 451 |
+| dev | duplicate of another dev op (lowest op_id kept) | 2 |
+| pick | exact key = a known row (R13 train 1,427, R13 val 118, r15 holdout 3, r15 trained 22,939, other r15 master 8,903; first source wins) | 33,390 |
+| pick | duplicate inside the pick (lowest op_id kept) | 4,984 |
+| pick | same key as a dev op (dev wins) | 273 |
+| pick | op of a vendor that moved to dev, taken there | 329 |
+| pick | other ops of a vendor that moved to dev | 501 |
+| | pick total replaced | 39,477 |
+
+Over the whole pool (807,949 kept ops) 83,088 ops match a r15 master row on K1; in the master list the ones not in dev/pick/exam #8 drop list now have status `dropped_op_key_known` (81,654; R13 rows included) and key duplicates of the pick/dev `dropped_op_key_dup` (5,259).
+
+### 4. Refill
+
+- **Dev (v2: 4,475 ops, 214 vendors, v1 was 4,475 / 200).** 4,022 kept; 121 refilled from the same 200 vendors (cap 30; their other clean ops ran out); the other 332 from 14 new vendors (v1 rules: at least 12 clean pool ops, cap 30, about 70% domain vendors, seeded): tmphost.io, boardgameplatform.com, telekom.com, openpanel.com, eluvia.com, mita.finance, negativeone.xyz, safarcollab.com, ai-schedule-manager.com, photomarket.com, heroiclabs.com, overal-x.org, tolabco.com, title:easydocker. Every vendor was already in the pick, so these 14 left the pick (329 of their ops were already rated). By kind: domain 3,332 ops, title 929, owner 214. Method mix GET 47.2, POST 32.4, DELETE 7.9, PUT 6.7, PATCH 5.1 (v1: 47.1 / 33.0 / 7.8 / 6.6 / 4.8).
+- **Pick (v2: 300,000 ops, 32,070 vendors, v1 32,295).** 260,523 kept from v1, 39,477 added. Domain vendors first: 0 added (all their clean ops were already in the pick, none left). Hobby fill: 39,477 ops (title 29,213, owner 10,264) from 21,297 vendors by water-filling on the current counts (spread thin, hobby cap 20, seeded +1), level 7 (v1 level 5-6). Candidates: clean unused rows only (kept in the pool, not on the exam #8 drop list, no soft flag, not in v1 dev/pick, not a dev vendor, K1 not known, K1 unique), 418,219 hobby rows available. Domain ops are now 132,772 (44.3%, v1 149,571 = 49.9%), hobby 167,228. Method mix GET 47.7, POST 34.3, DELETE 7.7, PUT 6.0, PATCH 4.2 (v1 48.1 / 34.6 / 7.7 / 5.8 / 3.8). Top 10 vendors 1.0%.
+- Asserts (in the script): no pick or dev op shares its exact key with any R13 train/val/v3eval, r15 master (trained, holdout) row; no exact-key duplicate inside the pick or dev or between them; no dev vendor in the pick; no exam #8 drop-list spec; exam #8 matcher 0 hits on every added row; every added op is `unused_clean`; caps hold (domain 300, hobby 20, dev 30). The same exact-key asserts are in `build_master_all.py`.
+- Soft-flagged rows already in the v1 pick (6,339) are kept (they are not copies); refills use clean rows only.
+
+### 5. Re-rating (added rows only)
+
+39,601 added ops (dev 124, pick 39,477; ops that moved between dev and pick keep their v1 rating) were scored by the r15 bge teacher (same checkpoint sha d53deafc..., same lean of rwxmap 1c25be1 via `r15/label_mech.mjs`, batch 64, T 1.36) on the server in `~/rwxlite-train/r16-rate-v2/` (nice 19, ionice idle, 3 threads, one job, memwatch 2 GB; free memory 12.9 GB at start, lowest seen 12.0 GB; 20.9 min; nothing left running). Merged with the 264,874 kept v1 ratings into `bge-rating-v2.parquet` (304,475 rows). New pick: p_top >= 0.9 for 92.6% at T=1, 88.0% at T 1.36; unsure (<0.7 at T 1.36) 12,305 (4.1%); bge differs from mech on 43,292 (14.4%). **Proposed Opus list = unsure + disagreements: 49,496 rows (16.5%)**, was 47,362 (15.8%). Details: `data/r16/pick/rating-report-v2.md`. No label was set.
+
+### 6. Language on every row and the non-English pool
+
+`lang` is now filled for every row of the master list (2,696,791); `non_english` is a boolean (lang zh, ru or other); `lang_computed_here` marks the 647,991 rows tagged in this build (r13 rows, r16 ops dropped before the text stage, r15 input-only rows) with `r15/master.py lang_signal` on summary+description, else summary, else operationId, else `unknown` (no letters; 13,467 rows). Nothing was deleted: non-English rows keep their status (for example `dropped_non_english`). Non-English rows: **409,478** (zh 134,777, other 214,952, ru 59,749; the 4,039 earlier non-English dev rows are among `other`). Otherwise clean (status `dropped_non_english`: has text, not a duplicate, not junk, not RPC, HTTP method): **319,149 ops from 12,705 vendors** (r15 108,101, r16 211,048; zh 116,546, ru 49,023, other 153,580). The full table lang x source round x status is in `data/master/master-summary.md`.
+
+### 7. Master list (rebuilt with v2)
+
+`data/master/master-all.{parquet,csv.gz}` (2,696,791 rows, parquet sha256 `b93936e1...`, identical on two runs), `master-summary.md`, `master-report.json`. New statuses `dropped_op_key_known` (81,654) and `dropped_op_key_dup` (5,259); `r16_dev` 4,475, `r16_pick_new` 300,000 (v2 sets); `opus_candidate` flag follows the v2 rating (49,496). Unused clean English rows 804,055 from 33,265 vendors (r16 pick-only 399,490 / 18,480 vendors, trained r13/r15 391,957 / 14,404, reserved dev/exam 12,580 / 363, never used 28 / 18: vendors whose every pick row was a copy). Not done: r15 unused rows were not key-checked against trained rows (the r15 filter already ran its own dedupe), and the filter was not re-run.
