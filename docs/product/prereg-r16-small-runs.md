@@ -197,3 +197,57 @@ What the 1/10 scale loses: (1) the absolute level; these runs predict which opti
 - **No soft targets in tA/tB:** they run without `--teacher` and without `--soft`, so `soft` is None, the loss is the weighted hard CE (`hard_i` times `weight`) and `--alpha 0.7` is never used.
 - **Measured step rate (tA):** 4.2 s/step (200 steps in 14.1 min; prereg estimate 5.09), memory: python RSS about 6.2 GB, lowest MemAvailable 6.06 GB, load about 3 of 4. New ETAs: tA 80 min + eval about 8 min (done about 00:25), tB 133 min + 8 (about 02:50), probsA about 23, sS0 and sS1 about 22 + 5 each (about 04:00 for the chain).
 - **Q1 base (r15 teacher), laptop, fp32 batch 1, T fixed 1.362087, real secondPass at 0.90** (checkpoint copied read-only from the server, `model.safetensors` sha256 `d53deafc...` verified): (a) 4,475 rows: exact 4,243 (94.816%), too loose 50 (1.117%), too tight 182 (4.067%); standalone 97.832 / 1.743 / 0.425. (b) 3,286 rows: exact 3,085 (93.883%), too loose 37 (1.126%), too tight 164 (4.991%); standalone 97.596 / 1.887 / 0.517. Replica agrees on all 4,475 rows. Floor for Q1 on (b): exact >= 3,085 and too loose <= 69. Files: `data/r16/scratch/small/base-teacher-dev.csv` sha256 `b2f7946ba1b0bc247ed45d589a135a9c49ab190e6417acffe5bfa4fc9bc2f49b`, `base-teacher-score.json` sha256 `1c439034b3a37bfdebb4da7c9e2c7b1486a0dd3a0062857c0baacb92d606d6ea`. `r16/small-runs-all.sh` is new (the chain wrapper); `small-runs.sh` is unchanged.
+
+## 13. Results (2026-11-22; sections 1 to 12 unchanged)
+
+Scored once per arm, exactly as section 5 and 7: fp32 PyTorch CPU batch 1 (`r16/predict_dev.py`, system python with torch), each candidate at its own val-fitted T (golden-section on the 4,180-row val), real `secondPass` (rwxmap tree 1c25be1) at 0.90, `r16/score_dev.py` (sha256 `17c599e3...` = section 10; dev, mech and subset shas asserted by the scorer; `predict_dev.py` `d8a212ea...`, `secondpass_real.mjs` `d4a055d8...`, subset list `10375671...` verified equal to section 10 before predicting). The real secondPass and the Python replica agree on all 4,475 rows in every arm. Nothing was re-run, tuned or re-fitted. Prediction and model sha256s were committed BEFORE any score: `docs/product/r16-small-runs-pred-sha256.txt` (students in commit 1d1e3a4, teachers in the next commit). Score JSONs: `docs/product/r16-small-runs-scores/<arm>-score.json`. Checkpoints (gitignored) on the laptop under `data/r16/small/models/<arm>/final`, copied from the server read-only.
+
+| arm | model.safetensors sha256 |
+|---|---|
+| tA | `0285ca483378beef139b946c3faab4ae728e8dd140ca0c54b00215d5fdcb3c26` |
+| tB | `8f97abf057a8c0bab4c00892637b20db10fe9e93873b8ad9adaf311f2e98fb85` |
+| sS0 | `2d7477c772faf8414f6ae38c3511c007365796e02b160c2c9a7509918a4198e8` |
+| sS1 | `08a23f5124b12550492981bf28f8225d641cec511960d7d28917d764249c06bd` |
+
+### 13.1 Q1 (teachers, against the r15 teacher base, T 1.362087)
+
+Floor on (b): exact >= 3,085 and too loose <= 69. On (a): exact >= 4,243 and too loose <= 94.
+
+| arm | T | (b) exact | (b) loose | (b) tight | (b) floor | (a) exact | (a) loose | (a) tight | (a) floor |
+|---|---|---|---|---|---|---|---|---|---|
+| base r15 teacher | 1.362087 | 3,085 (93.883%) | 37 | 164 | n/a | 4,243 (94.816%) | 50 | 182 | n/a |
+| tA (set-A, 20% replay) | 1.8495 | 3,081 (93.761%) | 33 (1.004%) | 172 (5.234%) | **FAIL** (exact 4 below) | 4,240 (94.749%) | 45 | 190 | FAIL (3 below) |
+| tB (set-B, all old) | 1.8896 | 3,064 (93.244%) | 34 (1.035%) | 188 (5.721%) | **FAIL** (exact 21 below) | 4,221 (94.324%) | 45 | 209 | FAIL (22 below) |
+
+Decision (clause 4): **neither arm passes the floor, so there is no automatic winner.** Per the rule the result goes to the user with both arms' numbers. The default arm (tA, the 20% replay) may be recommended only if its exact on (b) is higher or tied: tA 3,081 against tB 3,064, a gap of 17 rows (more than the 5-row tie band), so tA is higher and the rule allows recommending it. tA misses the floor by 4 rows on (b) (3 on (a)), inside single-seed noise but not passing; both arms are too loose well within the limit (33 and 34 against 69). (a) and (b) agree on the ordering.
+
+### 13.2 Q2 (students, against 0.4.0, T 1.3832)
+
+Floor on (b): exact >= 3,066 and too loose <= 72. On (a): exact >= 4,216 and too loose <= 96.
+
+| arm | T | (b) exact | (b) loose | (b) tight | (b) floor | (a) exact | (a) loose | (a) tight | (a) floor |
+|---|---|---|---|---|---|---|---|---|---|
+| base 0.4.0 | 1.3832 | 3,066 (93.305%) | 40 | 180 | n/a | 4,216 (94.212%) | 52 | 207 | n/a |
+| sS0 (T=1 targets) | 1.4875 | 3,069 (93.396%) | 36 (1.096%) | 181 (5.508%) | PASS | 4,217 (94.235%) | 47 (1.050%) | 211 (4.715%) | PASS |
+| sS1 (softened at 1.362087) | 1.1900 | 3,068 (93.366%) | 37 (1.126%) | 181 (5.508%) | PASS | 4,216 (94.212%) | 48 (1.073%) | 211 (4.715%) | PASS (exactly on the floor) |
+
+Decision: both pass the floor. Clause 2 would take the higher exact on (b), but the two differ by 1 row, inside the tie band (clause 3, 5 rows or fewer). Tie-break (i): the too-loose difference is 1 row (36 against 37), under the 3-row threshold, so it does not apply. Tie-break (ii): the default arm. **Winner Q2: sS0 (the current 0.7/0.3 on T=1 targets), decided by clause 3 (ii).** (a) agrees (4,217 against 4,216, also a tie). Softening the targets gave no measurable accuracy gain.
+
+### 13.3 Information only (decide nothing)
+
+Standalone argmax, (b) exact / loose / tight (T does not change it): base teacher 97.596% / 1.887% / 0.517%; tA 3,199 (97.352%) / 53 / 34; tB 3,197 (97.292%) / 50 / 39; base 0.4.0 95.740% / 3.226% / 1.035%; sS0 3,154 (95.983%) / 89 (2.708%) / 43; sS1 3,152 (95.922%) / 93 (2.830%) / 41. On (a): tA 4,370 / 64 / 41; tB 4,370 / 62 / 43; sS0 4,319 / 104 / 52; sS1 4,317 / 108 / 50. The teachers' standalone exact on (b) is slightly below the base teacher's (97.35 / 97.29 against 97.60); the students' is slightly above 0.4.0's (95.98 / 95.92 against 95.74) with more standalone too-loose rows than the teachers.
+
+Fitted T (val): tA 1.8495, tB 1.8896 (both far above the r15 teacher's 1.362, so the continued teachers are more over-confident, not less); sS0 1.4875; **sS1 1.1900**. The section 7 prediction held: sS1 lands clearly below 1.38 and below sS0 (1.49), and nearer 1.0, but it is just above the "calibrated" line of about 1.1. This calibration did not turn into dev accuracy.
+
+D143 POST-create readout, mode a, too tight before D143 (dev v1) / after (dev v2), (b) n 319 | (a) n 466: base 0.4.0 54 (16.93%) / 52 (16.30%) | 70 (15.02%) / 65 (13.95%); base teacher not recorded in section 12 (the file `data/r16/scratch/small/base-teacher-score.json` holds it); tA 54 (16.93%) / 51 (15.99%) | 68 (14.59%) / 61 (13.09%); tB 61 (19.12%) / 58 (18.18%) | 77 (16.52%) / 70 (15.02%); sS0 60 (18.81%) / 57 (17.87%) | 78 (16.74%) / 72 (15.45%); sS1 59 (18.50%) / 56 (17.55%) | 77 (16.52%) / 71 (15.24%). The 9 rwxmap-touched rows (5 in (b)): after D143 too tight 2 of 9 in every arm (2 of 5 in (b)); before D143 9 of 9 (tA, tB) and 8 of 9 (sS0, sS1). The D143 relabel lowers too tight by about 1 pp in every arm; no arm fixes the POST-create too-tight problem (13 to 18% on (b)).
+
+Paired against the base on (b) (mode a; this right, base wrong / base right, this wrong): tA 12 / 16; tB 12 / 33; sS0 16 / 13; sS1 14 / 12. On (a): tA 17 / 20; tB 18 / 40; sS0 18 / 17; sS1 16 / 16. So tB is clearly worse than the base teacher (net minus 21 on (b)), tA is within noise below it (net minus 4), and the students are within noise of 0.4.0.
+
+Train loss (mean of the logged per-25-step values; per-step values are noisy and the arms use different losses, so only same-model arms are comparable): tA 0.108, tB 0.080 (last ten logged 0.108 and 0.071); sS0 0.148, sS1 0.210 (sS1's soft cross-entropy has a higher floor because its targets are softer). Training time: tA 91.0 min, tB 153.4 min, sS0 16.0 min, sS1 15.8 min. Finetune end-of-run val accuracy: tA 94.50, tB 94.74, sS0 94.45, sS1 94.43.
+
+### 13.4 Surprises and consequences
+
+1. Neither teacher arm clears the floor against the r15 teacher: continuing the teacher on the r16 mix at lr 2e-5 did not improve it on unseen-route dev (b), and adding all old rows (tB) was worse than the 20% replay (tA), the opposite of the "dilution" worry. This is a result for the user (clause 4), not for an automatic pick; the user decides whether the full teacher is still worth about 16 h, what to change, or whether to keep the r15 teacher.
+2. The tie-band is what decides Q2: the softened-target student is statistically indistinguishable from the plain one on accuracy, though it is much better calibrated (T 1.19 against 1.49).
+3. The fitted T of both continued teachers rose to about 1.85 to 1.89 (from 1.36); the full teacher's soft targets, if used, would need that new T, not 1.362087.
+4. Section 7.7 stands: nothing here is a ship candidate; only exam #8, once, decides shipping.
