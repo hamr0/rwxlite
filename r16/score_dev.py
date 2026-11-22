@@ -12,7 +12,8 @@ R = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'); P = lambda *
 RK = {'r': 0, 'w': 1, 'x': 2}; FLOOR = 1e-15; L3 = 'rwx'
 CREATE_WORDS = {'create', 'add', 'new', 'make', 'insert', 'register', 'book', 'reserve', 'schedule', 'submit', 'place'}
 SHA = {'dev': 'ef5955787e88e5d4b4ceeaaf93de35026c678c67b86d51e710b275a7534e6e69', 'mech': '0600957b7c581bed19e81c8db0bfb2cce4f288621836c69905ed02a8db869fe4', 'subset': '10375671d69e3a71b793bccb638bef9ccf78eea8c8c72d0446279b437d401997',
-       'val': 'c54ee4612f6c93ac4ac800c8ef08c6fd2c1b415184a28d483401fd067c14d949'}
+       'val': 'c54ee4612f6c93ac4ac800c8ef08c6fd2c1b415184a28d483401fd067c14d949',
+       'dev3': 'b268b074c2225993e8f4dc146ea2d2672a8226f1932e20d27c1d9dfb507bceb5'}   # dev3 = final-labels-r16-dev-v3.parquet (prereg section 14)
 sha = lambda p: hashlib.sha256(open(p, 'rb').read()).hexdigest()
 
 def softmax(L, T):
@@ -52,8 +53,9 @@ def is_post_create(r):
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(); ap.add_argument('--pred', required=True); ap.add_argument('--name', required=True); ap.add_argument('--out', required=True)
     ap.add_argument('--T', type=float); ap.add_argument('--val-pred'); ap.add_argument('--cut', type=float, default=0.90); ap.add_argument('--tree'); ap.add_argument('--rows-out'); ap.add_argument('--vs')
-    ap.add_argument('--dev', default=P('data/r16/labels/final/final-labels-r16-dev-v2.parquet')); ap.add_argument('--mech', default=P('data/r16/labels/work/mech.jsonl')); ap.add_argument('--subset', default=P('r16/dev-subset-b-ids.txt'))
-    a = ap.parse_args(); assert (a.T is None) != (a.val_pred is None), 'give exactly one of --T and --val-pred'
+    ap.add_argument('--dev-set', choices=['v2', 'v3'], default='v2', help='v3 = final-labels-r16-dev-v3 (62 rwxmap-unsure answers applied; prereg section 14): same rows and order, label = v3, prior_label still v1 for the D143 readout, plus an information block on the 62 rows')
+    ap.add_argument('--dev', default=None); ap.add_argument('--mech', default=P('data/r16/labels/work/mech.jsonl')); ap.add_argument('--subset', default=P('r16/dev-subset-b-ids.txt'))
+    a = ap.parse_args(); V3 = a.dev_set == 'v3'; a.dev = a.dev or P('data/r16/labels/final/final-labels-r16-dev-' + a.dev_set + '.parquet'); SHA['dev'] = SHA['dev3'] if V3 else SHA['dev']; assert (a.T is None) != (a.val_pred is None), 'give exactly one of --T and --val-pred'
     for k, p in (('dev', a.dev), ('mech', a.mech), ('subset', a.subset)): assert sha(p) == SHA[k], f'{k} file sha256 differs from the preregistered one'
     dev = pd.read_parquet(a.dev).fillna(''); assert len(dev) == 4475 and dev.op_id.is_unique
     mech = {}; 
@@ -80,8 +82,9 @@ if __name__ == '__main__':
             subprocess.run(['node', P('r16/secondpass_real.mjs'), '--tree', os.path.abspath(a.tree), '--ops', fo, '--p', fp, '--out', fl], check=True)
             real = [json.loads(l) for l in open(fl)]; assert [r['op_id'] for r in real] == list(dev.op_id) and [r['mech'] for r in real] == M
             ma = [r['letter'] for r in real]; src = 'real secondpass.js (' + os.path.basename(os.path.normpath(a.tree)) + ')'; agree = int(sum(x == y for x, y in zip(ma, rep)))
-    t2, t1 = list(dev.label), list(dev.prior_label); assert sum(x != y for x, y in zip(t1, t2)) == 7
-    pc = np.array([is_post_create(r) for r in dev.itertuples(index=False)]); d9 = (dev.label_source == 'rwxmap').to_numpy(); assert d9.sum() == 9
+    t2, t1 = list(dev.label), list(dev.prior_label); assert V3 or sum(x != y for x, y in zip(t1, t2)) == 7
+    pc = np.array([is_post_create(r) for r in dev.itertuples(index=False)]); d9 = (dev.d143_touched if V3 else dev.label_source == 'rwxmap').to_numpy(); assert d9.sum() == 9
+    u62 = dev.unsure62.to_numpy() if V3 else np.zeros(len(dev), bool); assert u62.sum() == (62 if V3 else 0)
     insub = dev.op_id.isin(sub).to_numpy(); V = {'mode_a': ma, 'standalone': stand, 'mechanical': M}
     def block(mask):
         m = np.where(mask)[0]; sel = lambda x: [x[i] for i in m]; o = {'n': int(len(m))}
@@ -92,8 +95,9 @@ if __name__ == '__main__':
             for k in ('mode_a', 'standalone'):
                 b, af = tally([V[k][i] for i in mm], [t1[i] for i in mm]), tally([V[k][i] for i in mm], [t2[i] for i in mm])
                 o[nm][k] = {'before_D143_v1': {x: b[x] for x in ('exact', 'loose', 'tight', 'tight_pct')}, 'after_D143_v2': {x: af[x] for x in ('exact', 'loose', 'tight', 'tight_pct')}}
+        if V3: o['unsure62_info'] = {'n': int(u62[m].sum()), **{k: tally([V[k][i] for i in m if u62[i]], [t2[i] for i in m if u62[i]]) for k in ('mode_a', 'standalone', 'mechanical')}}
         return o
-    res = {'name': a.name, 'T': T, 'T_how': T_how, 'cut': a.cut, 'mode_a_source': src, 'replica_agrees_rows': agree, 'file_sha256': {'dev': SHA['dev'], 'mech': SHA['mech'], 'subset': SHA['subset'], 'pred': sha(a.pred), 'val_pred': sha(a.val_pred) if a.val_pred else None, 'score_dev.py': sha(__file__)},
+    res = {'name': a.name, 'dev_set': a.dev_set, 'T': T, 'T_how': T_how, 'cut': a.cut, 'mode_a_source': src, 'replica_agrees_rows': agree, 'file_sha256': {'dev': SHA['dev'], 'mech': SHA['mech'], 'subset': SHA['subset'], 'pred': sha(a.pred), 'val_pred': sha(a.val_pred) if a.val_pred else None, 'score_dev.py': sha(__file__)},
            'all_4475': block(np.ones(len(dev), bool)), 'subset_b_3286': block(insub)}
     if a.vs:   # paired counts of mode a on both scopes against another run's --rows-out file
         o = pd.read_csv(a.vs, dtype=str); assert list(o.op_id) == list(dev.op_id); ov = list(o.mode_a); res['paired_vs'] = {'file': a.vs}
