@@ -13,9 +13,10 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import opkey
 ap = argparse.ArgumentParser(); ap.add_argument('--conflicts', choices=['abort', 'exclude'], default='abort'); ap.add_argument('--no-exam7', action='store_true', help='build without the exam #7 rows; output name gets -noexam7')
+ap.add_argument('--v3', action='store_true', help='teacher-train-v3 + dev-v3 (prereg-r16-small-runs.md section 14): rebuild v2 in memory (asserted equal to the v2 file), apply rwxmap unsure answers (answers-train.csv, weight 1.0) and the Sonnet-sure x3 weight; writes only v3 files + summary-v3.md + SHA256SUMS-v3, leaves every v2 output untouched')
 ap.add_argument('--old-pool', choices=['replay', 'all'], default='replay', help="'all' = ALL 302,211 old rows (minus exam #8 vendors) instead of the 60k replay + extra-ruled, same rwxmap rulings and weights; writes only <name>-allold.parquet + SHA256SUMS-allold and exits before the dev/summary part (prereg-r16-small-runs.md)"); A = ap.parse_args()
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'); D = lambda *a: os.path.join(ROOT, *a)
-RA = D('data/r16/review/rwxmap-r13-answers'); OUT = D('data/r16/train'); os.makedirs(OUT, exist_ok=True); NAME = 'teacher-train-v2' + ('-noexam7' if A.no_exam7 else '') + ('-allold' if A.old_pool == 'all' else '')
+RA = D('data/r16/review/rwxmap-r13-answers'); OUT = D('data/r16/train'); os.makedirs(OUT, exist_ok=True); NAME = ('teacher-train-v3' if A.v3 else 'teacher-train-v2') + ('-noexam7' if A.no_exam7 else '') + ('-allold' if A.old_pool == 'all' else '')
 sha = lambda p: hashlib.sha256(open(p, 'rb').read()).hexdigest()
 Y = {'r': 0, 'w': 1, 'x': 2}
 EX8 = re.compile(r'gitbook|baserow|looker|wekan|shortcut|clubhouse|bitrise', re.I)
@@ -140,6 +141,56 @@ for n in order + ['answers-d143.csv', 'answers-h400.csv']:
         if i not in skip: lastl[i] = r.rwxmap_letter
 rr = T[T.label_source == 'rwxmap']; assert (rr.label.values == [lastl[i] for i in rr.id]).all() and (rr.weight == rr.weight_reason.map(lambda x: 3.0 if x.startswith('d143') else 1.0)).all()
 assert len(rr) == len(lastl) - len(set(lastl) & set(dropped_ex8.id)), 'not every ruled row is in the set'
+
+# ---- v3 (section 14): the v2 set rebuilt above must equal the v2 file; then rwxmap unsure answers + Sonnet-sure x3 weight; dev v3. Writes v3 files only and exits.
+if A.v3:
+    assert not A.no_exam7 and A.old_pool == 'replay'
+    v2 = pd.read_parquet(os.path.join(OUT, 'teacher-train-v2.parquet')); assert sha(os.path.join(OUT, 'teacher-train-v2.parquet')) == '9e1f37003cca905ef1cb869fb59bba480abbf0a9f86dce22133b77543e8a1870'
+    assert v2.drop(columns=['dup_k1'], errors='ignore').equals(T.drop(columns=['dup_k1'])), 'rebuilt v2 differs from the v2 file'
+    UP = D('data/r16/review/rwxmap-unsure'); U = rd(os.path.join(UP, 'answers-train.csv')); DV3 = rd(os.path.join(UP, 'answers-dev-v3.csv'))
+    assert sha(os.path.join(UP, 'answers-train.csv')) == '92daa73bc69b9302591b580a26609a029716734f7cf8449bb0f758c28459ffff' and sha(os.path.join(UP, 'answers-dev-v3.csv')) == 'c123b896b56b338c7e16f6704570ed521d6da2d8b5b4ff3286fedc404d505a9c'
+    assert len(U) == 3791 and U.op_id.is_unique and len(DV3) == 62 and DV3.op_id.is_unique and U.rwxmap_letter.isin(list(Y)).all() and DV3.rwxmap_letter.isin(list(Y)).all()
+    T3 = T.copy(); ix = T3.set_index('op_id', drop=False).index; assert ix.is_unique; assert U.op_id.isin(T3.op_id).all(), 'not all 3,791 unsure rows found'
+    mu = T3.op_id.isin(U.op_id).values; uu = U.set_index('op_id'); assert mu.sum() == 3791
+    assert ((T3.label_source[mu] == 'sonnet') & (T3.sonnet_confidence[mu] == 'unsure') & (T3.weight[mu] == 0.3)).all(), 'answers-train rows must all be Sonnet-unsure at 0.3'
+    assert (uu.sonnet_letter.loc[T3.op_id[mu]].values == T3.label[mu].values).all(), 'answers-train sonnet_letter differs from the v2 label'
+    v2_unsure_total = int(((T3.label_source == 'sonnet') & (T3.sonnet_confidence == 'unsure')).sum()); assert v2_unsure_total == 3791
+    old_lab = T3.label.copy(); T3.loc[mu, 'label'] = uu.rwxmap_letter.loc[T3.op_id[mu]].values; T3.loc[mu, 'label_source'] = 'rwxmap'; T3.loc[mu, 'weight'] = 1.0   # prior_label kept
+    T3['y'] = T3.label.map(Y).astype('int64'); unsure_changed = int((T3.label[mu] != old_lab[mu]).sum())
+    ms = ((T3.label_source == 'sonnet') & (T3.sonnet_confidence == 'sure')).values; assert (T3.weight[ms] == 1.0).all() and (T3.weight_reason[ms] == '').all()
+    T3.loc[ms, 'weight'] = 3.0; T3.loc[ms, 'weight_reason'] = 'sonnet_sure_x3'; n_sure = int(ms.sum())
+    left = T3[(T3.label_source == 'sonnet') & (T3.sonnet_confidence == 'unsure')]; assert len(left) == 0, f'{len(left)} Sonnet-unsure rows left'
+    assert (T3.weight.isin([1.0, 3.0])).all()
+    # hard checks again on v3
+    assert T3.id.is_unique and T3.op_id.is_unique and T3.label.isin(list(Y)).all() and (T3.weight > 0).all() and (T3.text.str.len() > 0).all() and (T3.y == T3.label.map(Y)).all() and len(T3) == len(T)
+    assert not (T3.vendor.str.contains(EX8) | T3.provider.str.contains(EX8)).any(), 'exam #8 vendor'
+    assert not set(devd.op_id) & set(T3.id), 'train/dev id overlap'
+    kd3 = set(opkey.k1(devd)); assert not any(k in kd3 for k in opkey.k1(T3.assign(operationId=T3.operationId.fillna(''), summary=T3.summary.fillna('')))), 'exact opkey overlap with dev'
+    for c in ('id', 'text', 'summary', 'method', 'path', 'operationId', 'vendor', 'part', 'src'): assert (T3[c].values == T[c].values).all(), c
+    T3.to_parquet(os.path.join(OUT, NAME + '.parquet'), index=False); T3.to_csv(os.path.join(OUT, NAME + '.csv.gz'), index=False, compression=dict(method='gzip', mtime=0))
+    # dev v3: from dev-v2; label_source rwxmap for the 62; prior_label (v1, before D143) kept, prior_label_v2 = the v2 label, d143_touched marks the 9 D143 rows, unsure62 marks the 62
+    FD = D('data/r16/labels/final'); dv2f = os.path.join(FD, 'final-labels-r16-dev-v2.parquet'); assert sha(dv2f) == 'ef5955787e88e5d4b4ceeaaf93de35026c678c67b86d51e710b275a7534e6e69'
+    dv = pd.read_parquet(dv2f).fillna(''); assert len(dv) == 4475 and DV3.op_id.isin(dv.op_id).all(); dd = DV3.set_index('op_id'); m3 = dv.op_id.isin(dd.index).values
+    assert (dd.sonnet_letter.loc[dv.op_id[m3]].values == dv.label[m3].values).all() and (dv.label_source[m3] == 'sonnet').all(), 'dev-v3 answers must start from sonnet rows with the dev-v2 label'
+    d9ids = set(rd(os.path.join(RA, 'answers-d143-dev.csv')).op_id); assert len(d9ids) == 9 and not d9ids & set(dd.index)
+    dv3 = dv.copy(); dv3['prior_label_v2'] = dv.label; dv3['d143_touched'] = dv3.op_id.isin(d9ids); dv3['unsure62'] = m3
+    dv3.loc[m3, 'label'] = dd.rwxmap_letter.loc[dv.op_id[m3]].values; dv3.loc[m3, 'label_source'] = 'rwxmap'
+    dchg = pd.crosstab(dv.label[m3].values, dv3.label[m3].values); dev_changed = int((dv3.label != dv3.prior_label_v2).sum()); assert dev_changed == int((dd.changed == 'yes').sum()) == 23
+    assert dv3.op_id.is_unique and dv3.label.isin(list(Y)).all()
+    dv3.to_parquet(os.path.join(FD, 'final-labels-r16-dev-v3.parquet'), index=False); dv3.to_csv(os.path.join(FD, 'final-labels-r16-dev-v3.csv.gz'), index=False, compression=dict(method='gzip', mtime=0))
+    keep = [l for l in open(os.path.join(FD, 'SHA256SUMS')).read().splitlines() if 'dev-v3' not in l]
+    open(os.path.join(FD, 'SHA256SUMS'), 'w').write('\n'.join(keep + [f'{sha(os.path.join(FD, n))}  {n}' for n in ('final-labels-r16-dev-v3.csv.gz', 'final-labels-r16-dev-v3.parquet')]) + '\n')
+    def md(d): return '\n'.join(['| ' + ' | '.join(map(str, d.columns)) + ' |', '|' + '---|' * len(d.columns)] + ['| ' + ' | '.join(map(str, r)) + ' |' for r in d.itertuples(index=False)])
+    def tbl(s): return ', '.join(f'{k} {v:,}' for k, v in s.items())
+    L = ['# Round 16 teacher training set v3', '', f'Rows {len(T3):,}. Made by `r16/build_teacher_train.py --v3`. v2 rebuilt in memory (asserted equal to `teacher-train-v2.parquet` sha256 `9e1f3700...`), then: (1) `data/r16/review/rwxmap-unsure/answers-train.csv` (sha256 `92daa73b...`, 3,791 rows) applied to the 3,791 Sonnet-unsure rows (all found; all were label_source sonnet, unsure, weight 0.3): label = rwxmap_letter, label_source rwxmap, weight 1.0, prior_label kept; {unsure_changed} of them changed letter vs Sonnet; (2) contested rows with label_source sonnet and sonnet_confidence sure: weight 3.0, weight_reason sonnet_sure_x3 ({n_sure:,} rows). Every other v2 weight kept (r15 replay 3.0, d143 3.0, exam7 3.0, likely 1.0). No row is Sonnet-unsure any more (asserted: 0 left).'.replace('{unsure_changed}', str(unsure_changed)).replace('{n_sure:,}', f'{n_sure:,}'), '']
+    L += ['## By part', '', tbl(T3.part.value_counts().reindex(['new', 'holdout', 'replay-r13', 'replay-r15', 'extra-ruled', 'exam7']).fillna(0).astype(int)), '', '## By letter', '', tbl(T3.label.value_counts()), f'(v2: {tbl(T.label.value_counts())}; letter changes v2 to v3: {unsure_changed})', '']
+    L += ['## By label_source', '', tbl(T3.label_source.value_counts()), '', '## By weight', '', tbl(T3.weight.value_counts().sort_index()) + f'; total {T3.weight.sum():,.1f} (v2 total {T.weight.sum():,.1f})', '']
+    L += ['## By weight_reason', '', tbl(T3.weight_reason.replace('', '(none, 1.0 or 3.0 plain)').value_counts()), '', '## Letter by part', '', md(T3.groupby(['part', 'label']).size().unstack(fill_value=0).reset_index()), '', '## The 3,791 unsure rows, Sonnet letter (rows) to rwxmap letter (columns)', '', md(pd.crosstab(old_lab[mu].values, T3.label[mu].values).rename_axis('sonnet').reset_index()), '']
+    L += ['## Dev v3', '', f'`final-labels-r16-dev-v3.{{parquet,csv.gz}}` from dev-v2 (sha256 `ef595578...`) plus `answers-dev-v3.csv` (sha256 `c123b896...`, 62 rows, all found, all label_source sonnet with the v2 label; label_source becomes rwxmap): {dev_changed} letters changed vs dev-v2 ({int(((dv.label[m3] == "w").values & (dv3.label[m3] == "x").values).sum())} w to x, {int(((dv.label[m3] == "x").values & (dv3.label[m3] == "w").values).sum())} x to w). Extra columns: prior_label (v1, before D143, unchanged), prior_label_v2, d143_touched (the 9 D143 rows), unsure62. Dev letters v3: {tbl(dv3.label.value_counts())} (v2: {tbl(dv.label.value_counts())}). answers-dev.csv (v1) and answers-dev-v2.csv are superseded and not used.', '']
+    L += [f'Checks passed: unique ids; no train/dev overlap by id or exact opkey; no exam #8 vendor; letters r/w/x; weights > 0 (all 1.0 or 3.0); all 3,791 unsure rows found; no Sonnet-unsure row left; text, ids, parts unchanged from v2.']
+    open(os.path.join(OUT, 'summary-v3.md'), 'w').write('\n'.join(L) + '\n')
+    open(os.path.join(OUT, 'SHA256SUMS-v3'), 'w').write(''.join(f'{sha(os.path.join(OUT, n))}  {n}\n' for n in (NAME + '.parquet', NAME + '.csv.gz', 'summary-v3.md')))
+    print('\n'.join(L)); sys.exit(0)
 T.drop(columns=['dup_k1']).to_parquet(os.path.join(OUT, NAME + '.parquet'), index=False)
 if A.old_pool == 'all':
     open(os.path.join(OUT, 'SHA256SUMS-allold'), 'w').write(f"{sha(os.path.join(OUT, NAME + '.parquet'))}  {NAME}.parquet\n"); print(len(T), T.part.value_counts().to_dict(), T.label.value_counts().to_dict(), f'weight total {T.weight.sum():,.1f}'); sys.exit(0)
