@@ -251,3 +251,61 @@ Train loss (mean of the logged per-25-step values; per-step values are noisy and
 2. The tie-band is what decides Q2: the softened-target student is statistically indistinguishable from the plain one on accuracy, though it is much better calibrated (T 1.19 against 1.49).
 3. The fitted T of both continued teachers rose to about 1.85 to 1.89 (from 1.36); the full teacher's soft targets, if used, would need that new T, not 1.362087.
 4. Section 7.7 stands: nothing here is a ship candidate; only exam #8, once, decides shipping.
+
+## 14. Addendum: the FULL teacher run (2026-11-22; sections 1 to 13 unchanged). Written BEFORE any full-run training
+
+The user approved round 16's full teacher run after the small runs. Sections 12/13 stand as written (dev-v2 labels). This addendum changes the labels the full teacher is judged on (dev-v3) and the training set (teacher-train-v3), and fixes the judging rule before anything is trained.
+
+### 14.1 Inputs
+
+| file | sha256 |
+|---|---|
+| `data/r16/train/teacher-train-v3.parquet` (360,536 rows; `r16/build_teacher_train.py --v3`, summary `docs/product/r16-teacher-train-v3-summary.md`) | `e5487eca839c164a919092df66094e25db77420c30edd51a015563f1d02a96b2` |
+| `data/r16/review/rwxmap-unsure/answers-train.csv` (3,791 rows) | `92daa73bc69b9302591b580a26609a029716734f7cf8449bb0f758c28459ffff` |
+| `data/r16/review/rwxmap-unsure/answers-dev-v3.csv` (62 rows) | `c123b896b56b338c7e16f6704570ed521d6da2d8b5b4ff3286fedc404d505a9c` |
+| `data/r16/labels/final/final-labels-r16-dev-v3.parquet` (4,475 rows, same ids and order as dev-v2) | `b268b074c2225993e8f4dc146ea2d2672a8226f1932e20d27c1d9dfb507bceb5` |
+| `r16/dev-subset-b-ids.txt` (frozen subset (b), 3,286 ids, NOT recomputed; sha rechecked 2026-11-22) | `10375671d69e3a71b793bccb638bef9ccf78eea8c8c72d0446279b437d401997` |
+| `r16/score_dev.py` (new option `--dev-set v3`; default v2 reproduces section 13 counts exactly, T differs in the 9th digit) | `d8b4de1d484c01a5d001cc40df3bfca2b7a2661a31be07b2524c21ea77967ba9` |
+| `r16/build_teacher_train.py` (new `--v3`) | `e185d71eba40a366f85a7eb92ccd603c63d0b199e3e17e34277c9dcb87b75bc5` |
+| `r16/full-teacher.sh` | `396119fe83c38d64707bfe21b2f34016712d0848c20ee4396457b2c4ca67791f` |
+
+What v3 is: v2 rebuilt and asserted equal to the v2 file, then (1) the 3,791 rows that were Sonnet-unsure (weight 0.3) take rwxmap's letter, label_source rwxmap, weight 1.0 (894 change letter: w to x 643, w to r 61, x to w 126, r to w 25, r to x 24, x to r 15); (2) contested rows with label_source sonnet and sonnet_confidence sure get weight 3.0, weight_reason `sonnet_sure_x3`: **27,473 rows** (the brief said "about 27,669"; the 196 difference is rows whose label_source is rwxmap but whose sonnet_confidence column is sure; they keep their rwxmap weights, as the rule is on label_source sonnet). Every other v2 weight kept; no row has two reasons. Total weight 463,434.0 (309,087 rows at 1.0, 51,449 at 3.0). No Sonnet-unsure row is left. Letters r 176,914, w 82,295, x 101,327. Dev v3 changes 23 of 4,475 dev letters against dev-v2 (12 w to x, 11 x to w; the other 39 of the 62 rows only confirm the label). dev-v1 and dev-v2 answer files (`answers-dev.csv`, `answers-dev-v2.csv`) are superseded and not used.
+
+### 14.2 Full teacher arm (fixed)
+
+Continue from the r15 bge teacher (`model.safetensors` sha256 `d53deafc13190f6c4807ca360b0de438828728680ee248abee93ce9d1457b741`) on teacher-train-v3, **tA recipe**: lr 2e-5, hard-label weighted CE (no `--teacher`, so alpha is unused), 1 epoch, batch 32, max_len 128, 3 threads, seed 1, warmup 6% then linear decay, `--ckpt 250`. 360,536 rows = 11,267 steps; at the measured 4.2 s/step about 13.1 h plus the end evaluation. Server dir `~/rwxlite-train/r16-full/teacher/` (new; the r15 and r16-small dirs read only), `data/train/train.parquet` = teacher-train-v3, `val.parquet` and `v3eval.parquet` as in section 2, `train/{finetune,common,losscost}.py` from the repo (shas as section 4). Command (run by `r16/full-teacher.sh`: nice 19, ionice -c3, memwatch kills under 2 GB free, nohup):
+
+```
+python train/finetune.py --base BAAI/bge-base-en-v1.5 --init $HOME/rwxlite-train/r15-teacher/data/train/ckpt-r15-teacher/final --row_weight weight --alpha 0.7 --epochs 1 --bs 32 --lr 2e-5 --max_len 128 --threads 3 --ckpt 250 --tag r16-full-teacher
+```
+
+### 14.3 Judging (decided now)
+
+Mode a, fp32 PyTorch CPU batch 1 (`r16/predict_dev.py` on dev and val), real secondPass (rwxmap tree 1c25be1) at 0.90, `r16/score_dev.py --dev-set v3`, exactly as sections 5 and 7, with dev-v3 labels. **The candidate uses its own val-fitted T** (golden-section on the 4,180-row val). **Base = the r15 teacher at its fixed T 1.362087**, never refitted; its prediction file `data/r16/scratch/small/base-teacher-dev.csv` (sha256 `b2f7946ba1b0bc247ed45d589a135a9c49ab190e6417acffe5bfa4fc9bc2f49b`, asserted before rescoring) is unchanged, only the labels changed, so it was rescored, not re-predicted.
+
+**Decision floor, same as section 7 clause 1, on subset (b) with dev-v3 labels** (the base rescored: (b) exact 3,087 (93.944%), too loose 37 (1.126%), too tight 162; (a) exact 4,247 (94.905%), too loose 48, too tight 180; real secondPass and replica agree on all 4,475):
+
+- **(b): exact >= 3,087 AND too loose <= 37 + 32 = 69.** Pass both or fail.
+- (a), reported, never overrules (b): exact >= 4,247 and too loose <= 48 + 44 = 92.
+- Passing this floor is not a ship candidate (section 7.7); only exam #8, once, decides shipping.
+
+Information only, decide nothing: too tight on the 62 rwxmap-unsure dev rows (56 are in (b)); the D143 POST-create readout (466 rows in (a), 319 in (b), truth before D143 = v1 `prior_label`, after = v3); the candidate's own val-fitted T; standalone argmax; paired counts against the base.
+
+### 14.4 Dev-v3 rescores (information only; labels changed, predictions did not)
+
+Files `docs/product/r16-dev-v3-rescores/<arm>-score.json`; prediction-file sha256 as in `docs/product/r16-small-runs-pred-sha256.txt` (re-verified). Mode a, exact / too loose / too tight:
+
+| model (T) | (b) v3 | (a) v3 | (b) v2 (section 13) |
+|---|---|---|---|
+| base r15 teacher (1.362087) | 3,087 / 37 / 162 | 4,247 / 48 / 180 | 3,085 / 37 / 164 |
+| tA (1.8495) | 3,081 / 34 / 171 | 4,242 / 44 / 189 | 3,081 / 33 / 172 |
+| tB (1.8896) | 3,064 / 35 / 187 | 4,223 / 44 / 208 | 3,064 / 34 / 188 |
+| base 0.4.0 student (1.3832) | 3,064 / 42 / 180 | 4,216 / 52 / 207 | 3,066 / 40 / 180 |
+| sS0 (1.4875) | 3,067 / 38 / 181 | 4,217 / 47 / 211 | 3,069 / 36 / 181 |
+| sS1 (1.1900) | 3,066 / 39 / 181 | 4,216 / 48 / 211 | 3,068 / 37 / 181 |
+
+On dev-v3 tA is still 6 rows below the base on (b) (3,081 against 3,087), so the section 13 Q1 verdict (neither small teacher passes the floor) does not change; the 23 relabelled rows moved the base up by 2 and the students down by 2. Information on the 62 rwxmap-unsure rows, mode a exact / too loose / too tight (n 62; 56 in (b)): base teacher 37 / 8 / 17; tA 37 / 6 / 19; tB 34 / 8 / 20; base 0.4.0 32 / 9 / 21; sS0 32 / 8 / 22; sS1 31 / 9 / 22. POST-create too tight after D143 (v3), (b) n 319 | (a) n 466: base teacher 55 (17.24%) | 65 (13.95%); tA 53 | 63; tB 60 | 72; base 0.4.0 54 | 67; sS0 59 | 74; sS1 58 | 73.
+
+### 14.5 Fallback (written now)
+
+If the full teacher fails the floor of 14.3 on (b), the plan falls back to **distilling the student from the r15 teacher**: keep the r15 teacher unchanged (T 1.362087), compute its T=1 probabilities over teacher-train-v3 (`train/teacher_probs.py`, about 3.8 h), and train the MiniLM student from the 0.4.0 student on those soft targets with the sS0 recipe (0.7 soft CE + 0.3 hard CE, lr 2e-5, 1 epoch, bs 32; Q2 winner sS0, not the softened variant). The student faces its own val floor against 0.4.0 and the same dev-v3 scoring; the failed full teacher is reported to the user with its numbers, not retried.
