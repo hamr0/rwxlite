@@ -1,0 +1,279 @@
+{
+ "name": "tA",
+ "T": 1.849538810607223,
+ "T_how": "fitted on val (4,180 rows, batch 1)",
+ "cut": 0.9,
+ "mode_a_source": "real secondpass.js (rwxmap-1c25be1)",
+ "replica_agrees_rows": 4475,
+ "file_sha256": {
+  "dev": "ef5955787e88e5d4b4ceeaaf93de35026c678c67b86d51e710b275a7534e6e69",
+  "mech": "0600957b7c581bed19e81c8db0bfb2cce4f288621836c69905ed02a8db869fe4",
+  "subset": "10375671d69e3a71b793bccb638bef9ccf78eea8c8c72d0446279b437d401997",
+  "pred": "573fdd869d459fe0541868308cb2d83b9ffb3becf5c918f9fc023b6dec686f80",
+  "val_pred": "bc087a8c853c4211ac2d0a9a3821a68f2c0d8112f0ccbc6fe493ca3c8dba797f",
+  "score_dev.py": "17c599e34a0a18254800969cd466a113ce0b1d012d07570bbf6421fa07c43496"
+ },
+ "all_4475": {
+  "n": 4475,
+  "mode_a": {
+   "n": 4475,
+   "exact": 4240,
+   "exact_pct": 94.749,
+   "loose": 45,
+   "loose_pct": 1.006,
+   "tight": 190,
+   "tight_pct": 4.246,
+   "confusion_truth_to_pred": {
+    "r>r": 2201,
+    "r>w": 1,
+    "r>x": 26,
+    "w>r": 6,
+    "w>w": 850,
+    "w>x": 163,
+    "x>r": 27,
+    "x>w": 12,
+    "x>x": 1189
+   }
+  },
+  "standalone": {
+   "n": 4475,
+   "exact": 4370,
+   "exact_pct": 97.654,
+   "loose": 64,
+   "loose_pct": 1.43,
+   "tight": 41,
+   "tight_pct": 0.916,
+   "confusion_truth_to_pred": {
+    "r>r": 2221,
+    "r>w": 4,
+    "r>x": 3,
+    "w>r": 15,
+    "w>w": 970,
+    "w>x": 34,
+    "x>r": 4,
+    "x>w": 45,
+    "x>x": 1179
+   }
+  },
+  "mechanical": {
+   "n": 4475,
+   "exact": 3883,
+   "exact_pct": 86.771,
+   "loose": 69,
+   "loose_pct": 1.542,
+   "tight": 523,
+   "tight_pct": 11.687,
+   "confusion_truth_to_pred": {
+    "r>r": 2156,
+    "r>w": 1,
+    "r>x": 71,
+    "w>r": 3,
+    "w>w": 565,
+    "w>x": 451,
+    "x>r": 28,
+    "x>w": 38,
+    "x>x": 1162
+   }
+  },
+  "d143_post_create": {
+   "rule": "POST and first word of operationId or summary in add,book,create,insert,make,new,place,register,reserve,schedule,submit",
+   "n": 466,
+   "mode_a": {
+    "before_D143_v1": {
+     "exact": 392,
+     "loose": 6,
+     "tight": 68,
+     "tight_pct": 14.592
+    },
+    "after_D143_v2": {
+     "exact": 399,
+     "loose": 6,
+     "tight": 61,
+     "tight_pct": 13.09
+    }
+   },
+   "standalone": {
+    "before_D143_v1": {
+     "exact": 428,
+     "loose": 21,
+     "tight": 17,
+     "tight_pct": 3.648
+    },
+    "after_D143_v2": {
+     "exact": 431,
+     "loose": 23,
+     "tight": 12,
+     "tight_pct": 2.575
+    }
+   }
+  },
+  "d143_rwxmap_touched_9": {
+   "n": 9,
+   "mode_a": {
+    "before_D143_v1": {
+     "exact": 0,
+     "loose": 0,
+     "tight": 9,
+     "tight_pct": 100.0
+    },
+    "after_D143_v2": {
+     "exact": 7,
+     "loose": 0,
+     "tight": 2,
+     "tight_pct": 22.222
+    }
+   },
+   "standalone": {
+    "before_D143_v1": {
+     "exact": 3,
+     "loose": 0,
+     "tight": 6,
+     "tight_pct": 66.667
+    },
+    "after_D143_v2": {
+     "exact": 6,
+     "loose": 2,
+     "tight": 1,
+     "tight_pct": 11.111
+    }
+   }
+  }
+ },
+ "subset_b_3286": {
+  "n": 3286,
+  "mode_a": {
+   "n": 3286,
+   "exact": 3081,
+   "exact_pct": 93.761,
+   "loose": 33,
+   "loose_pct": 1.004,
+   "tight": 172,
+   "tight_pct": 5.234,
+   "confusion_truth_to_pred": {
+    "r>r": 1600,
+    "r>w": 1,
+    "r>x": 25,
+    "w>r": 3,
+    "w>w": 632,
+    "w>x": 146,
+    "x>r": 22,
+    "x>w": 8,
+    "x>x": 849
+   }
+  },
+  "standalone": {
+   "n": 3286,
+   "exact": 3199,
+   "exact_pct": 97.352,
+   "loose": 53,
+   "loose_pct": 1.613,
+   "tight": 34,
+   "tight_pct": 1.035,
+   "confusion_truth_to_pred": {
+    "r>r": 1620,
+    "r>w": 3,
+    "r>x": 3,
+    "w>r": 12,
+    "w>w": 741,
+    "w>x": 28,
+    "x>r": 4,
+    "x>w": 37,
+    "x>x": 838
+   }
+  },
+  "mechanical": {
+   "n": 3286,
+   "exact": 2823,
+   "exact_pct": 85.91,
+   "loose": 55,
+   "loose_pct": 1.674,
+   "tight": 408,
+   "tight_pct": 12.416,
+   "confusion_truth_to_pred": {
+    "r>r": 1559,
+    "r>w": 1,
+    "r>x": 66,
+    "w>r": 3,
+    "w>w": 437,
+    "w>x": 341,
+    "x>r": 23,
+    "x>w": 29,
+    "x>x": 827
+   }
+  },
+  "d143_post_create": {
+   "rule": "POST and first word of operationId or summary in add,book,create,insert,make,new,place,register,reserve,schedule,submit",
+   "n": 319,
+   "mode_a": {
+    "before_D143_v1": {
+     "exact": 261,
+     "loose": 4,
+     "tight": 54,
+     "tight_pct": 16.928
+    },
+    "after_D143_v2": {
+     "exact": 264,
+     "loose": 4,
+     "tight": 51,
+     "tight_pct": 15.987
+    }
+   },
+   "standalone": {
+    "before_D143_v1": {
+     "exact": 290,
+     "loose": 18,
+     "tight": 11,
+     "tight_pct": 3.448
+    },
+    "after_D143_v2": {
+     "exact": 293,
+     "loose": 18,
+     "tight": 8,
+     "tight_pct": 2.508
+    }
+   }
+  },
+  "d143_rwxmap_touched_9": {
+   "n": 5,
+   "mode_a": {
+    "before_D143_v1": {
+     "exact": 0,
+     "loose": 0,
+     "tight": 5,
+     "tight_pct": 100.0
+    },
+    "after_D143_v2": {
+     "exact": 3,
+     "loose": 0,
+     "tight": 2,
+     "tight_pct": 40.0
+    }
+   },
+   "standalone": {
+    "before_D143_v1": {
+     "exact": 1,
+     "loose": 0,
+     "tight": 4,
+     "tight_pct": 80.0
+    },
+    "after_D143_v2": {
+     "exact": 4,
+     "loose": 0,
+     "tight": 1,
+     "tight_pct": 20.0
+    }
+   }
+  }
+ },
+ "paired_vs": {
+  "file": "data/r16/scratch/small/base-teacher-rows.csv",
+  "all_4475": {
+   "this_right_other_wrong": 17,
+   "other_right_this_wrong": 20
+  },
+  "subset_b_3286": {
+   "this_right_other_wrong": 12,
+   "other_right_this_wrong": 16
+  }
+ }
+}

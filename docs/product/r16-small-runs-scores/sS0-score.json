@@ -1,0 +1,279 @@
+{
+ "name": "sS0",
+ "T": 1.4875340753646826,
+ "T_how": "fitted on val (4,180 rows, batch 1)",
+ "cut": 0.9,
+ "mode_a_source": "real secondpass.js (rwxmap-1c25be1)",
+ "replica_agrees_rows": 4475,
+ "file_sha256": {
+  "dev": "ef5955787e88e5d4b4ceeaaf93de35026c678c67b86d51e710b275a7534e6e69",
+  "mech": "0600957b7c581bed19e81c8db0bfb2cce4f288621836c69905ed02a8db869fe4",
+  "subset": "10375671d69e3a71b793bccb638bef9ccf78eea8c8c72d0446279b437d401997",
+  "pred": "3dc1ba6cb909a702da83b083c0a2d08c39d5506b7edd9ae45745607c51a8115a",
+  "val_pred": "c64cd5476b3abd29757b36163e552daeaa8098ec053a41950524de0ec88f2638",
+  "score_dev.py": "17c599e34a0a18254800969cd466a113ce0b1d012d07570bbf6421fa07c43496"
+ },
+ "all_4475": {
+  "n": 4475,
+  "mode_a": {
+   "n": 4475,
+   "exact": 4217,
+   "exact_pct": 94.235,
+   "loose": 47,
+   "loose_pct": 1.05,
+   "tight": 211,
+   "tight_pct": 4.715,
+   "confusion_truth_to_pred": {
+    "r>r": 2202,
+    "r>w": 1,
+    "r>x": 25,
+    "w>r": 3,
+    "w>w": 831,
+    "w>x": 185,
+    "x>r": 27,
+    "x>w": 17,
+    "x>x": 1184
+   }
+  },
+  "standalone": {
+   "n": 4475,
+   "exact": 4319,
+   "exact_pct": 96.514,
+   "loose": 104,
+   "loose_pct": 2.324,
+   "tight": 52,
+   "tight_pct": 1.162,
+   "confusion_truth_to_pred": {
+    "r>r": 2212,
+    "r>w": 6,
+    "r>x": 10,
+    "w>r": 15,
+    "w>w": 968,
+    "w>x": 36,
+    "x>r": 11,
+    "x>w": 78,
+    "x>x": 1139
+   }
+  },
+  "mechanical": {
+   "n": 4475,
+   "exact": 3883,
+   "exact_pct": 86.771,
+   "loose": 69,
+   "loose_pct": 1.542,
+   "tight": 523,
+   "tight_pct": 11.687,
+   "confusion_truth_to_pred": {
+    "r>r": 2156,
+    "r>w": 1,
+    "r>x": 71,
+    "w>r": 3,
+    "w>w": 565,
+    "w>x": 451,
+    "x>r": 28,
+    "x>w": 38,
+    "x>x": 1162
+   }
+  },
+  "d143_post_create": {
+   "rule": "POST and first word of operationId or summary in add,book,create,insert,make,new,place,register,reserve,schedule,submit",
+   "n": 466,
+   "mode_a": {
+    "before_D143_v1": {
+     "exact": 382,
+     "loose": 6,
+     "tight": 78,
+     "tight_pct": 16.738
+    },
+    "after_D143_v2": {
+     "exact": 387,
+     "loose": 7,
+     "tight": 72,
+     "tight_pct": 15.451
+    }
+   },
+   "standalone": {
+    "before_D143_v1": {
+     "exact": 421,
+     "loose": 34,
+     "tight": 11,
+     "tight_pct": 2.361
+    },
+    "after_D143_v2": {
+     "exact": 416,
+     "loose": 40,
+     "tight": 10,
+     "tight_pct": 2.146
+    }
+   }
+  },
+  "d143_rwxmap_touched_9": {
+   "n": 9,
+   "mode_a": {
+    "before_D143_v1": {
+     "exact": 1,
+     "loose": 0,
+     "tight": 8,
+     "tight_pct": 88.889
+    },
+    "after_D143_v2": {
+     "exact": 6,
+     "loose": 1,
+     "tight": 2,
+     "tight_pct": 22.222
+    }
+   },
+   "standalone": {
+    "before_D143_v1": {
+     "exact": 7,
+     "loose": 0,
+     "tight": 2,
+     "tight_pct": 22.222
+    },
+    "after_D143_v2": {
+     "exact": 2,
+     "loose": 6,
+     "tight": 1,
+     "tight_pct": 11.111
+    }
+   }
+  }
+ },
+ "subset_b_3286": {
+  "n": 3286,
+  "mode_a": {
+   "n": 3286,
+   "exact": 3069,
+   "exact_pct": 93.396,
+   "loose": 36,
+   "loose_pct": 1.096,
+   "tight": 181,
+   "tight_pct": 5.508,
+   "confusion_truth_to_pred": {
+    "r>r": 1601,
+    "r>w": 1,
+    "r>x": 24,
+    "w>r": 3,
+    "w>w": 622,
+    "w>x": 156,
+    "x>r": 22,
+    "x>w": 11,
+    "x>x": 846
+   }
+  },
+  "standalone": {
+   "n": 3286,
+   "exact": 3154,
+   "exact_pct": 95.983,
+   "loose": 89,
+   "loose_pct": 2.708,
+   "tight": 43,
+   "tight_pct": 1.309,
+   "confusion_truth_to_pred": {
+    "r>r": 1612,
+    "r>w": 5,
+    "r>x": 9,
+    "w>r": 12,
+    "w>w": 740,
+    "w>x": 29,
+    "x>r": 11,
+    "x>w": 66,
+    "x>x": 802
+   }
+  },
+  "mechanical": {
+   "n": 3286,
+   "exact": 2823,
+   "exact_pct": 85.91,
+   "loose": 55,
+   "loose_pct": 1.674,
+   "tight": 408,
+   "tight_pct": 12.416,
+   "confusion_truth_to_pred": {
+    "r>r": 1559,
+    "r>w": 1,
+    "r>x": 66,
+    "w>r": 3,
+    "w>w": 437,
+    "w>x": 341,
+    "x>r": 23,
+    "x>w": 29,
+    "x>x": 827
+   }
+  },
+  "d143_post_create": {
+   "rule": "POST and first word of operationId or summary in add,book,create,insert,make,new,place,register,reserve,schedule,submit",
+   "n": 319,
+   "mode_a": {
+    "before_D143_v1": {
+     "exact": 255,
+     "loose": 4,
+     "tight": 60,
+     "tight_pct": 18.809
+    },
+    "after_D143_v2": {
+     "exact": 258,
+     "loose": 4,
+     "tight": 57,
+     "tight_pct": 17.868
+    }
+   },
+   "standalone": {
+    "before_D143_v1": {
+     "exact": 282,
+     "loose": 30,
+     "tight": 7,
+     "tight_pct": 2.194
+    },
+    "after_D143_v2": {
+     "exact": 281,
+     "loose": 32,
+     "tight": 6,
+     "tight_pct": 1.881
+    }
+   }
+  },
+  "d143_rwxmap_touched_9": {
+   "n": 5,
+   "mode_a": {
+    "before_D143_v1": {
+     "exact": 0,
+     "loose": 0,
+     "tight": 5,
+     "tight_pct": 100.0
+    },
+    "after_D143_v2": {
+     "exact": 3,
+     "loose": 0,
+     "tight": 2,
+     "tight_pct": 40.0
+    }
+   },
+   "standalone": {
+    "before_D143_v1": {
+     "exact": 3,
+     "loose": 0,
+     "tight": 2,
+     "tight_pct": 40.0
+    },
+    "after_D143_v2": {
+     "exact": 2,
+     "loose": 2,
+     "tight": 1,
+     "tight_pct": 20.0
+    }
+   }
+  }
+ },
+ "paired_vs": {
+  "file": "data/r16/scratch/small/base-student-rows.csv",
+  "all_4475": {
+   "this_right_other_wrong": 18,
+   "other_right_this_wrong": 17
+  },
+  "subset_b_3286": {
+   "this_right_other_wrong": 16,
+   "other_right_this_wrong": 13
+  }
+ }
+}
