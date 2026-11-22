@@ -1,0 +1,11 @@
+# Round 16 small runs: model.safetensors and prediction-file sha256 (fp32, batch 1). Written BEFORE the scores of the same arm.
+# model.safetensors
+0285ca483378beef139b946c3faab4ae728e8dd140ca0c54b00215d5fdcb3c26  models/tA/final/model.safetensors
+8f97abf057a8c0bab4c00892637b20db10fe9e93873b8ad9adaf311f2e98fb85  models/tB/final/model.safetensors
+2d7477c772faf8414f6ae38c3511c007365796e02b160c2c9a7509918a4198e8  models/sS0/final/model.safetensors
+08a23f5124b12550492981bf28f8225d641cec511960d7d28917d764249c06bd  models/sS1/final/model.safetensors
+# predictions (students)
+3dc1ba6cb909a702da83b083c0a2d08c39d5506b7edd9ae45745607c51a8115a  sS0-dev.csv
+c64cd5476b3abd29757b36163e552daeaa8098ec053a41950524de0ec88f2638  sS0-val.csv
+1b23221229301fc3360c62a0b9be6cb203716cafdd22952115b3be68bb1c9a04  sS1-dev.csv
+388a51ea8f0de111b88e4def0fc25df5beb695333892f12c7269a87dca42e009  sS1-val.csv
