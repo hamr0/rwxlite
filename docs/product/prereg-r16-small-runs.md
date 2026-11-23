@@ -347,3 +347,44 @@ Floor on (b): exact >= 3,087 AND too loose <= 69. Full teacher on (b): exact **3
 
 1. The full teacher clears the floor that the tenth-size tA missed by 6 rows; the volume effect is +18 exact and minus 20 too tight on (b) with too loose unchanged within 2 rows. Single seed; the margin over the floor is 12 rows on (b).
 2. Next step is the user's call; this section starts nothing. The student distillation from this teacher (new soft targets at its own T 1.839, not 1.362087) is not started. Exam #8 is not run.
+
+## 16. Addendum: the FULL student run (2026-11-23; sections 1 to 15 unchanged). Written BEFORE any server job of this run
+
+The user approved distilling round 16's FULL student from the full teacher that passed in section 15. The recipe is fixed by the user; nothing in it is untested (no 50/50 mix, no softened T).
+
+### 16.1 Recipe (fixed)
+
+- **Data:** `data/r16/train/teacher-train-v3.parquet` (360,536 rows) sha256 `e5487eca839c164a919092df66094e25db77420c30edd51a015563f1d02a96b2`, the same rows, order and `weight` column as the full teacher (`--row_weight weight`). Server `data/train/train.parquet` of the new dir is this file; `val.parquet` `c54ee461...` and `v3eval.parquet` `831499b6...` as section 2.
+- **Init:** the r15 student (the shipped 0.4.0 model), `model.safetensors` sha256 `e431763878ffaec9753b94ef5d26ebe4227eaea432d132637307673f9e2061d9` (server `~/rwxlite-train/r15-student/data/train/ckpt-r15-student/final`).
+- **Soft targets:** the FULL r16 teacher's softmax at **T=1** over teacher-train-v3 (the sS0 arm that won Q2, section 13). Teacher checkpoint: `~/rwxlite-train/r16-full/teacher/data/train/ckpt-r16-full-teacher/final`, read only, referenced and not copied; `model.safetensors` sha256 `aac10da4d01d878a2868c03c95f337f595694e74e553980e74c58c4c3e5a419d` (section 15). The teacher's own val-fitted T 1.839092 is NOT used for the targets.
+- **Loss and schedule:** 0.7 soft CE + 0.3 hard CE, lr 2e-5, 1 epoch, batch 32, max_len 128, 3 threads, `--ckpt 250`, seed 1, warmup 6% then linear decay, tag `r16-full-student`. 360,536 rows = 11,267 steps.
+- Code unchanged: `train/finetune.py` `6e54a3c3...`, `train/common.py` `061da692...`, `train/teacher_probs.py` `e49fa903...` (shas verified on the server before the start).
+
+### 16.2 Exact commands (run by `r16/full-student.sh`, two phases, dir `~/rwxlite-train/r16-full/student/`, new; the teacher, r15 and r16-small dirs are read only)
+
+```
+# phase 1 "probs" (cwd = student dir; data/train/train.parquet = teacher-train-v3)
+python train/teacher_probs.py --ckpt $HOME/rwxlite-train/r16-full/teacher/data/train/ckpt-r16-full-teacher/final --out data/train/teacher-r16-full-on-v3.npy --threads 3
+# phase 2 "student", started only if phase 1 exited 0
+python train/finetune.py --init $HOME/rwxlite-train/r15-student/data/train/ckpt-r15-student/final --teacher data/train/teacher-r16-full-on-v3.npy --row_weight weight --alpha 0.7 --epochs 1 --bs 32 --lr 2e-5 --max_len 128 --threads 3 --ckpt 250 --tag r16-full-student
+```
+
+Gentle rules as `r16/small-runs.sh`: nice 19, ionice -c3, 3 of 4 threads, one job at a time, nohup, logs appended, memwatch kills python under 2 GB free. Re-running the script skips a finished phase (marker file) and resumes a half-done training from `last.pt`.
+
+### 16.3 Judging (decided now)
+
+Dev-v3, mode a: fp32 PyTorch CPU **batch 1** (`r16/predict_dev.py` on dev and val), real `secondPass` (rwxmap tree 1c25be1) at **0.90**, `r16/score_dev.py --dev-set v3`, exactly as sections 5, 14.3 and 15. **The candidate uses its own val-fitted T** (golden-section on the 4,180-row val). **Base = the shipped 0.4.0 student at its fixed T 1.3832**, never refitted, using its dev-v3 rescore of section 14.4 (`docs/product/r16-dev-v3-rescores/base-student-score.json`, verified from the committed JSON, mode a): (b) exact **3,064** (93.244%) / too loose **42** (1.278%) / too tight 180; (a) exact **4,216** (94.212%) / too loose 52 (1.162%) / too tight 207. (The 3,064 / 42 / 180 recalled in the brief is correct.)
+
+**Floor on (b), pass both or fail:** exact >= 3,064 AND too loose <= 42 + floor(1% of 3,286) = 42 + 32 = **74**.
+**(a), reported, never overrules (b):** exact >= 4,216 and too loose <= 52 + floor(1% of 4,475) = 52 + 44 = 96.
+
+Information only, decide nothing: the small arms sS0 (1.4875; (b) 3,067 / 38 / 181) and sS1 on dev-v3, the full teacher (1.839092; (b) 3,099 / 36 / 151), the 62 rwxmap-unsure rows, the D143 POST-create readout, standalone argmax, the candidate's fitted T, paired counts against the base.
+
+### 16.4 What follows
+
+- **PASS on (b):** hand to rwxmap for **exam #8**, the ship gate. Passing this floor is not a ship candidate (section 7.7); the D142-style gate ruling (exact >= base, too loose <= base + 15, judged on fp32 exact; int8 information only) is rwxmap's user's call and is theirs to restate.
+- **FAIL on (b):** report to the user with the numbers and start nothing (no retry, no re-fit, no variant).
+
+### 16.5 Plan for exam #8 (named only, NOT run)
+
+Follows the r15 release recipe (findings.md, 2026-11-20 "Export", prereg-r15.md section 7). Scripts: `m1/export_r15.py` (export / rows / parity; env `R15_CKPT_DIR`, `R15_CKPT_SHA`, `R15_T`; it writes to the fixed dir `data/m1-r15/`, which holds the shipped 0.4.0 files, so running it unchanged would overwrite them) and `m1/manifest-r15.mjs` (manifest and parity), then `node m1/release-assets.mjs <out-dir> r15` (builds the 5 release files, does not upload), `m1/bench.mjs` (batch-1 int8-pc latency) and `m1/exam7-score.py` as the model for the exam scorer. For r16 these are copied as `m1/export_r16.py`, `m1/manifest-r16.mjs` and an `r16` mode in `m1/release-assets.mjs` with only paths and env names changed, writing a new dir `data/m1-r16/`; `R16_T` = the student's val-fitted T, frozen before the exam. The Node answerer path is `src/` unchanged (credential-set alias in `src/text.js` kept). Nothing of this is created or run in this addendum.
