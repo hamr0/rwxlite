@@ -3,6 +3,23 @@
 All notable changes to rwxlite are recorded here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.5.0] - 2026-11-23
+
+Round 16 (R16) is the new default model.
+
+- New default weights, trained on 360,536 labelled operations: about 300,000 new ones from about 32,000 vendors the earlier models never saw, about 60,000 re-used from earlier sets, and a few hundred more (rows rwxmap re-ruled, exam #7's mistakes, check rows). A teacher is distilled into the MiniLM student. Calibration temperature is 1.7029 (it was 1.3832), so the probabilities change and a decision cut tuned on 0.4.x values does not carry over. Callers should re-check their cut.
+- Model strings: `rwxlite-0.5.0+fac72395` (int8, the default `manifest.json`) and `rwxlite-0.5.0+82fa50c3` (fp32, `manifest-exact.json`).
+- Measured once on exam #8 (1,821 operations from 6 APIs no model had seen, official numbers from rwxmap's own CLI), right / too loose / too tight: mode a (rules plus model at the 0.90 cut) 1,653 / 60 / 108 against 0.4.0 at 1,631 / 65 / 125. Verdict GO under D142. These are the fp32 model's figures; the int8 default was not scored on this exam. Exam #8 is now used up: no tuning or gating on it again.
+- The API is unchanged. Text format 1 is kept; the manifest keys are the same as in 0.4.0.
+- The model files are not in the npm package. They are on the GitHub release `v0.5.0`: `manifest.json`, `manifest-exact.json`, `model-int8-pc.onnx`, `model-fp32.onnx` and `vocab.txt`.
+
+### Added
+- `m1/release-assets.mjs` has an `r16` mode, and `m1/export_r16.py` and `m1/manifest-r16.mjs` export the R16 model, with the same checks as the `r15` mode.
+- Round 16 research tooling: data collection, labelling, teacher and student training scripts, pre-registrations and recorded results. None of this ships in the npm package.
+
+### Changed
+- README and `docs/wiki/guide.md` are updated to 0.5.0 (badge, exam #8 results, the `v0.5.0` download, 0.5.0 sha256 values, worked examples re-run on the int8 model, calibration temperature note, training-set description).
+
 ## [0.4.0] - 2026-11-20
 
 Round 15 (R15) is the new default model.
