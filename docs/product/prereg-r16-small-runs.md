@@ -316,3 +316,34 @@ If the full teacher fails the floor of 14.3 on (b), the plan falls back to **dis
 - **Log:** `~/rwxlite-train/r16-full/teacher/data/train/finetune-r16-full-teacher.log`; `run.log` (wrapper); `memwatch-full-teacher.log`. A killed or crashed run resumes from `last.pt` by re-running `full-teacher.sh`.
 - **Rate:** 360,536 rows, 11,267 steps; 4.65 s/step over the first 75 steps (0.21 step/s; the small runs did 4.2). Python RSS about 7.4 GB, lowest MemAvailable so far 4.09 GB (kill threshold 2 GB), load about 3 of 4. **ETA about 14.5 h from the start: training done about 2026-11-23 02:10, plus the end evaluation (about 8 min).**
 - Progress check: `ssh ahassan@192.168.178.180 'tr "\r" "\n" < ~/rwxlite-train/r16-full/teacher/data/train/finetune-r16-full-teacher.log | grep ^step | tail -1; cat ~/rwxlite-train/r16-full/teacher/memwatch-full-teacher.log'`
+
+## 15. Full teacher result (2026-11-23; sections 1 to 14 unchanged)
+
+Scored once, exactly as section 14.3: fp32 PyTorch CPU batch 1 (`r16/predict_dev.py` `d8a212ea...`, system python3 with torch 2.10), the candidate's own val-fitted T (golden-section on the 4,180-row val), real `secondPass` (rwxmap tree 1c25be1) at 0.90, `r16/score_dev.py --dev-set v3` (`d8b4de1d...`, dev v3 `b268b074...`, mech, subset `10375671...` and val asserted by the scorer). Real secondPass and the Python replica agree on all 4,475 rows. Nothing was re-run, tuned or re-fitted. Model and prediction sha256s were committed BEFORE scoring (`docs/product/r16-full-teacher-pred-sha256.txt`, commit 054bfc0). Score JSON `docs/product/r16-full-teacher-scores/full-teacher-score.json` (sha256 `d9422b0e0146d0a05b3f72b39f59ad8c045e4566e902c6a5feda9e34c8ee11b9`).
+
+Run facts: finetune ended at step 11267 of 11267, train time 824.7 min, finetune end val accuracy 94.9, exit 0 (`run.log`), memwatch never fired (lowest MemAvailable 3.79 GB). `model.safetensors` sha256 `aac10da4d01d878a2868c03c95f337f595694e74e553980e74c58c4c3e5a419d` (server and laptop copy equal). Prediction files: dev `b05bbefff82ac455ff6fbf76dcbe74fdf9c9ae51a9c2ba6f84f829cfc15ac746`, val `8395ee81cf22b11c96dc42fdfa8bccc19725a22c8eca7aadcb7e394eff980064`. Server checked idle afterwards (no python or memwatch of ours; only the immich service). Files (gitignored) in `data/r16/full/teacher/`.
+
+### 15.1 Decision (section 14.3, word for word)
+
+Floor on (b): exact >= 3,087 AND too loose <= 69. Full teacher on (b): exact **3,099** (94.309%), too loose **36** (1.096%), too tight 151 (4.595%). 3,099 >= 3,087 and 36 <= 69: **PASS**. (a), reported and never overruling: exact 4,260 >= 4,247 and too loose 46 <= 92: also pass. Passing is not a ship candidate (section 7.7); only exam #8, once, decides shipping. The section 14.5 fallback does not apply.
+
+| model (T) | (b) exact / loose / tight | (a) exact / loose / tight |
+|---|---|---|
+| base r15 teacher (1.362087, fixed) | 3,087 / 37 / 162 | 4,247 / 48 / 180 |
+| tA, tenth size (1.8495) | 3,081 / 34 / 171 | 4,242 / 44 / 189 |
+| **full teacher (own val T 1.839092)** | **3,099 / 36 / 151** | **4,260 / 46 / 169** |
+
+### 15.2 Information only (decide nothing)
+
+- Fitted T 1.839092 (tA 1.8495, base 1.362087): the continued teacher is again more over-confident than the r15 teacher; volume did not change it.
+- Volume effect against tA on (b): exact +18, too tight minus 20, too loose +2 (34 to 36); on (a) +18 / minus 20 / +2.
+- Standalone argmax, exact / loose / tight: (b) full 3,203 (97.474%) / 52 / 31, base 3,210 / 61 / 15, tA 3,200 / 53 / 33; (a) full 4,382 (97.922%) / 58 / 35, base 4,383 / 75 / 17, tA 4,373 / 62 / 40. Standalone exact is level with the base; the mode a gain comes from fewer too-tight answers after the cut-off, not from a better argmax.
+- Paired vs base on (b), mode a (full right, base wrong / base right, full wrong): 34 / 22 (net plus 12); on (a) 40 / 27 (net plus 13).
+- The 62 rwxmap-unsure dev rows (56 in (b)), mode a exact / loose / tight: full 36 / 8 / 18 on all 62 (31 / 7 / 18 on the 56); base 37 / 8 / 17 on 62 (33 / 6 / 17 on the 56); tA 37 / 6 / 19 on 62. The full teacher is not better than the base on these rows (one fewer exact, one more too tight on all 62).
+- D143 POST-create readout, mode a, too tight before D143 (v1) / after (v3): (b) n 319: 50 (15.67%) / 49 (15.36%); (a) n 466: 65 (13.95%) / 60 (12.88%). The base after v3: 55 on (b), 65 on (a); tA 53 / 63. Standalone too tight on these rows: (b) 10 / 8, (a) 17 / 11 (the cut-off, not the model, causes most POST-create too-tight).
+- The 9 rwxmap-D143-touched rows (5 in (b)): too tight before 9 of 9 ((b) 5 of 5), after 2 of 9 ((b) 2 of 5); exact after 7 of 9 ((b) 3 of 5).
+
+### 15.3 Consequences
+
+1. The full teacher clears the floor that the tenth-size tA missed by 6 rows; the volume effect is +18 exact and minus 20 too tight on (b) with too loose unchanged within 2 rows. Single seed; the margin over the floor is 12 rows on (b).
+2. Next step is the user's call; this section starts nothing. The student distillation from this teacher (new soft targets at its own T 1.839, not 1.362087) is not started. Exam #8 is not run.
