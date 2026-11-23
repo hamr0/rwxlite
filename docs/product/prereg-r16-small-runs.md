@@ -397,3 +397,65 @@ Follows the r15 release recipe (findings.md, 2026-11-20 "Export", prereg-r15.md 
 - **ETAs (estimates):** phase 1 probs about 3.8 h (the same-size r15 teacher pass, section 14.5; the live 90 min figure is too low because of the length sort): done about 13:00. Phase 2 student: 11,267 steps at the sS0 rate of 1.29 step/s (r15 student: 142 min for a similar size) about 2.4 h, plus the end evaluation: done about 15:30 to 15:45 on 2026-11-23. Student starts automatically only if probs exits 0.
 - Progress check: `ssh ahassan@192.168.178.180 'cd ~/rwxlite-train/r16-full/student; cat run.log; tr "\r" "\n" < data/train/teacher-probs-r16-full-on-v3.log | tail -1; tr "\r" "\n" < data/train/finetune-r16-full-student.log 2>/dev/null | grep ^step | tail -1; cat memwatch-*.log'`
 - Nothing is scored; scoring (16.3) waits for the finished checkpoint.
+
+## 17. Full student result (2026-11-23; sections 1 to 16 unchanged)
+
+Scored once, exactly as section 16.3: fp32 PyTorch CPU batch 1 (`r16/predict_dev.py` `d8a212ea...`, system python3 with torch), the candidate's own val-fitted T (golden-section on the 4,180-row val), real `secondPass` (rwxmap tree 1c25be1) at 0.90, `r16/score_dev.py --dev-set v3` (`d8b4de1d...`; dev v3 `b268b074...`, mech `0600957b...`, subset `10375671...` and val `c54ee461...` asserted by the scorer and by the predictor). Real secondPass and the Python replica agree on all 4,475 rows. Nothing was re-run, tuned or re-fitted. Model and prediction sha256s were committed BEFORE scoring (`docs/product/r16-full-student-pred-sha256.txt`, commit 0eb4230). Score JSON `docs/product/r16-full-student-scores/full-student-score.json` (sha256 `ab8285560090f4213685c45d3ca29d99d37269323767daaa27b17705d023ed08`).
+
+Run facts: probs phase 09:12 to 12:54 (exit 0), student phase 12:54 to 15:19 (exit 0, `run.log`), train time 145.0 min, 11,267 steps, memwatch never fired (lowest MemAvailable 6.5 GB). `model.safetensors` sha256 `699bbf1a50eb51117175c902fe001db32601fb89792a06a67666e34abc0ece0c` (server and laptop copy equal). Prediction files: dev `737312fc884c73d1f8336a61e045188fd61d71eeecff7c965bdc8d085ef63061`, val `20b608eed62d8683eedb97bee59c4758f99fec73865b0b4a99dfe18b28d18ca2`. Server checked idle afterwards (no python or memwatch of ours; only the immich and filebrowser containers). Files (gitignored) in `data/r16/full/student/`.
+
+### 17.1 Decision (section 16.3, word for word)
+
+Floor on (b): exact >= 3,064 AND too loose <= 74. Full student on (b): exact **3,093** (94.127%), too loose **41** (1.248%), too tight 152 (4.626%). 3,093 >= 3,064 and 41 <= 74: **PASS**. (a), reported and never overruling: exact 4,252 >= 4,216 and too loose 50 <= 96: also pass. Passing is not a ship candidate (section 7.7); exam #8, once, decides shipping, and the gate ruling is rwxmap's user's.
+
+| model (T) | (b) exact / loose / tight | (a) exact / loose / tight |
+|---|---|---|
+| base 0.4.0 student (1.3832, fixed) | 3,064 / 42 / 180 | 4,216 / 52 / 207 |
+| sS0, tenth size (1.4875) | 3,067 / 38 / 181 | 4,217 / 47 / 211 |
+| sS1, tenth size (1.1900) | 3,066 / 39 / 181 | 4,216 / 48 / 211 |
+| full teacher (1.839092) | 3,099 / 36 / 151 | 4,260 / 46 / 169 |
+| **full student (own val T 1.702916)** | **3,093 / 41 / 152** | **4,252 / 50 / 173** |
+
+### 17.2 Information only (decide nothing)
+
+- Fitted T 1.702916 (0.4.0 student 1.3832, sS0 1.4875, full teacher 1.839092): the student inherited part of the teacher's over-confidence; targets at T=1 were not softened (section 16.1).
+- Margin over the floor on (b): exact +29, too loose 33 under the limit. Against the full teacher the student is 6 exact rows lower on (b) (3,093 against 3,099) and 5 too-loose rows higher (41 against 36); almost all of the teacher's gain was carried over.
+- Standalone argmax, exact / loose / tight: (b) student 3,172 (96.531%) / 80 / 34, 0.4.0 3,147 / 106 / 33, teacher 3,203 / 52 / 31; (a) student 4,343 (97.050%) / 91 / 41, 0.4.0 4,313 / 121 / 41, teacher 4,382 / 58 / 35. Standalone too loose is lower than 0.4.0 (80 against 106 on (b)) but higher than the teacher's.
+- Paired vs 0.4.0, mode a (student right, 0.4.0 wrong / 0.4.0 right, student wrong): (b) 46 / 17 (net plus 29); (a) 57 / 21 (net plus 36).
+- The 62 rwxmap-unsure dev rows (56 in (b)), mode a exact / loose / tight: student 33 / 9 / 20 on 62 (29 / 7 / 20 on the 56); 0.4.0 32 / 9 / 21 on 62 (28 / 7 / 21); sS0 32 / 8 / 22; full teacher 36 / 8 / 18.
+- D143 POST-create readout, mode a, too tight before D143 (v1) / after (v3): (b) n 319: 53 (16.61%) / 52 (16.30%); (a) n 466: 66 (14.16%) / 61 (13.09%). After v3, too tight: 0.4.0 54 (b) / 67 (a); sS0 59 / 74; full teacher 49 / 60. Standalone too tight on these rows: (b) 10 / 7, (a) 15 / 10.
+- The 9 rwxmap-D143-touched rows (5 in (b)): too tight before 9 of 9 ((b) 5 of 5), after 2 of 9 ((b) 2 of 5); exact after 7 of 9 ((b) 3 of 5), too loose 0.
+
+### 17.3 Extra information-only check: the exam #8 lean (rwxmap ref ecee4f1, D144)
+
+Question: does the mechanical lean frozen for exam #8 (rwxmap `ecee4f1`: D144 adds refresh to GET_ACTION and verify, callback, login to PATH_X_WORDS) move the dev scores? Method: `r15/regen_text.mjs` (`f31a6bdb...`, the builder that made the dev text; run on the 4,475 dev rows with `--tree` = `git archive ecee4f1 src package.json`); first run at 1c25be1 it reproduces all 4,475 `mech.jsonl` texts and mechanical (class, rule, review) byte for byte. Truth stays dev-v3, T stays fixed (student 1.702916, 0.4.0 1.3832, no re-fit), cut 0.90; secondPass and mechanical verdicts both from the ecee4f1 tree (`src/secondpass.js` differs from 1c25be1 only in a comment). Scratch copies of the predictor and scorer (only the text source, the mech file and the removed mech-sha assert differ; `docs/product/r16-lean-ecee4f1-check/`), score JSONs in the same dir. Nothing in section 16 is changed by this; the decision above used the 1c25be1 lean as preregistered.
+
+- **Dev rows whose lean changes: 81 of 4,475** (text differs only in the `lean:` prefix): 75 `x floor-post` to `x path-x-word` (letter unchanged), 5 `r method` to `x get-action` (letter r to x), 1 `w method-floor` to `x path-x-word` (letter w to x). Mechanical letter changes on 6 rows; mechanical exact (a) 86.726% to 86.771%.
+- 143 (student) and 115 (0.4.0) rows show any logit change above 1e-6; 81 of them are the changed-lean rows, the rest is float noise below 7e-6 (2 threads here against 3 in section 17.1).
+
+| mode a (T fixed) | (b) exact / loose / tight | (a) exact / loose / tight |
+|---|---|---|
+| student, 1c25be1 (section 17.1) | 3,093 / 41 / 152 | 4,252 / 50 / 173 |
+| student, new tree, old text (control) | 3,095 / 38 / 153 | 4,255 / 46 / 174 |
+| **student, ecee4f1 text and tree** | **3,093 / 38 / 155** | **4,253 / 46 / 176** |
+| 0.4.0, 1c25be1 (section 14.4) | 3,064 / 42 / 180 | 4,216 / 52 / 207 |
+| 0.4.0, new tree, old text (control) | 3,066 / 39 / 181 | 4,219 / 48 / 208 |
+| **0.4.0, ecee4f1 text and tree** | **3,064 / 39 / 183** | **4,217 / 48 / 210** |
+
+Reading: the lean change moves the student by 0 exact on (b) (3 too loose fewer, 3 too tight more) and by 1 exact on (a); the 0.4.0 base by 0 exact on (b) and 1 on (a). The gap student minus 0.4.0 on (b) is +29 before and after (3,093 against 3,064). The lean change is not a cause of any difference between the two; it does not alter the floor result (3,093 >= 3,064, 38 <= 74 with the new lean). Real secondPass and replica agree on all 4,475 rows in all four runs.
+
+### 17.4 If this passes: what the exam #8 addendum will need (named only, NOTHING created or run here)
+
+| item | value or source |
+|---|---|
+| package version | 0.5.0 (`package.json` is 0.4.0 today) |
+| rwxlite commit | the commit that carries the r16 export scripts and the version bump (not yet made; HEAD today is the commit of this section) |
+| tag | `v0.5.0` (not pushed; tag push is outward-facing and needs the user's yes) |
+| fp32 model string | `rwxlite-0.5.0+<first 8 hex of the model-fp32.onnx sha256>` (the `0.4.0+e4317638` form is the first 8 hex of the 0.4.0 safetensors in `secondpass_real.mjs`; the r15 manifest builder says the string is version plus fp32-onnx sha, so the value is known only after the export) |
+| sha256 of `model-fp32.onnx`, `manifest-exact.json`, `vocab.txt` | produced by the export and manifest steps below; also the int8-pc onnx for the five release assets |
+| our prereg commit | `87f501d` (section 16) plus the pred-sha commit `0eb4230` and the commit of this section 17 |
+| model dir | `data/m1-r16/` (new; `data/m1-r15/` holds the shipped 0.4.0 files and must not be touched) |
+| checkpoint | `data/r16/full/student/ckpt-r16-full-student/final`, `model.safetensors` `699bbf1a...` (`R16_CKPT_DIR`, `R16_CKPT_SHA`) |
+| T | `R16_T = 1.7029162450278692` (the val-fitted T of this section), frozen before the exam |
+
+Scripts that would produce them (r16 copies of the r15 ones, only paths and env names changed): `m1/export_r16.py` from `m1/export_r15.py` (steps export / rows / parity: fp32 and int8-pc onnx, vocab, `export-sha.json`); `m1/manifest-r16.mjs` from `m1/manifest-r15.mjs` (`manifest-exact.json`, node parity); `m1/release-assets.mjs` with an `r16` mode (builds the five release files, does not upload); `m1/bench.mjs` for batch-1 int8-pc latency; `m1/exam7-score.py` as the model for the exam scorer. The Node answerer path `src/` stays unchanged (credential-set alias in `src/text.js` kept).
