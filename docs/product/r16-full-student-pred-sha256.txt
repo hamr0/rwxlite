@@ -1,0 +1,6 @@
+# r16 FULL student (prereg section 16): shas committed BEFORE scoring, 2026-11-23
+# model.safetensors (server copy and laptop copy identical; data/r16/full/student/ckpt-r16-full-student/final/)
+699bbf1a50eb51117175c902fe001db32601fb89792a06a67666e34abc0ece0c  ckpt-r16-full-student/final/model.safetensors
+# predictions (fp32 CPU batch 1, r16/predict_dev.py d8a212ea...)
+737312fc884c73d1f8336a61e045188fd61d71eeecff7c965bdc8d085ef63061  full-student-dev.csv
+20b608eed62d8683eedb97bee59c4758f99fec73865b0b4a99dfe18b28d18ca2  full-student-val.csv
