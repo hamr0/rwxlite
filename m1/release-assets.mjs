@@ -6,7 +6,7 @@
 // `r13` builds from data/m1-r13/ and COPIES all five files verbatim, manifests included (never rewrites them):
 // the R13 files must stay byte-identical to what exam #5 tested. Each sha256 is checked against the five values hard-coded below
 // (same as docs/wiki/prereg-exam5.md section 9) and any mismatch exits 1. The two manifests must carry the same version, and it must equal
-// package.json's version (0.3.1); `--skip-version-check` skips only the package.json comparison (for a dry run before the /release version bump).
+// package.json's version; `--skip-version-check` skips only the package.json comparison (for a dry run before the /release version bump).
 // The printed upload command uses the manifests' version as the tag; under --skip-version-check with a differing package.json it prints no command.
 // `r15` is the same as r13 but builds from data/m1-r15/ (rwxlite 0.4.0) and checks the five sha256 values recorded in docs/wiki/prereg-r15.md / findings.md.
 // `r16` is the same as r15 but builds from data/m1-r16/ (rwxlite 0.5.0, exam #8 candidate) and checks the five sha256 values recorded in docs/product/r16-exam8-addendum.md.
