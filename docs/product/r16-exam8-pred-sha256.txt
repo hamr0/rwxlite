@@ -1,0 +1,20 @@
+# Exam #8 (rwxmap data/exam8-2026-11-23): rwxlite prediction files, sha256 committed BEFORE truth.csv is opened.
+# Input ops.csv  7d2be1f3167086597522025841c4a21e8eeb28095b2613f51e79237b21b428de  (rwxmap commit 474ecb1, verified)
+# Input lean.csv 87a6e8978534fb37e5d24e76034720c481e2c8417e91b3e6eaf64eb4317a1502  (built at rwxmap ecee4f1, verified; read as id,lean_letter,lean_rule)
+# Candidate rwxlite-0.5.0+82fa50c3  model-fp32.onnx 82fa50c394b1ef274e02ae9355bed56a6405fb001bd7694a6dd78acdc574065e  manifest-exact.json b576eb72a442d074c669f4cfd92b178ddf571d295d067db0b5e7891b5e67fd8e  (data/m1-r16, T 1.7029162450278692)
+# Baseline  rwxlite-0.4.0+4608f470  model-fp32.onnx 4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19  manifest-exact.json 5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8  (data/m1-r15, shipped T)
+# Predictions: m1/exam5-predict.mjs (Node answerer, fp32, batch 1, lean prefix as is). Mode a / b85 letters: r16/exam8-secondpass.mjs, real rwxmap ecee4f1 src/secondpass.js, LOWER_MIN_P 0.90 / confidence 85.
+# Derived files (perrow-*, letters-*) are computed from predictions-* only. Script and scratch lean converted from the input lean:
+ea830870fc3db137861d7bac912b39a95ffe82f32097f6e8feec2c2dc27f7484  data/r16/exam8/predictions-r15-fp32.csv
+02f5d303e9bbbb46480c6d7069da1d5199f037faaea73f1e61a119c7642a588e  data/r16/exam8/predictions-r16-fp32.csv
+acef40c9faeaaa4421e4069109ef9837a8314430bc86e2fcf657de5c0df8fd83  data/r16/exam8/predictions-r15-fp32.csv.lean.csv
+acef40c9faeaaa4421e4069109ef9837a8314430bc86e2fcf657de5c0df8fd83  data/r16/exam8/predictions-r16-fp32.csv.lean.csv
+97048e684b11bd8474278b4a76a6cb1c2bd6e382a13a0053add7a5171daf3f5f  data/r16/exam8/perrow-r15-fp32.csv
+012f2673f52da47ac501d6023ba63adc00e3c9e2c40a95f344408f1ac067f8c1  data/r16/exam8/perrow-r16-fp32.csv
+3ede7db58c286fed76dd2625aceb8e03697b0c6c48d32cdc4d0918bb8463abcb  data/r16/exam8/letters-r15-a090.csv
+ad92552998a8870b786d847345fb0a88ed06034d334193f5a1a1124c3d9266bd  data/r16/exam8/letters-r15-b85.csv
+2fd7f256d38e238cc859a65405177b1abdfe68f2c25c7e73de5e521d6c98a583  data/r16/exam8/letters-r16-a090.csv
+4e799003e3924886576b450f883763effadc6e5b9ae4c0b9c7c9c5b2434aa69e  data/r16/exam8/letters-r16-b85.csv
+99d647025de7b4cf42f2de7e892c28bb6220bbdd77427b1d1b8b6b6e4363ea87  r16/exam8-secondpass.mjs
+fe1172dfdddfb4fe6cf3a71779fd733bd12b9db403fa712eb4941303a0782d86  m1/exam5-predict.mjs
+4aaf033a757955ec7da557acf5dabcd7a9129d2e7b3e48f489343375cc881bf0  data/r16/scratch/exam8/lean-4col.csv
