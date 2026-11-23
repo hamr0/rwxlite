@@ -14,7 +14,7 @@ Node 22 or newer. `onnxruntime-node` is an optional dependency of rwxlite and is
 
 ## 2. Get the model files
 
-The model files are not in the npm package. Download the five files from the GitHub release `v0.4.0` (https://github.com/hamr0/rwxlite/releases) into one folder:
+The model files are not in the npm package. Download the five files from the GitHub release `v0.5.0` (https://github.com/hamr0/rwxlite/releases) into one folder:
 
 | File | Size | What it is |
 |---|---|---|
@@ -27,19 +27,19 @@ The model files are not in the npm package. Download the five files from the Git
 Check them against these sha256 values (the same values `m1/release-assets.mjs` enforces before a release is built):
 
 ```
-b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf  manifest.json
-5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8  manifest-exact.json
-470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7  model-int8-pc.onnx
-4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19  model-fp32.onnx
+9ecefd18633d01cf71702cff2d49b2d62bdbaf5f20c244d5ea2dc5a8dbc15476  manifest.json
+b576eb72a442d074c669f4cfd92b178ddf571d295d067db0b5e7891b5e67fd8e  manifest-exact.json
+fac7239505c086e01afbb3c342b743c17242ae1affcfaa51e20f1295c0b2f6e3  model-int8-pc.onnx
+82fa50c394b1ef274e02ae9355bed56a6405fb001bd7694a6dd78acdc574065e  model-fp32.onnx
 07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3  vocab.txt
 ```
 
 ```
 cd /path/to/model-dir && sha256sum -c <<'EOF'
-b42c5bc974d5a3fb213232c09fa85fbb7a99f1d57199585f34c2d964af3d2ccf  manifest.json
-5b3e5b876ea0eda3416ae2115404cae13dd3e699bf4f446e07adb7540771d0f8  manifest-exact.json
-470708b066d40ed5d8345ce7c21a9f012611f95c6d03d038ca4ed71d739697b7  model-int8-pc.onnx
-4608f4705d652de65adde722dc14868ef2f0898d36f84d18c88524e07ab0bc19  model-fp32.onnx
+9ecefd18633d01cf71702cff2d49b2d62bdbaf5f20c244d5ea2dc5a8dbc15476  manifest.json
+b576eb72a442d074c669f4cfd92b178ddf571d295d067db0b5e7891b5e67fd8e  manifest-exact.json
+fac7239505c086e01afbb3c342b743c17242ae1affcfaa51e20f1295c0b2f6e3  model-int8-pc.onnx
+82fa50c394b1ef274e02ae9355bed56a6405fb001bd7694a6dd78acdc574065e  model-fp32.onnx
 07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3  vocab.txt
 EOF
 ```
@@ -67,7 +67,7 @@ Which model to choose:
 
 On the 1,443 exam #5 operations both score almost the same on their own (int8 1,280 right / 64 too loose / 99 too tight; fp32 1,283 / 64 / 96), so the choice is about size and numeric stability, not accuracy.
 
-The `model` string in every answer is `rwxlite-<manifest version>+<first 8 hex of the weights hash>`, here `rwxlite-0.4.0+470708b0` (int8) or `rwxlite-0.4.0+4608f470` (fp32). Log it next to every decision so you can tell which model gave an answer.
+The `model` string in every answer is `rwxlite-<manifest version>+<first 8 hex of the weights hash>`, here `rwxlite-0.5.0+fac72395` (int8) or `rwxlite-0.5.0+82fa50c3` (fp32). Log it next to every decision so you can tell which model gave an answer.
 
 ## 4. The request
 
@@ -215,11 +215,11 @@ The probabilities are calibrated: among answers where the top probability is abo
 
 > **Answer automatically when the top probability is at least your cut. Otherwise ask a human (or keep the lean).**
 
-A higher cut means fewer automatic answers and fewer mistakes. A lower cut means more automatic answers and more mistakes. Nothing else changes. The cut is yours: rwxmap uses 0.90 for lowering, tuned to its needs. A cut tuned on an earlier version does not carry over: the calibration temperature differs between versions (0.2.x 0.844, 0.3.1 0.991463, 0.4.0 1.3832182330120317), so the same number means something different. Re-check your cut when you move to 0.4.0.
+A higher cut means fewer automatic answers and fewer mistakes. A lower cut means more automatic answers and more mistakes. Nothing else changes. The cut is yours: rwxmap uses 0.90 for lowering, tuned to its needs. A cut tuned on an earlier version does not carry over: the calibration temperature differs between versions (0.2.x 0.844, 0.3.1 0.991463, 0.4.0 1.3832182330120317), so the same number means something different. Re-check your cut when you move to 0.5.0 (T 1.7029162450278692).
 
 ### What the cut does, measured
 
-Measured on our validation set: 4,180 operations from vendors that also appear in training, using the fp32 model and rwxmap's v4 mechanical leans, one operation at a time. **This is validation data from the same vendors as training, so it is optimistic.** Real, unseen vendors are harder (on exam #5 the model on its own had 4.4% too loose over all rows). Use the table to see the *shape* of the trade, not to predict your rates.
+Measured on our validation set (with the 0.3.1 model, T 0.991463): 4,180 operations from vendors that also appear in training, using the fp32 model and rwxmap's v4 mechanical leans, one operation at a time. **This is validation data from the same vendors as training, so it is optimistic.** Real, unseen vendors are harder (on exam #5 the model on its own had 4.4% too loose over all rows). Use the table to see the *shape* of the trade, not to predict your rates.
 
 Letters are "too loose" when the model's letter is safer than the truth (the dangerous mistake) and "too tight" when it is riskier than the truth. "Answered" is the share of rows whose top probability is at or above the cut; the mistake columns are counted among the answered rows only.
 

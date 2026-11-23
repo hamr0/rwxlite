@@ -16,9 +16,9 @@ SHA = {'data/round13/train.parquet': '91808a87cf24ac9c70f4d5b8f26fe68341ca983660
        'data/r15/labels/d141/merged.csv': '2436a63db9dfdf9c464133b7b6181ab384d17333e6698858b205cd6a7d5cd990', 'data/r15/labels/d141/pass2/out-a.csv': '6ca51a31eb6d2cb411b10bfb60d6cb692fd6757b59e85044d6584fb3120c4ee3', 'data/r15/labels/d141/pass2/out-b.csv': '931ffc9f53d7dc314fc5c851f98c68b1fced13ac86bc09ac4b81925e7091ffa4',
        'data/r15/labels/texts-r15.jsonl': '4f7955fb897ff1ca48a628df38d8b80aa8b5489f7f93085d027a98e45416a4ab', 'data/r15/labels/mech-r15.jsonl': 'ef3938d15bd81aed423927ce6a429c492e5dede06835275be9f075ad12b46a43',
        'data/r15/labels/disagree-sample-400.csv': '76dd3fae6ec409855447f3d449fda4fa2f7a5a5d5b543900fd791e84bb194512'}
-# The label file is final (D141 applied, rwxlite cf6232d). The 102,668 R13 rows will be replaced by rwxmap's export-v4-d141 (TODO in the prereg, section 3.4): then run with
+# The label file is final (D141 applied, rwxlite cf6232d). The 102,668 R13 rows were replaced by rwxmap's export-v4-d141 (DONE 2026-11-19, prereg section 3.4); the final build runs with
 #   R15_R13_DIR=<dir holding train.parquet, val.parquet, v3eval.parquet> R15_R13_SHAS=train=<sha>,val=<sha>,v3eval=<sha>   (same columns, same row count and order as round 13's)
-# and the round 13 shas above are replaced by those. Until then the output is PROVISIONAL.
+# and the round 13 shas above are replaced by those. Without these env vars the output is the PROVISIONAL set (round 13 rows as stored), not the shipped one.
 R13DIR = os.environ.get('R15_R13_DIR', 'data/round13')
 if 'R15_R13_DIR' in os.environ:
     for kv in os.environ['R15_R13_SHAS'].split(','):
@@ -83,7 +83,7 @@ assert not any(k in VK for k in key(new)), 'an r15 row still matches val'
 NROWS = len(train); assert NROWS == len(old) + len(fin) - int(dropv.sum())
 T13 = soft_targets(tr13); T13[d141_chg] = np.eye(3, dtype=np.float32)[tr13.y.values[d141_chg]]
 T = np.concatenate([T13, np.eye(3, dtype=np.float32)[new.y.values]]).astype(np.float32); assert T.shape == (len(train), 3) and np.allclose(T.sum(1), 1, atol=1e-5)
-# ---- PROPOSED (prereg section 7.2, pending the user's decision): R15_MECH_REF=<rwxmap git sha of the frozen exam #7 ref> regenerates the text of ALL train rows and the val/v3eval rows with that ref's
+# ---- Regeneration (prereg section 7.2, DONE 2026-11-19 at R15_MECH_REF=1c25be1): R15_MECH_REF=<rwxmap git sha of the frozen exam #7 ref> regenerates the text of ALL train rows and the val/v3eval rows with that ref's
 # mechanical lean (lean = exam lean). Unset = texts exactly as stored (R13 rows) and as texts-r15.jsonl (rwxmap 1c25be1 mechanical). Needs the rwxmap repo at R15_RWXMAP (default ~/PycharmProjects/rwxmap).
 REF = os.environ.get('R15_MECH_REF'); regen = {'mech_ref': None}
 def regen_texts(df, desc):
