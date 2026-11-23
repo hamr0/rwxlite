@@ -116,8 +116,8 @@ The last three rules in the table, `path-x-word`, `content-noun` and `get-action
 
 ```js
 const one = await a.answer(req);
-// { model: 'rwxlite-0.4.0+470708b0',
-//   answers: { isX: { noul: 0.0012527997670124082 }, changes: { noul: 0.01085614682218233 } } }
+// { model: 'rwxlite-0.5.0+fac72395',
+//   answers: { isX: { noul: 0.002781661761415137 }, changes: { noul: 0.007532522455968698 } } }
 ```
 
 `noul` is the probability. For each question you asked there is one entry under `answers`. Two shapes exist, both plain JSON:
@@ -176,22 +176,22 @@ Real answers, with the arithmetic done (rounded to 4 places):
 
 | # | Answer JSON (`isX`, `changes`) | p(r) | p(w) | p(x) | Letter |
 |---|---|---|---|---|---|
-| 1 GET read | `0.0012527997670124082`, `0.01085614682218233` | 0.9891 | 0.0096 | 0.0013 | **r** |
-| 2 PUT update | `0.018779843778726487`, `0.9925372159732244` | 0.0075 | 0.9738 | 0.0188 | **w** |
-| 3 POST create | `0.023517771785246885`, `0.9872990344481938` | 0.0127 | 0.9638 | 0.0235 | **w** |
-| 4 POST create API key | `0.9733988058311938`, `0.9954438745538006` | 0.0046 | 0.0220 | 0.9734 | **x** |
-| 5 DELETE project | `0.9928668568432085`, `0.9973209991014456` | 0.0027 | 0.0045 | 0.9929 | **x** |
+| 1 GET read | `0.002781661761415137`, `0.007532522455968698` | 0.9925 | 0.0048 | 0.0028 | **r** |
+| 2 PUT update | `0.021241198867230634`, `0.9933129650843894` | 0.0067 | 0.9721 | 0.0212 | **w** |
+| 3 POST create | `0.016013041735194727`, `0.9911672920437073` | 0.0088 | 0.9752 | 0.0160 | **w** |
+| 4 POST create API key | `0.9787379128088075`, `0.995687693937855` | 0.0043 | 0.0169 | 0.9787 | **x** |
+| 5 DELETE project | `0.9867628158340147`, `0.9945955899348312` | 0.0054 | 0.0078 | 0.9868 | **x** |
 
 What they show:
 
-- Example 3 arrived with lean `x` (a plain POST starts out at x because a POST might do anything) and the model lowered it to `w` with 96% confidence. This is the kind of row where the model earns its place, and also the kind of row where a mistake would be "too loose", so this is where your cut matters.
-- Example 4 stays `x`: creating a key is x under the widened rule, and the model is 97% sure.
+- Example 3 arrived with lean `x` (a plain POST starts out at x because a POST might do anything) and the model lowered it to `w` with 98% confidence. This is the kind of row where the model earns its place, and also the kind of row where a mistake would be "too loose", so this is where your cut matters.
+- Example 4 stays `x`: creating a key is x under the widened rule, and the model is 98% sure.
 - Example 5 (DELETE) is x, and the model agrees with its lean.
 
 The complete answer for example 4, as returned:
 
 ```json
-{"model":"rwxlite-0.4.0+470708b0","answers":{"isX":{"noul":0.9733988058311938},"changes":{"noul":0.9954438745538006}}}
+{"model":"rwxlite-0.5.0+fac72395","answers":{"isX":{"noul":0.9787379128088075},"changes":{"noul":0.995687693937855}}}
 ```
 
 The script used (save outside the package, adjust `dir`):
